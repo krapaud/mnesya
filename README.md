@@ -1,351 +1,496 @@
-# Mnesya - Elderly Care Assistance Application
+# Mnesya
 
-## Overview
+Mobile reminder application for elderly people and their caregivers.
 
-Mnesya is a mobile reminder application designed to assist elderly individuals and their caregivers. The app features two distinct interfaces optimized for each user type.
+## 📋 Table of Contents
 
-### User Interface (Elderly Person)
+- [About](#about)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Technologies](#technologies)
+- [Installation](#installation)
+- [Project Structure](#project-structure)
+- [API Documentation](#api-documentation)
+- [Development](#development)
+- [Tests](#tests)
 
-- Ultra-simplified interface with large buttons (minimum 16px text)
+## About
+
+Mnesya is a mobile reminder application designed to help elderly people (Users) and their caregivers, with a focus on simple and accessible use.
+
+### Main Users
+
+- **User (Elderly Person)**: Receives and responds to reminders
+- **Caregiver**: Configures and manages profiles and reminders
+
+### MVP Guiding Principles
+
+- Ultra-simple interface for elderly people
+- Large clickable areas and readable text (minimum 16px)
 - Maximum 3 buttons per screen
-- PIN-based authentication (4 digits, stored locally)
-- Device pairing system for security
-- Push notifications for reminders
-- Simple response options: Done, Remind Later, Unable
+- Linear journey without complex navigation
 
-### Caregiver Interface
+### MVP Scope
 
-- Full profile management
-- Create and schedule reminders
-- Real-time tracking of reminder status
-- JWT-based secure authentication
-- Multi-profile support
+- **15 screens total**:
+  - 2 Onboarding screens (Welcome Screen shared for both profile types)
+  - 7 Caregiver screens (Login, Register, Dashboard, Create Profile, Generate Code, Create Reminder, Reminders List)
+  - 6 User screens (Enter Code, Set PIN, Enter PIN Daily, Home, Notification, Profile)
+- **Estimated duration**: 5-6 weeks with 2 developers
+- **Detailed User Stories**: See [Technical Documentation _ Mnesya-2.md](Technical%20Documentation%20_%20Mnesya-2.md) (MoSCoW method, US-001 to US-027)
 
-## Architecture
-
-```text
-mnesya/
-├── backend/              # Python API (FastAPI)
-│   ├── app/
-│   │   ├── models/      # SQLAlchemy models
-│   │   ├── schemas/     # Pydantic schemas
-│   │   ├── routes/      # API endpoints
-│   │   ├── services/    # Business logic
-│   │   ├── core/        # Configuration and security
-│   │   └── utils/       # Utilities
-│   ├── worker/          # Asynchronous tasks and scheduler
-│   └── migrations/      # Alembic migrations
-│
-├── frontend/            # Mobile app (React Native)
-│   ├── src/
-│   │   ├── screens/     # Screens (manager + user)
-│   │   ├── components/  # Reusable components
-│   │   ├── navigation/  # Navigation configuration
-│   │   ├── services/    # API calls
-│   │   ├── widgets/     # Native widget
-│   │   └── utils/       # Utilities
-│   ├── android/         # Android native code
-│   └── ios/             # iOS native code
-│
-├── docker/              # Docker configuration
-└── docs/                # Documentation
-```
-
-## Technologies
-
-### Backend
-
-- **API**: FastAPI (Python)
-- **Database**: PostgreSQL
-- **Push notifications**: Firebase Cloud Messaging (FCM)
-- **Worker**: APScheduler (simple scheduler for MVP)
-
-### Frontend
-
-- **Framework**: React Native
-- **Navigation**: React Navigation
-- **Notifications**: Firebase
-- **Voice**: react-native-voice
-
-### Infrastructure
-
-- **Containerization**: Docker Compose
-- **Reverse Proxy**: NGINX
-- **Deployment**: VPS or Cloud (AWS, Azure, GCP)
-
-## Core Features
-
-### Authentication & Security
-
-**Caregiver Authentication:**
-
-- JWT-based secure login
-- Email/password registration
-- Session management
-
-**User Authentication:**
-
-- Device pairing with 6-character code
-- Local PIN validation (4 digits)
-- PIN stored as bcrypt hash
-- Limited attempts (3-5 max)
-- Offline PIN validation capability
-
-**Device Pairing Flow:**
-
-1. Caregiver creates user profile and generates pairing code
-2. Elderly user enters code on their device
-3. Device is paired to profile (expires after 1 hour)
-4. User sets 4-digit PIN locally
-5. FCM device token registered for notifications
+## Features
 
 ### Profile Management (Caregiver)
 
-- Create user profiles (name, birthday, optional photo)
-- Generate pairing codes for devices
-- Manage multiple profiles
-- View profile details and history
+- ✅ Caregiver account creation (email/password)
+- ✅ Secure login
+- ✅ User profile creation (first name, last name, date of birth, optional photo)
+- ✅ 6-character pairing code generation (valid 24h)
+- ✅ View all managed profiles
 
-### Reminder System
+### Reminder Management (Caregiver)
 
-**For Caregivers:**
+- ✅ Simple reminder creation (title, message, date, time)
+- ✅ Chronological reminder view
+- ✅ Status tracking (Done, Pending, Postponed, Unable)
+- ✅ Tab navigation (Home | Reminders | Profile)
 
-- Create one-shot reminders with title and description
-- Schedule specific date/time
-- Track reminder status in real-time
+### User Interface (Elderly Person)
 
-**For Users:**
+- ✅ Pairing via 6-character code
+- ✅ 4-digit PIN code creation and usage
+- ✅ Simple home screen with next reminder
+- ✅ Full-screen notification at reminder time
+- ✅ 3 available actions:
+  - **✓ Done** (Green)
+  - **⏰ Remind me later** (Orange, reminder in 5 min)
+  - **✗ Unable** (Red, urgent alert to caregiver)
 
-- Receive push notifications
-- Respond with 3 action buttons:
-  - ✅ Done
-  - 🔔 Remind Later
-  - ❌ Unable
-- View upcoming reminders
+## Architecture
 
-### Tracking & History
+### Components
 
-- View complete reminder history per profile
-- Monitor status: done, postponed, refused, pending
-- Real-time updates on user actions
+```text
+┌─────────────────────┐         ┌─────────────────────┐
+│  Frontend Mobile    │         │  Frontend Mobile    │
+│   (Caregiver)       │         │  (User)             │
+│  React Native       │         │  React Native       │
+└──────────┬──────────┘         └──────────┬──────────┘
+           │                               │
+           └───────────┬───────────────────┘
+                       │
+                       ▼
+              ┌────────────────┐
+              │   Backend API  │
+              │  Python/FastAPI│
+              └────────┬───────┘
+                       │
+          ┌────────────┼────────────┐
+          ▼            ▼            ▼
+    ┌──────────┐  ┌──────────┐  ┌──────────┐
+    │PostgreSQL│  │APScheduler│ │   FCM    │
+    │ Database │  │  Worker   │  │(Notifs)  │
+    └──────────┘  └──────────┘  └──────────┘
+```
 
-## Database Schema
+### Main Data Flows
 
-### Main Tables
+1. **Caregiver Registration/Login**: Frontend → FastAPI (Validation, Hashing) → PostgreSQL
+2. **Profile/Reminder Creation**: Frontend → FastAPI (Business logic, code generation) → PostgreSQL
+3. **User Pairing**: Frontend (Code entry) → FastAPI (Validation/expiration) → PostgreSQL
+4. **Reminder Trigger**: APScheduler → FastAPI → FCM → User Frontend
+5. **Status Update**: User Frontend → FastAPI → PostgreSQL + FCM (if "Unable")
 
-#### users
+## Technologies
 
-- `id`: Primary key
-- `type`: Enum (caregiver, user)
-- `email`: Caregiver email (unique)
-- `password_hash`: Bcrypt hashed password
-- `name`: User display name
-- `device_token`: FCM token for push notifications
-- `pairing_code`: 6-char alphanumeric code
-- `pairing_code_expires_at`: Expiration timestamp
-- `is_paired`: Boolean flag
-- `created_at`, `updated_at`
+### Frontend
 
-#### profiles
+- **Framework** : React Native (iOS/Android)
+- **Gestion d'état** : React Hooks
+- **Navigation** : React Navigation
+- **Notifications** : Firebase Cloud Messaging (FCM)
 
-- `id`: Primary key
-- `caregiver_id`: Foreign key to users
-- `user_id`: Foreign key to users
-- `name`: Profile name
-- `birthday`: Date of birth
-- `photo_url`: Optional profile picture
-- `created_at`, `updated_at`
+### Backend
 
-#### reminders
+- **Framework** : Python 3.x avec FastAPI
+- **Base de données** : PostgreSQL
+- **ORM** : SQLAlchemy avec Alembic pour les migrations
+- **Authentification** : JWT (JSON Web Tokens)
+- **Tâches asynchrones** : APScheduler
+- **Notifications push** : Firebase Cloud Messaging (FCM)
 
-- `id`: Primary key
-- `profile_id`: Foreign key to profiles
-- `title`: Reminder title
-- `description`: Reminder details
-- `scheduled_datetime`: When to trigger
-- `created_at`, `updated_at`
+### Infrastructure
 
-#### reminder_status
+- **Containerisation** : Docker & Docker Compose
+- **CI/CD** : GitHub Actions / GitLab CI
+- **Environnements** : Dev, Staging, Production
 
-- `id`: Primary key
-- `reminder_id`: Foreign key to reminders
-- `status`: Enum (done, postponed, refused, pending)
-- `timestamp`: When action occurred
-- `created_at`
-
-## Security & Privacy
-
-- JWT tokens for caregiver authentication
-- Bcrypt password hashing
-- Local PIN validation (offline capable)
-- Device pairing with expiring codes
-- GDPR-compliant data handling
-- Role-based access control (caregivers only see their profiles)
-- API rate limiting
-- Secure HTTPS communication
-
-## Development Phases
-
-### Phase 1: MVP (Current - 5-6 weeks)
-
-**Scope:**
-
-- Authentication (caregiver JWT + user PIN/pairing)
-- Profile management (create, view, list)
-- One-shot reminders only
-- Push notifications via Firebase
-- User response interface (3 buttons)
-- Basic tracking and history
-- 15 total screens (6 onboarding, 6 caregiver, 3 user)
-
-**MVP Constraints:**
-
-- ✅ Large clickable areas
-- ✅ Minimum 16px text
-- ✅ Maximum 3 buttons per screen
-- ✅ Linear navigation flow
-- ❌ No recurring reminders
-- ❌ No statistics/graphs
-- ❌ No widgets
-- ❌ No voice features
-
-### Phase 2: Enhanced Features (Post-MVP)
-
-- Edit/delete profiles and reminders
-- Recurring reminders (daily, weekly)
-- Automatic re-reminders
-- Alert system for caregivers
-- Statistics and analytics
-
-### Phase 3: Advanced Features (Future)
-
-- Weather integration
-- Text-to-Speech notifications
-- Voice journal with transcription
-- Home screen widget
-- Geolocation and safety features
-- Emergency mode
-- Daily routine management
-
-## Installation and Deployment
+## Installation
 
 ### Prerequisites
 
-- Docker and Docker Compose
-- Node.js 18+ (for frontend)
-- Python 3.11+ (for backend)
-- Firebase account (for push notifications)
+- Node.js 16+ and npm/yarn
+- Python 3.9+
+- PostgreSQL 13+
+- Docker and Docker Compose (optional but recommended)
 
-### Configuration
-
-1. Clone repository
-2. Copy `.env.example` to `.env` and configure
-3. Configure Firebase credentials
-4. Launch with Docker Compose
+### Installation with Docker
 
 ```bash
+# Clone the repository
+git clone <repository-url>
+cd mnesya
+
+# Start the environment with Docker Compose
 docker-compose up -d
 ```
 
-### Mobile Development
+### Manual Installation
+
+#### Backend Setup
+
+```bash
+cd backend
+
+# Create a virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# or
+venv\Scripts\activate  # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment variables
+cp .env.example .env
+# Edit .env with your configurations
+
+# Initialize the database
+alembic upgrade head
+
+# Start the server
+uvicorn app.main:app --reload
+```
+
+#### Frontend Setup
 
 ```bash
 cd frontend
+
+# Install dependencies
 npm install
-npx react-native run-android
-# or
+
+# iOS (Mac only)
+cd ios && pod install && cd ..
 npx react-native run-ios
+
+# Android
+npx react-native run-android
 ```
 
-## API Endpoints
+## Project Structure
 
-### Authentication (5 endpoints)
+```text
+mnesya/
+├── backend/                    # Backend API Python/FastAPI
+│   ├── app/
+│   │   ├── main.py            # Application entry point
+│   │   ├── core/              # Configuration and security
+│   │   │   ├── config.py
+│   │   │   ├── database.py
+│   │   │   └── security.py
+│   │   ├── models/            # SQLAlchemy ORM models
+│   │   │   ├── user.py
+│   │   │   ├── caregiver.py
+│   │   │   ├── profile.py
+│   │   │   ├── pairing_code.py
+│   │   │   ├── reminder.py
+│   │   │   └── reminder_completion.py
+│   │   ├── routes/            # API endpoints
+│   │   │   ├── auth.py
+│   │   │   ├── caregiver.py
+│   │   │   ├── pairing.py
+│   │   │   ├── profile.py
+│   │   │   ├── reminder.py
+│   │   │   └── user.py
+│   │   ├── schemas/           # Pydantic schemas
+│   │   │   ├── auth.py
+│   │   │   ├── caregiver.py
+│   │   │   ├── profile.py
+│   │   │   ├── reminder.py
+│   │   │   └── user.py
+│   │   ├── services/          # Business logic
+│   │   │   ├── user_service.py
+│   │   │   ├── caregiver_service.py
+│   │   │   ├── profile_service.py
+│   │   │   ├── reminder_service.py
+│   │   │   └── notification_service.py
+│   │   └── utils/             # Utilities
+│   │       ├── dependencies.py
+│   │       └── exceptions.py
+│   ├── migrations/            # Alembic migrations
+│   ├── worker/                # APScheduler tasks
+│   └── alembic.ini
+├── frontend/                  # React Native Mobile Application
+│   ├── src/
+│   │   ├── App.js            # Root component
+│   │   ├── components/       # Reusable components
+│   │   │   ├── Button.js
+│   │   │   └── Card.js
+│   │   ├── navigation/       # Navigation configuration
+│   │   │   └── AppNavigator.js
+│   │   ├── screens/          # Application screens
+│   │   │   ├── LoginScreen.js
+│   │   │   ├── HomeScreen.js
+│   │   │   ├── ProfileScreen.js
+│   │   │   └── ReminderScreen.js
+│   │   ├── services/         # API services
+│   │   │   ├── api.js
+│   │   │   ├── authService.js
+│   │   │   └── reminderService.js
+│   │   ├── utils/            # Constants and helpers
+│   │   │   ├── constants.js
+│   │   │   └── helpers.js
+│   │   └── widgets/          # Specialized widgets
+│   │       └── ReminderCard.js
+│   ├── android/              # Native Android project
+│   ├── ios/                  # Native iOS project
+│   ├── assets/               # Images and static resources
+│   ├── app.json
+│   ├── babel.config.js
+│   └── package.json
+├── docker/                    # Docker configuration
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   └── .dockerignore
+├── docs/                      # Documentation
+│   ├── Technical Documentation _ Mnesya.pdf
+│   ├── Project Planning.pdf
+│   ├── Team Formation and Idea Development Outline.pdf
+│   └── img/
+├── README.md
+├── MVP_COMPLIANCE_REPORT.md
+└── .gitignore
+```
 
-- `POST /auth/register` - Manager registration
-- `POST /auth/login` - Manager login (JWT)
-- `POST /auth/generate-pairing-code` - Generate device pairing code (manager
-  only)
-- `POST /auth/pair-device` - Pair device with user profile using code
-- `POST /auth/validate-pin` - Validate PIN for paired device (returns JWT)
+## API Documentation
 
-### Profiles (3 endpoints)
+### Authentication and Users
 
-- `GET /profiles` - List all profiles
-- `POST /profiles` - Create profile
-- `GET /profiles/{id}` - Profile details
+| Endpoint         | Method | Description                 | Auth |
+|------------------|--------|-----------------------------|----- |
+| `/auth/register` | POST   | Caregiver registration      | No   |
+| `/auth/login`    | POST   | Login                       | No   |
+| `/pairing`       | POST   | User pairing                | No   |
 
-### Reminders (6 endpoints)
+### Profile Management (Caregiver)
 
-- `GET /reminders` - List reminders (by profile)
-- `POST /reminders` - Create one-shot reminder
-- `GET /reminders/{id}` - Reminder details
-- `POST /reminders/{id}/validate` - Mark as done
-- `POST /reminders/{id}/postpone` - Postpone reminder
-- `POST /reminders/{id}/refuse` - Refuse reminder
+| Endpoint    | Method | Description           | Auth             |
+|-------------|--------|-----------------------|----------------- |
+| `/profiles` | POST   | Create a profile      | Yes (Caregiver)  |
+| `/profiles` | GET    | List profiles         | Yes (Caregiver)  |
 
-### History (1 endpoint)
+### Reminder Management
 
-- `GET /history/{profile_id}` - Reminder history for profile
+| Endpoint                 | Method | Description            | Auth          |
+|--------------------------|--------|------------------------|-------------- |
+| `/reminders`             | POST   | Create a reminder      | Yes (Caregiver) |
+| `/reminders`             | GET    | List reminders         | Yes (Caregiver) |
+| `/reminders/{id}/status` | PUT    | Update status          | Yes (User)      |
 
-### Device Management (2 endpoints)
+### Request Examples
 
-- `GET /devices/{user_id}` - List paired devices for user
-- `DELETE /devices/{device_id}` - Unpair device (manager only)
+#### Caregiver Registration
 
-Total: 17 MVP endpoints
+```json
+POST /auth/register
+{
+  "email": "caregiver@example.com",
+  "password": "SecurePass123",
+  "first_name": "John",
+  "last_name": "Doe"
+}
+```
+
+#### Reminder Creation
+
+```json
+POST /reminders
+{
+  "profile_id": 10,
+  "title": "Take medications",
+  "message": "Don't forget to take your morning medications",
+  "scheduled_datetime": "2025-12-30T09:00:00"
+}
+```
+
+#### Status Update
+
+```json
+PUT /reminders/50/status
+{
+  "status": "Done"
+}
+```
+
+**Possible statuses**:
+- `Done`: Task completed ✓
+- `Pending`: Reminder not yet processed ⏳
+- `Postponed`: Reminder in 5 minutes ⏰
+- `Unable`: Task impossible, alert caregiver ✗
+
+## Development
+
+### Git Branching Strategy
+
+The project uses a simplified Gitflow workflow:
+
+- **main**: Stable branch, reflects Production code
+- **dev**: Main development/staging branch
+- **feature/\***: Isolated work branches (e.g., `feature/auth-login`)
+
+### Workflow
+
+1. Create a `feature/*` branch from `dev`
+2. Develop and commit
+3. Create a Pull Request to `dev`
+4. Mandatory Code Review by the other developer
+5. Merge into `dev`
+6. Once validated in Staging, PR from `dev` to `main`
+
+### Commit Conventions
+
+```text
+feat(api): add POST /reminders endpoint
+fix(frontend): resolve navigation issue
+docs: update README
+```
+
+### Design System
+
+#### Typography
+
+- **Headings (H1)**: 24px, Bold
+- **Body text**: 16px minimum, Regular
+- **Buttons**: 18px, Medium
+
+#### Spacing
+
+- Minimum button height: **56px**
+- Minimum clickable areas: 44x44px
+
+#### Color Palette
+
+- **Primary Blue**: #4A90E2 (main actions)
+- **Success Green**: #7ED321 ("Done" button)
+- **Warning Orange**: #F5A623 ("Remind later" button)
+- **Error Red**: #D0021B ("Unable" button)
+- High contrast for accessibility (WCAG AA)
+
+#### UX Constraints
+
+- Maximum 3 buttons per screen
+- Linear journey without complex navigation
+
+## Tests
+
+### Backend (Python/FastAPI)
+
+```bash
+cd backend
+
+# Unit tests
+pytest tests/unit/
+
+# Integration tests
+pytest tests/integration/
+
+# Code coverage
+pytest --cov=app tests/
+```
+
+#### Test Types
+
+- **Unit tests**: Service classes (AuthService, ProfileService, ReminderService)
+- **Integration tests**: API endpoints and database interaction
+- **Tool**: Pytest
+
+### Frontend (React Native)
+
+```bash
+cd frontend
+
+# Unit tests
+npm test
+
+# E2E tests
+npm run test:e2e
+```
+
+#### Frontend Test Types
+
+- **Unit tests**: Isolated React Native components
+- **E2E tests**: Critical user journeys (pairing, reminder response)
+- **Tools**: Jest (components), Detox/Appium (E2E)
+
+### Manual Tests
+
+Acceptance criteria checklist to verify before each Production deployment:
+
+#### Functional
+
+- ☐ A caregiver can create an account and log in
+- ☐ A caregiver can create a user profile
+- ☐ A caregiver can generate a 24h valid pairing code
+- ☐ A user can pair with the code
+- ☐ A user can create and use a 4-digit PIN code
+- ☐ A caregiver can create a one-shot reminder
+- ☐ A user receives a full-screen notification at reminder time
+- ☐ A user can respond Done/Remind Later/Unable
+- ☐ The caregiver sees the status updated in real-time
+- ☐ "Remind later" triggers a new reminder in 5 minutes
+- ☐ "Unable" sends an urgent notification to the caregiver
+
+#### Design
+
+- ☐ All texts are readable (minimum 16px)
+- ☐ All buttons respect 56px minimum height
+- ☐ Maximum 3 actions per screen
+- ☐ Clear and linear navigation
+- ☐ Contrasted colors (WCAG AA accessibility test)
+
+#### Technical
+
+- ☐ The application works offline (local data via AsyncStorage)
+- ☐ Notifications work in the background (FCM)
+- ☐ The pairing code expires after 24h (Backend verification)
+- ☐ The PIN is encrypted locally (React Native Keychain/Crypto)
+- ☐ Real-time synchronization between caregiver and user (via FCM + API polling)
+
+### CI/CD
+
+Automated pipeline:
+
+1. **On PR**: Execution of automated tests (Unit/Integration) Backend and Frontend
+2. **Staging Deployment**: If tests pass, automatic deployment of the `dev` branch
+3. **Production Deployment**: Manual/semi-automatic deployment from `main` after final validation
+
+## MVP Exclusions
+
+Features **not included** in v1.0 (postponed post-MVP):
+
+- ❌ Recurring reminders (daily, weekly, monthly)
+- ❌ Graphical calendar view
+- ❌ Statistics and graphs
+- ❌ Voice messages in reminders
+- ❌ Home screen widget
+- ❌ Emergency button
+- ❌ Advanced settings (custom notification sounds, vibrations, etc.)
+- ❌ Images in reminders (US-021, classified COULD HAVE)
+
+These features are documented in the User Stories (US-020 to US-028) as **WON'T HAVE** for the MVP.
 
 ---
 
-## MVP Development Timeline
-
-**Team:** 2 developers (Mickael - Frontend, Jordann - Backend)  
-**Duration:** 5-6 weeks  
-**Target:** Functional MVP with 15 screens
-
-### Week 1: Foundation & Authentication
-
-- Docker setup and database schema
-- Backend: 5 authentication endpoints
-- Frontend: Welcome, login, register screens
-- Frontend: Device pairing and PIN screens
-
-### Week 2: Profile Management
-
-- Backend: 3 profile endpoints
-- Frontend: Profile list and creation forms
-- Pairing code generation interface
-
-### Week 3-4: Reminder System
-
-- Backend: 6 reminder endpoints
-- Worker: APScheduler setup
-- Frontend: Create reminder form
-- Frontend: User notification interface (3 buttons)
-- Firebase Cloud Messaging integration
-
-### Week 5: Integration & Testing
-
-- End-to-end testing
-- Push notification debugging
-- Security testing
-- Bug fixes
-
-### Week 6: Polish & Deployment
-
-- UI/UX refinements
-- User acceptance testing
-- Documentation
-- Deployment preparation
-
-## Team
-
-**Developers:**
-
-- Mickael - Frontend (React Native)
-- Jordann - Backend (Python/FastAPI)
-
-**Project Type:** Academic project - 2025
-
-## License
-
-Educational purposes only.
+Developed with ❤️ to make life easier for elderly people and their caregivers
