@@ -17,6 +17,8 @@
     "expo": "^54.0.31",
     "react": "19.1.0",
     "react-native": "0.81.5",
+    "react-native-confirmation-code-field": "^8.0.1",
+    "react-native-pin-view": "^3.0.3",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0"
   }
