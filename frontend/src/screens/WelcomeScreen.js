@@ -1,3 +1,8 @@
+/**
+ * WelcomeScreen - Initial profile type selection screen
+ * Allows users to choose between User or Caregiver profile
+ * Entry point of the application flow
+ */
 import React from 'react';
 import { View, Text, StyleSheet, Button, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -5,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 const WelcomeScreen = ({ navigation }) => {
     return (
         <View style={styles.container}>
+            {/* Header with logo and app name */}
             <View style={styles.header}>
                 <Image 
                     source={require('../../assets/mnesya-logo.png')} 
@@ -13,12 +19,15 @@ const WelcomeScreen = ({ navigation }) => {
                 <Text style={styles.appName}>Mnesya</Text>
             </View>
             
+            {/* Welcome title and instructions */}
             <View style={styles.titleSection}>
                 <Text style={styles.title}>Welcome to Mnesya</Text>
                 <Text style={styles.subtitle}>Choose your profile type</Text>
             </View>
             
+            {/* Profile type selection buttons */}
             <View style={styles.content}>
+                {/* User profile button - navigates to pairing screen */}
                 <TouchableOpacity 
                     style={styles.userButton}
                     onPress={() => navigation.navigate('UserPairing')} 
@@ -31,6 +40,7 @@ const WelcomeScreen = ({ navigation }) => {
                     </View>
                 </TouchableOpacity>
                 
+                {/* Caregiver profile button - navigates to login screen */}
                 <TouchableOpacity
                     style={styles.caregiverButton}
                     onPress={() => navigation.navigate('Login')}
@@ -119,8 +129,8 @@ const styles = StyleSheet.create({
     iconCircle: {
         width: 80,
         height: 80,
-        borderRadius: 40,  // la moitié de width/height = cercle
-        backgroundColor: 'rgba(255, 255, 255, 0.3)',  // blanc semi-transparent
+        borderRadius: 40,
+        backgroundColor: 'rgba(255, 255, 255, 0.3)',
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 10,

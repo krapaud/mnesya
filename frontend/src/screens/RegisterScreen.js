@@ -1,15 +1,23 @@
+/**
+ * RegisterScreen - Caregiver account registration
+ * Allows new caregivers to create an account with personal information
+ * Uses ScrollView to handle keyboard and form length
+ */
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const RegisterScreen = ({ navigation }) => {
+    // Form state management - 5 required fields
     const [firstname, setFirstname] = useState('');
     const [lastname, setLastname] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmpassword, setConfirmPassword] = useState('');
+    
     return (
         <View style={styles.container}>
+            {/* Header with back button and logo */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <View style={styles.ArrowIconCircle}>
@@ -26,9 +34,13 @@ const RegisterScreen = ({ navigation }) => {
                 </View>
                 <View style={{ width: 30 }} />
             </View>
+            
+            {/* Page title */}
             <View style={styles.titleSection}>
                 <Text style={styles.title}>Create an account</Text>
             </View>
+            
+            {/* Scrollable registration form */}
             <ScrollView>
             <View style={styles.content}>
                 <Text style={styles.label}>First Name</Text>
@@ -73,12 +85,16 @@ const RegisterScreen = ({ navigation }) => {
                         defaultValue={confirmpassword}
                     />
                 </View>
+                
+                {/* Sign up button - navigates to Login after registration */}
                 <TouchableOpacity 
                     style={styles.registerButton}
                     onPress={() => navigation.navigate('Login')}
                 >
                     <Text style={styles.registerButtonText}>Sign up</Text>
                 </TouchableOpacity>
+                
+                {/* Navigation back to login screen */}
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                     <Text style={styles.alreadyHaveAccountText}>Already have an account? Log in</Text>
                 </TouchableOpacity>
@@ -126,19 +142,10 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 10,
     },
-    subtitle: {
-        fontSize: 18,
-        color: '#999',
-        marginBottom: 40,
-    },
     content: {
         width: '100%',
         marginTop: 0,
         paddingBottom: 50,
-    },
-    text: {
-        fontSize: 24,
-        fontWeight: 'bold',
     },
     ArrowIconCircle: {
         width: 40,

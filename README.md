@@ -220,12 +220,10 @@ mnesya/
 │   │   │   ├── profile.py
 │   │   │   ├── reminder.py
 │   │   │   └── user.py
-│   │   ├── services/          # Business logic
-│   │   │   ├── user_service.py
-│   │   │   ├── caregiver_service.py
-│   │   │   ├── profile_service.py
-│   │   │   ├── reminder_service.py
-│   │   │   └── notification_service.py
+│   │   ├── services/          # Business logic (domain-based)
+│   │   │   ├── auth_service.py        # Authentication & pairing
+│   │   │   ├── care_service.py        # Profiles & reminders
+│   │   │   └── notification_service.py # Push notifications
 │   │   └── utils/             # Utilities
 │   │       ├── dependencies.py
 │   │       └── exceptions.py

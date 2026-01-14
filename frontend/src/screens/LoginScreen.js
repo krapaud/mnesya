@@ -1,13 +1,19 @@
-// Login Screen
+/**
+ * LoginScreen - Caregiver authentication screen
+ * Allows caregivers to log in with email and password
+ */
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button, TouchableOpacity, TextInput, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const LoginScreen = ({ navigation }) => {
+    // Form state management
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    
     return (
         <View style={styles.container}>
+            {/* Header with back button and logo */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <View style={styles.ArrowIconCircle}>
@@ -24,9 +30,13 @@ const LoginScreen = ({ navigation }) => {
                 </View>
                 <View style={{ width: 30 }} />
             </View>
+            
+            {/* Page title */}
             <View style={styles.titleSection}>
                 <Text style={styles.title}>Caregiver Login</Text>
             </View>
+            
+            {/* Login form */}
             <View style={styles.content}>
                 <Text style={styles.label}>Email</Text>
                 <View style={styles.formsButton}>
@@ -45,15 +55,21 @@ const LoginScreen = ({ navigation }) => {
                         defaultValue={password}
                     />
                 </View>
+                
+                {/* Login button - navigates to Dashboard */}
                 <TouchableOpacity 
                     style={styles.loginButton}
                     onPress={() => navigation.navigate('Dashboard')}
                 >
                     <Text style={styles.loginButtonText}>Log in</Text>
                 </TouchableOpacity>
+                
+                {/* Password recovery link */}
                 <TouchableOpacity onPress={() => {}}>
                     <Text style={styles.lostPasswordText}>Lost password?</Text>
                 </TouchableOpacity>
+                
+                {/* Navigation to registration screen */}
                 <TouchableOpacity onPress={() => navigation.navigate('Register')}>
                     <Text style={styles.createAccountText}>Create an account</Text>
                 </TouchableOpacity>
@@ -100,19 +116,10 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 10,
     },
-    subtitle: {
-        fontSize: 18,
-        color: '#999',
-        marginBottom: 40,
-    },
     content: {
         width: '100%',
         marginTop: 40,
         paddingBottom: 50,
-    },
-    text: {
-        fontSize: 24,
-        fontWeight: 'bold',
     },
     ArrowIconCircle: {
         width: 40,
