@@ -2,4 +2,60 @@
 version: '3.8'
 
 services:
-  # Services will be defined here
+  # PostgreSQL Database
+  db:
+    image: postgres:13-alpine
+    container_name: mnesya-db
+    environment:
+      POSTGRES_USER: mnesya_user
+      POSTGRES_PASSWORD: mnesya_password
+      POSTGRES_DB: mnesya_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mnesya-network
+
+  # Backend API
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: mnesya-backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://mnesya_user:mnesya_password@db:5432/mnesya_db
+      SECRET_KEY: your-secret-key-change-in-production
+    depends_on:
+      - db
+    volumes:
+      - ../backend:/app
+    networks:
+      - mnesya-network
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  # APScheduler Worker (for reminders)
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: mnesya-worker
+    environment:
+      DATABASE_URL: postgresql://mnesya_user:mnesya_password@db:5432/mnesya_db
+    depends_on:
+      - db
+      - backend
+    volumes:
+      - ../backend:/app
+    networks:
+      - mnesya-network
+    command: python -m worker.scheduler
+
+volumes:
+  postgres_data:
+
+networks:
+  mnesya-network:
+    driver: bridge
