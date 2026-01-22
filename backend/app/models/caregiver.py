@@ -58,8 +58,8 @@ class caregiver(database):
     def password(self, value):
         SpecialSym = ['$', '@', '#', '%', '*', '!', '~', '&']
 
-        if len(value) < 6:
-            raise ValueError('Length should be at least 6')
+        if len(value) < 8:
+            raise ValueError('Length should be at least 8')
         if len(value) > 20:
             raise ValueError('Length should not be greater than 20')
 
@@ -82,7 +82,7 @@ class caregiver(database):
         if not has_lower:
             raise ValueError('Password should have at least one lowercase letter')
         if not has_sym:
-            raise ValueError('Password should have at least one of the symbols $@#%')
+            raise ValueError('Password should have at least one of the symbols $@#%*!~&')
         self._password = value
 
     @property

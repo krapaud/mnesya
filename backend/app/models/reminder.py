@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone, timedelta
-from sqlalchemy import Column, String, DateTime, ARRAY, Boolean, Text
+from sqlalchemy import Column, String, DateTime, ARRAY, Boolean, Text, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from app import database
 
@@ -9,8 +9,8 @@ class user(database):
     _id = Column('id', UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     _title = Column('title', String(200), nullable=False)
     _description = Column('description', Text, nullable=True)
-    _caregiver_id = Column('caregiver_ids', ARRAY(UUID(as_uuid=True)), default=list)
-    _user_id = Column('caregiver_ids', ARRAY(UUID(as_uuid=True)), default=list)
+    _caregiver_id = Column('caregiver_id', UUID(as_uuid=True), ForeignKey('caregiver.id'))
+    _user_id = Column('caregiver_id', UUID(as_uuid=True), ForeignKey('user.id'))
     _created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     _updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
 
