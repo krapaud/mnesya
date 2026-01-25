@@ -12,10 +12,16 @@ import {
   useBlurOnFulfill,
   useClearByFocusCell,
 } from 'react-native-confirmation-code-field';
+import * as Haptics from 'expo-haptics';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../types/index';
+import { commonStyles } from '../styles/commonStyles';
 
-const UserPairingScreen = ({ navigation }) => {
+type Props = NativeStackScreenProps<RootStackParamList, 'UserPairing'>;
+
+const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
     // Pairing code state and configuration
-    const [code, setCode] = useState('');
+    const [code, setCode] = useState<string>('');
     const CELL_COUNT = 6; // 6-character alphanumeric code (e.g., A7X9K2)
     
     // Auto-blur when code is complete
@@ -35,36 +41,39 @@ const UserPairingScreen = ({ navigation }) => {
           navigation.navigate('UserHome', { userName: 'Mika'});
         }, 500);
       }
-    }, [code]);
+    }, [code, navigation]);
 
     return (
-        <View style={styles.container}>
+        <View style={commonStyles.container}>
                     {/* Header with back button and logo */}
-                    <View style={styles.header}>
-                        <TouchableOpacity onPress={() => navigation.goBack()}>
-                            <View style={styles.ArrowIconCircle}>
+                    <View style={commonStyles.header}>
+                        <TouchableOpacity onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            navigation.goBack();
+                        }}>
+                            <View style={commonStyles.ArrowIconCircle}>
                                 <Ionicons name="arrow-back" size={24} color='#4A90E2'
                             />
                             </View>
                         </TouchableOpacity>
-                        <View style={styles.headerCenter}>
+                        <View style={[commonStyles.headerCenter, { gap: 10 }]}>
                             <Image 
                                 source={require('../../assets/mnesya-logo.png')} 
-                                style={styles.logo}
+                                style={commonStyles.logo}
                             />
-                            <Text style={styles.appName}>Mnesya</Text>
+                            <Text style={commonStyles.appName}>Mnesya</Text>
                         </View>
-                        <View style={{ width: 30 }} />
+                        <View style={commonStyles.headerSpacer} />
                     </View>
                     
                     {/* Page title and instructions */}
-                    <View style={styles.titleSection}>
-                        <Text style={styles.title}>User Pairing</Text>
+                    <View style={[commonStyles.titleSection, { marginTop: 30 }]}>
+                        <Text style={commonStyles.title}>User Pairing</Text>
                         <Text style={styles.subtitle}>Enter the pairing code</Text>
                     </View>
                     
                     {/* 6-character code input field */}
-                    <View style={styles.content}>
+                    <View style={[commonStyles.content, { marginTop: 40, paddingBottom: 50, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }]}>
                       <CodeField
                         ref={ref}
                         {...props}
@@ -94,7 +103,10 @@ const UserPairingScreen = ({ navigation }) => {
                     </View>
                     
                     {/* Navigation back to profile type selection */}
-                    <TouchableOpacity onPress={() => navigation.navigate('Welcome')}>
+                    <TouchableOpacity onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        navigation.navigate('Welcome');
+                    }}>
                         <Text style={styles.backProfileText}>Back to profile type</Text>
                     </TouchableOpacity>
             </View>
@@ -102,65 +114,11 @@ const UserPairingScreen = ({ navigation }) => {
         };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'flex-start',
-        backgroundColor: '#fff',
-        padding: 20,
-    },
-    header: {
-        width: '100%',
-        justifyContent: 'space-between',
-        paddingTop: 40,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    headerCenter: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
-    },
-    logo: {
-        width: 50,
-        height: 50,
-        marginRight: 10,
-        paddingLeft: 10,
-    },
-    appName: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    titleSection: {
-        width: '100%',
-        paddingLeft: 10,
-        marginTop: 30,
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
+    // Screen-specific styles
     subtitle: {
         fontSize: 18,
         color: '#999',
         marginBottom: 40,
-    },
-    content: {
-        width: '100%',
-        marginTop: 40,
-        paddingBottom: 50,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    ArrowIconCircle: {
-        width: 40,
-        height: 40,
-        borderRadius: 40,
-        backgroundColor: '#F5F5F5',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 10,
     },
     backProfileText: {
         color: '#4A90E2',

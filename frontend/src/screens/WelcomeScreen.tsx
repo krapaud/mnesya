@@ -6,31 +6,40 @@
 import React from 'react';
 import { View, Text, StyleSheet, Button, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../types/index';
+import { commonStyles } from '../styles/commonStyles';
 
-const WelcomeScreen = ({ navigation }) => {
+type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
+
+const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
     return (
-        <View style={styles.container}>
+        <View style={commonStyles.container}>
             {/* Header with logo and app name */}
-            <View style={styles.header}>
+            <View style={[commonStyles.header, { justifyContent: 'flex-start', paddingTop: 40 }]}>
                 <Image 
                     source={require('../../assets/mnesya-logo.png')} 
-                    style={styles.logo}
+                    style={commonStyles.logo}
                 />
-                <Text style={styles.appName}>Mnesya</Text>
+                <Text style={commonStyles.appName}>Mnesya</Text>
             </View>
             
             {/* Welcome title and instructions */}
-            <View style={styles.titleSection}>
-                <Text style={styles.title}>Welcome to Mnesya</Text>
+            <View style={[commonStyles.titleSection, { marginTop: 30 }]}>
+                <Text style={commonStyles.title}>Welcome to Mnesya</Text>
                 <Text style={styles.subtitle}>Choose your profile type</Text>
             </View>
             
             {/* Profile type selection buttons */}
-            <View style={styles.content}>
+            <View style={[commonStyles.content, { marginTop: 40, paddingBottom: 50 }]}>
                 {/* User profile button - navigates to pairing screen */}
                 <TouchableOpacity 
                     style={styles.userButton}
-                    onPress={() => navigation.navigate('UserPairing')} 
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        navigation.navigate('UserPairing');
+                    }}
                 >
                     <View style={styles.buttonContent}>
                         <View style={styles.iconCircle}>
@@ -43,7 +52,10 @@ const WelcomeScreen = ({ navigation }) => {
                 {/* Caregiver profile button - navigates to login screen */}
                 <TouchableOpacity
                     style={styles.caregiverButton}
-                    onPress={() => navigation.navigate('Login')}
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        navigation.navigate('Login');
+                    }}
                 >
                     <View style={styles.buttonContent}>
                         <View style={styles.iconCircle}>
@@ -60,47 +72,11 @@ const WelcomeScreen = ({ navigation }) => {
 
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'flex-start',
-        backgroundColor: '#fff',
-        padding: 20,
-    },
-    header: {
-        width: '100%',
-        paddingTop: 40,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    logo: {
-        width: 50,
-        height: 50,
-        marginRight: 10,
-        paddingLeft: 10,
-    },
-    appName: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    titleSection: {
-        width: '100%',
-        paddingLeft: 10,
-        marginTop: 30,
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
+    // Screen-specific styles
     subtitle: {
         fontSize: 18,
         color: '#999',
         marginBottom: 40,
-    },
-    content: {
-        width: '100%',
-        marginTop: 40,
-        paddingBottom: 50,
     },
     userButton: {
         backgroundColor: '#4A90E2',
