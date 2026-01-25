@@ -5,20 +5,23 @@
  */
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import type { RootStackParamList } from '../types/index';
 
 // Screen imports
 import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
-import DashboardScreen from '../screens/DashboardScreen';
+import CaregiverTabs from './CaregiverTabs';
 import UserPairingScreen from '../screens/UserPairingScreen';
-import UserSetPINScreen from '../screens/UserSetPINScreen';
+import CreateProfileScreen from '../screens/CreateProfileScreen';
+import CreateReminderScreen from '../screens/CreateReminderScreen';
+import UserProfileDetailScreen from '../screens/UserProfileDetailScreen';
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const AppNavigator = () => {
+const AppNavigator: React.FC = () => {
     return (
-        <Stack.Navigator>
+        <Stack.Navigator id='root'>
             {/* Initial screen - Profile type selection */}
             <Stack.Screen 
                 name="Welcome" 
@@ -38,10 +41,10 @@ const AppNavigator = () => {
                 options={{ headerShown: false }}
                 />
             
-            {/* Main caregiver dashboard */}
+            {/* Main caregiver dashboard with tabs */}
             <Stack.Screen
                 name="Dashboard"
-                component={DashboardScreen}
+                component={CaregiverTabs}
                 options={{ headerShown: false }}
                 />
             
@@ -52,9 +55,20 @@ const AppNavigator = () => {
                 options={{ headerShown: false }}
                 />
             <Stack.Screen
-                name="UserSetPin"
-                component={UserSetPINScreen}
+                name="CreateProfile"
+                component={CreateProfileScreen}
                 options={{ headerShown: false }}
+                />
+            <Stack.Screen
+                name="CreateReminder"
+                component={CreateReminderScreen}
+                options={{ headerShown: false }}
+                />
+            {/* User information */}
+            <Stack.Screen
+                name='UserProfileDetails'
+                component={UserProfileDetailScreen}
+                options={{ headerShown: false}}
                 />
         </Stack.Navigator>
     );

@@ -7,9 +7,8 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import AppNavigator from './navigation/AppNavigator';
 
-const App = () => {
+const App: React.FC = () => {
     return (
-        // NavigationContainer manages navigation state and links navigation tree
         <NavigationContainer>
             <AppNavigator />
         </NavigationContainer>

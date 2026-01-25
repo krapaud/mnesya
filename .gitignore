@@ -37,6 +37,9 @@ web-build/
 # Copilot
 .github/copilot-instructions.md
 
+# Project Management
+docs/trello-guide.txt
+
 # OS
 .DS_Store
 Thumbs.db
