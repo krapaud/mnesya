@@ -20,12 +20,14 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
         const [birthday, setBirthday] = useState<Date>(new Date());
         const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
 
+        // Handles date selection from the DateTimePicker component
         const getBirthdayPicker = (event: DateTimePickerEvent, selectedDate?: Date): void => {
             if (selectedDate) {
                 setBirthday(selectedDate);
             }
         };
 
+        // Formats date to DD/MM/YYYY for display
         const formatDate = (date: Date): string => {
             const day = date.getDate().toString().padStart(2, '0');
             const month = (date.getMonth() + 1).toString().padStart(2, '0');

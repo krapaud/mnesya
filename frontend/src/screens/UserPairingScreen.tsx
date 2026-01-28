@@ -24,21 +24,21 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
     const [code, setCode] = useState<string>('');
     const CELL_COUNT = 6; // 6-character alphanumeric code (e.g., A7X9K2)
     
-    // Auto-blur when code is complete
+    // Auto-blur when code is complete for better keyboard handling
     const ref = useBlurOnFulfill({value: code, cellCount: CELL_COUNT});
     
-    // Clear cell on focus for better UX
+    // Clear cell on focus for better UX - allows easy correction of typos
     const [props, getCellOnLayoutHandler] = useClearByFocusCell({
       value: code,
       setValue: setCode,
     });
 
-    // Auto-navigate to User Home when code is complete
+    // Auto-navigate to User Home when code is complete (all 6 characters entered)
     useEffect(() => {
       if (code.length === CELL_COUNT) {
-        // 500ms delay for visual feedback
+        // 500ms delay provides visual feedback before navigation
         setTimeout(() => {
-          navigation.navigate('UserHome', { userName: 'Mika'});
+          navigation.navigate('UserDashboard');
         }, 500);
       }
     }, [code, navigation]);
@@ -69,7 +69,7 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
                     {/* Page title and instructions */}
                     <View style={[commonStyles.titleSection, { marginTop: 30 }]}>
                         <Text style={commonStyles.title}>User Pairing</Text>
-                        <Text style={styles.subtitle}>Enter the pairing code</Text>
+                        <Text style={commonStyles.subtitle}>Enter the pairing code</Text>
                     </View>
                     
                     {/* 6-character code input field */}
@@ -115,11 +115,6 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     // Screen-specific styles
-    subtitle: {
-        fontSize: 18,
-        color: '#999',
-        marginBottom: 40,
-    },
     backProfileText: {
         color: '#4A90E2',
         fontSize: 16,

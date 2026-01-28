@@ -14,7 +14,7 @@ import { commonStyles } from '../styles/commonStyles';
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
 
 const RegisterScreen: React.FC<Props> = ({ navigation }) => {
-    // Form state management - 5 required fields
+    // Form state management - 5 required fields for account registration
     const [firstname, setFirstname] = useState<string>('');
     const [lastname, setLastname] = useState<string>('');
     const [email, setEmail] = useState<string>('');

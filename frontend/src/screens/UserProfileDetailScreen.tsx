@@ -3,26 +3,26 @@
  * Shows profile information (name, age) and active reminders for the selected profile
  * Accessible from Dashboard when clicking on a profile card
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-type Props = NativeStackScreenProps<RootStackParamList, 'UserProfileDetails'>;
-import { ProfileItem } from '../types/interfaces';
 import { fakeProfiles, fakeReminders } from '../data/fakeData';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'UserProfileDetails'>;
 
 
 const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) => {
     const { profileId } = route.params;
     
-    // Find the profile matching the profileId
+    // Find the profile matching the profileId from route params
     const profile = fakeProfiles.find(p => p.id === profileId);
 
-    // Filter reminders for this specific profile
-    const profileReminders = fakeReminders.filter(r => r.profileName === profile?.name);
+    // Filter reminders for this specific profile using full name matching
+    const profileReminders = fakeReminders.filter(r => r.profileName === `${profile?.firstName} ${profile?.lastName}`);
 
     return (
 	<View style={commonStyles.container}>
@@ -55,7 +55,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
             {profile ? (
                 <View style={styles.profileCard}>
                     <View style={styles.profileRow}>
-                        <Text style={styles.profileNameValue}>{profile.name}</Text>
+                        <Text style={styles.profileNameValue}>{profile.firstName + ' ' + profile.lastName}</Text>
                     </View>
                     <View style={styles.profileRow}>
                         <Text style={styles.profileDetailValue}>{profile.age} years old</Text>

@@ -10,12 +10,12 @@ import * as Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { ProfileItem } from '../types/interfaces';
+import { fakeProfiles } from '../data/fakeData';
+
 type Props = NativeStackScreenProps<RootStackParamList, 'Dashboard'>;
-import { fakeProfiles, fakeReminders } from '../data/fakeData';
 
 const DashboardScreen: React.FC<Props> = ({ navigation }) => {
-    // Mock data for managed profiles (will be replaced with API data)
+    // Managed profiles data - currently using mock data, will be replaced with API in Sprint 1
     const [profiles, setProfiles] = useState(fakeProfiles);
 
     return (
@@ -55,7 +55,10 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 
                 <Text style={commonStyles.textPrimary}>Managed Profiles</Text>
                 
-                {/* Scrollable list of profile cards */}
+                {/* 
+                 * Scrollable list of profile cards
+                 * Each card displays user name, age, and a view button to access profile details
+                 */}
                 <ScrollView showsVerticalScrollIndicator={false} style={styles.profilesList}>
                     {profiles.length === 0 ? (
                         <Text style={styles.emptyMessage}>No profiles yet</Text>
@@ -64,7 +67,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                             <View key={profile.id} style={styles.profileCard}>
                                 <View style={styles.profileInfo}>
                                     <View>
-                                        <Text style={styles.textUser}>{profile.name}</Text>
+                                        <Text style={styles.textUser}>{profile.firstName + ' ' + profile.lastName}</Text>
                                         <Text style={styles.textUserInfo}>{profile.age} years old</Text>
                                     </View>
                                     
