@@ -1,3 +1,18 @@
+/**
+ * RemindersListScreen - Displays a filterable list of all reminders
+ * 
+ * Allows caregivers to view and manage reminders across all profiles.
+ * Features dropdown filters for profile and date selection with dynamic filtering.
+ * 
+ * Key features:
+ * - Filter by profile and/or date
+ * - Reset filters button (only active when filters applied)
+ * - Status badges with color coding for each reminder
+ * - Scrollable list view with empty state handling
+ * 
+ * @component
+ * @param {Props} navigation - Navigation object for screen transitions
+ */
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,9 +27,10 @@ import { fakeReminders } from '../data/fakeData';
 type Props = NativeStackScreenProps<RootStackParamList, 'Dashboard'>;
 
 const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
-    // Fake data for reminders list (will be replaced with API data)
+    // Reminders data - currently using fake data, will be replaced with API in Sprint 2
     const [reminders, setReminders] = useState(fakeReminders);
 
+    // Filter state management for profile and date selection
     const [selectedProfile, setSelectedProfile] = useState<string>('');
     const [selectedDate, setSelectedDate] = useState<string>('');
     const [showProfilePicker, setShowProfilePicker] = useState<boolean>(false);

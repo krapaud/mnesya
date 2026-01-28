@@ -68,6 +68,11 @@ export const commonStyles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 10,
     },
+    subtitle: {
+        fontSize: 18,
+        color: '#999',
+        marginBottom: 40,
+    },
 
     // ============ FORM STYLES ============
     label: {

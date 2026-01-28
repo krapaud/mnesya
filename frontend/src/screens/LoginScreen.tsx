@@ -13,7 +13,7 @@ import { commonStyles } from '../styles/commonStyles';
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
-    // Form state management
+    // Form state management for email and password inputs
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     

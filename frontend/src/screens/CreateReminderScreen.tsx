@@ -5,30 +5,29 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker, { DateTimePickerEvent} from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import * as Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { Picker } from '@react-native-picker/picker';
 import { commonStyles } from '../styles/commonStyles';
+import { fakeProfiles } from '../data/fakeData';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateReminder'>;
 
 const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
+    // Form state for reminder creation
     const [reminderTitle, setReminderTitle] = useState<string>('');
     const [reminderMessage, setReminderMessage] = useState<string>('');
     const [reminderDate, setReminderDate] = useState<Date>(new Date());
+    
+    // Picker visibility state - ensures mutual exclusion (only one picker shown at a time)
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
     const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
     const [showProfilePicker, setShowProfilePicker] = useState<boolean>(false);
     const [selectedProfile, setSelectedProfile] = useState<string>('');
 
-// TODO: Replace with actual API call to fetch profiles
-const profiles = [
-    { id: '1', name: 'John Doe' },
-    { id: '2', name: 'Jane Smith' },
-    { id: '3', name: 'Robert Johnson' },
-];
+    const selectedProfileData = fakeProfiles.find(p => p.id === Number(selectedProfile));
 
     const getReminderPicker = (event: DateTimePickerEvent, selectedDate?: Date): void => {
         if (selectedDate) {
@@ -51,6 +50,7 @@ const profiles = [
 
     /**
      * Opens the date picker and closes the time picker
+     * Ensures mutual exclusion between pickers to prevent UI overlap
      */
     const openDatePicker = () => {
         setShowDatePicker(true);
@@ -59,6 +59,7 @@ const profiles = [
 
     /**
      * Opens the time picker and closes the date picker
+     * Ensures mutual exclusion between pickers to prevent UI overlap
      */
     const openTimePicker = () => {
         setShowTimePicker(true);
@@ -98,7 +99,7 @@ const profiles = [
                     onPress={() => setShowProfilePicker(true)}
                 >
                     <View style={styles.profilePicker}>
-                        <Text>{selectedProfile ? profiles.find(p => p.id === selectedProfile)?.name : 'Select a profile'}</Text>
+                        <Text>{selectedProfileData ? `${selectedProfileData.firstName} ${selectedProfileData.lastName}` : 'Select a profile'}</Text>
                         <Ionicons name="chevron-down" size={20} color="#999" />
                     </View>
                 </TouchableOpacity>
@@ -192,10 +193,10 @@ const profiles = [
                                     onValueChange={(itemValue) => setSelectedProfile(itemValue)}
                                 >
                                     <Picker.Item label="Select a profile" value="" />
-                                    {profiles.map((profile) => (
+                                    {fakeProfiles.map((profile) => (
                                         <Picker.Item 
                                             key={profile.id} 
-                                            label={profile.name} 
+                                            label={profile.firstName + ' ' + profile.lastName} 
                                             value={profile.id} 
                                         />
                                     ))}

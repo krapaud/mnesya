@@ -12,10 +12,12 @@ import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import CaregiverTabs from './CaregiverTabs';
+import UserTabs from "./UserTabs";
 import UserPairingScreen from '../screens/UserPairingScreen';
 import CreateProfileScreen from '../screens/CreateProfileScreen';
 import CreateReminderScreen from '../screens/CreateReminderScreen';
 import UserProfileDetailScreen from '../screens/UserProfileDetailScreen';
+import ReminderNotificationScreen from '../screens/ReminderNotificationScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -48,6 +50,13 @@ const AppNavigator: React.FC = () => {
                 options={{ headerShown: false }}
                 />
             
+            {/* Main user dashboard with tabs */}
+            <Stack.Screen
+                name="UserDashboard"
+                component={UserTabs}
+                options={{ headerShown: false }}
+                />
+            
             {/* User pairing and setup flow */}
             <Stack.Screen
                 name="UserPairing"
@@ -64,12 +73,20 @@ const AppNavigator: React.FC = () => {
                 component={CreateReminderScreen}
                 options={{ headerShown: false }}
                 />
+            
             {/* User information */}
             <Stack.Screen
                 name='UserProfileDetails'
                 component={UserProfileDetailScreen}
                 options={{ headerShown: false}}
                 />
+            {/* User notifications */}
+            <Stack.Screen
+                name='ReminderNotification'
+                component={ReminderNotificationScreen}
+                options={{ headerShown: false }}
+                />
+            
         </Stack.Navigator>
     );
 }

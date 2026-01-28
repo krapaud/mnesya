@@ -28,10 +28,14 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
             {/* Welcome title and instructions */}
             <View style={[commonStyles.titleSection, { marginTop: 30 }]}>
                 <Text style={commonStyles.title}>Welcome to Mnesya</Text>
-                <Text style={styles.subtitle}>Choose your profile type</Text>
+                <Text style={commonStyles.subtitle}>Choose your profile type</Text>
             </View>
             
-            {/* Profile type selection buttons */}
+            {/* 
+             * Profile type selection buttons
+             * Two large, clearly labeled buttons for User and Caregiver flows
+             * Includes haptic feedback for better user experience
+             */}
             <View style={[commonStyles.content, { marginTop: 40, paddingBottom: 50 }]}>
                 {/* User profile button - navigates to pairing screen */}
                 <TouchableOpacity 
@@ -73,11 +77,6 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     // Screen-specific styles
-    subtitle: {
-        fontSize: 18,
-        color: '#999',
-        marginBottom: 40,
-    },
     userButton: {
         backgroundColor: '#4A90E2',
         padding: 60,

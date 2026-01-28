@@ -5,7 +5,8 @@
 // Profile interface for elderly users
 export interface ProfileItem {
     id: number;
-    name: string;
+    firstName: string;
+    lastName: string;
     age: number;
 }
 
