@@ -3,7 +3,6 @@ from datetime import datetime, date
 from uuid import UUID
 from typing import List, Optional
 
-# Pour créer un user (POST /users)
 class UserCreate(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=100)
     last_name: str = Field(..., min_length=1, max_length=100)
@@ -15,7 +14,6 @@ class UserCreate(BaseModel):
             raise ValueError('Name cannot be empty')
         return v.strip()
 
-# Pour mettre à jour un user (PUT /users/{id})
 class UserUpdate(BaseModel):
     first_name: Optional[str] = Field(None, min_length=1, max_length=100)
     last_name: Optional[str] = Field(None, min_length=1, max_length=100)
@@ -27,7 +25,6 @@ class UserUpdate(BaseModel):
             raise ValueError('Name cannot be empty')
         return v.strip() if v else None
 
-# Pour renvoyer un user (GET /users/{id})
 class UserResponse(BaseModel):
     id: UUID
     first_name: str
@@ -38,9 +35,8 @@ class UserResponse(BaseModel):
     updated_at: datetime
     
     class Config:
-        from_attributes = True  # Permet de créer depuis un objet SQLAlchemy
+        from_attributes = True
 
-# Pour lister les users (GET /users)
 class UserListResponse(BaseModel):
     users: List[UserResponse]
     total: int
