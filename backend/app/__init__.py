@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from contextlib import asynccontextmanager
 
-# Database setup
+# ==================== Database setup ====================
 database = declarative_base()
 engine = None
 SessionLocal = None

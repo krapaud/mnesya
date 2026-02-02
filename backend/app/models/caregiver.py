@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, DateTime, ARRAY
+from sqlalchemy import Column, String, DateTime, ARRAY, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from app import database
 import validators
@@ -12,9 +12,11 @@ class caregiver(database):
     _last_name = Column('last_name', String(100), nullable=False)
     _email = Column('email', String(255), unique=True, nullable=False, index=True)
     _password = Column('password', String(255), nullable=False)
-    _user_ids = Column('user_ids', ARRAY(UUID(as_uuid=True)), default=list)
+    _user_ids = Column('user_ids', ARRAY(UUID(as_uuid=True), ForeignKey('user.id')), default=list)
     _created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     _updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+
+    # ==================== Getter Setter ====================
 
     @property
     def id(self):
@@ -98,8 +100,10 @@ class caregiver(database):
         return self._created_at
 
     @property
-    def uptated_at(self):
+    def updated_at(self):
         return self._updated_at
+
+    # ==================== Object function ====================
 
     def add_user(self, user_id: uuid.UUID):
         """Ajoute un user_id au tableau"""

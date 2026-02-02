@@ -1,18 +1,20 @@
 import uuid
 from datetime import datetime, timezone, date
-from sqlalchemy import Column, String, DateTime, ARRAY, Date
+from sqlalchemy import Column, String, DateTime, ARRAY, Date, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from app import database
 
 class user(database):
-    __tablename__ = 'caregiver'
+    __tablename__ = 'user'
     _id = Column('id', UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     _first_name = Column('first_name', String(100), nullable=False)
     _last_name = Column('last_name', String(100), nullable=False)
     _birthday = Column('birthday', Date, nullable=False)
-    _caregiver_ids = Column('caregiver_ids', ARRAY(UUID(as_uuid=True)), default=list)
+    _caregiver_ids = Column('caregiver_ids', ARRAY(UUID(as_uuid=True), ForeignKey('caregiver.id')), default=list)
     _created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     _updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+
+    # ==================== Getter Setter ====================
 
     @property
     def id(self):
@@ -78,8 +80,10 @@ class user(database):
         return self._created_at
 
     @property
-    def uptated_at(self):
+    def updated_at(self):
         return self._updated_at
+
+    # ==================== object function ====================
 
     def add_caregiver(self, caregiver_id: uuid.UUID):
         """Ajoute un caregiver_id au tableau"""
