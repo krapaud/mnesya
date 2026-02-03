@@ -1,40 +1,61 @@
 /**
- * CreateReminderScreen - Caregiver reminders creation
- * Allows caregivers to create reminders for profiles
+ * CreateReminderScreen - Form for creating reminders for user profiles.
+ * 
+ * Allows caregivers to create scheduled reminders by selecting a profile,
+ * entering a title and message, and choosing a date and time. Features
+ * cross-platform pickers for profile, date, and time selection with
+ * mutual exclusion to prevent UI overlap.
+ * 
+ * @module CreateReminderScreen
  */
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import * as Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
-import { Picker } from '@react-native-picker/picker';
 import { commonStyles } from '../styles/commonStyles';
 import { fakeProfiles } from '../data/fakeData';
+import { PlatformDatePicker, PlatformTimePicker, PlatformProfilePicker } from '../components';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateReminder'>;
 
+/**
+ * Screen component for creating reminders for user profiles.
+ * 
+ * Provides a comprehensive form with profile selection, title, message,
+ * date and time inputs. Implements mutual exclusion between pickers to
+ * ensure clean UI interaction.
+ * 
+ * @param props - Navigation props
+ * @returns Reminder creation form screen
+ */
 const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
-    // Form state for reminder creation
+    /** Reminder title input state */
     const [reminderTitle, setReminderTitle] = useState<string>('');
+    /** Reminder message/description input state */
     const [reminderMessage, setReminderMessage] = useState<string>('');
+    /** Selected date and time for the reminder */
     const [reminderDate, setReminderDate] = useState<Date>(new Date());
     
-    // Picker visibility state - ensures mutual exclusion (only one picker shown at a time)
+    /** Controls date picker visibility - mutually exclusive with other pickers */
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+    /** Controls time picker visibility - mutually exclusive with other pickers */
     const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
+    /** Controls profile picker visibility - mutually exclusive with other pickers */
     const [showProfilePicker, setShowProfilePicker] = useState<boolean>(false);
-    const [selectedProfile, setSelectedProfile] = useState<string>('');
+    /** Selected profile ID */
+    const [selectedProfile, setSelectedProfile] = useState<string | number>('');
 
+    /** Currently selected profile data object */
     const selectedProfileData = fakeProfiles.find(p => p.id === Number(selectedProfile));
 
-    const getReminderPicker = (event: DateTimePickerEvent, selectedDate?: Date): void => {
-        if (selectedDate) {
-            setReminderDate(selectedDate);
-        }
-    };
-
+    /**
+     * Formats a date to DD/MM/YYYY string format for display.
+     * 
+     * @param date - Date object to format
+     * @returns Formatted date string
+     */
     const formatDate = (date: Date): string => {
         const day = date.getDate().toString().padStart(2, '0');
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -42,28 +63,40 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
         return `${day}/${month}/${year}`;
     };
 
+    /**
+     * Formats a time to HH:MM string format for display.
+     * 
+     * @param date - Date object containing the time to format
+     * @returns Formatted time string
+     */
     const formatTime = (date: Date): string => {
         const hour = date.getHours().toString().padStart(2, '0');
         const minute = date.getMinutes().toString().padStart(2, '0');
         return `${hour}:${minute}`;
-    }
+    };
 
     /**
-     * Opens the date picker and closes the time picker
+     * Opens the date picker and closes other pickers.
+     * 
      * Ensures mutual exclusion between pickers to prevent UI overlap
+     * and maintain clean user experience.
      */
     const openDatePicker = () => {
         setShowDatePicker(true);
         setShowTimePicker(false);
+        setShowProfilePicker(false);
     };
 
     /**
-     * Opens the time picker and closes the date picker
+     * Opens the time picker and closes other pickers.
+     * 
      * Ensures mutual exclusion between pickers to prevent UI overlap
+     * and maintain clean user experience.
      */
     const openTimePicker = () => {
         setShowTimePicker(true);
         setShowDatePicker(false);
+        setShowProfilePicker(false);
     };
     return (
         <View style={commonStyles.container}>
@@ -152,65 +185,33 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                     </View>
                         </>
                     )}
-                        {showDatePicker && (
-                        <View style={commonStyles.datePickerContainer}>
-                            <DateTimePicker
-                                value={reminderDate}
-                                mode="date"
-                                display="spinner"
-                                onChange={getReminderPicker}
-                                style={{ transform: [{ scaleY: 1 }] }}
-                            />
-                            <TouchableOpacity
-                                style={commonStyles.validateButton}
-                                onPress={() => setShowDatePicker(false)}
-                                >
-                                <Text style={commonStyles.validateButtonText}>Validate</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                    {showTimePicker && (
-                            <View style={commonStyles.timePickerContainer}>
-                                <DateTimePicker
-                                    value={reminderDate}
-                                    mode="time"
-                                    display="spinner"
-                                    onChange={getReminderPicker}
-                                />
-                                <TouchableOpacity
-                                    style={commonStyles.validateButton}
-                                    onPress={() => setShowTimePicker(false)}
-                                >
-                                    <Text style={commonStyles.validateButtonText}>Validate</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
-                    {showProfilePicker && (
-                        <View style={styles.profilePickerContainer}>
-                            <View style={styles.pickerWrapper}>
-                                <Picker
-                                    selectedValue={selectedProfile}
-                                    onValueChange={(itemValue) => setSelectedProfile(itemValue)}
-                                >
-                                    <Picker.Item label="Select a profile" value="" />
-                                    {fakeProfiles.map((profile) => (
-                                        <Picker.Item 
-                                            key={profile.id} 
-                                            label={profile.firstName + ' ' + profile.lastName} 
-                                            value={profile.id} 
-                                        />
-                                    ))}
-                                </Picker>
-                            </View>
-                            <TouchableOpacity
-                                style={commonStyles.validateButton}
-                                onPress={() => setShowProfilePicker(false)}
-                            >
-                                <Text style={commonStyles.validateButtonText}>Validate</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                    {/* Create button - navigates back to Dashboard after profile creation */}
+                        {/* Cross-platform date picker component */}
+                        <PlatformDatePicker
+                            value={reminderDate}
+                            onChange={setReminderDate}
+                            visible={showDatePicker}
+                            onClose={() => setShowDatePicker(false)}
+                            displayFormat={formatDate}
+                        />
+                        {/* Cross-platform time picker component */}
+                        <PlatformTimePicker
+                            value={reminderDate}
+                            onChange={setReminderDate}
+                            visible={showTimePicker}
+                            onClose={() => setShowTimePicker(false)}
+                            displayFormat={formatTime}
+                        />
+                        
+                    {/* Cross-platform profile picker component */}
+                    <PlatformProfilePicker
+                        profiles={fakeProfiles}
+                        selectedValue={selectedProfile}
+                        onValueChange={setSelectedProfile}
+                        visible={showProfilePicker}
+                        onClose={() => setShowProfilePicker(false)}
+                        placeholder="Select a profile"
+                    />
+                    {/* Save button - navigates back to Dashboard after reminder creation */}
                     {!showDatePicker && !showTimePicker && !showProfilePicker && (
                     <TouchableOpacity 
                         style={commonStyles.primaryButton}
@@ -235,16 +236,6 @@ const styles = StyleSheet.create({
     },
     messageInput: {
         height: 80,
-    },
-    profilePickerContainer: {
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        width: '100%',
-    },
-    pickerWrapper: {
-        width: '100%',
-        height: 150,
-        overflow: 'hidden',
     },
     text: {
         fontSize: 12,
