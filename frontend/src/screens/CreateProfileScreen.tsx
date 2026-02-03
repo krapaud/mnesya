@@ -1,42 +1,53 @@
 /**
- * CreateProfileScreen - Form to create a new user profile
- * Allows caregivers to register elderly users with their personal information
- * Includes fields for first name, last name, and birthday
+ * CreateProfileScreen - Form for creating new user profiles.
+ * 
+ * Allows caregivers to register elderly users by entering their personal information
+ * including first name, last name, and date of birth. Utilizes a cross-platform
+ * date picker for birthday selection.
+ * 
+ * @module CreateProfileScreen
  */
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker, { DateTimePickerEvent} from '@react-native-community/datetimepicker';
 import * as Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
+import { PlatformDatePicker } from '../components';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateProfile'>;
 
+/**
+ * Screen component for creating a new user profile.
+ * 
+ * Provides a form with input fields for first name, last name, and birthday.
+ * Includes validation and navigation back to dashboard upon successful creation.
+ * 
+ * @param props - Navigation props
+ * @returns Profile creation form screen
+ */
 const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
+        /** User's first name input state */
         const [firstname, setFirstname] = useState<string>('');
+        /** User's last name input state */
         const [lastname, setLastname] = useState<string>('');
+        /** User's birthday date state */
         const [birthday, setBirthday] = useState<Date>(new Date());
+        /** Controls date picker visibility */
         const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
 
-        // Handles date selection from the DateTimePicker component
-        const getBirthdayPicker = (event: DateTimePickerEvent, selectedDate?: Date): void => {
-            if (selectedDate) {
-                setBirthday(selectedDate);
-            }
-        };
-
-        // Formats date to DD/MM/YYYY for display
+        /**
+         * Formats a date to DD/MM/YYYY string format for display.
+         * 
+         * @param date - Date object to format
+         * @returns Formatted date string
+         */
         const formatDate = (date: Date): string => {
             const day = date.getDate().toString().padStart(2, '0');
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             const year = date.getFullYear();
             return `${day}/${month}/${year}`;
-        };
-        
-        const closeDatePicker = () => {
-            setShowDatePicker(false);
         };
         
         return (
@@ -92,22 +103,15 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                     >
                         <Text>{formatDate(birthday)}</Text>
                     </TouchableOpacity>
-                    {showDatePicker && (
-                        <View style={commonStyles.datePickerContainer}>
-                            <DateTimePicker
-                                value={birthday}
-                                mode="date"
-                                display="spinner"
-                                onChange={getBirthdayPicker}
-                            />
-                            <TouchableOpacity
-                                style={commonStyles.validateButton}
-                                onPress={() => setShowDatePicker(false)}
-                                >
-                                <Text style={commonStyles.validateButtonText}>Validate</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
+                    
+                    {/* Cross-platform date picker component */}
+                    <PlatformDatePicker
+                        value={birthday}
+                        onChange={setBirthday}
+                        visible={showDatePicker}
+                        onClose={() => setShowDatePicker(false)}
+                        displayFormat={formatDate}
+                    />
                     {/* Create button - navigates back to Dashboard after profile creation */}
                     {!showDatePicker && (
                     <TouchableOpacity 
