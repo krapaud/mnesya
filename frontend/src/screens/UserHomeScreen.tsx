@@ -14,6 +14,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { UserTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
@@ -27,6 +28,7 @@ const currentUser = fakeProfiles.find(p => p.firstName === "Marie");
 const userReminders = fakeReminders.filter(r => r.profileName === `${currentUser?.firstName} ${currentUser?.lastName}`);
 
 const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
+    const { t } = useTranslation();
 
     const [showAlert, setShowAlert] = useState(false);
 
@@ -62,8 +64,8 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
              * Helps elderly users feel comfortable with the app
              */}
             <View style={[commonStyles.titleSection, { marginTop: 30 }]}>
-                <Text style={commonStyles.title}>Hello {currentUser?.firstName} !</Text>
-                <Text style={commonStyles.subtitle}>Your reminders</Text>
+                <Text style={commonStyles.title}>{t('UserHome.greeting')} {currentUser?.firstName} !</Text>
+                <Text style={commonStyles.subtitle}>{t('UserHome.subtitle')}</Text>
             </View>
             <ScrollView>
                 {/* 
@@ -71,7 +73,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                  * Each reminder displayed as a card with tap feedback for accessibility
                  */}
                 {userReminders.length === 0 ? (
-                    <Text style={commonStyles.emptyMessage}>No active reminders</Text>
+                    <Text style={commonStyles.emptyMessage}>{t('UserHome.messages.noReminders')}</Text>
                 ) : (
                     userReminders.map((reminder) => (
                         <View key={reminder.id} style={commonStyles.reminderCard}>
@@ -117,13 +119,13 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
             >
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, width: '80%' }}>
-                        <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }}>Not Available</Text>
-                        <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 20 }}>Please wait, this is an upcoming reminder</Text>
+                        <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }}>{t('UserHome.messages.notAvailableTitle')}</Text>
+                        <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 20 }}>{t('UserHome.messages.notAvailableMessage')}</Text>
                         <TouchableOpacity 
                             style={{ backgroundColor: '#4A90E2', padding: 10, borderRadius: 5 }}
                             onPress={() => setShowAlert(false)}
                         >
-                            <Text style={{ color: 'white', textAlign: 'center', fontSize: 16 }}>OK</Text>
+                            <Text style={{ color: 'white', textAlign: 'center', fontSize: 16 }}>{t('UserHome.messages.ok')}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

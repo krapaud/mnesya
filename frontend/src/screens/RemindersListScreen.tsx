@@ -18,6 +18,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'rea
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
@@ -27,6 +28,7 @@ import { fakeReminders } from '../data/fakeData';
 type Props = NativeStackScreenProps<RootStackParamList, 'Dashboard'>;
 
 const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
+    const { t } = useTranslation();
     // Reminders data - currently using fake data, will be replaced with API in Sprint 2
     const [reminders, setReminders] = useState(fakeReminders);
 
@@ -75,7 +77,7 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                     </View>
                     {/* Page title */}
                     <View style={commonStyles.titleSection}>
-                        <Text style={commonStyles.title}>Reminders</Text>
+                        <Text style={commonStyles.title}>{t('reminders.Title')}</Text>
                     </View>
                     
                     {/* Action button */}
@@ -85,14 +87,14 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             navigation.navigate('CreateReminder', {});
                         }}>
-                        <Text style={commonStyles.primaryButtonText}>New Reminder</Text>
+                        <Text style={commonStyles.primaryButtonText}>{t('reminders.buttons.New Reminder')}</Text>
                     </TouchableOpacity>
 
                     {/* Filters section */}
                     <View style={styles.filtersSection}>
                         <View style={styles.filterRow}>
                             <View style={styles.filterItem}>
-                                <Text style={styles.filterLabel}>Profile:</Text>
+                                <Text style={styles.filterLabel}>{t('reminders.pickersTitle.Profile')}:</Text>
                                 <TouchableOpacity 
                                     style={styles.filterDropdown}
                                     onPress={() => {
@@ -101,14 +103,14 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                                     }}
                                 >
                                     <Text style={styles.filterDropdownText}>
-                                        {selectedProfile || 'All Profiles'}
+                                        {selectedProfile || t('common.pickersText.All Profiles')}
                                     </Text>
                                     <Ionicons name="chevron-down" size={20} color="#666" />
                                 </TouchableOpacity>
                             </View>
 
                             <View style={styles.filterItem}>
-                                <Text style={styles.filterLabel}>Date:</Text>
+                                <Text style={styles.filterLabel}>{t('reminders.labels.Date:')}</Text>
                                 <TouchableOpacity 
                                     style={styles.filterDropdown}
                                     onPress={() => {
@@ -117,7 +119,7 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                                     }}
                                 >
                                     <Text style={styles.filterDropdownText}>
-                                        {selectedDate || 'All Dates'}
+                                        {selectedDate || t('common.pickersText.All Dates')}
                                     </Text>
                                     <Ionicons name="chevron-down" size={20} color="#666" />
                                 </TouchableOpacity>
@@ -144,7 +146,7 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                                 styles.resetButtonText,
                                 !(selectedProfile || selectedDate) && styles.resetButtonTextDisabled
                             ]}>
-                                Reset Filters
+                                {t('reminders.buttons.Reset Filters')}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -157,7 +159,7 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                                     selectedValue={selectedProfile}
                                     onValueChange={(itemValue) => setSelectedProfile(itemValue)}
                                 >
-                                    <Picker.Item label="All Profiles" value="" />
+                                    <Picker.Item label={t('common.pickersText.All Profiles')} value="" />
                                     {uniqueProfiles.map((profile) => (
                                         <Picker.Item 
                                             key={profile} 
@@ -184,7 +186,7 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                                     selectedValue={selectedDate}
                                     onValueChange={(itemValue) => setSelectedDate(itemValue)}
                                 >
-                                    <Picker.Item label="All Dates" value="" />
+                                    <Picker.Item label={t('common.pickersText.All Dates')} value="" />
                                     {uniqueDates.map((date) => (
                                         <Picker.Item 
                                             key={date} 
@@ -198,7 +200,7 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                                 style={[commonStyles.validateButton, { marginTop: 10 }]}
                                 onPress={() => setShowDatePicker(false)}
                             >
-                                <Text style={commonStyles.validateButtonText}>Validate</Text>
+                                <Text style={commonStyles.validateButtonText}>{t('common.buttons.Validate')}</Text>
                             </TouchableOpacity>
                         </View>
                     )}

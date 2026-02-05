@@ -1,0 +1,173 @@
+{
+  "common": {
+    "buttons": {
+      "New reminder": "Nouveau Rappel",
+      "Validate": "Valider"
+    },
+    "fields": {
+      "Email": "Email",
+      "Password": "Mot de passe",
+      "Confirm Password": "Confirmation du mot de passe"
+    },
+    "units": {
+      "years old": "ans"
+    },
+    "messages": {
+        "profileCreated": "Profil créé",
+        "profileUpdated": "Profil mis à jour",
+        "profileDeleted": "Profil supprimé"
+    },
+    "pickersText": {
+        "All Profiles": "Tous",
+        "All Dates": "Toutes",
+        "Select a profile": "Sélectionner un Profil"
+    }
+  },
+  "welcome": {
+    "title": "Bienvenue sur Mnesya",
+    "subtitle": "Choisissez votre type de profil",
+    "userButton": "Utilisateur",
+    "caregiverButton": "Accompagnateur"
+  },
+  "login": {
+    "title": "Connexion Accompagnant",
+    "buttons": {
+      "submit": "Se connecter",
+      "lostPassword": "Mot de passe oublié",
+      "createAccount": "Créer un compte"
+    }
+  },
+  "register" : {
+    "title": "Créez votre compte",
+    "fields": {
+        "First Name": "Prénom",
+        "Last Name": "Nom"
+    },
+    "placeholders": {
+        "Enter your First Name": "Entrez votre prénom",
+        "Enter your Last Name": "Entrez votre nom",
+        "Enter your Email": "Entrez votre adresse Email",
+        "Enter your Password": "Entrez votre mot de passe",
+        "Confirm your password": "Confirmez votre mot de passe"
+    },
+    "buttons": {
+        "Sign Up": "S'enregistrer",
+        "Already have an account? Log in": "Vous avez déjà un compte? Connectez vous"
+    }
+  },
+  "dashboard": {
+    "title": "Tableau de Bord",
+    "profilesListTitle": "Gestion de Profils",
+    "buttons": {
+        "New profile": "Nouveau Profil",
+        "View": "Consulter"
+    },
+    "messages": {
+        "No profiles yet": "Aucun profil pour le moment"
+    }
+  },
+  "reminders": {
+    "Title": "Rappels",
+    "pickersTitle": {
+        "Profile": "Profil"
+    },
+    "buttons": {
+        "Reset Filters": "Effacer les filtres",
+        "New Reminder": "Nouveau Rappel"
+    },
+    "labels": {
+        "Date:": "Date :"
+    },
+    "status": {
+        "Pending": "En attente",
+        "Postponed": "Reporté",
+        "Done": "Effectué",
+        "Unable": "Annulé"
+    }
+  },
+  "CreateReminder": {
+    "Title": "Créer un Rappel",
+    "fields": {
+        "For Profile": "Pour le profil",
+        "Reminder Title": "Titre du Rappel",
+        "Time": "Heure"
+    },
+    "placeholders": {
+        "Ex. : Take Medication": "Ex : Prendre les médicaments",
+        "Enter the description about your reminder": "Entrer la description à propos de votre rappel"
+    },
+    "buttons": {
+        "Save Reminder": "Sauvegarder le Rappel"
+    },
+    "message": {
+        "Be careful not to enter sensitive confidential information.": "Il est important de ne pas saisir de données confidentielles sensibles."
+    }
+  },
+  "UserPairing": {
+    "title": "Appairage des utilisateurs",
+    "subtitle": "Entrez le code d'appairage",
+    "tipText": "Astuce : Votre accompagnant peut vous fournir le code de jumelage pour connecter vos comptes.",
+    "buttons": {
+        "Back to profile type": "Retour vers choix du type de profil"
+    }
+  },
+  "CreateProfile": {
+    "title": "Nouveau Profil",
+    "fields": {
+        "First Name": "Prénom",
+        "Last Name": "Nom",
+        "Birthday": "Date de naissance"
+    },
+    "placeholders": {
+        "Enter the profile First Name": "Entrez le prénom du profil",
+        "Enter the profile Last Name": "Entrez le nom du profil"
+    },
+    "buttons": {
+        "Create profile": "Créer le profil"
+    }
+  },
+  "UserHome": {
+    "greeting": "Bonjour",
+    "subtitle": "Vos rappels",
+    "messages": {
+        "noReminders": "Aucun rappel actif",
+        "notAvailableTitle": "Non disponible",
+        "notAvailableMessage": "Veuillez patienter, ceci est un rappel à venir",
+        "ok": "OK"
+    }
+  },
+  "UserProfile": {
+    "title": "Paramètres",
+    "buttons": {
+        "Logout": "Déconnexion"
+    }
+  },
+  "UserProfileDetail": {
+    "title": "Détails du Profil",
+    "buttons": {
+        "Generate pairing code": "Générer un code d'appairage"
+    },
+    "sections": {
+        "Active Reminders": "Rappels Actifs"
+    },
+    "messages": {
+        "Profile not found": "Profil introuvable",
+        "No active reminders": "Aucun rappel actif"
+    }
+  },
+  "ReminderNotification": {
+    "buttons": {
+        "Done": "Terminé",
+        "Remind later": "Me rappeler plus tard",
+        "Unable": "Impossible"
+    },
+    "messages": {
+        "Reminder not found": "Rappel introuvable"
+    }
+  },
+  "tabs": {
+    "Home": "Accueil",
+    "Profile": "Profil",
+    "Reminders": "Rappels"
+  }
+}

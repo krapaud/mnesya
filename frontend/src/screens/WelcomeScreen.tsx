@@ -10,10 +10,12 @@ import * as Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
+import { useTranslation } from 'react-i18next';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 
 const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
+    const { t } = useTranslation();
     return (
         <View style={commonStyles.container}>
             {/* Header with logo and app name */}
@@ -27,8 +29,8 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
             
             {/* Welcome title and instructions */}
             <View style={[commonStyles.titleSection, { marginTop: 30 }]}>
-                <Text style={commonStyles.title}>Welcome to Mnesya</Text>
-                <Text style={commonStyles.subtitle}>Choose your profile type</Text>
+                <Text style={commonStyles.title}>{t('welcome.title')}</Text>
+                <Text style={commonStyles.subtitle}>{t('welcome.subtitle')}</Text>
             </View>
             
             {/* 
@@ -49,7 +51,7 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
                         <View style={styles.iconCircle}>
                             <Ionicons name="person" size={50} color="#fff" />
                         </View>
-                        <Text style={styles.buttonText}>User</Text>
+                        <Text style={styles.buttonText}>{t('welcome.userButton')}</Text>
                     </View>
                 </TouchableOpacity>
                 
@@ -65,7 +67,7 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
                         <View style={styles.iconCircle}>
                             <Ionicons name="heart" size={50} color="#fff" />
                         </View>
-                        <Text style={styles.buttonText}>Caregiver</Text>
+                        <Text style={styles.buttonText}>{t('welcome.caregiverButton')}</Text>
                     </View>
                 </TouchableOpacity>
             </View>

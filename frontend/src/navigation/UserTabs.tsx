@@ -6,6 +6,7 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import type { UserTabsParamList } from '../types/index';
 
 // Screen imports
@@ -15,6 +16,8 @@ import UserProfileScreen from '../screens/UserProfileScreen';
 const Tab = createBottomTabNavigator<UserTabsParamList>();
 
 const UserTabs: React.FC = () => {
+    const { t } = useTranslation();
+    
     return (
         <Tab.Navigator
             id='user-tabs'
@@ -29,6 +32,7 @@ const UserTabs: React.FC = () => {
                 name="Home" 
                 component={UserHomeScreen}
                 options={{
+                    tabBarLabel: t('tabs.Home'),
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="home" size={size} color={color} />
                     ),
@@ -40,6 +44,7 @@ const UserTabs: React.FC = () => {
                 name="Profile" 
                 component={UserProfileScreen}
                 options={{
+                    tabBarLabel: t('tabs.Profile'),
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="person" size={size} color={color} />
                     ),

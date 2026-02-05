@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
@@ -13,6 +14,7 @@ import { commonStyles } from '../styles/commonStyles';
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
+    const { t } = useTranslation();
     // Form state management for email and password inputs
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
@@ -42,23 +44,23 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             
             {/* Page title */}
             <View style={commonStyles.titleSection}>
-                <Text style={commonStyles.title}>Caregiver Login</Text>
+                <Text style={commonStyles.title}>{t('login.title')}</Text>
             </View>
             
             {/* Login form */}
             <View style={commonStyles.content}>
-                <Text style={commonStyles.label}>Email</Text>
+                <Text style={commonStyles.label}>{t('common.fields.Email')}</Text>
                 <View style={commonStyles.formsButton}>
                     <TextInput
-                        placeholder='Enter your Email'
+                        placeholder={t('register.placeholders.Enter your Email')}
                         onChangeText={newText => setEmail(newText)}
                         defaultValue={email}
                     />
                 </View>
-                <Text style={commonStyles.label}>Password</Text>
+                <Text style={commonStyles.label}>{t('common.fields.Password')}</Text>
                 <View style={commonStyles.formsButton}>
                     <TextInput
-                        placeholder='Enter your Password'
+                        placeholder={t('register.placeholders.Enter your Password')}
                         secureTextEntry={true}
                         onChangeText={newText => setPassword(newText)}
                         defaultValue={password}
@@ -73,12 +75,12 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                         navigation.navigate('Dashboard');
                     }}
                 >
-                    <Text style={commonStyles.primaryButtonText}>Log in</Text>
+                    <Text style={commonStyles.primaryButtonText}>{t('login.buttons.submit')}</Text>
                 </TouchableOpacity>
                 
                 {/* Password recovery link */}
                 <TouchableOpacity onPress={() => {}}>
-                    <Text style={styles.lostPasswordText}>Lost password?</Text>
+                    <Text style={styles.lostPasswordText}>{t('login.buttons.lostPassword')}</Text>
                 </TouchableOpacity>
                 
                 {/* Navigation to registration screen */}
@@ -86,7 +88,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     navigation.navigate('Register');
                 }}>
-                    <Text style={styles.createAccountText}>Create an account</Text>
+                    <Text style={styles.createAccountText}>{t('login.buttons.createAccount')}</Text>
                 </TouchableOpacity>
             </View>
         </View>

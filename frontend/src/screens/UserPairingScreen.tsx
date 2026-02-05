@@ -13,6 +13,7 @@ import {
   useClearByFocusCell,
 } from 'react-native-confirmation-code-field';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
@@ -20,6 +21,7 @@ import { commonStyles } from '../styles/commonStyles';
 type Props = NativeStackScreenProps<RootStackParamList, 'UserPairing'>;
 
 const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
+    const { t } = useTranslation();
     // Pairing code state and configuration
     const [code, setCode] = useState<string>('');
     const CELL_COUNT = 6; // 6-character alphanumeric code (e.g., A7X9K2)
@@ -68,8 +70,8 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
                     
                     {/* Page title and instructions */}
                     <View style={[commonStyles.titleSection, { marginTop: 30 }]}>
-                        <Text style={commonStyles.title}>User Pairing</Text>
-                        <Text style={commonStyles.subtitle}>Enter the pairing code</Text>
+                        <Text style={commonStyles.title}>{t('UserPairing.title')}</Text>
+                        <Text style={commonStyles.subtitle}>{t('UserPairing.subtitle')}</Text>
                     </View>
                     
                     {/* 6-character code input field */}
@@ -99,7 +101,7 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
                     {/* Helpful tip section with icon */}
                     <View style={styles.tipSection}>
                         <Ionicons name='bulb' size={20} color='#4A90E2' />
-                        <Text style={styles.tipText}>Tip: Ask your caregiver for the pairing code to link your account.</Text>
+                        <Text style={styles.tipText}>{t('UserPairing.tipText')}</Text>
                     </View>
                     
                     {/* Navigation back to profile type selection */}
@@ -107,7 +109,7 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         navigation.navigate('Welcome');
                     }}>
-                        <Text style={styles.backProfileText}>Back to profile type</Text>
+                        <Text style={styles.backProfileText}>{t('UserPairing.buttons.Back to profile type')}</Text>
                     </TouchableOpacity>
             </View>
             );

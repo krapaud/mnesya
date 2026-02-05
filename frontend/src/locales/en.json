@@ -1,0 +1,173 @@
+{
+  "common": {
+    "buttons": {
+      "New reminder": "New Reminder",
+      "Validate": "Validate"
+    },
+    "fields": {
+      "Email": "Email",
+      "Password": "Password",
+      "Confirm Password": "Confirm Password"
+    },
+    "units": {
+      "years old": "years old"
+    },
+    "messages": {
+        "profileCreated": "Profile created",
+        "profileUpdated": "Profile updated",
+        "profileDeleted": "Profile deleted"
+    },
+    "pickersText": {
+        "All Profiles": "All",
+        "All Dates": "All",
+        "Select a profile": "Select a Profile"
+    }
+  },
+  "welcome": {
+    "title": "Welcome to Mnesya",
+    "subtitle": "Choose your profile type",
+    "userButton": "User",
+    "caregiverButton": "Caregiver"
+  },
+  "login": {
+    "title": "Caregiver Login",
+    "buttons": {
+      "submit": "Log in",
+      "lostPassword": "Lost password?",
+      "createAccount": "Create an account"
+    }
+  },
+  "register" : {
+    "title": "Create an account",
+    "fields": {
+        "First Name": "First Name",
+        "Last Name": "Last Name"
+    },
+    "placeholders": {
+        "Enter your First Name": "Enter your First Name",
+        "Enter your Last Name": "Enter your Last Name",
+        "Enter your Email": "Enter your Email",
+        "Enter your Password": "Enter your Password",
+        "Confirm your password": "Confirm your Password"
+    },
+    "buttons": {
+        "Sign Up": "Sign Up",
+        "Already have an account? Log in": "Already have an account? Log in"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "profilesListTitle": "Managed Profiles",
+    "buttons": {
+        "New profile": "New Profile",
+        "View": "View"
+    },
+    "messages": {
+        "No profiles yet": "No profiles yet"
+    }
+  },
+  "reminders": {
+    "Title": "Reminders",
+    "pickersTitle": {
+        "Profile": "Profile"
+    },
+    "buttons": {
+        "Reset Filters": "Reset Filters",
+        "New Reminder": "New Reminder"
+    },
+    "labels": {
+        "Date:": "Date:"
+    },
+    "status": {
+        "Pending": "Pending",
+        "Postponed": "Postponed",
+        "Done": "Done",
+        "Unable": "Unable"
+    }
+  },
+  "CreateReminder": {
+    "Title": "Create Reminder",
+    "fields": {
+        "For Profile": "For Profile",
+        "Reminder Title": "Reminder Title",
+        "Time": "Time"
+    },
+    "placeholders": {
+        "Ex. : Take Medication": "Ex.: Take Medication",
+        "Enter the description about your reminder": "Enter the description about your reminder"
+    },
+    "buttons": {
+        "Save Reminder": "Save Reminder"
+    },
+    "message": {
+        "Be careful not to enter sensitive confidential information.": "Be careful not to enter sensitive confidential information."
+    }
+  },
+  "UserPairing": {
+    "title": "User Pairing",
+    "subtitle": "Enter the pairing code",
+    "tipText": "Tip: Ask your caregiver for the pairing code to link your account.",
+    "buttons": {
+        "Back to profile type": "Back to profile type"
+    }
+  },
+  "CreateProfile": {
+    "title": "New Profile",
+    "fields": {
+        "First Name": "First Name",
+        "Last Name": "Last Name",
+        "Birthday": "Birthday"
+    },
+    "placeholders": {
+        "Enter the profile First Name": "Enter the profile First Name",
+        "Enter the profile Last Name": "Enter the profile Last Name"
+    },
+    "buttons": {
+        "Create profile": "Create profile"
+    }
+  },
+  "UserHome": {
+    "greeting": "Hello",
+    "subtitle": "Your reminders",
+    "messages": {
+        "noReminders": "No active reminders",
+        "notAvailableTitle": "Not Available",
+        "notAvailableMessage": "Please wait, this is an upcoming reminder",
+        "ok": "OK"
+    }
+  },
+  "UserProfile": {
+    "title": "Settings",
+    "buttons": {
+        "Logout": "Logout"
+    }
+  },
+  "UserProfileDetail": {
+    "title": "Profile Details",
+    "buttons": {
+        "Generate pairing code": "Generate pairing code"
+    },
+    "sections": {
+        "Active Reminders": "Active Reminders"
+    },
+    "messages": {
+        "Profile not found": "Profile not found",
+        "No active reminders": "No active reminders"
+    }
+  },
+  "ReminderNotification": {
+    "buttons": {
+        "Done": "Done",
+        "Remind later": "Remind later",
+        "Unable": "Unable"
+    },
+    "messages": {
+        "Reminder not found": "Reminder not found"
+    }
+  },
+  "tabs": {
+    "Home": "Home",
+    "Profile": "Profile",
+    "Reminders": "Reminders"
+  }
+}

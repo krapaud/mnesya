@@ -10,6 +10,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, Platform, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { useTranslation } from 'react-i18next';
 import { commonStyles } from '../styles/commonStyles';
 
 /**
@@ -59,6 +60,8 @@ const PlatformProfilePicker: React.FC<PlatformProfilePickerProps> = ({
     onClose,
     placeholder = 'Select a profile'
 }) => {
+    const { t } = useTranslation();
+    
     /**
      * Handles selection change with platform-specific behavior.
      * Automatically closes picker on Android after selection.
@@ -98,7 +101,7 @@ const PlatformProfilePicker: React.FC<PlatformProfilePickerProps> = ({
                     style={commonStyles.validateButton}
                     onPress={onClose}
                 >
-                    <Text style={commonStyles.validateButtonText}>Validate</Text>
+                    <Text style={commonStyles.validateButtonText}>{t('common.buttons.Validate')}</Text>
                 </TouchableOpacity>
             )}
         </View>

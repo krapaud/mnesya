@@ -6,6 +6,7 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import type { CaregiverTabsParamList } from '../types/index';
 
 // Screen imports
@@ -15,6 +16,8 @@ import RemindersListScreen from '../screens/RemindersListScreen';
 const Tab = createBottomTabNavigator<CaregiverTabsParamList>();
 
 const CaregiverTabs: React.FC = () => {
+    const { t } = useTranslation();
+    
     return (
         <Tab.Navigator
             id='caregiver-tabs'
@@ -29,6 +32,7 @@ const CaregiverTabs: React.FC = () => {
                 name="Home" 
                 component={DashboardScreen}
                 options={{
+                    tabBarLabel: t('tabs.Home'),
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="home" size={size} color={color} />
                     ),
@@ -40,6 +44,7 @@ const CaregiverTabs: React.FC = () => {
                 name="Reminders" 
                 component={RemindersListScreen}
                 options={{
+                    tabBarLabel: t('tabs.Reminders'),
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="notifications" size={size} color={color} />
                     ),
