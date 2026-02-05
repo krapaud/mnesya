@@ -1,10 +1,10 @@
 import uuid
-from datetime import datetime, timezone, timedelta
-from sqlalchemy import Column, String, DateTime, ARRAY, Boolean, Text, ForeignKey
+from datetime import datetime, timezone
+from sqlalchemy import Column, String, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from app import database
 
-class reminder_status(database):
+class ReminderStatusModel(database):
     __tablename__ = 'reminder_status'
     _id = Column('id', UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     _status = Column('status', String(15), nullable=False)
@@ -19,27 +19,27 @@ class reminder_status(database):
         return self._id
 
     @property
-    def status(self):
+    def status(self) -> str:
         return self._status
 
     @status.setter
-    def status(self, value):
+    def status(self, value: str) -> None:
         if (not value or len(value) > 200 or len(value.strip()) == 0):
             raise ValueError("status is required and must be <= 200 chars")
         self._status = value.strip()
 
     @property
-    def reminder_id(self):
+    def reminder_id(self) -> uuid.UUID:
         return self._reminder_id
 
     @reminder_id.setter
-    def reminder_id(self, value):
+    def reminder_id(self, value: uuid.UUID) -> None:
         self._reminder_id = value
 
     @property
-    def created_at(self):
+    def created_at(self) -> datetime:
         return self._created_at
 
     @property
-    def updated_at(self):
+    def updated_at(self) -> datetime:
         return self._updated_at

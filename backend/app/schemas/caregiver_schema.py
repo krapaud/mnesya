@@ -9,21 +9,21 @@ class CaregiverCreate(BaseModel):
     last_name: str = Field(..., min_length=1, max_length=100)
     email : str = Field(..., min_length=5, max_length=255)
     password : str = Field(..., min_length=8, max_length=255)
-    
+
     @field_validator('first_name', 'last_name')
-    def validate_name(cls, value):
+    def validate_name(cls, value: str) -> str:
         if (not value or len(value) > 100 or len(value.strip()) == 0):
             raise ValueError("Name is required and must be <= 100 chars")
         return value.strip()
 
     @field_validator('email')
-    def validate_email(cls, value):
+    def validate_email(cls, value: str) -> str:
         if not validators.email(value):
             raise ValueError("email is required and a valid email")
         return value.strip()
 
     @field_validator('password')
-    def validate_password(cls, value):
+    def validate_password(cls, value: str) -> str:
         SpecialSym = ['$', '@', '#', '%', '*', '!', '~', '&']
 
         if len(value) < 8:
@@ -58,21 +58,21 @@ class CaregiverUpdate(BaseModel):
     last_name: Optional[str] = Field(None, min_length=1, max_length=100)
     email: Optional[str] = None
     password: Optional[str] = Field(None, min_length=8, max_length=255)
-    
+
     @field_validator('first_name', 'last_name')
-    def validate_name(cls, value):
+    def validate_name(cls, value: Optional[str]) -> Optional[str]:
         if value is not None and (len(value) > 100 or len(value.strip()) == 0):
             raise ValueError("Name must be <= 100 chars and not empty")
         return value.strip() if value else None
 
     @field_validator('email')
-    def validate_email(cls, value):
+    def validate_email(cls, value: Optional[str]) -> Optional[str]:
         if value is not None and not validators.email(value):
             raise ValueError("Must be a valid email")
         return value.strip() if value else None
 
     @field_validator('password')
-    def validate_password(cls, value):
+    def validate_password(cls, value: Optional[str]) -> Optional[str]:
         if value is None:
             return None
             
@@ -114,7 +114,7 @@ class CaregiverResponse(BaseModel):
     user_ids: List[UUID]
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
