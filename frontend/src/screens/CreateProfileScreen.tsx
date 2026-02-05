@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
@@ -28,6 +29,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CreateProfile'>;
  * @returns Profile creation form screen
  */
 const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
+        const { t } = useTranslation();
         /** User's first name input state */
         const [firstname, setFirstname] = useState<string>('');
         /** User's last name input state */
@@ -74,29 +76,29 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                 </View>
                 {/* Page title */}
                 <View style={commonStyles.titleSection}>
-                    <Text style={commonStyles.title}>New Profile</Text>
+                    <Text style={commonStyles.title}>{t('CreateProfile.title')}</Text>
                 </View>
                 
                 {/* Scrollable registration form */}
                 <ScrollView>
                 <View style={commonStyles.content}>
-                    <Text style={commonStyles.label}>First Name</Text>
+                    <Text style={commonStyles.label}>{t('CreateProfile.fields.First Name')}</Text>
                     <View style={commonStyles.formsButton}>
                         <TextInput
-                            placeholder='Enter the profile First Name'
+                            placeholder={t('CreateProfile.placeholders.Enter the profile First Name')}
                             onChangeText={newText => setFirstname(newText)}
                             defaultValue={firstname}
                         />
                     </View>
-                    <Text style={commonStyles.label}>Last Name</Text>
+                    <Text style={commonStyles.label}>{t('CreateProfile.fields.Last Name')}</Text>
                     <View style={commonStyles.formsButton}>
                         <TextInput
-                            placeholder='Enter the profile Last Name'
+                            placeholder={t('CreateProfile.placeholders.Enter the profile Last Name')}
                             onChangeText={newText => setLastname(newText)}
                             defaultValue={lastname}
                         />
                     </View>
-                     <Text style={commonStyles.label}>Birthday</Text>
+                     <Text style={commonStyles.label}>{t('CreateProfile.fields.Birthday')}</Text>
                     <TouchableOpacity 
                         style={commonStyles.formsButton}
                         onPress={() => setShowDatePicker(true)}
@@ -120,7 +122,7 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             navigation.navigate('Dashboard');
                         }}>
-                        <Text style={commonStyles.primaryButtonText}>Create profile</Text>
+                        <Text style={commonStyles.primaryButtonText}>{t('CreateProfile.buttons.Create profile')}</Text>
                     </TouchableOpacity>
                     )}
                 </View>

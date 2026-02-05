@@ -20,6 +20,7 @@ import React, { useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
@@ -29,6 +30,7 @@ import { createBellSwingAnimation, getBellRotation } from '../utils/animations';
 type Props = NativeStackScreenProps<RootStackParamList, 'ReminderNotification'>;
 
 const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
+    const { t } = useTranslation();
     const { reminderId } = route.params;
     const reminder = fakeReminders.find(r => r.id === reminderId);
     // Animation reference using useRef to persist the animated value across renders
@@ -112,7 +114,7 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
                                 handleReminderAction('Done');
                             }}
                         >
-                            <Text style={styles.buttonDoneText}>Done</Text>
+                            <Text style={styles.buttonDoneText}>{t('ReminderNotification.buttons.Done')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity 
                             style={styles.bgButtonPostpone}
@@ -121,7 +123,7 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
                                 handleReminderAction('Postponed');
                             }}
                         >
-                            <Text style={styles.buttonPostponeText}>Remind later</Text>
+                            <Text style={styles.buttonPostponeText}>{t('ReminderNotification.buttons.Remind later')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity 
                             style={styles.bgButtonUnable}
@@ -130,11 +132,11 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
                                 handleReminderAction('Unable');
                             }}
                         >
-                            <Text style={styles.buttonUnableText}>Unable</Text>
+                            <Text style={styles.buttonUnableText}>{t('ReminderNotification.buttons.Unable')}</Text>
                         </TouchableOpacity>
                     </>
                 ) : (
-                    <Text style={commonStyles.emptyMessage}>Reminder not found</Text>
+                    <Text style={commonStyles.emptyMessage}>{t('ReminderNotification.messages.Reminder not found')}</Text>
                 )}
             </View>
         </View>

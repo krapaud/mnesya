@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { UserTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
@@ -10,6 +11,7 @@ import { fakeProfiles, fakeReminders } from '../data/fakeData';
 type Props = NativeStackScreenProps<UserTabsParamList, 'Profile'>;
 
 const UserProfileScreen: React.FC<Props> = ({ navigation }) => {
+    const { t } = useTranslation();
     // Temporary simulation using fake data to test the UI flow
     // Will be replaced with real authentication context in Sprint 2
     const currentUser = fakeProfiles.find(p => p.firstName === "Marie");
@@ -33,7 +35,7 @@ const UserProfileScreen: React.FC<Props> = ({ navigation }) => {
                      * Helps elderly users feel comfortable with the app
                      */}
                     <View style={[commonStyles.titleSection, { marginTop: 30 }]}>
-                        <Text style={commonStyles.subtitle}>Settings</Text>
+                        <Text style={commonStyles.subtitle}>{t('UserProfile.title')}</Text>
                     </View>
 
                     <View style={commonStyles.content}>
@@ -43,7 +45,7 @@ const UserProfileScreen: React.FC<Props> = ({ navigation }) => {
                                 {currentUser?.firstName} {currentUser?.lastName}
                             </Text>
                             <Text style={{ fontSize: 18, color: '#666' }}>
-                                {currentUser?.age} years old
+                                {currentUser?.age} {t('common.units.years old')}
                             </Text>
                         </View>
 
@@ -55,7 +57,7 @@ const UserProfileScreen: React.FC<Props> = ({ navigation }) => {
                                 navigation.getParent()?.navigate('Welcome');
                             }}
                         >
-                            <Text style={commonStyles.primaryButtonText}>Logout</Text>
+                            <Text style={commonStyles.primaryButtonText}>{t('UserProfile.buttons.Logout')}</Text>
                         </TouchableOpacity>
                     </View>
         </View>

@@ -12,6 +12,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
@@ -31,6 +32,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CreateReminder'>;
  * @returns Reminder creation form screen
  */
 const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
+    const { t } = useTranslation();
     /** Reminder title input state */
     const [reminderTitle, setReminderTitle] = useState<string>('');
     /** Reminder message/description input state */
@@ -122,26 +124,26 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
             </View>
             {/* Page title */}
             <View style={commonStyles.titleSection}>
-                <Text style={commonStyles.title}>Create Reminder</Text>
+                <Text style={commonStyles.title}>{t('CreateReminder.Title')}</Text>
             </View>
             {/* Content */}
             <ScrollView style={commonStyles.content}>
-                <Text style={commonStyles.label}>For Profile</Text>
+                <Text style={commonStyles.label}>{t('CreateReminder.fields.For Profile')}</Text>
                 <TouchableOpacity 
                     style={[commonStyles.formsButton, { marginBottom: 0 }]}
                     onPress={() => setShowProfilePicker(true)}
                 >
                     <View style={styles.profilePicker}>
-                        <Text>{selectedProfileData ? `${selectedProfileData.firstName} ${selectedProfileData.lastName}` : 'Select a profile'}</Text>
+                        <Text>{selectedProfileData ? `${selectedProfileData.firstName} ${selectedProfileData.lastName}` : t('common.pickersText.Select a profile')}</Text>
                         <Ionicons name="chevron-down" size={20} color="#999" />
                     </View>
                 </TouchableOpacity>
                 {!showProfilePicker && (
                     <>
-                    <Text style={commonStyles.label}>Reminder Title</Text>
+                    <Text style={commonStyles.label}>{t('CreateReminder.fields.Reminder Title')}</Text>
                 <View style={commonStyles.formsButton}>
                     <TextInput
-                        placeholder='Ex. : Take Medication'
+                        placeholder={t('CreateReminder.placeholders.Ex. : Take Medication')}
                         onChangeText={newText => setReminderTitle(newText)}
                         defaultValue={reminderTitle}
                     />
@@ -150,13 +152,13 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 <View style={[commonStyles.formsButton, styles.messageInput]}>
                     <TextInput multiline={true}
                         numberOfLines={4}
-                        placeholder='Enter the description about your reminder'
+                        placeholder={t('CreateReminder.placeholders.Enter the description about your reminder')}
                         onChangeText={newText => setReminderMessage(newText)}
                         defaultValue={reminderMessage}
                     />
                 </View>
                 <Text style={styles.text}>
-                    Be careful not to enter sensitive confidential information.</Text>
+                    {t('CreateReminder.message.Be careful not to enter sensitive confidential information.')}</Text>
                 <View style={commonStyles.pickerContainer}>
                 <View style={commonStyles.pickerColumn}>
                     <Text style={commonStyles.label}>Date</Text>
@@ -171,7 +173,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 </TouchableOpacity>
                 </View>
                 <View style={commonStyles.pickerColumn}>
-                    <Text style={commonStyles.label}>Time</Text>
+                    <Text style={commonStyles.label}>{t('CreateReminder.fields.Time')}</Text>
                 <TouchableOpacity 
                     style={commonStyles.formsButton}
                     onPress={openTimePicker}
@@ -209,7 +211,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                         onValueChange={setSelectedProfile}
                         visible={showProfilePicker}
                         onClose={() => setShowProfilePicker(false)}
-                        placeholder="Select a profile"
+                        placeholder={t('common.pickersText.Select a profile')}
                     />
                     {/* Save button - navigates back to Dashboard after reminder creation */}
                     {!showDatePicker && !showTimePicker && !showProfilePicker && (
@@ -219,7 +221,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             navigation.navigate('Dashboard');
                         }}>
-                        <Text style={commonStyles.primaryButtonText}>Save Reminder</Text>
+                        <Text style={commonStyles.primaryButtonText}>{t('CreateReminder.buttons.Save Reminder')}</Text>
                     </TouchableOpacity>
                     )}
                 </ScrollView>

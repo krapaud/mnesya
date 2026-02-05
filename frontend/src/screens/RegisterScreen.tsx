@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
@@ -14,6 +15,7 @@ import { commonStyles } from '../styles/commonStyles';
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
 
 const RegisterScreen: React.FC<Props> = ({ navigation }) => {
+    const { t } = useTranslation();
     // Form state management - 5 required fields for account registration
     const [firstname, setFirstname] = useState<string>('');
     const [lastname, setLastname] = useState<string>('');
@@ -46,49 +48,49 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             
             {/* Page title */}
             <View style={commonStyles.titleSection}>
-                <Text style={commonStyles.title}>Create an account</Text>
+                <Text style={commonStyles.title}>{t('register.title')}</Text>
             </View>
             
             {/* Scrollable registration form */}
             <ScrollView showsVerticalScrollIndicator={false}>
             <View style={commonStyles.content}>
-                <Text style={commonStyles.label}>First Name</Text>
+                <Text style={commonStyles.label}>{t('register.fields.First Name')}</Text>
                 <View style={commonStyles.formsButton}>
                     <TextInput
-                        placeholder='Enter your First Name'
+                        placeholder={t('register.placeholders.Enter your First Name')}
                         onChangeText={newText => setFirstname(newText)}
                         defaultValue={firstname}
                     />
                 </View>
-                <Text style={commonStyles.label}>Last Name</Text>
+                <Text style={commonStyles.label}>{t('register.fields.Last Name')}</Text>
                 <View style={commonStyles.formsButton}>
                     <TextInput
-                        placeholder='Enter your Last Name'
+                        placeholder={t('register.placeholders.Enter your Last Name')}
                         onChangeText={newText => setLastname(newText)}
                         defaultValue={lastname}
                     />
                 </View>
-                <Text style={commonStyles.label}>Email</Text>
+                <Text style={commonStyles.label}>{t('common.fields.Email')}</Text>
                 <View style={commonStyles.formsButton}>
                     <TextInput
-                        placeholder='Enter your Email'
+                        placeholder={t('register.placeholders.Enter your Email')}
                         onChangeText={newText => setEmail(newText)}
                         defaultValue={email}
                     />
                 </View>
-                <Text style={commonStyles.label}>Password</Text>
+                <Text style={commonStyles.label}>{t('common.fields.Password')}</Text>
                 <View style={commonStyles.formsButton}>
                     <TextInput
-                        placeholder='Enter your Password'
+                        placeholder={t('register.placeholders.Enter your Password')}
                         secureTextEntry={true}
                         onChangeText={newText => setPassword(newText)}
                         defaultValue={password}
                     />
                 </View>
-                <Text style={commonStyles.label}>Confirm Password</Text>
+                <Text style={commonStyles.label}>{t('common.fields.Confirm Password')}</Text>
                 <View style={commonStyles.formsButton}>
                     <TextInput
-                        placeholder='Confirm your Password'
+                        placeholder={t('register.placeholders.Confirm your password')}
                         secureTextEntry={true}
                         onChangeText={newText => setConfirmPassword(newText)}
                         defaultValue={confirmpassword}
@@ -103,7 +105,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                         navigation.navigate('Login');
                     }}
                 >
-                    <Text style={commonStyles.primaryButtonText}>Sign Up</Text>
+                    <Text style={commonStyles.primaryButtonText}>{t('register.buttons.Sign Up')}</Text>
                 </TouchableOpacity>
                 
                 {/* Navigation back to login screen */}
@@ -111,7 +113,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     navigation.navigate('Login');
                 }}>
-                    <Text style={styles.alreadyHaveAccountText}>Already have an account? Log in</Text>
+                    <Text style={styles.alreadyHaveAccountText}>{t('register.buttons.Already have an account? Log in')}</Text>
                 </TouchableOpacity>
             </View>
             </ScrollView>

@@ -7,6 +7,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
@@ -16,6 +17,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'UserProfileDetails'>;
 
 
 const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) => {
+    const { t } = useTranslation();
     const { profileId } = route.params;
     
     // Find the profile matching the profileId from route params
@@ -48,7 +50,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
         </View>
         {/* Page title */}
         <View style={commonStyles.titleSection}>
-            <Text style={commonStyles.title}>Profile Details</Text>
+            <Text style={commonStyles.title}>{t('UserProfileDetail.title')}</Text>
         </View>
         <View style={[commonStyles.content, { flex: 1, marginTop: 40, paddingBottom: 50 }]}>
             {/* Profile information card - displays name and age */}
@@ -58,11 +60,11 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
                         <Text style={styles.profileNameValue}>{profile.firstName + ' ' + profile.lastName}</Text>
                     </View>
                     <View style={styles.profileRow}>
-                        <Text style={styles.profileDetailValue}>{profile.age} years old</Text>
+                        <Text style={styles.profileDetailValue}>{profile.age} {t('common.units.years old')}</Text>
                     </View>
                 </View>
             ) : (
-                <Text style={styles.errorMessage}>Profile not found</Text>
+                <Text style={styles.errorMessage}>{t('UserProfileDetail.messages.Profile not found')}</Text>
             )}
             
             {/* Generate pairing code button - allows creating new pairing code for user */}
@@ -72,14 +74,14 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     navigation.navigate('CreateProfile');
                     }}>
-                <Text style={[commonStyles.primaryButtonText, { fontSize: 20 }]}>Generate pairing code</Text>
+                <Text style={[commonStyles.primaryButtonText, { fontSize: 20 }]}>{t('UserProfileDetail.buttons.Generate pairing code')}</Text>
             </TouchableOpacity>
             
             {/* Active reminders section - displays filtered reminders for this profile */}
-            <Text style={commonStyles.textPrimary}>Active Reminders</Text>
+            <Text style={commonStyles.textPrimary}>{t('UserProfileDetail.sections.Active Reminders')}</Text>
             <ScrollView>
                 {profileReminders.length === 0 ? (
-                    <Text style={commonStyles.emptyMessage}>No active reminders</Text>
+                    <Text style={commonStyles.emptyMessage}>{t('UserProfileDetail.messages.No active reminders')}</Text>
                 ) : (
                     profileReminders.map((reminder) => (
                         <View key={reminder.id} style={commonStyles.reminderCard}>
