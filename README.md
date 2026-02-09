@@ -30,42 +30,53 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 - Maximum 3 buttons per screen
 - Linear journey without complex navigation
 
-### MVP Scope
+### MVP Scope - Current Implementation (Feb 9, 2026)
 
-- **15 screens total**:
-  - 2 Onboarding screens (Welcome Screen shared for both profile types)
-  - 7 Caregiver screens (Login, Register, Dashboard, Create Profile, Generate Code, Create Reminder, Reminders List)
-  - 6 User screens (Enter Code, Set PIN, Enter PIN Daily, Home, Notification, Profile)
+- **12 screens implemented** (UI Complete - Frontend 120%):
+  - 1 Shared screen: WelcomeScreen
+  - 7 Caregiver screens: LoginScreen, RegisterScreen, DashboardScreen, CreateProfileScreen, CreateReminderScreen, RemindersListScreen, UserProfileDetailScreen
+  - 4 User screens: UserPairingScreen, UserHomeScreen, ReminderNotificationScreen, UserProfileScreen
+- **Internationalization**: Full bilingual support (FR/EN) with i18next
+- **Enhanced Notifications**: 4 automatic repetitions (0, +2, +5, +10 min) + caregiver alerts
+- **Current status**: Frontend complete (120%), Backend ~50% (models, persistence, services implemented; API routes and Expo Push pending)
 - **Estimated duration**: 5-6 weeks with 2 developers
-- **Detailed User Stories**: See [Technical Documentation _ Mnesya-2.md](Technical%20Documentation%20_%20Mnesya-2.md) (MoSCoW method, US-001 to US-027)
+- **Detailed User Stories**: See [Technical Documentation _ Mnesya.pdf](docs/Technical%20Documentation%20_%20Mnesya.pdf) (MoSCoW method, US-001 to US-027)
 
 ## Features
 
 ### Profile Management (Caregiver)
 
-- ✅ Caregiver account creation (email/password)
-- ✅ Secure login
-- ✅ User profile creation (first name, last name, date of birth, optional photo)
-- ✅ 6-character pairing code generation (valid 24h)
-- ✅ View all managed profiles
+- ✅ Caregiver account creation (email/password) - UI Complete, Backend Models Ready
+- ✅ Secure login - UI Complete, Backend Models Ready
+- ✅ User profile creation (first name, last name, date of birth, optional photo) - UI Complete, Backend Models Ready
+- ⚠️ 6-character pairing code generation (valid 24h) - UI Complete, Backend Implementation Pending
+- ✅ View all managed profiles - UI Complete
+- ✅ Bilingual interface (French/English) with i18next
 
 ### Reminder Management (Caregiver)
 
-- ✅ Simple reminder creation (title, message, date, time)
-- ✅ Chronological reminder view
-- ✅ Status tracking (Done, Pending, Postponed, Unable)
-- ✅ Tab navigation (Home | Reminders | Profile)
+- ✅ Simple reminder creation (title, message, date, time) - UI Complete, Backend Models Ready
+- ✅ Chronological reminder view with filters (date, profile, status) - UI Complete
+- ✅ Status tracking (Done, Pending, Postponed, Unable) - UI Complete
+- ✅ Tab navigation (Home | Reminders | Profile) - Implemented
+- ✅ Reminder deletion with automatic notification cleanup - Implemented
 
 ### User Interface (Elderly Person)
 
-- ✅ Pairing via 6-character code
-- ✅ 4-digit PIN code creation and usage
-- ✅ Simple home screen with next reminder
-- ✅ Full-screen notification at reminder time
+- ✅ Pairing via 6-character code - UI Complete
+- ⚠️ 4-digit PIN code creation and usage - Planned
+- ✅ Simple home screen with next reminder - UI Complete
+- ✅ Full-screen notification at reminder time - Implemented with Expo Notifications
+- ✅ Enhanced notification system:
+  - **4 automatic repetitions** (immediate, +2 min, +5 min, +10 min)
+  - **Automatic caregiver alert** if no response after 10 minutes
+  - **Smart notification cancellation** when user responds
+  - **Badge count management** on app icon
 - ✅ 3 available actions:
-  - **✓ Done** (Green)
-  - **⏰ Remind me later** (Orange, reminder in 5 min)
-  - **✗ Unable** (Red, urgent alert to caregiver)
+  - **✓ Done** (Green) - Cancels all remaining notifications
+  - **⏰ Remind me later** (Orange) - Triggers next repetition
+  - **✗ Unable** (Red) - Sends immediate alert to caregiver
+- ✅ Bilingual notifications (French/English)
 
 ## Architecture
 
@@ -75,76 +86,130 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 ┌─────────────────────┐         ┌─────────────────────┐
 │  Frontend Mobile    │         │  Frontend Mobile    │
 │   (Caregiver)       │         │  (User)             │
-│  React Native       │         │  React Native       │
+│  React Native +     │         │  React Native +     │
+│  Expo Notifications │         │  Expo Notifications │
 └──────────┬──────────┘         └──────────┬──────────┘
            │                               │
            └───────────┬───────────────────┘
                        │
                        ▼
               ┌────────────────┐
-              │   Backend API  │
-              │  Python/FastAPI│
+              │   Backend API  │ ✅ Models & Services
+              │  Python/FastAPI│ ⚠️ Routes Pending
               └────────┬───────┘
                        │
           ┌────────────┼────────────┐
           ▼            ▼            ▼
     ┌──────────┐  ┌──────────┐  ┌──────────┐
-    │PostgreSQL│  │APScheduler│ │   FCM    │
-    │ Database │  │  Worker   │  │(Notifs)  │
+    │PostgreSQL│  │APScheduler│ │Expo Push │
+    │ Database │  │  Worker   │  │  Service │
+    │ ✅ Ready │  │ ✅ Config │  │⚠️ Pending│
     └──────────┘  └──────────┘  └──────────┘
 ```
 
-### Main Data Flows
+### Main Data Flows (Current Implementation)
 
-1. **Caregiver Registration/Login**: Frontend → FastAPI (Validation, Hashing) → PostgreSQL
-2. **Profile/Reminder Creation**: Frontend → FastAPI (Business logic, code generation) → PostgreSQL
-3. **User Pairing**: Frontend (Code entry) → FastAPI (Validation/expiration) → PostgreSQL
-4. **Reminder Trigger**: APScheduler → FastAPI → FCM → User Frontend
-5. **Status Update**: User Frontend → FastAPI → PostgreSQL + FCM (if "Unable")
+1. **Caregiver Registration/Login** (⚠️ Pending): Frontend UI → FastAPI (Validation, Hashing) → PostgreSQL
+   - Frontend: ✅ UI Complete
+   - Backend: ✅ Models Ready, ⚠️ Routes Pending
+
+2. **Profile/Reminder Creation** (⚠️ Pending): Frontend → FastAPI (Business logic) → PostgreSQL
+   - Frontend: ✅ UI Complete with local data
+   - Backend: ✅ Models & Services Ready, ⚠️ API Routes Pending
+
+3. **User Pairing** (⚠️ Pending): Frontend (Code entry) → FastAPI (Validation/expiration) → PostgreSQL
+   - Frontend: ✅ UI Complete
+   - Backend: ⚠️ Pairing logic not yet implemented
+
+4. **Reminder Trigger** (✅ LOCAL Only): Caregiver creates → Local Expo Notifications (4 repetitions: 0, +2, +5, +10 min)
+   - Current: ✅ Fully implemented with local scheduling
+   - Future: ⚠️ Backend → Expo Push Service → User device (cross-device notifications)
+
+5. **Status Update** (✅ UI / ⚠️ Backend): User responds → Local state update + notification cancellation
+   - Current: ✅ Local response handling with smart cancellation
+   - Future: ⚠️ User Frontend → FastAPI → PostgreSQL + Expo Push (caregiver alert)
 
 ## Technologies
 
-### Frontend
+### Frontend - Fully Implemented
 
-- **Framework** : React Native (iOS/Android)
-- **Gestion d'état** : React Hooks
-- **Navigation** : React Navigation
-- **Notifications** : Firebase Cloud Messaging (FCM)
+- **Framework** : React Native 0.81.5 with Expo 54 (iOS/Android)
+- **Language**: TypeScript 5.9
+- **State Management** : React Hooks + AsyncStorage
+- **Navigation** : React Navigation 7 (Stack + Bottom Tabs)
+- **Internationalization**: i18next 25.8 + react-i18next 16.5 (FR/EN)
+- **Notifications** : Expo Notifications 0.32 (local scheduling with 4 automatic repetitions + caregiver alerts)
+- **UI Components**:
+  - Custom date/time pickers (cross-platform)
+  - Haptic feedback (expo-haptics)
+  - 6-character code input (react-native-confirmation-code-field)
+  - PIN view (react-native-pin-view)
 
-### Backend
+### Backend - Implementation in Progress
 
-- **Framework** : Python 3.x avec FastAPI
-- **Base de données** : PostgreSQL
-- **ORM** : SQLAlchemy avec Alembic pour les migrations
-- **Authentification** : JWT (JSON Web Tokens)
-- **Tâches asynchrones** : APScheduler
-- **Notifications push** : Firebase Cloud Messaging (FCM)
+- **Framework** : Python 3.9+ with FastAPI 0.104.1
+- **Database** : PostgreSQL 13+ with psycopg2-binary
+- **ORM** : SQLAlchemy 2.0.23 with Alembic 1.12.1 (2 migrations created)
+- **Authentication** : JWT with python-jose (planned)
+- **Async Tasks** : APScheduler 3.10.4 (configured)
+- **Push Notifications** : Firebase Admin SDK 6.3.0 (to be replaced with Expo Push)
+- **Current Implementation Status**:
+  - ✅ 4 SQLAlchemy Models implemented (Caregiver, User, Reminder, ReminderStatus)
+  - ✅ 5 Persistence Repositories (BaseRepository + 4 domain-specific)
+  - ✅ 4 Service Facades (caregiver, user, reminder, reminder_status)
+  - ✅ 4 Pydantic Schemas (caregiver_schema, user_schema, reminder_schema, reminder_status_schema)
+  - ✅ FastAPI app initialization (main.py with health endpoints)
+  - ✅ Database configuration and connection
+  - ✅ Alembic migrations configured
+  - ✅ Docker Compose full setup (PostgreSQL + Backend + Worker)
+  - ✅ requirements.txt with all dependencies
+  - ✅ pytest configuration
+  - ⚠️ API Routes/Endpoints - Pending implementation
+  - ⚠️ Expo Push Notification Service integration - Pending
+  - ⚠️ JWT Authentication implementation - Pending
+  - ⚠️ Pairing code logic - Pending
 
 ### Infrastructure
 
-- **Containerisation** : Docker & Docker Compose
-- **CI/CD** : GitHub Actions / GitLab CI
-- **Environnements** : Dev, Staging, Production
+- **Containerisation** : Docker & Docker Compose ✅ (Fully configured with PostgreSQL, Backend, Worker services)
+- **CI/CD** : GitHub Actions / GitLab CI (not yet configured)
+- **Environments** : Dev, Staging, Production (to be configured)
 
 ## Installation
+
+### Current Status (Feb 9, 2026)
+
+**Frontend**: ✅ Fully operational and ready for development/testing  
+**Backend**: ✅ Docker configured, Models & Services ready, API routes pending  
+**Docker**: ✅ Fully configured with PostgreSQL, Backend, and Worker services
 
 ### Prerequisites
 
 - Node.js 16+ and npm/yarn
-- Python 3.9+
-- PostgreSQL 13+
-- Docker and Docker Compose (optional but recommended)
+- Python 3.9+ (if manual installation)
+- PostgreSQL 13+ (if manual installation)
+- Docker and Docker Compose (recommended)
 
-### Installation with Docker
+### Installation with Docker ✅ Recommended
 
 ```bash
 # Clone the repository
 git clone <repository-url>
 cd mnesya
 
-# Start the environment with Docker Compose
+# Start the full environment (PostgreSQL + Backend + Worker)
+cd docker
 docker-compose up -d
+
+# Check services status
+docker-compose ps
+
+# View logs
+docker-compose logs -f backend
 ```
+
+The backend will be available at `http://localhost:8000`  
+Health endpoint: `http://localhost:8000/health`
 
 ### Manual Installation
 
@@ -173,7 +238,7 @@ alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
-#### Frontend Setup
+#### Frontend Setup - Operational ✅
 
 ```bash
 cd frontend
@@ -181,12 +246,14 @@ cd frontend
 # Install dependencies
 npm install
 
-# iOS (Mac only)
-cd ios && pod install && cd ..
-npx react-native run-ios
+# Start Expo development server
+npm start
 
-# Android
-npx react-native run-android
+# Run on iOS (Mac only)
+npm run ios
+
+# Run on Android
+npm run android
 ```
 
 ## Project Structure
@@ -195,56 +262,105 @@ npx react-native run-android
 mnesya/
 ├── backend/                    # Backend API Python/FastAPI
 │   ├── app/
-│   │   ├── main.py            # Application entry point
-│   │   ├── core/              # Configuration and security
-│   │   │   ├── config.py
-│   │   │   ├── database.py
-│   │   │   └── security.py
-│   │   ├── models/            # SQLAlchemy ORM models
-│   │   │   ├── user.py
-│   │   │   ├── caregiver.py
-│   │   │   ├── profile.py
-│   │   │   ├── pairing_code.py
-│   │   │   ├── reminder.py
-│   │   │   └── reminder_completion.py
-│   │   ├── routes/            # API endpoints
-│   │   │   ├── auth.py
-│   │   │   ├── caregiver.py
-│   │   │   ├── pairing.py
-│   │   │   ├── profile.py
-│   │   │   ├── reminder.py
-│   │   │   └── user.py
-│   │   ├── schemas/           # Pydantic schemas
-│   │   │   ├── auth.py
-│   │   │   ├── caregiver.py
-│   │   │   ├── profile.py
-│   │   │   ├── reminder.py
-│   │   │   └── user.py
-│   │   ├── services/          # Business logic (domain-based)
-│   │   │   ├── auth_service.py        # Authentication & pairing
-│   │   │   ├── care_service.py        # Profiles & reminders
-│   │   │   └── notification_service.py # Push notifications
-│   │   └── utils/             # Utilities
-│   │       ├── dependencies.py
-│   │       └── exceptions.py
-│   ├── migrations/            # Alembic migrations
-│   ├── worker/                # APScheduler tasks
-│   └── alembic.ini
-├── frontend/                  # React Native Mobile Application
+│   │   ├── main.py            # ✅ FastAPI application entry point
+│   │   ├── config.py          # ✅ Database and app configuration
+│   │   ├── __init__.py        # ✅ App factory and database initialization
+│   │   ├── models/            # ✅ SQLAlchemy ORM models
+│   │   │   ├── caregiver.py   # ✅ Caregiver entity (auth + user management)
+│   │   │   ├── user.py        # ✅ User entity (elderly individuals)
+│   │   │   ├── reminder.py    # ✅ Reminder entity (scheduled tasks)
+│   │   │   └── reminder_status.py # ✅ Status tracking
+│   │   ├── persistence/       # ✅ Repository pattern (data access layer)
+│   │   │   ├── base_repository.py # Generic CRUD operations
+│   │   │   ├── caregiver_repository.py
+│   │   │   ├── user_repository.py
+│   │   │   ├── reminder_repository.py
+│   │   │   └── reminder_status_repository.py
+│   │   ├── services/          # ✅ Business logic (facade pattern)
+│   │   │   ├── caregiver_facade.py    # Caregiver operations
+│   │   │   ├── user_facade.py         # User operations
+│   │   │   ├── reminder_facade.py     # Reminder CRUD
+│   │   │   └── reminder_status_facade.py # Status tracking
+│   │   ├── schemas/           # ✅ Pydantic validation schemas
+│   │   │   ├── caregiver_schema.py
+│   │   │   ├── user_schema.py
+│   │   │   ├── reminder_schema.py
+│   │   │   └── reminder_status_schema.py
+│   │   └── test/              # ✅ Test suite
+│   ├── alembic/               # ✅ Database migrations
+│   │   ├── versions/          # 2 migrations created
+│   │   ├── env.py
+│   │   └── script.py.mako
+│   ├── alembic.ini            # ✅ Alembic configuration
+│   ├── requirements.txt       # ✅ Python dependencies
+│   └── pytest.ini             # ✅ Test configuration
+├── frontend/                  # ✅ React Native + Expo + TypeScript Mobile App
 │   ├── src/
-│   │   ├── App.js            # Root component
-│   │   ├── components/       # Reusable components
-│   │   │   ├── Button.js
-│   │   │   └── Card.js
-│   │   ├── navigation/       # Navigation configuration
-│   │   │   └── AppNavigator.js
-│   │   ├── screens/          # Application screens
-│   │   │   ├── LoginScreen.js
-│   │   │   ├── HomeScreen.js
-│   │   │   ├── ProfileScreen.js
-│   │   │   └── ReminderScreen.js
-│   │   ├── services/         # API services
-│   │   │   ├── api.js
+│   │   ├── App.tsx            # Root component with i18n
+│   │   ├── i18n.ts            # i18next configuration
+│   │   ├── components/        # Reusable UI components
+│   │   │   ├── PlatformDatePicker.tsx
+│   │   │   ├── PlatformTimePicker.tsx
+│   │   │   └── PlatformProfilePicker.tsx
+│   │   ├── locales/           # Internationalization
+│   │   │   ├── en.json        # English translations
+│   │   │   └── fr.json        # French translations
+│   │   ├── navigation/        # Navigation configuration
+│   │   │   ├── AppNavigator.tsx    # Main stack navigator
+│   │   │   ├── CaregiverTabs.tsx   # Caregiver bottom tabs
+│   │   │   └── UserTabs.tsx        # User bottom tabs
+│   │   ├── screens/           # Application screens (12 total)
+│   │   │   ├── WelcomeScreen.tsx
+│   │   │   ├── LoginScreen.tsx
+│   │   │   ├── RegisterScreen.tsx
+│   │   │   ├── DashboardScreen.tsx
+│   │   │   ├── CreateProfileScreen.tsx
+│   │   │   ├── CreateReminderScreen.tsx
+│   │   │   ├── RemindersListScreen.tsx
+│   │   │   ├── UserProfileDetailScreen.tsx
+│   │   │   ├── UserPairingScreen.tsx
+│   │   │   ├── UserHomeScreen.tsx
+│   │   │   ├── ReminderNotificationScreen.tsx
+│   │   │   └── UserProfileScreen.tsx
+│   │   ├── styles/            # Common styles
+│   │   │   └── commonStyles.ts
+│   │   ├── types/             # TypeScript definitions
+│   │   │   ├── index.ts
+│   │   │   ├── interfaces.ts
+│   │   │   └── declaration.d.ts
+│   │   ├── utils/             # Utilities
+│   │   │   ├── animations.ts  # Bell swing animation
+│   │   │   └── notifications.ts # Expo Notifications setup
+│   │   └── data/              # Mock data for testing
+│   │       └── fakeData.ts
+│   ├── assets/                # Images and icons
+│   │   ├── icon.png
+│   │   ├── splash.png
+│   │   ├── adaptive-icon.png
+│   │   ├── favicon.png
+│   │   └── mnesya-logo.png
+│   ├── archives/              # Legacy components
+│   ├── app.json
+│   ├── babel.config.js
+│   ├── tsconfig.json
+│   ├── index.tsx
+│   └── package.json
+├── docker/                    # ✅ Docker configuration
+│   ├── Dockerfile             # Backend container configuration
+│   ├── docker-compose.yml     # PostgreSQL + Backend + Worker services
+│   └── README.md              # Docker usage instructions
+├── docs/                      # Documentation
+│   ├── Technical Documentation _ Mnesya.pdf
+│   ├── Project Planning.pdf
+│   ├── Team Formation and Idea Development Outline.pdf
+│   ├── bug-report.md          # Bug tracking and solutions
+│   ├── trello-status.md       # Trello vs actual implementation
+│   ├── trello-status.txt      # Trello cards for import
+│   ├── test-warnings-resolution.md # Backend test documentation
+│   └── img/
+├── README.md
+└── .gitignore
+```
 │   │   │   ├── authService.js
 │   │   │   └── reminderService.js
 │   │   ├── utils/            # Constants and helpers
