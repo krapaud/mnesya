@@ -101,6 +101,17 @@
     },
     "message": {
         "Be careful not to enter sensitive confidential information.": "Be careful not to enter sensitive confidential information."
+    },
+    "errors": {
+        "title": "Error",
+        "Please select a profile": "Please select a profile",
+        "Please enter a title": "Please enter a title",
+        "Please enter a message": "Please enter a message",
+        "Error scheduling notification": "Error scheduling notification"
+    },
+    "success": {
+        "title": "Success",
+        "Reminder created successfully": "Reminder created successfully!"
     }
   },
   "UserPairing": {
@@ -164,8 +175,17 @@
     "messages": {
         "Reminder not found": "Reminder not found"
     }
-  },
-  "tabs": {
+  },  "notifications": {
+    "repetitions": {
+        "reminder": "⏰ REMINDER: {{title}}",
+        "urgent": "🔔 URGENT: {{title}}"
+    },
+    "caregiver": {
+        "alert": "⚠️ {{profileName}} did not respond to the reminder",
+        "message": "No action taken for: {{title}}",
+        "defaultUser": "User"
+    }
+  },  "tabs": {
     "Home": "Home",
     "Profile": "Profile",
     "Reminders": "Reminders"

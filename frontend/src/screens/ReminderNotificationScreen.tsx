@@ -31,8 +31,16 @@ type Props = NativeStackScreenProps<RootStackParamList, 'ReminderNotification'>;
 
 const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
     const { t } = useTranslation();
-    const { reminderId } = route.params;
-    const reminder = fakeReminders.find(r => r.id === reminderId);
+    const { reminderId, message, profileId } = route.params;
+    
+    // Try to find in fakeReminders first, fallback to params data
+    const reminder = fakeReminders.find(r => r.id === reminderId) || {
+        id: reminderId,
+        title: t('ReminderNotification.title'),
+        message: message || t('ReminderNotification.defaultMessage'),
+        time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+    };
+    
     // Animation reference using useRef to persist the animated value across renders
     const bellAnimation = useRef(new Animated.Value(0)).current;
 
@@ -70,74 +78,68 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
 
             {/* Reminder content section */}
             <View style={[commonStyles.content, { alignItems: 'center', marginTop: 40 }]}>
-                {reminder ? (
-                    <>
-                        {/* 
-                         * Animated bell icon with rotation transform from getBellRotation
-                         * Creates a swinging effect to catch the user's attention
-                         */}
-                        <Animated.View style={[
-                            styles.bellContainer,
-                            getBellRotation(bellAnimation),
-                        ]}>
-                            <Ionicons name="notifications-outline" size={80} color="#FFFFFF" />
-                        </Animated.View>
-                        <Text style={styles.reminderTimeText}>{reminder.time}</Text>
-                        <Text style={styles.reminderTitleText}>{reminder.title}</Text>
-                        {/* 
-                         * Message text with overflow protection
-                         * numberOfLines={4} and ellipsizeMode prevent text overflow issues
-                         * Ensures the message stays within bounds even with long text
-                         */}
-                        <Text 
-                            style={styles.reminderMessage}
-                            numberOfLines={4}
-                            ellipsizeMode="tail"
-                        >
-                            {reminder.message}
-                        </Text>
+                {/* 
+                 * Animated bell icon with rotation transform from getBellRotation
+                 * Creates a swinging effect to catch the user's attention
+                 */}
+                <Animated.View style={[
+                    styles.bellContainer,
+                    getBellRotation(bellAnimation),
+                ]}>
+                    <Ionicons name="notifications-outline" size={80} color="#FFFFFF" />
+                </Animated.View>
+                <Text style={styles.reminderTimeText}>{reminder.time}</Text>
+                <Text style={styles.reminderTitleText}>{reminder.title}</Text>
+                {/* 
+                 * Message text with overflow protection
+                 * numberOfLines={4} and ellipsizeMode prevent text overflow issues
+                 * Ensures the message stays within bounds even with long text
+                 */}
+                <Text 
+                    style={styles.reminderMessage}
+                    numberOfLines={4}
+                    ellipsizeMode="tail"
+                >
+                    {reminder.message}
+                </Text>
 
-                        {/* 
-                         * Three action buttons for elderly-friendly interaction:
-                         * - Done (green): Task completed successfully
-                         * - Remind later (orange): Need more time, will try again
-                         * - Unable (red): Cannot complete the task
-                         * 
-                         * Color coding makes the meaning clear without reading
-                         * All buttons include haptic feedback for better user experience
-                         * Sprint 3 will add API calls to update reminder status
-                         */}
-                        <TouchableOpacity 
-                            style={[styles.bgButtonDone, { marginTop: 15}]}
-                            onPress={() => {
-                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                handleReminderAction('Done');
-                            }}
-                        >
-                            <Text style={styles.buttonDoneText}>{t('ReminderNotification.buttons.Done')}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity 
-                            style={styles.bgButtonPostpone}
-                            onPress={() => {
-                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                handleReminderAction('Postponed');
-                            }}
-                        >
-                            <Text style={styles.buttonPostponeText}>{t('ReminderNotification.buttons.Remind later')}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity 
-                            style={styles.bgButtonUnable}
-                            onPress={() => {
-                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                handleReminderAction('Unable');
-                            }}
-                        >
-                            <Text style={styles.buttonUnableText}>{t('ReminderNotification.buttons.Unable')}</Text>
-                        </TouchableOpacity>
-                    </>
-                ) : (
-                    <Text style={commonStyles.emptyMessage}>{t('ReminderNotification.messages.Reminder not found')}</Text>
-                )}
+                {/* 
+                 * Three action buttons for elderly-friendly interaction:
+                 * - Done (green): Task completed successfully
+                 * - Remind later (orange): Need more time, will try again
+                 * - Unable (red): Cannot complete the task
+                 * 
+                 * Color coding makes the meaning clear without reading
+                 * All buttons include haptic feedback for better user experience
+                 * Sprint 3 will add API calls to update reminder status
+                 */}
+                <TouchableOpacity 
+                    style={[styles.bgButtonDone, { marginTop: 15}]}
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        handleReminderAction('Done');
+                    }}
+                >
+                    <Text style={styles.buttonDoneText}>{t('ReminderNotification.buttons.Done')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={styles.bgButtonPostpone}
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        handleReminderAction('Postponed');
+                    }}
+                >
+                    <Text style={styles.buttonPostponeText}>{t('ReminderNotification.buttons.Remind later')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={styles.bgButtonUnable}
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        handleReminderAction('Unable');
+                    }}
+                >
+                    <Text style={styles.buttonUnableText}>{t('ReminderNotification.buttons.Unable')}</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );

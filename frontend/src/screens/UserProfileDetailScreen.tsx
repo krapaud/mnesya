@@ -88,7 +88,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
                             <View style={commonStyles.reminderHeader}>
                                 <Text style={commonStyles.reminderTitle}>{reminder.title}</Text>
                                 <Text style={[commonStyles.statusText, commonStyles[`status${reminder.status}`]]}>
-                                    {reminder.status}
+                                    {t(`reminders.status.${reminder.status}`)}
                                 </Text>
                             </View>
                             

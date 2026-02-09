@@ -24,6 +24,8 @@ import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { ReminderItem } from '../types/interfaces';
 import { fakeReminders } from '../data/fakeData';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { cancelNotifications } from '../utils/notifications';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Dashboard'>;
 
@@ -52,6 +54,30 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
 
     // Get unique dates
     const uniqueDates = Array.from(new Set(reminders.map(r => r.date)));
+
+    /**
+     * Deletes a reminder and cancels all its scheduled notifications
+     * @param reminderId - ID of the reminder to delete
+     */
+    const handleDeleteReminder = async (reminderId: number) => {
+        try {
+
+            const storageKey = `notification_ids_${reminderId}`;
+            const storedIds = await AsyncStorage.getItem(storageKey);
+
+            if (storedIds) {
+                const notificationIds = JSON.parse(storedIds) as string[];
+                await cancelNotifications(notificationIds);
+                await AsyncStorage.removeItem(storageKey);
+                console.log(`Cancelled ${notificationIds.length} notifications for reminder ${reminderId}`);
+            }
+
+            setReminders(reminders.filter(reminder => reminder.id !== reminderId));
+
+        } catch (error) {
+            console.error('Error deleting reminder:', error);
+        }
+    };
 
     return (
          <View style={commonStyles.container}>
@@ -215,24 +241,30 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                                 <View key={reminder.id} style={commonStyles.reminderCard}>
                                     <View style={commonStyles.reminderHeader}>
                                         <Text style={commonStyles.reminderTitle}>{reminder.title}</Text>
-                                        <Text style={[commonStyles.statusText, commonStyles[`status${reminder.status}`]]}>
-                                            {reminder.status}
-                                        </Text>
+                                        <TouchableOpacity onPress={() => handleDeleteReminder(reminder.id)}>
+                                            <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+                                        </TouchableOpacity>
                                     </View>
                                     
-                                    <View style={commonStyles.reminderDetails}>
-                                        <View style={commonStyles.detailRow}>
-                                            <Ionicons name="person-outline" size={16} color="#666" />
-                                            <Text style={commonStyles.detailText}>{reminder.profileName}</Text>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                                        <View style={commonStyles.reminderDetails}>
+                                            <View style={commonStyles.detailRow}>
+                                                <Ionicons name="person-outline" size={16} color="#666" />
+                                                <Text style={commonStyles.detailText}>{reminder.profileName}</Text>
+                                            </View>
+                                            <View style={commonStyles.detailRow}>
+                                                <Ionicons name="calendar-outline" size={16} color="#666" />
+                                                <Text style={commonStyles.detailText}>{reminder.date}</Text>
+                                            </View>
+                                            <View style={commonStyles.detailRow}>
+                                                <Ionicons name="time-outline" size={16} color="#666" />
+                                                <Text style={commonStyles.detailText}>{reminder.time}</Text>
+                                            </View>
                                         </View>
-                                        <View style={commonStyles.detailRow}>
-                                            <Ionicons name="calendar-outline" size={16} color="#666" />
-                                            <Text style={commonStyles.detailText}>{reminder.date}</Text>
-                                        </View>
-                                        <View style={commonStyles.detailRow}>
-                                            <Ionicons name="time-outline" size={16} color="#666" />
-                                            <Text style={commonStyles.detailText}>{reminder.time}</Text>
-                                        </View>
+                                        
+                                        <Text style={[commonStyles.statusText, commonStyles[`status${reminder.status}`]]}>
+                                            {t(`reminders.status.${reminder.status}`)}
+                                        </Text>
                                     </View>
                                 </View>
                             ))
