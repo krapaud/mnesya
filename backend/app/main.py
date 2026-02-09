@@ -11,7 +11,3 @@ app = create_app()
 @app.get("/")
 async def root():
     return {"message": "Welcome to Mnesya API"}
-
-@app.get("/health")
-async def health():
-    return {"status": "healthy"}
