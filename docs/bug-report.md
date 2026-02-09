@@ -397,6 +397,504 @@ Everything works perfectly now!
 
 ---
 
+### 9. Internationalization (i18n) - French/English Support
+
+**Date:** 5 February 2026  
+**Components:** `i18n.ts`, `locales/fr.json`, `locales/en.json`, 21 files modified  
+**Severity:** Enhancement / Feature
+
+#### Description (i18n Implementation)
+
+I realized the app was entirely in English, but my target users (elderly people in France) would need French as their primary language. I decided to implement internationalization (i18n) to support both French and English.
+
+#### What I Discovered (Research)
+
+While researching i18n solutions for React Native, I learned:
+
+- **react-i18next** is the standard library for React/React Native projects
+- It integrates well with TypeScript and provides type safety
+- I needed to structure translations by feature/screen for maintainability
+- The library handles language detection, fallbacks, and dynamic switching automatically
+
+#### How I Implemented It (Step-by-Step)
+
+**1. Installation & Setup**
+
+I installed the necessary packages:
+```bash
+npm install i18next react-i18next
+```
+
+**2. Created Configuration File (i18n.ts)**
+
+I set up the i18n configuration with French as default:
+
+```typescript
+/**
+ * Internationalization (i18n) configuration using i18next
+ * 
+ * Supports French (default) and English languages.
+ * Translation files are located in src/locales/
+ */
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import fr from './locales/fr.json';
+import en from './locales/en.json';
+
+i18n
+  .use(initReactI18next)
+  .init({
+    compatibilityJSON: 'v3',
+    resources: {
+      fr: { translation: fr },
+      en: { translation: en }
+    },
+    lng: 'fr',              // Default language: French
+    fallbackLng: 'en',       // Fallback if French fails
+    interpolation: {
+      escapeValue: false     // React already escapes values
+    }
+  });
+
+export default i18n;
+```
+
+**3. Created Translation Files**
+
+I created structured JSON files for both languages:
+
+- `frontend/src/locales/fr.json` (173 lines)
+- `frontend/src/locales/en.json` (173 lines)
+
+I organized translations by feature:
+```json
+{
+  "common": {
+    "appName": "Mnesya",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "welcome": {
+    "title": "Bienvenue sur Mnesya",
+    "subtitle": "Votre assistant de mémoire personnel"
+  },
+  "tabs": {
+    "dashboard": "Tableau de bord",
+    "profiles": "Profils"
+  }
+}
+```
+
+**4. Integrated i18n into App.tsx**
+
+I imported and initialized i18n at the app entry point:
+
+```typescript
+import './i18n'; // Initialize i18n before rendering
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <AppNavigator />
+    </NavigationContainer>
+  );
+}
+```
+
+**5. Updated All Screens (13 files)**
+
+I replaced hardcoded strings with translation keys in every screen:
+
+```typescript
+// Before
+<Text>Bienvenue sur Mnesya</Text>
+
+// After
+import { useTranslation } from 'react-i18next';
+
+const WelcomeScreen = () => {
+  const { t } = useTranslation();
+  
+  return <Text>{t('welcome.title')}</Text>;
+};
+```
+
+**Files I Updated:**
+- WelcomeScreen.tsx
+- LoginScreen.tsx
+- RegisterScreen.tsx
+- DashboardScreen.tsx
+- CreateProfileScreen.tsx
+- CreateReminderScreen.tsx
+- UserPairingScreen.tsx
+- UserHomeScreen.tsx
+- UserProfileScreen.tsx
+- UserProfileDetailScreen.tsx
+- RemindersListScreen.tsx
+- ReminderNotificationScreen.tsx
+- Navigation files (UserTabs.tsx, CaregiverTabs.tsx)
+- Components (PlatformProfilePicker.tsx)
+
+#### Result (What Works Now)
+
+The entire application now supports bilingual functionality:
+
+- ✅ **13 screens** fully translated (FR/EN)
+- ✅ **Navigation tabs** translated
+- ✅ **Form labels** and buttons translated
+- ✅ **Error messages** and placeholders translated
+- ✅ **French as default** (primary user base)
+- ✅ **English fallback** (for international users)
+- ✅ **Type-safe translations** (TypeScript integration)
+- ✅ **Consistent structure** (organized by feature)
+
+#### Technical Decisions I Made
+
+**1. Why French as Default:**
+- Primary users are French-speaking elderly people
+- Better user experience for target audience
+- English remains available as fallback
+
+**2. Translation Structure:**
+- Grouped by feature (welcome, login, dashboard, etc.)
+- Common keys for shared UI elements
+- Hierarchical organization (easy to maintain)
+
+**3. JSDoc Documentation:**
+- Added professional documentation to i18n.ts
+- Explained configuration choices
+- Included usage examples
+
+#### What I Learned (Best Practices)
+
+This implementation taught me several important lessons:
+
+1. **Plan Early**: i18n is easier to implement early than retrofit later
+2. **Consistent Keys**: Using dot notation (e.g., `welcome.title`) keeps translations organized
+3. **Avoid Hardcoding**: Never put text directly in JSX - always use translation keys
+4. **Test Both Languages**: I verified every screen in both FR and EN
+5. **Documentation Matters**: JSDoc helps others understand the i18n setup
+
+#### Future Improvements
+
+If I add more features, I'll need to:
+- Add new translation keys to both fr.json and en.json
+- Consider adding language switcher in Settings (currently defaults to French)
+- Test with real elderly users to validate French translations are clear and simple
+
+#### Git Integration
+
+I committed this feature professionally:
+- **Branch**: `front/feature/trads`
+- **Commit**: "feat: implement i18n support (French/English)"
+- **Files changed**: 21 files (3 new, 18 modified)
+- **Merged to**: `dev` branch via squash merge
+
+---
+
+### 10. Notification System - Repetitions with Caregiver Alerts
+
+**Date:** 9 February 2026  
+**Components:** `App.tsx`, `notifications.ts`, `CreateReminderScreen.tsx`, `locales/fr.json`, `locales/en.json`  
+**Severity:** Enhancement / Feature
+
+#### Description (Notification System)
+
+I implemented the basic notification system using `expo-notifications`, but I discovered a critical problem: elderly users might forget to click on notifications or dismiss them by accident. I needed a way to ensure they don't miss important reminders, and caregivers need to be alerted when users don't respond.
+
+#### What I Discovered (User Behavior Research)
+
+After thinking about the target users, I identified several risks:
+
+- **Notification Dismissal**: Users might swipe away notifications without reading them
+- **Forgetfulness**: Even after seeing a notification, users might forget to act on it
+- **No Feedback Loop**: Caregivers have no way to know if users responded to reminders
+- **Single Point of Failure**: One missed notification = missed medication or important task
+
+I researched notification best practices for elderly users and learned:
+- **Repetition is key**: Multiple gentle reminders work better than a single alert
+- **Progressive urgency**: Starting subtle and increasing urgency helps without being annoying
+- **Caregiver integration**: Family members need visibility into user responses
+
+#### How I Implemented It (Step-by-Step)
+
+**1. Notification Repetition System**
+
+I created a repetition system with 4 user notifications at strategic intervals:
+
+```typescript
+// Delays in minutes for each user notification
+const delays = [0, 2, 5, 10];
+
+// Schedule 4 notifications for the user
+for (let i = 0; i < delays.length; i++) {
+  const delay = delays[i];
+  const notificationDate = new Date(triggerDate.getTime() + delay * 60 * 1000);
+  
+  // Adapt title based on delay to attract attention
+  let notificationTitle = title;
+  if (delay === 2) {
+    notificationTitle = i18n.t('notifications.repetitions.reminder', { title });
+  } else if (delay === 5) {
+    notificationTitle = i18n.t('notifications.repetitions.reminder', { title });
+  } else if (delay === 10) {
+    notificationTitle = i18n.t('notifications.repetitions.urgent', { title });
+  }
+}
+```
+
+**Rationale Behind Timing:**
+- **0 min**: Initial notification at scheduled time
+- **+2 min**: Quick reminder if user didn't respond immediately
+- **+5 min**: Second reminder (halfway to urgent threshold)
+- **+10 min**: Final urgent notification with emoji escalation (🔔 URGENT)
+
+**2. Caregiver Alert Notification**
+
+I added a 5th notification specifically for caregivers when users don't respond:
+
+```typescript
+// Schedule alert notification for caregiver (+10 min)
+const caregiverDate = new Date(triggerDate.getTime() + 10 * 60 * 1000);
+const profileName = data.profileName || i18n.t('notifications.caregiver.defaultUser');
+
+const caregiverId = await Notifications.scheduleNotificationAsync({
+  content: {
+    title: i18n.t('notifications.caregiver.alert', { profileName }),
+    body: i18n.t('notifications.caregiver.message', { title }),
+    sound: true,
+    data: {
+      ...data,
+      isCaregiverAlert: true,
+      allNotificationIds: notificationIds
+    }
+  },
+  trigger: {
+    type: Notifications.SchedulableTriggerInputTypes.DATE,
+    date: caregiverDate
+  }
+});
+```
+
+**Why +10 minutes:**
+- Gives user enough time to respond to 4 user notifications
+- Alerts caregiver before it's too late to intervene
+- Same time as final urgent notification (unified escalation point)
+
+**3. Auto-Cancellation System**
+
+I realized sending all 5 notifications even after the user responds would be annoying spam. I implemented auto-cancellation using AsyncStorage:
+
+```typescript
+// Store IDs in AsyncStorage to be able to cancel them later
+const reminderId = data.reminderId?.toString() || Date.now().toString();
+await AsyncStorage.setItem(
+  `notification_ids_${reminderId}`,
+  JSON.stringify(notificationIds)
+);
+```
+
+Then in App.tsx, I added the cancellation logic:
+
+```typescript
+// If it's a user notification, cancel all other remaining notifications
+if (data.isUserNotification && data.reminderId) {
+  try {
+    const storageKey = `notification_ids_${reminderId}`;
+    const storedIds = await AsyncStorage.getItem(storageKey);
+    
+    if (storedIds) {
+      const notificationIds = JSON.parse(storedIds) as string[];
+      await cancelNotifications(notificationIds);
+      await AsyncStorage.removeItem(storageKey);
+      console.log(`Cancelled ${notificationIds.length} remaining notifications`);
+    }
+  } catch (error) {
+    console.error('Error cancelling notifications:', error);
+  }
+}
+```
+
+**4. Smart Navigation**
+
+I implemented conditional navigation to prevent caregivers from being sent to the reminder screen:
+
+```typescript
+// Navigate to ReminderNotificationScreen with notification data
+if (navigationRef.current && data && !data.isCaregiverAlert) {
+  navigationRef.current.navigate('ReminderNotification', {
+    reminderId: data.reminderId,
+    message: data.message,
+    profileId: data.profileId,
+  });
+}
+```
+
+**5. Data Flags for Notification Types**
+
+I added boolean flags to distinguish notification types:
+
+- `isUserNotification: true` - For the 4 user notifications
+- `isCaregiverAlert: true` - For the caregiver notification
+
+This allows conditional logic for cancellation and navigation.
+
+**6. Translation Integration**
+
+I added notification-specific translations to maintain bilingual support:
+
+```json
+// fr.json
+"notifications": {
+  "repetitions": {
+    "reminder": "⏰ RAPPEL: {{title}}",
+    "urgent": "🔔 URGENT: {{title}}"
+  },
+  "caregiver": {
+    "alert": "⚠️ {{profileName}} n'a pas répondu au rappel",
+    "message": "Aucune action effectuée pour: {{title}}",
+    "defaultUser": "L'utilisateur"
+  }
+}
+
+// en.json
+"notifications": {
+  "repetitions": {
+    "reminder": "⏰ REMINDER: {{title}}",
+    "urgent": "🔔 URGENT: {{title}}"
+  },
+  "caregiver": {
+    "alert": "⚠️ {{profileName}} did not respond to the reminder",
+    "message": "No action taken for: {{title}}",
+    "defaultUser": "User"
+  }
+}
+```
+
+**7. Alert Messages Translation**
+
+I updated all Alert.alert() calls in CreateReminderScreen.tsx to use i18n:
+
+```typescript
+// Before
+Alert.alert('Erreur', 'Veuillez sélectionner un profil');
+
+// After
+Alert.alert(t('CreateReminder.errors.title'), t('CreateReminder.errors.Please select a profile'));
+```
+
+#### Result (What Works Now)
+
+The notification system now provides comprehensive reminder management:
+
+- ✅ **4 user notifications** with progressive urgency (0, +2, +5, +10 min)
+- ✅ **1 caregiver alert** when user doesn't respond (+10 min)
+- ✅ **Auto-cancellation** when user clicks any notification
+- ✅ **Smart navigation** (only user notifications navigate to screen)
+- ✅ **Persistent storage** (AsyncStorage for notification IDs)
+- ✅ **Bilingual support** (FR/EN translations with interpolation)
+- ✅ **Professional UI messages** (all alerts use i18n)
+- ✅ **Clean codebase** (all comments in English)
+
+#### Technical Decisions I Made
+
+**1. Why 4 Repetitions:**
+- Research shows elderly users respond better to gentle persistence
+- 10-minute window is long enough without being excessive
+- Progressive urgency (calm → reminder → urgent) respects user's attention
+
+**2. Why AsyncStorage for IDs:**
+- Notifications are scheduled asynchronously by the OS
+- IDs must persist across app sessions
+- AsyncStorage provides reliable key-value storage for retrieval
+
+**3. Why Separate Caregiver Notification:**
+- Caregivers don't need to see the reminder content screen
+- Alert should be non-intrusive but informative
+- Allows different handling logic than user notifications
+
+**4. Why Auto-Cancel All Notifications:**
+- Prevents spam after user responds
+- Shows respect for user's attention
+- Improves overall app experience
+
+#### What I Learned (Best Practices)
+
+This implementation taught me several important lessons:
+
+1. **User-Centered Design**: Always think about actual user behavior, not ideal scenarios
+2. **Data Persistence**: Notification IDs need storage for later cancellation
+3. **Conditional Logic**: Use data flags (isUserNotification) for different notification types
+4. **Progressive Urgency**: Start gentle, increase urgency gradually
+5. **Feedback Loops**: Caregivers need visibility into user actions
+6. **Clean Code**: All internal messages (console.log, errors) should be in English
+7. **Professional UI**: User-facing messages should use i18n for consistency
+
+#### Testing Results
+
+I tested the complete flow on a physical device:
+
+**Test 1: Auto-Cancellation**
+- Created reminder for 2 minutes from now
+- Clicked on 1st notification
+- ✅ Result: All 5 remaining notifications were cancelled
+
+**Test 2: Full Notification Flow**
+- Created reminder
+- Did NOT click any notification
+- ✅ Result: Received all 5 notifications (4 user + 1 caregiver)
+- ✅ Caregiver notification showed profile name correctly
+- ✅ Clicking caregiver notification did NOT navigate to reminder screen
+
+**Test 3: Translation Verification**
+- Tested in French (default language)
+- ✅ All notification titles displayed correctly
+- ✅ Interpolation worked ({{title}}, {{profileName}})
+
+#### Known Limitations
+
+I discovered Expo Go has some notification limitations:
+
+```
+`expo-notifications` functionality is not fully supported in Expo Go
+We recommend you instead use a development build
+```
+
+**What This Means:**
+- Basic scheduling, cancellation, and navigation work fine in Expo Go
+- Advanced features may have limitations
+- Production builds (APK/IPA) will have full functionality
+
+**My Decision:**
+- Keep using Expo Go for development (works well enough)
+- Plan to create production build with `eas build` before deployment
+
+#### Future Improvements
+
+If I continue developing this feature, I would add:
+
+**Option 2: Manual Cancellation**
+- When caregiver deletes a reminder, cancel its scheduled notifications
+- Already have `cancelNotifications()` function, just need UI integration
+
+**Option 3: Badge Count**
+- Show number of unread notifications on app icon
+- Set `shouldSetBadge: true` in notification handler
+
+**Option 4: Notification History**
+- Track which notifications user responded to
+- Analytics for caregivers to see response patterns
+
+#### Git Integration
+
+I committed this feature professionally:
+- **Branch**: `front/feature/notifs`
+- **Commit**: "feat: implement notification repetitions with caregiver alerts and auto-cancellation"
+- **Files changed**: 5 files modified
+- **TODO**: Merge to `dev` branch after documentation complete
+
+---
+
 ## Backend Issues
 
 No issues reported yet

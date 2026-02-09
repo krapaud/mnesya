@@ -9,7 +9,7 @@
  * @module CreateReminderScreen
  */
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +18,7 @@ import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { fakeProfiles } from '../data/fakeData';
 import { PlatformDatePicker, PlatformTimePicker, PlatformProfilePicker } from '../components';
+import { scheduleReminderWithRepetitions } from '../utils/notifications';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateReminder'>;
 
@@ -100,13 +101,58 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
         setShowDatePicker(false);
         setShowProfilePicker(false);
     };
+
+    const handleSaveReminder = async () => {
+        if (!selectedProfile) {
+            Alert.alert(t('CreateReminder.errors.title'), t('CreateReminder.errors.Please select a profile'));
+            return;
+        }
+
+        if (!reminderTitle.trim()) {
+            Alert.alert(t('CreateReminder.errors.title'), t('CreateReminder.errors.Please enter a title'));
+            return;
+        }
+
+        if (!reminderMessage.trim()) {
+            Alert.alert(t('CreateReminder.errors.title'), t('CreateReminder.errors.Please enter a message'));
+            return;
+        }
+        try {
+            const notificationIds = await scheduleReminderWithRepetitions(
+                reminderTitle,
+                reminderMessage,
+                reminderDate,
+                {
+                    reminderId: Date.now(),
+                    message: reminderMessage,
+                    profileId: selectedProfile,
+                    profileName: selectedProfileData ? `${selectedProfileData.firstName} ${selectedProfileData.lastName}` : 'Utilisateur',
+                    allNotificationIds: []
+                }
+            );
+
+            console.log('Scheduled notifications with IDs:', notificationIds);
+            console.log(`${notificationIds.length} notifications scheduled (4 user + 1 caregiver)`);
+            console.log('Reminder saved (local)');
+
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            Alert.alert(t('CreateReminder.success.title'), t('CreateReminder.success.Reminder created successfully'));
+            navigation.navigate('Dashboard');
+            
+        } catch (error) {
+            Alert.alert(t('CreateReminder.errors.title'), t('CreateReminder.errors.Error scheduling notification'));
+            console.error(error);
+            return;
+        }
+    };
+
     return (
         <View style={commonStyles.container}>
             {/* Header with back button and logo */}
             <View style={commonStyles.header}>
                 <TouchableOpacity onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    navigation.goBack();
+                    navigation.navigate('Dashboard');
                 }}>
                     <View style={commonStyles.ArrowIconCircle}>
                         <Ionicons name="arrow-back" size={24} color='#4A90E2'
@@ -217,10 +263,8 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                     {!showDatePicker && !showTimePicker && !showProfilePicker && (
                     <TouchableOpacity 
                         style={commonStyles.primaryButton}
-                        onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            navigation.navigate('Dashboard');
-                        }}>
+                        onPress={handleSaveReminder}
+                        >
                         <Text style={commonStyles.primaryButtonText}>{t('CreateReminder.buttons.Save Reminder')}</Text>
                     </TouchableOpacity>
                     )}

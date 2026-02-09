@@ -173,7 +173,7 @@ export const commonStyles = StyleSheet.create({
         marginRight: 10,
     },
     statusText: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: 'bold',
     },
     statusDone: {

@@ -8,7 +8,11 @@ export type RootStackParamList = {
     CreateReminder: { profileId?: number };
     UserProfileDetails: { profileId: number};
     UserDashboard: undefined;
-    ReminderNotification: { reminderId: number };
+    ReminderNotification: { 
+        reminderId: number;
+        message?: string;
+        profileId?: string | number;
+    };
 }
 
 export type CaregiverTabsParamList = {

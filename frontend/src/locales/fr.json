@@ -101,6 +101,17 @@
     },
     "message": {
         "Be careful not to enter sensitive confidential information.": "Il est important de ne pas saisir de données confidentielles sensibles."
+    },
+    "errors": {
+        "title": "Erreur",
+        "Please select a profile": "Veuillez sélectionner un profil",
+        "Please enter a title": "Veuillez entrer un titre",
+        "Please enter a message": "Veuillez entrer un message",
+        "Error scheduling notification": "Erreur lors de la programmation de la notification"
+    },
+    "success": {
+        "title": "Succès",
+        "Reminder created successfully": "Rappel créé avec succès !"
     }
   },
   "UserPairing": {
@@ -163,6 +174,17 @@
     },
     "messages": {
         "Reminder not found": "Rappel introuvable"
+    }
+  },
+  "notifications": {
+    "repetitions": {
+        "reminder": "⏰ RAPPEL: {{title}}",
+        "urgent": "🔔 URGENT: {{title}}"
+    },
+    "caregiver": {
+        "alert": "⚠️ {{profileName}} n'a pas répondu au rappel",
+        "message": "Aucune action effectuée pour: {{title}}",
+        "defaultUser": "L'utilisateur"
     }
   },
   "tabs": {
