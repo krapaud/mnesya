@@ -5,6 +5,7 @@ __pycache__/
 *.so
 .Python
 env/
+*.env
 venv/
 ENV/
 *.egg-info/
@@ -48,6 +49,8 @@ Thumbs.db
 # Environment
 .env
 .env.local
+docker/.env
+backend/.env
 
 # Database
 *.db
