@@ -52,8 +52,25 @@ services:
       - mnesya-network
     command: python -m worker.scheduler
 
+  # pgAdmin - PostgreSQL Administration Panel
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: mnesya-pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@mnesya.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - db
+    networks:
+      - mnesya-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
 volumes:
   postgres_data:
+  pgadmin_data:
 
 networks:
   mnesya-network:

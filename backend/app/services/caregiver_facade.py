@@ -4,7 +4,7 @@ This module implements the Facade pattern for Caregiver business logic.
 It provides a simplified interface for caregiver operations, including
 authentication and user management.
 """
-
+from sqlalchemy.orm import Session
 from app.models.caregiver import CaregiverModel
 from app.persistence.caregiver_repository import CaregiverRepository
 
@@ -18,9 +18,9 @@ class CaregiverFacade:
     Attributes:
         caregiver_repo (CaregiverRepository): Repository for caregiver data access
     """
-    def __init__(self):
+    def __init__(self, db: Session):
         """Initialize the facade with a caregiver repository."""
-        self.caregiver_repo = CaregiverRepository()
+        self.caregiver_repo = CaregiverRepository(db)
 
     # ==================== CAREGIVER BUSINESS LOGIC ====================
 
