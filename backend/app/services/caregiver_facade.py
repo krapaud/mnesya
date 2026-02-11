@@ -44,8 +44,10 @@ class CaregiverFacade:
         Note:
             Password is automatically hashed before storage
         """
+        # Create caregiver (password is validated by setter)
         caregiver = CaregiverModel(**caregiver_data)
-        caregiver.hash_password(caregiver_data['password'])  # Hash the password
+        # Hash the validated password
+        caregiver.hash_password(caregiver_data['password'])
         self.caregiver_repo.add(caregiver)
         return caregiver
 
