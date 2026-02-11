@@ -38,6 +38,10 @@ web-build/
 # Copilot
 .github/copilot-instructions.md
 
+# Project Management
+docs/trello-status.md
+docs/trello-status.txt
+
 # OS
 .DS_Store
 Thumbs.db
