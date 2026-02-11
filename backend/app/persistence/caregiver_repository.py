@@ -3,9 +3,9 @@
 This module provides data access operations specific to Caregiver entities.
 """
 
-from typing import Optional
 from app.models.caregiver import CaregiverModel
 from app.persistence.base_repository import BaseRepository
+from sqlalchemy.orm import Session
 
 class CaregiverRepository(BaseRepository[CaregiverModel]):
     """Repository for Caregiver entity data access.
@@ -13,11 +13,11 @@ class CaregiverRepository(BaseRepository[CaregiverModel]):
     Extends BaseRepository with caregiver-specific query methods,
     particularly for authentication and email lookup.
     """
-    def __init__(self):
+    def __init__(self, db: Session):
         """Initialize the CaregiverRepository with CaregiverModel."""
-        super().__init__(CaregiverModel)
+        super().__init__(CaregiverModel, db)
 
-    def get_caregiver_by_email(self, email: str) -> Optional[CaregiverModel]:
+    def get_caregiver_by_email(self, email: str):
         """Get a caregiver by their email address.
         
         Args:
