@@ -8,12 +8,17 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'rea
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../types/index';
+import type { RootStackParamList, CaregiverTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { fakeProfiles } from '../data/fakeData';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Dashboard'>;
+type Props = CompositeScreenProps<
+    BottomTabScreenProps<CaregiverTabsParamList, 'Home'>,
+    NativeStackScreenProps<RootStackParamList>
+>;
 
 const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -23,20 +28,24 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     return (
         <View style={commonStyles.container}>
             {/* Header with app logo and name */}
-            <View style={[commonStyles.header, { justifyContent: 'center' }]}>
-                <Image 
-                    source={require('../../assets/mnesya-logo.png')} 
-                    style={commonStyles.logo}
-                />
-                <Text style={[commonStyles.appName, { alignItems: 'center' }]}>Mnesya</Text>
+            <View style={commonStyles.header}>
+                <View style={commonStyles.headerSpacer} />
+                <View style={commonStyles.headerCenter}>
+                    <Image 
+                        source={require('../../assets/mnesya-logo.png')} 
+                        style={commonStyles.logo}
+                    />
+                    <Text style={commonStyles.appName}>Mnesya</Text>
+                </View>
+                <View style={commonStyles.headerSpacer} />
             </View>
 
             {/* Page title */}
-            <View style={[commonStyles.titleSection, { marginTop: 20 }]}>
-                <Text style={[commonStyles.title, { marginBottom: 1 }]}>{t('dashboard.title')}</Text>
+            <View style={styles.titleSection}>
+                <Text style={styles.title}>{t('dashboard.title')}</Text>
             </View>
 
-            <View style={[commonStyles.content, { flex: 1, marginTop: 40, paddingBottom: 50 }]}>
+            <View style={styles.scrollContainer}>
                 {/* Action buttons */}
                 <TouchableOpacity 
                     style={commonStyles.primaryButton}
@@ -55,7 +64,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                     <Text style={[commonStyles.primaryButtonText, { fontSize: 20 }]}>{t('common.buttons.New reminder')}</Text>
                 </TouchableOpacity>
                 
-                <Text style={commonStyles.textPrimary}>{t('dashboard.profilesListTitle')}</Text>
+                <Text style={styles.sectionTitle}>{t('dashboard.profilesListTitle')}</Text>
                 
                 {/* 
                  * Scrollable list of profile cards
@@ -94,7 +103,32 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    // Screen-specific styles
+    // LAYOUT
+    titleSection: {
+        width: '100%',
+        paddingLeft: 10,
+        marginTop: 30,
+        marginBottom: 0,
+    },
+    scrollContainer: {
+        flex: 1,
+        marginTop: 40,
+        paddingBottom: 50,
+    },
+    
+    // TYPOGRAPHY
+    title: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        marginBottom: 1,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        marginTop: 20,
+        fontWeight: 'bold',
+    },
+    
+    // PROFILE CARDS
     textUser: {
         fontSize: 18,
         fontWeight: 'bold',
@@ -102,11 +136,11 @@ const styles = StyleSheet.create({
     },
     textUserInfo: {
         fontSize: 16,
-        color: '#999',
+        color: '#666',
     },
     emptyMessage: {
         fontSize: 16,
-        color: '#999',
+        color: '#666',
         textAlign: 'center',
         marginTop: 200,
         fontStyle: 'italic',
@@ -127,6 +161,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginLeft: 5,
+        minHeight: 44,
+        minWidth: 44,
     },
     viewButtonText: {
         color: '#4A90E2',

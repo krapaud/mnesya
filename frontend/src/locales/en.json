@@ -2,7 +2,8 @@
   "common": {
     "buttons": {
       "New reminder": "New Reminder",
-      "Validate": "Validate"
+      "Validate": "Validate",
+      "Cancel": "Cancel"
     },
     "fields": {
       "Email": "Email",
@@ -20,7 +21,11 @@
     "pickersText": {
         "All Profiles": "All",
         "All Dates": "All",
-        "Select a profile": "Select a Profile"
+        "Select a profile": "Select a Profile",
+        "Select Date": "Select Date",
+        "Select Time": "Select Time",
+        "Today": "Today",
+        "Tomorrow": "Tomorrow"
     }
   },
   "welcome": {
@@ -53,6 +58,38 @@
     "buttons": {
         "Sign Up": "Sign Up",
         "Already have an account? Log in": "Already have an account? Log in"
+    },
+    "errors": {
+        "Email must be between 5 and 255 characters": "Email must be between 5 and 255 characters",
+        "Invalid email": "Invalid email format",
+        "Password must be at least 8 characters": "Password must be at least 8 characters",
+        "Password must be at most 20 characters": "Password must be at most 20 characters",
+        "Password must contain at least one digit": "Password must contain at least one digit",
+        "Password must contain at least one uppercase letter": "Password must contain at least one uppercase letter",
+        "Password must contain at least one lowercase letter": "Password must contain at least one lowercase letter",
+        "Password must contain at least one special character": "Password must contain at least one special character ($@#%*!~&)",
+        "Passwords do not match": "Passwords do not match",
+        "All fields are required": "All fields are required"
+    },
+    "errors": {
+        "Email must be between 5 and 255 characters": "Email must be between 5 and 255 characters",
+        "Invalid email": "Invalid email format",
+        "Password must be at least 8 characters": "Password must be at least 8 characters",
+        "Password must be at most 20 characters": "Password must be at most 20 characters",
+        "Password must contain at least one digit": "Password must contain at least one digit",
+        "Password must contain at least one uppercase letter": "Password must contain at least one uppercase letter",
+        "Password must contain at least one lowercase letter": "Password must contain at least one lowercase letter",
+        "Password must contain at least one special character": "Password must contain at least one special character ($@#%*!~&)",
+        "Passwords do not match": "Passwords do not match",
+        "All fields are required": "All fields are required",
+        "Name cannot be empty": "Name cannot be empty",
+        "Name must be at most 100 characters": "Name must be at most 100 characters"
+    },
+    "success": {
+        "Valid email": "✓ Valid email",
+        "Valid password": "✓ Valid password",
+        "Passwords match": "✓ Passwords match",
+        "Valid name": "✓ Valid name"
     }
   },
   "dashboard": {
@@ -88,7 +125,7 @@
   "CreateReminder": {
     "Title": "Create Reminder",
     "fields": {
-        "For Profile": "For Profile",
+        "For Profile": "Recipient",
         "Reminder Title": "Reminder Title",
         "Time": "Time"
     },
@@ -100,7 +137,7 @@
         "Save Reminder": "Save Reminder"
     },
     "message": {
-        "Be careful not to enter sensitive confidential information.": "Be careful not to enter sensitive confidential information."
+        "Be careful not to enter sensitive confidential information.": "Warning: Avoid entering confidential information."
     },
     "errors": {
         "title": "Error",
@@ -166,6 +203,15 @@
         "No active reminders": "No active reminders"
     }
   },
+  "pairingCode": {
+    "title": "Pairing Code",
+    "description": "Share this code with your user to pair their device",
+    "buttons": {
+      "copyCode": "Copy code",
+      "done": "Done"
+    },
+    "tip": "Tip: This code expires in 5 minutes"
+  },
   "ReminderNotification": {
     "buttons": {
         "Done": "Done",
@@ -175,7 +221,49 @@
     "messages": {
         "Reminder not found": "Reminder not found"
     }
-  },  "notifications": {
+  },
+  "caregiverProfile": {
+    "title": "My Profile",
+    "sections": {
+      "accountInfo": "Account Information",
+      "actions": "Account Actions"
+    },
+    "fields": {
+      "name": "Name",
+      "email": "Email"
+    },
+    "buttons": {
+      "changePassword": "Change Password",
+      "logout": "Logout"
+    },
+    "modal": {
+      "title": "Confirm Logout",
+      "message": "You will be logged out and will need to enter your credentials again to reconnect.",
+      "cancel": "Cancel",
+      "confirm": "Logout"
+    }
+  },
+  "userProfile": {
+    "title": "My Profile",
+    "sections": {
+      "accountInfo": "My Information",
+      "actions": "Actions"
+    },
+    "fields": {
+      "name": "Name",
+      "age": "Age"
+    },
+    "buttons": {
+      "rePairing": "Re-Pair My Device"
+    },
+    "modal": {
+      "title": "Warning",
+      "message": "This action will reset your pairing. You will no longer receive notifications until you enter a new pairing code.",
+      "cancel": "Cancel",
+      "confirm": "Continue"
+    }
+  },
+  "notifications": {
     "repetitions": {
         "reminder": "⏰ REMINDER: {{title}}",
         "urgent": "🔔 URGENT: {{title}}"

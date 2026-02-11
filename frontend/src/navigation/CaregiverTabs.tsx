@@ -1,22 +1,42 @@
 /**
- * CaregiverTabs - Bottom tab navigation for caregiver screens
- * Provides navigation between Dashboard, Reminders, and Profile
+ * Bottom tab navigation component for caregiver interface.
+ * 
+ * Provides a three-tab navigation bar optimized for caregiver workflows:
+ * - Home: Dashboard with profile management
+ * - Reminders: List and management of all reminders
+ * - Profile: Caregiver account settings
+ * 
+ * Implements safe area handling for Android system UI to prevent overlap
+ * with system navigation buttons.
+ * 
+ * @module CaregiverTabs
  */
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { CaregiverTabsParamList } from '../types/index';
 
-// Screen imports
 import DashboardScreen from '../screens/DashboardScreen';
 import RemindersListScreen from '../screens/RemindersListScreen';
+import CaregiverProfileScreen from '../screens/CaregiverProfileScreen';
 
 const Tab = createBottomTabNavigator<CaregiverTabsParamList>();
 
+/**
+ * Caregiver tab navigation component.
+ * 
+ * Renders a bottom tab navigator with dynamic height adjustment for
+ * Android system UI compatibility. Uses Ionicons for tab icons and
+ * supports internationalization.
+ * 
+ * @returns Tab navigator component for caregiver interface
+ */
 const CaregiverTabs: React.FC = () => {
     const { t } = useTranslation();
+    const insets = useSafeAreaInsets();
     
     return (
         <Tab.Navigator
@@ -25,6 +45,12 @@ const CaregiverTabs: React.FC = () => {
                 headerShown: false,
                 tabBarActiveTintColor: styles.activeTab.color,
                 tabBarInactiveTintColor: styles.inactiveTab.color,
+                tabBarStyle: {
+                    height: 70 + insets.bottom,
+                    paddingBottom: insets.bottom + 10,
+                    paddingTop: 5,
+                },
+                tabBarLabelStyle: styles.tabBarLabel,
             }}
         >
             {/* Home tab - Dashboard */}
@@ -54,8 +80,9 @@ const CaregiverTabs: React.FC = () => {
             {/* Profile tab */}
             <Tab.Screen 
                 name="Profile" 
-                component={DashboardScreen}
+                component={CaregiverProfileScreen}
                 options={{
+                    tabBarLabel: t('tabs.Profile'),
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="person" size={size} color={color} />
                     ),
@@ -71,6 +98,14 @@ const styles = StyleSheet.create({
     },
     inactiveTab: {
         color: '#999',
+    },
+    tabBar: {
+        height: 70,
+        paddingBottom: 10,
+        paddingTop: 5,
+    },
+    tabBarLabel: {
+        fontSize: 12,
     },
 });
 

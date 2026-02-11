@@ -102,6 +102,12 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
         setShowProfilePicker(false);
     };
 
+    const openProfilePicker = () => {
+        setShowProfilePicker(true);
+        setShowDatePicker(false);
+        setShowTimePicker(false);
+    };
+
     const handleSaveReminder = async () => {
         if (!selectedProfile) {
             Alert.alert(t('CreateReminder.errors.title'), t('CreateReminder.errors.Please select a profile'));
@@ -169,15 +175,15 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 <View style={commonStyles.headerSpacer} />
             </View>
             {/* Page title */}
-            <View style={commonStyles.titleSection}>
-                <Text style={commonStyles.title}>{t('CreateReminder.Title')}</Text>
+            <View style={styles.titleSection}>
+                <Text style={styles.title}>{t('CreateReminder.Title')}</Text>
             </View>
             {/* Content */}
-            <ScrollView style={commonStyles.content}>
-                <Text style={commonStyles.label}>{t('CreateReminder.fields.For Profile')}</Text>
+            <ScrollView style={styles.scrollContainer}>
+                <Text style={styles.label}>{t('CreateReminder.fields.For Profile')}</Text>
                 <TouchableOpacity 
-                    style={[commonStyles.formsButton, { marginBottom: 0 }]}
-                    onPress={() => setShowProfilePicker(true)}
+                    style={styles.input}
+                    onPress={openProfilePicker}
                 >
                     <View style={styles.profilePicker}>
                         <Text>{selectedProfileData ? `${selectedProfileData.firstName} ${selectedProfileData.lastName}` : t('common.pickersText.Select a profile')}</Text>
@@ -186,45 +192,46 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 </TouchableOpacity>
                 {!showProfilePicker && (
                     <>
-                    <Text style={commonStyles.label}>{t('CreateReminder.fields.Reminder Title')}</Text>
-                <View style={commonStyles.formsButton}>
+                    <Text style={styles.label}>{t('CreateReminder.fields.Reminder Title')}</Text>
+                <View style={styles.input}>
                     <TextInput
                         placeholder={t('CreateReminder.placeholders.Ex. : Take Medication')}
                         onChangeText={newText => setReminderTitle(newText)}
                         defaultValue={reminderTitle}
                     />
                 </View>
-                <Text style={commonStyles.label}>Message</Text>
-                <View style={[commonStyles.formsButton, styles.messageInput]}>
+                <Text style={styles.messageLabel}>Message</Text>
+                <View style={[styles.input, styles.messageInput]}>
                     <TextInput multiline={true}
                         numberOfLines={4}
+                        maxLength={120}
                         placeholder={t('CreateReminder.placeholders.Enter the description about your reminder')}
                         onChangeText={newText => setReminderMessage(newText)}
                         defaultValue={reminderMessage}
                     />
                 </View>
-                <Text style={styles.text}>
+                <Text style={[styles.text, { paddingBottom: 10 }]}>
                     {t('CreateReminder.message.Be careful not to enter sensitive confidential information.')}</Text>
-                <View style={commonStyles.pickerContainer}>
-                <View style={commonStyles.pickerColumn}>
-                    <Text style={commonStyles.label}>Date</Text>
+                <View style={styles.pickerContainer}>
+                <View style={styles.pickerColumn}>
+                    <Text style={styles.label}>Date</Text>
                 <TouchableOpacity 
-                    style={commonStyles.formsButton}
+                    style={styles.pickerButton}
                     onPress={openDatePicker}
                 >
-                    <View style={commonStyles.pickerRow}>
+                    <View style={styles.pickerRow}>
                         <Text>{formatDate(reminderDate)}</Text>
                         <Ionicons name="calendar-outline" size={20} color="#999" />
                     </View>
                 </TouchableOpacity>
                 </View>
-                <View style={commonStyles.pickerColumn}>
-                    <Text style={commonStyles.label}>{t('CreateReminder.fields.Time')}</Text>
+                <View style={styles.pickerColumn}>
+                    <Text style={styles.label}>{t('CreateReminder.fields.Time')}</Text>
                 <TouchableOpacity 
-                    style={commonStyles.formsButton}
+                    style={styles.pickerButton}
                     onPress={openTimePicker}
                 >
-                    <View style={commonStyles.pickerRow}>
+                    <View style={styles.pickerRow}>
                         <Text>{formatTime(reminderDate)}</Text>
                         <Ionicons name="time-outline" size={20} color="#999" />
                     </View>
@@ -233,32 +240,37 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                     </View>
                         </>
                     )}
-                        {/* Cross-platform date picker component */}
-                        <PlatformDatePicker
-                            value={reminderDate}
-                            onChange={setReminderDate}
-                            visible={showDatePicker}
-                            onClose={() => setShowDatePicker(false)}
-                            displayFormat={formatDate}
-                        />
-                        {/* Cross-platform time picker component */}
-                        <PlatformTimePicker
-                            value={reminderDate}
-                            onChange={setReminderDate}
-                            visible={showTimePicker}
-                            onClose={() => setShowTimePicker(false)}
-                            displayFormat={formatTime}
-                        />
-                        
-                    {/* Cross-platform profile picker component */}
-                    <PlatformProfilePicker
-                        profiles={fakeProfiles}
-                        selectedValue={selectedProfile}
-                        onValueChange={setSelectedProfile}
-                        visible={showProfilePicker}
-                        onClose={() => setShowProfilePicker(false)}
-                        placeholder={t('common.pickersText.Select a profile')}
-                    />
+                </ScrollView>
+                
+                {/* Cross-platform date picker component */}
+                <PlatformDatePicker
+                    value={reminderDate}
+                    onChange={setReminderDate}
+                    visible={showDatePicker}
+                    onClose={() => setShowDatePicker(false)}
+                    displayFormat={formatDate}
+                />
+                {/* Cross-platform time picker component */}
+                <PlatformTimePicker
+                    value={reminderDate}
+                    onChange={setReminderDate}
+                    visible={showTimePicker}
+                    onClose={() => setShowTimePicker(false)}
+                    displayFormat={formatTime}
+                />
+                
+                {/* Cross-platform profile picker component */}
+                <PlatformProfilePicker
+                    profiles={fakeProfiles}
+                    selectedValue={selectedProfile}
+                    onValueChange={setSelectedProfile}
+                    visible={showProfilePicker}
+                    onClose={() => setShowProfilePicker(false)}
+                    placeholder={t('common.pickersText.Select a profile')}
+                />
+                
+                {/* Buttons section - fixed at bottom */}
+                <View style={styles.buttonsContainer}>
                     {/* Save button - navigates back to Dashboard after reminder creation */}
                     {!showDatePicker && !showTimePicker && !showProfilePicker && (
                     <TouchableOpacity 
@@ -268,13 +280,60 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                         <Text style={commonStyles.primaryButtonText}>{t('CreateReminder.buttons.Save Reminder')}</Text>
                     </TouchableOpacity>
                     )}
-                </ScrollView>
+                    </View>
             </View>
     );
 };
 
 const styles = StyleSheet.create({
-    // Screen-specific styles
+    // ========== LAYOUT ==========
+    titleSection: {
+        width: '100%',
+        paddingLeft: 10,
+        marginTop: 30,
+        marginBottom: 20,
+    },
+    scrollContainer: {
+        width: '100%',
+        paddingBottom: 10,
+    },
+    buttonsContainer: {
+        paddingBottom: 40,
+    },
+
+    // ========== TYPOGRAPHY ==========
+    title: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    label: {
+        fontSize: 18,
+        fontWeight: '500',
+        marginBottom: 10,
+        marginTop: 5,
+    },
+    messageLabel: {
+        fontSize: 18,
+        fontWeight: '500',
+        marginBottom: 10,
+        marginTop: 0,
+    },
+    text: {
+        fontSize: 16,
+        width: '100%',
+        justifyContent: 'flex-start',
+        color: '#FF0000',
+    },
+
+    // ========== FORM ELEMENTS ==========
+    input: {
+        backgroundColor: '#F5F5F5',
+        padding: 15,
+        borderRadius: 20,
+        marginBottom: 10,
+        width: '100%',
+    },
     profilePicker: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -283,11 +342,27 @@ const styles = StyleSheet.create({
     messageInput: {
         height: 80,
     },
-    text: {
-        fontSize: 12,
+
+    // ========== PICKERS ==========
+    pickerContainer: {
+        flexDirection: 'row',
         width: '100%',
-        justifyContent: 'flex-start',
-        color: '#FF0000',
+    },
+    pickerColumn: {
+        flex: 1,
+        marginRight: 10,
+    },
+    pickerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    pickerButton: {
+        backgroundColor: '#F5F5F5',
+        padding: 18,
+        borderRadius: 20,
+        marginBottom: 15,
+        width: '100%',
     },
 });
 

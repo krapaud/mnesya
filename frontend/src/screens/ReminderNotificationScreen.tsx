@@ -26,6 +26,7 @@ import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { fakeReminders } from '../data/fakeData';
 import { createBellSwingAnimation, getBellRotation } from '../utils/animations';
+import { scheduleReminderNotification } from '../utils/notifications';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ReminderNotification'>;
 
@@ -54,9 +55,25 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
      * Handles reminder action and updates status
      * @param status - The new status: 'Done', 'Postponed', or 'Unable'
      */
-    const handleReminderAction = (status: string) => {
+    const handleReminderAction = async (status: string) => {
         // Log the action for testing (will be API call in Sprint 3)
         console.log(`Reminder ${reminderId} status changed to: ${status}`);
+        
+        // If postponed, schedule a new notification in 5 minutes
+        if (status === 'Postponed') {
+            try {
+                const postponeDate = new Date(Date.now() + 5 * 60 * 1000); // +5 minutes
+                await scheduleReminderNotification(
+                    reminder.title,
+                    reminder.message,
+                    postponeDate,
+                    { reminderId, profileId, isPostponed: true }
+                );
+                console.log(`Reminder postponed: will trigger again at ${postponeDate.toLocaleTimeString()}`);
+            } catch (error) {
+                console.error('Failed to schedule postponed notification:', error);
+            }
+        }
         
         // TODO Sprint 3: Call API to update reminder status
         // await updateReminderStatus(reminderId, status);
@@ -77,7 +94,7 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
             </View>
 
             {/* Reminder content section */}
-            <View style={[commonStyles.content, { alignItems: 'center', marginTop: 40 }]}>
+            <View style={styles.contentContainer}>
                 {/* 
                  * Animated bell icon with rotation transform from getBellRotation
                  * Creates a swinging effect to catch the user's attention
@@ -116,7 +133,7 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
                 <TouchableOpacity 
                     style={[styles.bgButtonDone, { marginTop: 15}]}
                     onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         handleReminderAction('Done');
                     }}
                 >
@@ -125,7 +142,7 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
                 <TouchableOpacity 
                     style={styles.bgButtonPostpone}
                     onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         handleReminderAction('Postponed');
                     }}
                 >
@@ -134,7 +151,7 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
                 <TouchableOpacity 
                     style={styles.bgButtonUnable}
                     onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         handleReminderAction('Unable');
                     }}
                 >
@@ -146,7 +163,15 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-    // Screen-specific styles
+    // LAYOUT
+    contentContainer: {
+        width: '100%',
+        paddingBottom: 10,
+        alignItems: 'center',
+        marginTop: 40,
+    },
+    
+    // TYPOGRAPHY
     reminderTimeText: {
         fontSize: 50,
         fontWeight: 'bold',
@@ -158,10 +183,10 @@ const styles = StyleSheet.create({
     reminderMessage: {
         fontSize: 18,
         alignContent: 'center',
-        color: '#999',
+        color: '#666',
         marginTop: 10,
         textAlign: 'center',
-        height: 100,
+        height: 85,
         lineHeight: 24,
     },
     bgButtonDone: {

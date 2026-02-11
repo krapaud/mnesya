@@ -68,14 +68,16 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
                         <View style={commonStyles.headerSpacer} />
                     </View>
                     
-                    {/* Page title and instructions */}
-                    <View style={[commonStyles.titleSection, { marginTop: 30 }]}>
-                        <Text style={commonStyles.title}>{t('UserPairing.title')}</Text>
-                        <Text style={commonStyles.subtitle}>{t('UserPairing.subtitle')}</Text>
+                    {/* Page title */}
+                    <View style={styles.titleSection}>
+                        <Text style={styles.title}>{t('UserPairing.title')}</Text>
                     </View>
                     
+                    {/* Instructions - positioned just above code input */}
+                    <Text style={styles.subtitle}>{t('UserPairing.subtitle')}</Text>
+                    
                     {/* 6-character code input field */}
-                    <View style={[commonStyles.content, { marginTop: 40, paddingBottom: 50, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }]}>
+                    <View style={styles.codeContainer}>
                       <CodeField
                         ref={ref}
                         {...props}
@@ -116,7 +118,36 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
         };
 
 const styles = StyleSheet.create({
-    // Screen-specific styles
+    // LAYOUT
+    titleSection: {
+        width: '100%',
+        paddingLeft: 10,
+        marginTop: 30,
+        marginBottom: 20,
+    },
+    codeContainer: {
+        width: '100%',
+        paddingBottom: 50,
+        marginTop: 0,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    
+    // TYPOGRAPHY
+    title: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        marginBottom: 70,
+    },
+    subtitle: {
+        fontSize: 18,
+        color: '#666',
+        paddingLeft: 10,
+        marginBottom: 15,
+    },
+    
+    // SCREEN-SPECIFIC
     backProfileText: {
         color: '#4A90E2',
         fontSize: 16,

@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import { View, TouchableOpacity, Text, Platform, StyleSheet } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { View, TouchableOpacity, Text, StyleSheet, Modal, FlatList } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { commonStyles } from '../styles/commonStyles';
 
@@ -42,12 +41,10 @@ interface PlatformProfilePickerProps {
     /** Optional placeholder text */
     placeholder?: string;
 }
-
 /**
  * Platform-adapted profile picker component.
  * 
- * Displays a native profile picker with platform-specific handling:
- * iOS shows a spinner with validation button, Android auto-closes on selection.
+ * Displays a modal with a list of profiles for selection.
  * 
  * @param props - Component properties
  * @returns Profile picker component or null if not visible
@@ -63,15 +60,11 @@ const PlatformProfilePicker: React.FC<PlatformProfilePickerProps> = ({
     const { t } = useTranslation();
     
     /**
-     * Handles selection change with platform-specific behavior.
-     * Automatically closes picker on Android after selection.
+     * Handles profile selection and closes the modal.
      */
-    const handleValueChange = (itemValue: string | number) => {
-        onValueChange(itemValue);
-        
-        if (Platform.OS === 'android') {
-            onClose();
-        }
+    const handleProfileSelect = (profileId: string | number) => {
+        onValueChange(profileId);
+        onClose();
     };
 
     if (!visible) {
@@ -79,45 +72,79 @@ const PlatformProfilePicker: React.FC<PlatformProfilePickerProps> = ({
     }
 
     return (
-        <View style={styles.profilePickerContainer}>
-            <View style={styles.pickerWrapper}>
-                <Picker
-                    selectedValue={selectedValue}
-                    onValueChange={handleValueChange}
-                >
-                    <Picker.Item label={placeholder} value="" />
-                    {profiles.map((profile) => (
-                        <Picker.Item 
-                            key={profile.id} 
-                            label={`${profile.firstName} ${profile.lastName}`} 
-                            value={profile.id} 
-                        />
-                    ))}
-                </Picker>
+        <Modal
+            visible={visible}
+            transparent={true}
+            animationType="slide"
+            onRequestClose={onClose}
+        >
+            <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>{placeholder}</Text>
+                    <FlatList
+                        data={profiles}
+                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={({ item }) => (
+                            <TouchableOpacity 
+                                style={styles.profileItem}
+                                onPress={() => handleProfileSelect(item.id)}
+                            >
+                                <Text style={styles.profileText}>
+                                    {`${item.firstName} ${item.lastName}`}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                    />
+                    <TouchableOpacity 
+                        style={styles.closeButton}
+                        onPress={onClose}
+                    >
+                        <Text style={styles.closeButtonText}>{t('common.buttons.Cancel')}</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-            
-            {Platform.OS === 'ios' && (
-                <TouchableOpacity
-                    style={commonStyles.validateButton}
-                    onPress={onClose}
-                >
-                    <Text style={commonStyles.validateButtonText}>{t('common.buttons.Validate')}</Text>
-                </TouchableOpacity>
-            )}
-        </View>
+        </Modal>
     );
 };
 
 const styles = StyleSheet.create({
-    profilePickerContainer: {
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
         alignItems: 'center',
-        justifyContent: 'flex-start',
-        width: '100%',
     },
-    pickerWrapper: {
-        width: '100%',
-        height: 150,
-        overflow: 'hidden',
+    modalContent: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 15,
+        padding: 20,
+        width: '85%',
+        maxHeight: '70%',
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        textAlign: 'center',
+    },
+    profileItem: {
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
+    },
+    profileText: {
+        fontSize: 16,
+    },
+    closeButton: {
+        marginTop: 15,
+        padding: 15,
+        backgroundColor: '#E0E0E0',
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    closeButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
 

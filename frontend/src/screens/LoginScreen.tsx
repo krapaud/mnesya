@@ -1,6 +1,16 @@
 /**
- * LoginScreen - Caregiver authentication screen
- * Allows caregivers to log in with email and password
+ * Caregiver authentication screen.
+ * 
+ * Provides email and password login form for caregiver accounts.
+ * Includes navigation to registration screen and password recovery.
+ * 
+ * Features:
+ * - Email and password input fields
+ * - Form validation (to be implemented in Sprint 3)
+ * - Navigation to registration
+ * - Password recovery link (placeholder)
+ * 
+ * @module LoginScreen
  */
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image } from 'react-native';
@@ -13,11 +23,22 @@ import { commonStyles } from '../styles/commonStyles';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
+/**
+ * Login screen component for caregiver authentication.
+ * 
+ * Renders a login form with email and password inputs. Currently navigates
+ * directly to dashboard (authentication to be implemented in Sprint 3).
+ * 
+ * @param props - Navigation props
+ * @returns Login form screen
+ */
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
-    // Form state management for email and password inputs
+    /** Email input state */
     const [email, setEmail] = useState<string>('');
+    /** Password input state */
     const [password, setPassword] = useState<string>('');
+
     
     return (
         <View style={commonStyles.container}>
@@ -42,23 +63,23 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                 <View style={commonStyles.headerSpacer} />
             </View>
             
-            {/* Page title */}
-            <View style={commonStyles.titleSection}>
-                <Text style={commonStyles.title}>{t('login.title')}</Text>
+            {/* Title section */}
+            <View style={styles.titleContainer}>
+                <Text style={styles.title}>{t('login.title')}</Text>
             </View>
             
             {/* Login form */}
-            <View style={commonStyles.content}>
-                <Text style={commonStyles.label}>{t('common.fields.Email')}</Text>
-                <View style={commonStyles.formsButton}>
+            <View style={styles.formContainer}>
+                <Text style={styles.emailLabel}>{t('common.fields.Email')}</Text>
+                <View style={styles.input}>
                     <TextInput
                         placeholder={t('register.placeholders.Enter your Email')}
                         onChangeText={newText => setEmail(newText)}
                         defaultValue={email}
                     />
                 </View>
-                <Text style={commonStyles.label}>{t('common.fields.Password')}</Text>
-                <View style={commonStyles.formsButton}>
+                <Text style={styles.passwordLabel}>{t('common.fields.Password')}</Text>
+                <View style={styles.input}>
                     <TextInput
                         placeholder={t('register.placeholders.Enter your Password')}
                         secureTextEntry={true}
@@ -67,23 +88,23 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                     />
                 </View>
                 
-                {/* Login button - navigates to Dashboard */}
+                <TouchableOpacity onPress={() => {}}>
+                    <Text style={styles.lostPasswordText}>{t('login.buttons.lostPassword')}</Text>
+                </TouchableOpacity>
+            </View>
+            
+            {/* Buttons section - fixed at bottom */}
+            <View style={styles.buttonsContainer}>
                 <TouchableOpacity 
-                    style={[commonStyles.primaryButton, { marginTop: 60, width: '95%' }]}
+                    style={commonStyles.primaryButton}
                     onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         navigation.navigate('Dashboard');
                     }}
                 >
                     <Text style={commonStyles.primaryButtonText}>{t('login.buttons.submit')}</Text>
                 </TouchableOpacity>
                 
-                {/* Password recovery link */}
-                <TouchableOpacity onPress={() => {}}>
-                    <Text style={styles.lostPasswordText}>{t('login.buttons.lostPassword')}</Text>
-                </TouchableOpacity>
-                
-                {/* Navigation to registration screen */}
                 <TouchableOpacity onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     navigation.navigate('Register');
@@ -96,7 +117,42 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    // Screen-specific styles
+    // ========== LAYOUT ==========
+    titleContainer: {
+        justifyContent: 'center',
+        paddingHorizontal: 10,
+        paddingTop: 30,
+    },
+    formContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        paddingHorizontal: 0,
+        paddingTop: 10,
+    },
+    buttonsContainer: {
+        paddingBottom: 40,
+    },
+
+    // ========== TYPOGRAPHY ==========
+    title: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    emailLabel: {
+        fontSize: 18,
+        fontWeight: '500',
+        marginBottom: 5,
+        marginTop: -180,
+        paddingHorizontal: 10,
+    },
+    passwordLabel: {
+        fontSize: 18,
+        fontWeight: '500',
+        marginBottom: 5,
+        marginTop: 50,
+        paddingHorizontal: 10,
+    },
     createAccountText: {
         color: '#4A90E2',
         fontSize: 18,
@@ -105,9 +161,19 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     lostPasswordText: {
-        color: '#999',
+        color: '#666',
         fontSize: 16,
-        textAlign: 'center',
+        textAlign: 'left',
+        paddingHorizontal: 10,
+    },
+
+    // ========== FORM ELEMENTS ==========
+    input: {
+        backgroundColor: '#F5F5F5',
+        padding: 15,
+        borderRadius: 20,
+        marginBottom: 10,
+        width: '100%',
     },
 });
 
