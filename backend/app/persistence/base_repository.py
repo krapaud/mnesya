@@ -7,7 +7,6 @@ All specific repositories inherit from BaseRepository to get standard CRUD opera
 from sqlalchemy.orm import Session
 from typing import Generic, TypeVar, Type, List, Optional
 from uuid import UUID
-from app import SessionLocal
 
 T = TypeVar('T')  # Generic type for the model class
 
@@ -27,14 +26,14 @@ class BaseRepository(Generic[T]):
     Note:
         The session is automatically closed when the repository is destroyed.
     """
-    def __init__(self, model: Type[T]):
+    def __init__(self, model: Type[T], db: Session):
         """Initialize the repository with a model class.
         
         Args:
             model (Type[T]): The SQLAlchemy model class to manage
         """
         self.model = model
-        self.db: Session = SessionLocal()
+        self.db = db
 
     def add(self, entity: T) -> T:
         """Add a new entity to the database.
@@ -132,12 +131,3 @@ class BaseRepository(Generic[T]):
         except Exception as e:
             self.db.rollback()
             raise e
-
-    def __del__(self):
-        """Clean up database session when repository is destroyed.
-        
-        Note:
-            This ensures database connections are properly closed
-        """
-        if hasattr(self, 'db'):
-            self.db.close()

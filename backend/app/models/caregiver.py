@@ -242,16 +242,14 @@ class CaregiverModel(database):
         if self._user_ids and user_id in self._user_ids:
             self._user_ids.remove(user_id)
 
-    def hash_password(self, password: str) -> str:
-        """Hash a plaintext password using bcrypt.
+    def hash_password(self, password: str) -> None:
+        """Hash a plaintext password using bcrypt and store it.
         
         Args:
             password (str): The plaintext password to hash
-            
-        Returns:
-            str: The bcrypt hashed password
         """
-        return bcrypt.hash(password)
+        # Bypass the setter to avoid validation on the hash
+        self._password = bcrypt.hash(password)
 
     def verify_password(self, password: str) -> bool:
         """Verify a plaintext password against the stored hash.
@@ -262,4 +260,4 @@ class CaregiverModel(database):
         Returns:
             bool: True if password matches, False otherwise
         """
-        return bcrypt.verify(self.password, password)
+        return bcrypt.verify(password, self.password)
