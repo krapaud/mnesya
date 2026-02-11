@@ -895,6 +895,411 @@ I committed this feature professionally:
 
 ---
 
+### 10. Bottom Tab Navigation - Android System Buttons Overlap
+
+**Date:** 10 February 2026  
+**Components:** `CaregiverTabs.tsx`, `UserTabs.tsx`  
+**Severity:** High (Android-specific UX issue)
+
+#### Problem Description
+
+I discovered that on Android devices, the bottom tab navigation was overlapping with the system navigation buttons (back, home, recent apps). This made the tabs partially inaccessible and created a poor user experience on Android.
+
+#### What I Discovered
+
+When I tested the app on an Android device, I noticed:
+
+1. **Visual Overlap**: The bottom tabs were positioned behind the Android system navigation bar
+2. **Fixed Height Issue**: My tabs had a fixed height of 70px with fixed padding (10px bottom, 5px top)
+3. **No Safe Area Handling**: I wasn't accounting for the device's safe area insets on Android
+4. **iOS vs Android Difference**: The issue was specific to Android because iOS handles safe areas differently
+
+#### Root Cause Analysis
+
+In both navigation files, I had:
+
+```tsx
+tabBar: {
+    height: 70,
+    paddingBottom: 10,
+    paddingTop: 5,
+},
+```
+
+This fixed-height approach didn't adapt to different Android devices with varying system UI heights.
+
+#### How I Fixed It
+
+I implemented dynamic safe area handling using `useSafeAreaInsets` from `react-native-safe-area-context`:
+
+**Step 1: Import the hook**
+```tsx
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+```
+
+**Step 2: Use insets in the component**
+```tsx
+const CaregiverTabs: React.FC = () => {
+    const { t } = useTranslation();
+    const insets = useSafeAreaInsets();
+    
+    return (
+        <Tab.Navigator
+            screenOptions={{
+                // ... other options
+                tabBarStyle: {
+                    height: 70 + insets.bottom,
+                    paddingBottom: insets.bottom + 10,
+                    paddingTop: 5,
+                },
+                // ... other styles
+            }}
+        >
+```
+
+**What This Does:**
+- `insets.bottom` provides the height of the Android system UI at the bottom
+- Height dynamically adjusts: `70 + insets.bottom`
+- Padding adjusts: `insets.bottom + 10` (keeps 10px visual padding above system UI)
+- On devices without system UI, `insets.bottom` is 0, so it works normally
+
+#### Files Modified
+
+1. `/frontend/src/navigation/CaregiverTabs.tsx`
+2. `/frontend/src/navigation/UserTabs.tsx`
+
+Both files received the same fix since they both use bottom tab navigation.
+
+#### What I Learned
+
+This bug taught me several important lessons:
+
+1. **Platform Differences**: iOS and Android handle safe areas differently - always test on both
+2. **Safe Area Context**: The `react-native-safe-area-context` library is essential for cross-platform apps
+3. **Dynamic Layouts**: Never use fixed heights for UI elements that interact with system UI
+4. **Accessibility**: System navigation buttons are critical for Android users - blocking them breaks the entire UX
+
+#### Testing Approach
+
+To verify the fix worked:
+
+1. ✅ Tested on Android device with gesture navigation (newer style)
+2. ✅ Tested on Android device with button navigation (3-button style)
+3. ✅ Verified tabs remain accessible and don't overlap
+4. ✅ Checked that iOS behavior wasn't negatively affected
+
+#### Future Considerations
+
+If I encounter similar layout issues in the future, I should:
+
+- Always consider safe areas from the start of development
+- Use `SafeAreaView` or `useSafeAreaInsets` for edge-positioned UI elements
+- Test early on physical devices, not just simulators
+- Remember that Android has more device variety than iOS
+
+---
+
+### 11. PlatformTimePicker - Duplicate React Keys in Infinite Scroll
+
+**Date:** 11 February 2026  
+**Component:** `PlatformTimePicker.tsx`  
+**Severity:** High (Console Errors / Performance)
+
+#### Problem Description
+
+After implementing the infinite scroll feature for the time picker (iOS-style looping), I encountered hundreds of React warnings about duplicate keys. The console was flooded with errors like:
+
+```
+ERROR  Encountered two children with the same key, `%s`. Keys should be unique 
+so that components maintain their identity across updates. Non-unique keys may 
+cause children to be duplicated and/or omitted — the behavior is unsupported 
+and could change in a future version.
+```
+
+The errors showed keys like `.1:$0`, `.1:$5`, `.1:$10` repeating many times.
+
+#### Root Cause Analysis
+
+I discovered the issue was in how I implemented infinite scrolling:
+
+**My Initial Broken Implementation:**
+```typescript
+const baseHours = Array.from({ length: 24 }, (_, i) => i);
+const baseMinutes = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+
+// These created duplicate values 100 times
+const hours = Array(100).fill(baseHours).flat();     // [0,1,2...23, 0,1,2...23, ...]
+const minutes = Array(100).fill(baseMinutes).flat(); // [0,5,10...55, 0,5,10...55, ...]
+
+// Then in JSX:
+{hours.map((hour, index) => (
+    <View key={`hour-${index}`}>  // Keys were index-based
+        <Text>{hour}</Text>
+    </View>
+))}
+```
+
+**Why This Failed:**
+
+1. I was repeating the same arrays 100 times to create the infinite scroll effect
+2. Each repetition had the same values (0-23 for hours, 0-55 for minutes)
+3. React was seeing the same numeric values rendered multiple times
+4. Even though I used `index` in the key, React's reconciliation was still detecting issues
+5. The pattern `.1:$0`, `.1:$5` suggests React was grouping by value, not just by key
+
+#### How I Fixed It
+
+I restructured the data to use objects with truly unique identifiers:
+
+```typescript
+/**
+ * Creates looped arrays for infinite scrolling with unique identifiers.
+ */
+const hours = Array(LOOP_COUNT)
+    .fill(null)
+    .flatMap((_, loopIndex) => 
+        baseHours.map((h) => ({ 
+            value: h,           // The actual hour value (0-23)
+            id: `${loopIndex}-${h}`  // Unique ID like "0-5", "1-5", "2-5"
+        }))
+    );
+
+const minutes = Array(LOOP_COUNT)
+    .fill(null)
+    .flatMap((_, loopIndex) => 
+        baseMinutes.map((m) => ({ 
+            value: m,           // The actual minute value
+            id: `${loopIndex}-${m}`  // Unique ID
+        }))
+    );
+
+// In JSX:
+{hours.map((hour) => (
+    <View key={hour.id}>  // Now using truly unique IDs
+        <Text>{hour.value}</Text>
+    </View>
+))}
+```
+
+**Additional Updates Required:**
+
+I also had to update all related functions to work with objects instead of primitive values:
+
+```typescript
+// Before: selectedHour === hour
+// After:  selectedHour === hour.value
+
+// Before: const hourValue = hours[index] % 24;
+// After:  const hourValue = hours[index].value;
+
+// Before: selectedMinute === minute
+// After:  selectedMinute === minute.value
+```
+
+#### Files Modified
+
+1. `/frontend/src/components/PlatformTimePicker.tsx`
+   - Changed data structure from arrays of primitives to arrays of objects
+   - Updated all map operations to use `hour.id` and `minute.id` as keys
+   - Modified scroll handlers to access `.value` property
+   - Updated all conditional rendering to compare with `.value`
+
+#### What I Learned
+
+This bug taught me several critical lessons about React:
+
+1. **React Keys Must Be Truly Unique**: Using array indices isn't always sufficient, especially with complex data structures
+2. **Value-Based Reconciliation**: React considers both keys AND values when reconciling components
+3. **Data Structure Design**: Sometimes adding extra structure (objects vs primitives) improves code clarity and prevents bugs
+4. **Infinite Scroll Challenges**: Creating seamless infinite scrolling requires careful consideration of uniqueness across repetitions
+5. **Performance Impact**: Duplicate keys can cause unexpected re-renders and poor performance
+
+#### Testing Verification
+
+After applying the fix:
+
+✅ **Console is clean** - No more duplicate key warnings  
+✅ **Scroll performance is smooth** - No lag or stuttering  
+✅ **Selection works correctly** - Hour and minute selection updates properly  
+✅ **Infinite scrolling works** - Can scroll indefinitely in both directions  
+✅ **Recentering functions properly** - Scroll position resets smoothly after each interaction
+
+#### Alternative Solutions I Considered
+
+1. **Using index + value as key**: `key={`${index}-${hour}`}` 
+   - ❌ Would still have duplicates since values repeat
+   
+2. **UUID library**: Generate random UUIDs for each item
+   - ❌ Overkill and unnecessary dependency
+   
+3. **Using Map instead of Array**: Store items in a Map with unique keys
+   - ❌ More complex to work with in React rendering
+   
+4. **Object with unique IDs** ✅ **CHOSEN**
+   - Simple, performant, and guarantees uniqueness
+
+#### Future Considerations
+
+When implementing infinite scroll or repeating data patterns:
+
+- Always ensure keys are unique across ALL rendered elements, not just within one iteration
+- Consider using objects with ID properties instead of primitive values
+- Test with React DevTools to catch key-related warnings early
+- Remember that React's reconciliation algorithm looks beyond just the key prop
+- Profile performance to ensure the data structure doesn't cause unnecessary re-renders
+
+---
+
+### 12. PlatformTimePicker - Slow Opening Performance
+
+**Date:** 11 February 2026  
+**Component:** `PlatformTimePicker.tsx`  
+**Severity:** Medium - UX Performance Issue
+
+#### Problem Description
+
+I noticed that the time picker was opening significantly slower than the date picker. The delay was noticeable and made the user experience feel sluggish, especially compared to the smooth, instant opening of the date picker modal.
+
+#### What I Discovered
+
+After investigating the component, I identified several performance bottlenecks:
+
+1. **Massive Array Generation**: The component was generating 2400 hour elements and 1200 minute elements (LOOP_COUNT = 100)
+2. **Slow Initialization**: A 100ms setTimeout delay was adding unnecessary lag before positioning the scroll
+3. **Repeated Calculations**: Arrays were being recreated on every render without memoization
+4. **Heavy Initial Render**: Processing thousands of elements before displaying the modal
+
+#### Root Cause Analysis
+
+The performance issues stemmed from trying to create too extensive an infinite scroll effect:
+
+```typescript
+// BEFORE - Performance killer
+const LOOP_COUNT = 100; // Way too many repetitions!
+
+const hours = Array(LOOP_COUNT)
+    .fill(null)
+    .flatMap((_, loopIndex) => baseHours.map((h) => ({ value: h, id: `${loopIndex}-${h}` })));
+// Result: 100 * 24 = 2400 elements
+
+const minutes = Array(LOOP_COUNT)
+    .fill(null)
+    .flatMap((_, loopIndex) => baseMinutes.map((m) => ({ value: m, id: `${loopIndex}-${m}` })));
+// Result: 100 * 12 = 1200 elements
+
+setTimeout(() => {
+    // Position scroll
+}, 100); // Unnecessary delay
+```
+
+Total elements rendered: **3600 items** just for a simple time picker!
+
+#### How I Fixed It
+
+I implemented three key optimizations:
+
+**1. Reduced Loop Count (95% reduction)**
+```typescript
+// AFTER - Much more reasonable
+const LOOP_COUNT = 5; // Still plenty for infinite scroll effect
+
+// New totals:
+// Hours: 5 * 24 = 120 elements
+// Minutes: 5 * 12 = 60 elements
+// Total: 180 elements (down from 3600!)
+```
+
+**2. Faster Initialization (90% faster)**
+```typescript
+// BEFORE
+setTimeout(() => {
+    // Position scroll
+}, 100);
+
+// AFTER
+setTimeout(() => {
+    // Position scroll
+}, 10); // 10x faster response
+```
+
+**3. Added Performance Memoization**
+```typescript
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+
+const baseHours = useMemo(() => Array.from({ length: 24 }, (_, i) => i), []);
+const baseMinutes = useMemo(() => [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55], []);
+
+const hours = useMemo(() => 
+    Array(LOOP_COUNT)
+        .fill(null)
+        .flatMap((_, loopIndex) => baseHours.map((h) => ({ value: h, id: `${loopIndex}-${h}` }))),
+    [LOOP_COUNT, baseHours]
+);
+
+const minutes = useMemo(() => 
+    Array(LOOP_COUNT)
+        .fill(null)
+        .flatMap((_, loopIndex) => baseMinutes.map((m) => ({ value: m, id: `${loopIndex}-${m}` }))),
+    [LOOP_COUNT, baseMinutes]
+);
+```
+
+#### Impact Assessment
+
+**Before Optimizations:**
+- 🐌 Slow, noticeable delay when opening
+- 😕 Poor user experience compared to date picker
+- ⚡ High memory usage (3600 elements)
+- 🔄 Recalculating arrays on every render
+
+**After Optimizations:**
+- ⚡ Opens instantly, matching date picker speed
+- 😊 Smooth user experience
+- 💚 95% reduction in rendered elements (180 vs 3600)
+- 🎯 Arrays cached with useMemo, no unnecessary recalculations
+
+#### Why These Numbers Work
+
+I validated that `LOOP_COUNT = 5` is more than sufficient:
+
+- **5 loops of 24 hours = 120 total hours displayed**
+- Users would need to scroll through **120 hours** (5 complete days) to reach the edge
+- In practice, users scroll 1-3 positions max to select their time
+- The infinite scroll still works perfectly, users never notice it's not truly infinite
+- Even power users couldn't realistically scroll fast enough to hit the limit
+
+#### What I Learned
+
+This bug taught me important lessons about performance optimization:
+
+1. **Question Initial Assumptions**: Just because you CAN loop 100 times doesn't mean you SHOULD
+2. **Profile Before Optimizing**: Understanding what's slow helps target fixes effectively
+3. **useMemo for Expensive Calculations**: Arrays, objects, and complex computations benefit greatly from memoization
+4. **User Perception**: Even small delays (100ms) are noticeable when comparing similar features
+5. **Reasonable Defaults**: 5 loops of an infinite scroll is just as good as 100 for real-world usage
+
+#### Testing Verification
+
+After applying all optimizations:
+
+✅ **Opening speed matches date picker** - No perceptible delay  
+✅ **Smooth scrolling** - No lag or stuttering  
+✅ **Infinite scroll still works** - Can scroll in both directions seamlessly  
+✅ **Memory usage reduced** - 95% fewer DOM elements  
+✅ **No visual difference** - Users can't tell it's not 100 loops  
+
+#### Future Considerations
+
+For similar components in the future:
+
+- Start with the minimum viable loop count (3-5)
+- Always use `useMemo` for data transformations
+- Keep initialization delays as short as possible (10-50ms max)
+- Compare performance with similar components to maintain consistency
+- Profile with React DevTools to identify bottlenecks
+
+---
+
 ## Backend Issues
 
 No issues reported yet

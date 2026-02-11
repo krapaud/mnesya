@@ -1,3 +1,11 @@
+/**
+ * Notification utilities for managing push notifications and reminders.
+ * 
+ * Handles permission requests, notification scheduling, and caregiver alerts
+ * for the reminder system.
+ * 
+ * @module notifications
+ */
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import AsyncStorage from '@react-native-async-storage/async-storage';

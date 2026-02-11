@@ -1,15 +1,10 @@
 /**
- * animations.ts - Centralized animation utilities for the app
+ * Centralized animation utilities for the application.
  * 
- * Extracts and centralizes animation logic for reuse across different screens.
- * Previously implemented directly in ReminderNotificationScreen, but centralized
- * for better maintainability and code organization.
+ * Provides reusable animations for bell swings, button presses,
+ * and other UI feedback across screens.
  * 
- * Benefits:
- * - Reusable animations across components
- * - Testable animation logic in isolation
- * - Keeps screen components focused on rendering
- * - Maintains consistent animation behavior across the app
+ * @module animations
  */
 import { Animated } from 'react-native';
 

@@ -1,13 +1,12 @@
 /**
- * UserProfileScreen - Profile settings page for elderly users
+ * CaregiverProfileScreen - Profile settings page for caregivers
  * 
- * Displays user account information with a simplified interface:
- * - Profile information (name, age)
- * - Re-pairing action with confirmation modal
+ * Displays caregiver account information and provides access to:
+ * - Profile information (name, email)
+ * - Password change functionality
+ * - Logout action with confirmation modal
  * 
- * Designed with larger elements and clear labels for accessibility.
- * 
- * @module UserProfileScreen
+ * @module CaregiverProfileScreen
  */
 
 import React, { useState } from 'react';
@@ -18,60 +17,72 @@ import { useTranslation } from 'react-i18next';
 import type { CompositeScreenProps } from '@react-navigation/native';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { UserTabsParamList, RootStackParamList } from '../types/index';
+import type { CaregiverTabsParamList, RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { fakeProfiles } from '../data/fakeData';
 
 type Props = CompositeScreenProps<
-    BottomTabScreenProps<UserTabsParamList, 'Profile'>,
+    BottomTabScreenProps<CaregiverTabsParamList, 'Profile'>,
     NativeStackScreenProps<RootStackParamList>
 >;
 
 /**
- * User profile settings screen component.
+ * Caregiver profile settings screen component.
  * 
- * Displays account information for elderly users with a simplified,
- * accessible interface. Provides logout functionality.
+ * Displays account information and settings options for caregivers.
+ * Provides logout and password change functionality.
  * 
  * @param props - Component properties
  * @returns Profile settings screen
  */
-const UserProfileScreen: React.FC<Props> = ({ navigation }) => {
+const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
-    
+
     // Modal visibility state
-    const [showWarningModal, setShowWarningModal] = useState(false);
-    
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+
     // TODO: Replace with actual user data from context/store
-    // Temporary simulation using fake data
-    const currentUser = fakeProfiles.find(p => p.firstName === "Marie");
-
-    /**
-     * Handles re-pairing button click.
-     * Opens warning modal before proceeding.
-     */
-    const handleRePairing = () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        setShowWarningModal(true);
+    const caregiverData = {
+        firstName: 'Jean',
+        lastName: 'Dupont',
+        email: 'jean.dupont@example.com'
     };
 
     /**
-     * Handles re-pairing confirmation.
-     * Closes modal and navigates to pairing screen.
+     * Handles password change navigation.
      */
-    const handleConfirmRePairing = () => {
-        setShowWarningModal(false);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-        navigation.getParent()?.navigate('UserPairing');
+    const handleChangePassword = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        // TODO: Navigate to password change screen when implemented
+        console.log('Change password clicked');
     };
 
     /**
-     * Handles re-pairing cancellation.
-     * Closes the warning modal.
+     * Handles logout button click.
+     * Opens confirmation modal before proceeding.
      */
-    const handleCancelRePairing = () => {
+    const handleLogout = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        setShowWarningModal(false);
+        setShowLogoutModal(true);
+    };
+
+    /**
+     * Handles logout confirmation.
+     * Closes modal and navigates to Welcome screen.
+     */
+    const handleConfirmLogout = () => {
+        setShowLogoutModal(false);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        // TODO: Clear authentication state
+        navigation.navigate('Welcome');
+    };
+
+    /**
+     * Handles logout cancellation.
+     * Closes the confirmation modal.
+     */
+    const handleCancelLogout = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        setShowLogoutModal(false);
     };
 
     return (
@@ -91,50 +102,62 @@ const UserProfileScreen: React.FC<Props> = ({ navigation }) => {
 
             {/* Page title */}
             <View style={styles.titleSection}>
-                <Text style={styles.title}>{t('userProfile.title')}</Text>
+                <Text style={styles.title}>{t('caregiverProfile.title')}</Text>
             </View>
 
             <ScrollView style={styles.scrollContainer}>
                 {/* Profile Information Section */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>{t('userProfile.sections.accountInfo')}</Text>
+                    <Text style={styles.sectionTitle}>{t('caregiverProfile.sections.accountInfo')}</Text>
                     
                     {/* Name */}
                     <View style={styles.infoRow}>
                         <Ionicons name="person-outline" size={24} color="#666" />
                         <View style={styles.infoContent}>
-                            <Text style={styles.infoLabel}>{t('userProfile.fields.name')}</Text>
+                            <Text style={styles.infoLabel}>{t('caregiverProfile.fields.name')}</Text>
                             <Text style={styles.infoValue}>
-                                {currentUser?.firstName} {currentUser?.lastName}
+                                {caregiverData.firstName} {caregiverData.lastName}
                             </Text>
                         </View>
                     </View>
 
-                    {/* Age */}
+                    {/* Email */}
                     <View style={styles.infoRow}>
-                        <Ionicons name="calendar-outline" size={24} color="#666" />
+                        <Ionicons name="mail-outline" size={24} color="#666" />
                         <View style={styles.infoContent}>
-                            <Text style={styles.infoLabel}>{t('userProfile.fields.age')}</Text>
-                            <Text style={styles.infoValue}>
-                                {currentUser?.age} {t('common.units.years old')}
-                            </Text>
+                            <Text style={styles.infoLabel}>{t('caregiverProfile.fields.email')}</Text>
+                            <Text style={styles.infoValue}>{caregiverData.email}</Text>
                         </View>
                     </View>
                 </View>
 
                 {/* Actions Section */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>{t('userProfile.sections.actions')}</Text>
+                    <Text style={styles.sectionTitle}>{t('caregiverProfile.sections.actions')}</Text>
                     
-                    {/* Re-Pairing Button */}
+                    {/* Change Password Button */}
                     <TouchableOpacity 
-                        style={[styles.actionButton, styles.pairingButton]}
-                        onPress={handleRePairing}
+                        style={styles.actionButton}
+                        onPress={handleChangePassword}
                     >
                         <View style={styles.actionButtonContent}>
-                            <Ionicons name="sync-outline" size={24} color="#4A90E2" />
-                            <Text style={[styles.actionButtonText, styles.pairingText]}>
-                                {t('userProfile.buttons.rePairing')}
+                            <Ionicons name="key-outline" size={24} color="#4A90E2" />
+                            <Text style={styles.actionButtonText}>
+                                {t('caregiverProfile.buttons.changePassword')}
+                            </Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={24} color="#999" />
+                    </TouchableOpacity>
+
+                    {/* Logout Button */}
+                    <TouchableOpacity 
+                        style={[styles.actionButton, styles.logoutButton]}
+                        onPress={handleLogout}
+                    >
+                        <View style={styles.actionButtonContent}>
+                            <Ionicons name="log-out-outline" size={24} color="#E53935" />
+                            <Text style={[styles.actionButtonText, styles.logoutText]}>
+                                {t('caregiverProfile.buttons.logout')}
                             </Text>
                         </View>
                         <Ionicons name="chevron-forward" size={24} color="#999" />
@@ -142,45 +165,45 @@ const UserProfileScreen: React.FC<Props> = ({ navigation }) => {
                 </View>
             </ScrollView>
 
-            {/* Re-Pairing Warning Modal */}
+            {/* Logout Confirmation Modal */}
             <Modal
-                visible={showWarningModal}
+                visible={showLogoutModal}
                 transparent={true}
                 animationType="fade"
-                onRequestClose={handleCancelRePairing}
+                onRequestClose={handleCancelLogout}
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
                         {/* Warning icon */}
                         <View style={styles.warningIconContainer}>
-                            <Ionicons name="warning-outline" size={48} color="#FF9800" />
+                            <Ionicons name="log-out-outline" size={48} color="#E53935" />
                         </View>
 
                         {/* Title */}
-                        <Text style={styles.modalTitle}>{t('userProfile.modal.title')}</Text>
+                        <Text style={styles.modalTitle}>{t('caregiverProfile.modal.title')}</Text>
 
                         {/* Warning message */}
                         <Text style={styles.modalMessage}>
-                            {t('userProfile.modal.message')}
+                            {t('caregiverProfile.modal.message')}
                         </Text>
 
                         {/* Buttons */}
                         <View style={styles.modalButtons}>
                             <TouchableOpacity 
                                 style={[styles.modalButton, styles.cancelButton]}
-                                onPress={handleCancelRePairing}
+                                onPress={handleCancelLogout}
                             >
                                 <Text style={styles.cancelButtonText}>
-                                    {t('userProfile.modal.cancel')}
+                                    {t('caregiverProfile.modal.cancel')}
                                 </Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity 
                                 style={[styles.modalButton, styles.confirmButton]}
-                                onPress={handleConfirmRePairing}
+                                onPress={handleConfirmLogout}
                             >
                                 <Text style={styles.confirmButtonText}>
-                                    {t('userProfile.modal.confirm')}
+                                    {t('caregiverProfile.modal.confirm')}
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -264,12 +287,12 @@ const styles = StyleSheet.create({
         color: '#333',
         fontWeight: '500',
     },
-    pairingButton: {
-        borderColor: '#4A90E2',
-        backgroundColor: '#E8F4FF',
+    logoutButton: {
+        borderColor: '#E53935',
+        backgroundColor: '#FFF5F5',
     },
-    pairingText: {
-        color: '#4A90E2',
+    logoutText: {
+        color: '#E53935',
     },
     modalOverlay: {
         flex: 1,
@@ -288,7 +311,7 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#FFF3E0',
+        backgroundColor: '#FFF5F5',
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 20,
@@ -329,7 +352,7 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     confirmButton: {
-        backgroundColor: '#FF9800',
+        backgroundColor: '#E53935',
     },
     confirmButtonText: {
         fontSize: 16,
@@ -338,4 +361,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default UserProfileScreen;
+export default CaregiverProfileScreen;

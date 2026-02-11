@@ -19,15 +19,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../types/index';
+import type { RootStackParamList, CaregiverTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { ReminderItem } from '../types/interfaces';
 import { fakeReminders } from '../data/fakeData';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { cancelNotifications } from '../utils/notifications';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Dashboard'>;
+type Props = CompositeScreenProps<
+    BottomTabScreenProps<CaregiverTabsParamList, 'Reminders'>,
+    NativeStackScreenProps<RootStackParamList>
+>;
 
 const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -81,17 +86,9 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
 
     return (
          <View style={commonStyles.container}>
-                    {/* Header with back button and logo */}
+                    {/* Header with app logo and name */}
                     <View style={commonStyles.header}>
-                        <TouchableOpacity onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            navigation.goBack();
-                        }}>
-                            <View style={commonStyles.ArrowIconCircle}>
-                                <Ionicons name="arrow-back" size={24} color='#4A90E2'
-                            />
-                            </View>
-                        </TouchableOpacity>
+                        <View style={commonStyles.headerSpacer} />
                         <View style={commonStyles.headerCenter}>
                             <Image 
                                 source={require('../../assets/mnesya-logo.png')} 
@@ -102,8 +99,8 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                         <View style={commonStyles.headerSpacer} />
                     </View>
                     {/* Page title */}
-                    <View style={commonStyles.titleSection}>
-                        <Text style={commonStyles.title}>{t('reminders.Title')}</Text>
+                    <View style={styles.titleSection}>
+                        <Text style={styles.title}>{t('reminders.Title')}</Text>
                     </View>
                     
                     {/* Action button */}
@@ -196,10 +193,10 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                                 </Picker>
                             </View>
                             <TouchableOpacity
-                                style={[commonStyles.validateButton, { marginTop: 10 }]}
+                                style={[commonStyles.primaryButton, { marginTop: 10 }]}
                                 onPress={() => setShowProfilePicker(false)}
                             >
-                                <Text style={commonStyles.validateButtonText}>Validate</Text>
+                                <Text style={commonStyles.primaryButtonText}>Validate</Text>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -223,10 +220,10 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                                 </Picker>
                             </View>
                             <TouchableOpacity
-                                style={[commonStyles.validateButton, { marginTop: 10 }]}
+                                style={[commonStyles.primaryButton, { marginTop: 10 }]}
                                 onPress={() => setShowDatePicker(false)}
                             >
-                                <Text style={commonStyles.validateButtonText}>{t('common.buttons.Validate')}</Text>
+                                <Text style={commonStyles.primaryButtonText}>{t('common.buttons.Validate')}</Text>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -272,13 +269,28 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                     </ScrollView>
                     )}
             </View>
-    );
+        );
 };
 
 const styles = StyleSheet.create({
-    // Screen-specific styles
+    // LAYOUT
+    titleSection: {
+        width: '100%',
+        paddingLeft: 10,
+        marginTop: 30,
+        marginBottom: 20,
+    },
+    
+    // TYPOGRAPHY
+    title: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    
+    // FILTER COMPONENTS
     filtersSection: {
-        marginTop: 20,
+        marginTop: 10,
         marginBottom: 10,
     },
     filterRow: {
@@ -290,7 +302,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     filterLabel: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: '600',
         marginBottom: 5,
         color: '#333',
@@ -304,20 +316,21 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 1,
         borderColor: '#E0E0E0',
+        minHeight: 44,
     },
     filterDropdownText: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#333',
     },
     resetButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 8,
+        paddingVertical: 1,
         gap: 6,
     },
     resetButtonText: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#4A90E2',
         fontWeight: '600',
     },

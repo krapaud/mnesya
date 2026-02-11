@@ -2,7 +2,8 @@
   "common": {
     "buttons": {
       "New reminder": "Nouveau Rappel",
-      "Validate": "Valider"
+      "Validate": "Valider",
+      "Cancel": "Annuler"
     },
     "fields": {
       "Email": "Email",
@@ -20,14 +21,18 @@
     "pickersText": {
         "All Profiles": "Tous",
         "All Dates": "Toutes",
-        "Select a profile": "Sélectionner un Profil"
+        "Select a profile": "Sélectionner un Profil",
+        "Select Date": "Sélectionner une Date",
+        "Select Time": "Sélectionner une Heure",
+        "Today": "Aujourd'hui",
+        "Tomorrow": "Demain"
     }
   },
   "welcome": {
     "title": "Bienvenue sur Mnesya",
     "subtitle": "Choisissez votre type de profil",
     "userButton": "Utilisateur",
-    "caregiverButton": "Accompagnateur"
+    "caregiverButton": "Accompagnant"
   },
   "login": {
     "title": "Connexion Accompagnant",
@@ -53,6 +58,38 @@
     "buttons": {
         "Sign Up": "S'enregistrer",
         "Already have an account? Log in": "Vous avez déjà un compte? Connectez vous"
+    },
+    "errors": {
+        "Email must be between 5 and 255 characters": "L'email doit contenir entre 5 et 255 caractères",
+        "Invalid email": "Format d'email invalide",
+        "Password must be at least 8 characters": "Le mot de passe doit contenir au moins 8 caractères",
+        "Password must be at most 20 characters": "Le mot de passe doit contenir au maximum 20 caractères",
+        "Password must contain at least one digit": "Le mot de passe doit contenir au moins un chiffre",
+        "Password must contain at least one uppercase letter": "Le mot de passe doit contenir au moins une majuscule",
+        "Password must contain at least one lowercase letter": "Le mot de passe doit contenir au moins une minuscule",
+        "Password must contain at least one special character": "Le mot de passe doit contenir au moins un caractère spécial ($@#%*!~&)",
+        "Passwords do not match": "Les mots de passe ne correspondent pas",
+        "All fields are required": "Tous les champs sont requis"
+    },
+    "errors": {
+        "Email must be between 5 and 255 characters": "L'email doit contenir entre 5 et 255 caractères",
+        "Invalid email": "Format d'email invalide",
+        "Password must be at least 8 characters": "Le mot de passe doit contenir au moins 8 caractères",
+        "Password must be at most 20 characters": "Le mot de passe doit contenir au maximum 20 caractères",
+        "Password must contain at least one digit": "Le mot de passe doit contenir au moins un chiffre",
+        "Password must contain at least one uppercase letter": "Le mot de passe doit contenir au moins une majuscule",
+        "Password must contain at least one lowercase letter": "Le mot de passe doit contenir au moins une minuscule",
+        "Password must contain at least one special character": "Le mot de passe doit contenir au moins un caractère spécial ($@#%*!~&)",
+        "Passwords do not match": "Les mots de passe ne correspondent pas",
+        "All fields are required": "Tous les champs sont requis",
+        "Name cannot be empty": "Le nom ne peut pas être vide",
+        "Name must be at most 100 characters": "Le nom doit contenir au maximum 100 caractères"
+    },
+    "success": {
+        "Valid email": "✓ Email valide",
+        "Valid password": "✓ Mot de passe valide",
+        "Passwords match": "✓ Les mots de passe correspondent",
+        "Valid name": "✓ Nom valide"
     }
   },
   "dashboard": {
@@ -88,7 +125,7 @@
   "CreateReminder": {
     "Title": "Créer un Rappel",
     "fields": {
-        "For Profile": "Pour le profil",
+        "For Profile": "Destinataire",
         "Reminder Title": "Titre du Rappel",
         "Time": "Heure"
     },
@@ -100,7 +137,7 @@
         "Save Reminder": "Sauvegarder le Rappel"
     },
     "message": {
-        "Be careful not to enter sensitive confidential information.": "Il est important de ne pas saisir de données confidentielles sensibles."
+        "Be careful not to enter sensitive confidential information.": "Attention: Évitez de saisir des informations confidentielles."
     },
     "errors": {
         "title": "Erreur",
@@ -165,8 +202,15 @@
         "Profile not found": "Profil introuvable",
         "No active reminders": "Aucun rappel actif"
     }
-  },
-  "ReminderNotification": {
+  },  "pairingCode": {
+    "title": "Code de jumelage",
+    "description": "Partagez ce code avec votre utilisateur pour jumeler son appareil",
+    "buttons": {
+      "copyCode": "Copier le code",
+      "done": "Terminé"
+    },
+    "tip": "Astuce : Ce code expire dans 5 minutes"
+  },  "ReminderNotification": {
     "buttons": {
         "Done": "Terminé",
         "Remind later": "Me rappeler plus tard",
@@ -174,6 +218,47 @@
     },
     "messages": {
         "Reminder not found": "Rappel introuvable"
+    }
+  },
+  "caregiverProfile": {
+    "title": "Mon Profil",
+    "sections": {
+      "accountInfo": "Informations du compte",
+      "actions": "Actions du compte"
+    },
+    "fields": {
+      "name": "Nom",
+      "email": "Email"
+    },
+    "buttons": {
+      "changePassword": "Changer le mot de passe",
+      "logout": "Déconnexion"
+    },
+    "modal": {
+      "title": "Confirmer la déconnexion",
+      "message": "Vous allez être déconnecté et devrez saisir vos identifiants à nouveau pour vous reconnecter.",
+      "cancel": "Annuler",
+      "confirm": "Se déconnecter"
+    }
+  },
+  "userProfile": {
+    "title": "Mon Profil",
+    "sections": {
+      "accountInfo": "Mes informations",
+      "actions": "Actions"
+    },
+    "fields": {
+      "name": "Nom",
+      "age": "Âge"
+    },
+    "buttons": {
+      "rePairing": "Jumeler à nouveau"
+    },
+    "modal": {
+      "title": "Attention",
+      "message": "Cette action réinitialisera votre jumelage. Vous ne recevrez plus de notifications tant que vous n'aurez pas saisi un nouveau code de jumelage.",
+      "cancel": "Annuler",
+      "confirm": "Continuer"
     }
   },
   "notifications": {

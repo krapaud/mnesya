@@ -28,9 +28,9 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
             </View>
             
             {/* Welcome title and instructions */}
-            <View style={[commonStyles.titleSection, { marginTop: 30 }]}>
-                <Text style={commonStyles.title}>{t('welcome.title')}</Text>
-                <Text style={commonStyles.subtitle}>{t('welcome.subtitle')}</Text>
+            <View style={styles.titleSection}>
+                <Text style={styles.title}>{t('welcome.title')}</Text>
+                <Text style={styles.subtitle}>{t('welcome.subtitle')}</Text>
             </View>
             
             {/* 
@@ -38,7 +38,7 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
              * Two large, clearly labeled buttons for User and Caregiver flows
              * Includes haptic feedback for better user experience
              */}
-            <View style={[commonStyles.content, { marginTop: 40, paddingBottom: 50 }]}>
+            <View style={styles.contentContainer}>
                 {/* User profile button - navigates to pairing screen */}
                 <TouchableOpacity 
                     style={styles.userButton}
@@ -78,7 +78,32 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
 
 
 const styles = StyleSheet.create({
-    // Screen-specific styles
+    // LAYOUT
+    titleSection: {
+        width: '100%',
+        paddingLeft: 10,
+        marginTop: 30,
+        marginBottom: 20,
+    },
+    contentContainer: {
+        width: '100%',
+        paddingBottom: 50,
+        marginTop: 40,
+    },
+    
+    // TYPOGRAPHY
+    title: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    subtitle: {
+        fontSize: 18,
+        color: '#666',
+        marginBottom: 40,
+    },
+    
+    // BUTTONS
     userButton: {
         backgroundColor: '#4A90E2',
         padding: 60,

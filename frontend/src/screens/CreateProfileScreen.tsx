@@ -74,33 +74,30 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                     </View>
                     <View style={commonStyles.headerSpacer} />
                 </View>
-                {/* Page title */}
-                <View style={commonStyles.titleSection}>
-                    <Text style={commonStyles.title}>{t('CreateProfile.title')}</Text>
-                </View>
                 
                 {/* Scrollable registration form */}
-                <ScrollView>
-                <View style={commonStyles.content}>
-                    <Text style={commonStyles.label}>{t('CreateProfile.fields.First Name')}</Text>
-                    <View style={commonStyles.formsButton}>
+                <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+                    <Text style={styles.title}>{t('CreateProfile.title')}</Text>
+                    
+                    <Text style={styles.firstLabel}>{t('CreateProfile.fields.First Name')}</Text>
+                <View style={styles.input}>
                         <TextInput
                             placeholder={t('CreateProfile.placeholders.Enter the profile First Name')}
                             onChangeText={newText => setFirstname(newText)}
                             defaultValue={firstname}
                         />
                     </View>
-                    <Text style={commonStyles.label}>{t('CreateProfile.fields.Last Name')}</Text>
-                    <View style={commonStyles.formsButton}>
+                    <Text style={styles.label}>{t('CreateProfile.fields.Last Name')}</Text>
+                    <View style={styles.input}>
                         <TextInput
                             placeholder={t('CreateProfile.placeholders.Enter the profile Last Name')}
                             onChangeText={newText => setLastname(newText)}
                             defaultValue={lastname}
                         />
                     </View>
-                     <Text style={commonStyles.label}>{t('CreateProfile.fields.Birthday')}</Text>
+                     <Text style={styles.label}>{t('CreateProfile.fields.Birthday')}</Text>
                     <TouchableOpacity 
-                        style={commonStyles.formsButton}
+                        style={styles.input}
                         onPress={() => setShowDatePicker(true)}
                     >
                         <Text>{formatDate(birthday)}</Text>
@@ -114,25 +111,65 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                         onClose={() => setShowDatePicker(false)}
                         displayFormat={formatDate}
                     />
-                    {/* Create button - navigates back to Dashboard after profile creation */}
+                </ScrollView>
+                
+                {/* Buttons section - fixed at bottom */}
+                <View style={styles.buttonsContainer}>
+                {/* Create button - navigates back to Dashboard after profile creation */}
                     {!showDatePicker && (
                     <TouchableOpacity 
                         style={commonStyles.primaryButton}
                         onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                             navigation.navigate('Dashboard');
                         }}>
                         <Text style={commonStyles.primaryButtonText}>{t('CreateProfile.buttons.Create profile')}</Text>
                     </TouchableOpacity>
                     )}
-                </View>
-                </ScrollView>
+                    </View>
             </View>
         );
     };
 
 const styles = StyleSheet.create({
-    // Screen-specific styles only
+    // ========== LAYOUT ==========
+    scrollContainer: {
+        flex: 1,
+    },
+    scrollContent: {
+        paddingTop: 40,
+    },
+    buttonsContainer: {
+        paddingBottom: 40,
+    },
+
+    // ========== TYPOGRAPHY ==========
+    title: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    firstLabel: {
+        fontSize: 18,
+        fontWeight: '500',
+        marginBottom: 10,
+        marginTop: 30,
+    },
+    label: {
+        fontSize: 18,
+        fontWeight: '500',
+        marginBottom: 10,
+        marginTop: 5,
+    },
+
+    // ========== FORM ELEMENTS ==========
+    input: {
+        backgroundColor: '#F5F5F5',
+        padding: 15,
+        borderRadius: 20,
+        marginBottom: 10,
+        width: '100%',
+    },
 });
 
 export default CreateProfileScreen;

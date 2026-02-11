@@ -1,22 +1,40 @@
 /**
- * UserTabs - Bottom tab navigation for elderly user screens
- * Provides simple navigation between Home and Profile (2 tabs for accessibility)
+ * Bottom tab navigation component for elderly user interface.
+ * 
+ * Provides a simplified two-tab navigation optimized for accessibility:
+ * - Home: User dashboard with active reminders
+ * - Profile: User settings and paired profiles
+ * 
+ * Uses larger tab icons and labels for improved visibility and ease of use
+ * for elderly users. Implements safe area handling for Android system UI.
+ * 
+ * @module UserTabs
  */
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { UserTabsParamList } from '../types/index';
 
-// Screen imports
 import UserHomeScreen from '../screens/UserHomeScreen';
 import UserProfileScreen from '../screens/UserProfileScreen';
 
 const Tab = createBottomTabNavigator<UserTabsParamList>();
 
+/**
+ * User tab navigation component.
+ * 
+ * Renders a simplified bottom tab navigator designed for elderly users.
+ * Features dynamic height adjustment for Android compatibility and
+ * accessibility-focused design.
+ * 
+ * @returns Tab navigator component for user interface
+ */
 const UserTabs: React.FC = () => {
     const { t } = useTranslation();
+    const insets = useSafeAreaInsets();
     
     return (
         <Tab.Navigator
@@ -25,6 +43,12 @@ const UserTabs: React.FC = () => {
                 headerShown: false,
                 tabBarActiveTintColor: styles.activeTab.color,
                 tabBarInactiveTintColor: styles.inactiveTab.color,
+                tabBarStyle: {
+                    height: 70 + insets.bottom,
+                    paddingBottom: insets.bottom + 10,
+                    paddingTop: 5,
+                },
+                tabBarLabelStyle: styles.tabBarLabel,
             }}
         >
             {/* Home tab - Dashboard */}
@@ -60,6 +84,14 @@ const styles = StyleSheet.create({
     },
     inactiveTab: {
         color: '#999',
+    },
+    tabBar: {
+        height: 70,
+        paddingBottom: 10,
+        paddingTop: 5,
+    },
+    tabBarLabel: {
+        fontSize: 12,
     },
 });
 

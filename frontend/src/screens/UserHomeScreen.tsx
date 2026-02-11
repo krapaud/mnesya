@@ -11,7 +11,7 @@
  * @param {Props} navigation - Navigation object for screen transitions
  */
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -47,25 +47,26 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
 
     return (
         <View style={commonStyles.container}>
-            {/* 
-             * Header section with logo and app name
-             * Positioned at the top with extra padding for better visibility
-             */}
-            <View style={[commonStyles.header, { justifyContent: 'flex-start', paddingTop: 40 }]}>
-            <Image 
-                source={require('../../assets/mnesya-logo.png')} 
-                style={commonStyles.logo}
-            />
-            <Text style={commonStyles.appName}>Mnesya</Text>
-        </View>
-        
+            {/* Header with logo */}
+            <View style={commonStyles.header}>
+                <View style={commonStyles.headerSpacer} />
+                <View style={commonStyles.headerCenter}>
+                    <Image 
+                        source={require('../../assets/mnesya-logo.png')} 
+                        style={commonStyles.logo}
+                    />
+                    <Text style={commonStyles.appName}>Mnesya</Text>
+                </View>
+                <View style={commonStyles.headerSpacer} />
+            </View>
+
             {/* 
              * Personalized greeting using the user's first name
              * Helps elderly users feel comfortable with the app
              */}
-            <View style={[commonStyles.titleSection, { marginTop: 30 }]}>
-                <Text style={commonStyles.title}>{t('UserHome.greeting')} {currentUser?.firstName} !</Text>
-                <Text style={commonStyles.subtitle}>{t('UserHome.subtitle')}</Text>
+            <View style={styles.titleSection}>
+                <Text style={styles.title}>{t('UserHome.greeting')} {currentUser?.firstName} !</Text>
+                <Text style={styles.subtitle}>{t('UserHome.subtitle')}</Text>
             </View>
             <ScrollView>
                 {/* 
@@ -84,6 +85,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                                  * Shows alert if reminder not yet available, navigates otherwise
                                  */}
                                 <TouchableOpacity 
+                                    style={styles.bellIcon}
                                     onPress={() => {
                                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                                         
@@ -122,7 +124,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                         <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }}>{t('UserHome.messages.notAvailableTitle')}</Text>
                         <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 20 }}>{t('UserHome.messages.notAvailableMessage')}</Text>
                         <TouchableOpacity 
-                            style={{ backgroundColor: '#4A90E2', padding: 10, borderRadius: 5 }}
+                            style={{ backgroundColor: '#4A90E2', padding: 18, borderRadius: 5 }}
                             onPress={() => setShowAlert(false)}
                         >
                             <Text style={{ color: 'white', textAlign: 'center', fontSize: 16 }}>{t('UserHome.messages.ok')}</Text>
@@ -135,3 +137,31 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 export default UserHomeScreen;
+
+const styles = StyleSheet.create({
+    // LAYOUT
+    titleSection: {
+        width: '100%',
+        paddingLeft: 10,
+        marginTop: 30,
+        marginBottom: 20,
+    },
+    
+    // TYPOGRAPHY
+    title: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    subtitle: {
+        fontSize: 18,
+        color: '#666',
+        marginBottom: 40,
+    },
+    bellIcon: {
+        minHeight: 44,
+        minWidth: 44,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+});
