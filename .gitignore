@@ -64,3 +64,11 @@ logs/
 firebase-credentials.json
 google-services.json
 GoogleService-Info.plist
+
+# Test Coverage
+coverage/
+.nyc_output/
+junit.xml
+*.lcov
+.cache/
+test-results/
