@@ -37,8 +37,7 @@
   "login": {
     "title": "Connexion Accompagnant",
     "buttons": {
-      "submit": "Se connecter",
-      "lostPassword": "Mot de passe oublié",
+      "submit": "Se connecter",      "Logging in...": "Connexion en cours...",      "lostPassword": "Mot de passe oublié",
       "createAccount": "Créer un compte"
     }
   },
@@ -69,27 +68,23 @@
         "Password must contain at least one lowercase letter": "Le mot de passe doit contenir au moins une minuscule",
         "Password must contain at least one special character": "Le mot de passe doit contenir au moins un caractère spécial ($@#%*!~&)",
         "Passwords do not match": "Les mots de passe ne correspondent pas",
-        "All fields are required": "Tous les champs sont requis"
-    },
-    "errors": {
-        "Email must be between 5 and 255 characters": "L'email doit contenir entre 5 et 255 caractères",
-        "Invalid email": "Format d'email invalide",
-        "Password must be at least 8 characters": "Le mot de passe doit contenir au moins 8 caractères",
-        "Password must be at most 20 characters": "Le mot de passe doit contenir au maximum 20 caractères",
-        "Password must contain at least one digit": "Le mot de passe doit contenir au moins un chiffre",
-        "Password must contain at least one uppercase letter": "Le mot de passe doit contenir au moins une majuscule",
-        "Password must contain at least one lowercase letter": "Le mot de passe doit contenir au moins une minuscule",
-        "Password must contain at least one special character": "Le mot de passe doit contenir au moins un caractère spécial ($@#%*!~&)",
-        "Passwords do not match": "Les mots de passe ne correspondent pas",
         "All fields are required": "Tous les champs sont requis",
-        "Name cannot be empty": "Le nom ne peut pas être vide",
-        "Name must be at most 100 characters": "Le nom doit contenir au maximum 100 caractères"
+        "Name cannot be empty": "Ce champ ne peut pas être vide",
+        "Name must be at most 100 characters": "Le nom doit contenir au maximum 100 caractères",
+        "Please fix errors before submitting": "Veuillez corriger les erreurs avant de soumettre",
+        "Email already registered": "Cet email est déjà enregistré",
+        "Please use a different email": "Veuillez utiliser une adresse email différente",
+        "Registration failed": "L'inscription a échoué",
+        "Please try again": "Veuillez réessayer plus tard",
+        "This field is required": "Ce champ est requis"
     },
     "success": {
         "Valid email": "✓ Email valide",
         "Valid password": "✓ Mot de passe valide",
         "Passwords match": "✓ Les mots de passe correspondent",
-        "Valid name": "✓ Nom valide"
+        "Valid name": "✓ Nom valide",
+        "Account created": "Compte créé avec succès !",
+        "Please log in": "Veuillez vous connecter avec vos identifiants"
     }
   },
   "dashboard": {

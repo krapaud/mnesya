@@ -20,6 +20,8 @@ import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
+import { validateEmail } from '../utils/validation';
+import { useAuth } from '../hooks';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -33,13 +35,78 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
  * @returns Login form screen
  */
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
+    /** Translation function for internationalization */
     const { t } = useTranslation();
+    
+    /** Authentication hook for login operations */
+    const { login, loading } = useAuth();
+    
     /** Email input state */
     const [email, setEmail] = useState<string>('');
     /** Password input state */
     const [password, setPassword] = useState<string>('');
+    /** Email validation error message */
+    const [emailError, setEmailError] = useState<string>('');
+    /** Password validation error message */
+    const [passwordError, setPasswordError] = useState<string>('');
+    /** Visual error indicator for email field */
+    const [showEmailError, setShowEmailError] = useState<boolean>(false);
+    /** Visual error indicator for password field */
+    const [showPasswordError, setShowPasswordError] = useState<boolean>(false);
 
-    
+    /**
+     * Handles login form submission.
+     * 
+     * Validates fields and calls backend API for authentication.
+     */
+    const handleLogin = async () => {
+        // Reset all visual error indicators
+        setShowEmailError(false);
+        setShowPasswordError(false);
+
+        let hasError = false;
+
+        // Validate email
+        const emailValidation = validateEmail(email);
+        if (!email.trim() || emailValidation) {
+            setEmailError(emailValidation ? t(emailValidation) : t('register.errors.This field is required'));
+            setShowEmailError(true);
+            hasError = true;
+        }
+        
+        // Validate password
+        if (!password) {
+            setPasswordError(t('register.errors.This field is required'));
+            setShowPasswordError(true);
+            hasError = true;
+        }
+
+        // If there are errors, vibrate and stop
+        if (hasError) {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            return;
+        }
+
+        // Call login function from hook
+        const success = await login({
+            email: email.trim(),
+            password: password
+        });
+        
+        if (success) {
+            // Success - navigate to dashboard
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            navigation.navigate('Dashboard');
+        } else {
+            // Handle login errors (hook already set loading state)
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            
+            // Show error on email field (invalid credentials)
+            setShowEmailError(true);
+            setShowPasswordError(true);
+        }
+    };
+
     return (
         <View style={commonStyles.container}>
             {/* Header with back button and logo */}
@@ -70,24 +137,44 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             
             {/* Login form */}
             <View style={styles.formContainer}>
+                {/* Email input field */}
                 <Text style={styles.emailLabel}>{t('common.fields.Email')}</Text>
-                <View style={styles.input}>
+                <View style={[styles.input, showEmailError && styles.inputError]}>
                     <TextInput
+                        autoCapitalize="none"
+                        autoCorrect={false}
                         placeholder={t('register.placeholders.Enter your Email')}
-                        onChangeText={newText => setEmail(newText)}
-                        defaultValue={email}
+                        onChangeText={newText => {
+                            setShowEmailError(false);
+                            setEmail(newText);
+                            const error = validateEmail(newText);
+                            setEmailError(error ? t(error) : '');
+                        }}
+                        value={email}
                     />
                 </View>
+                <Text style={[styles.errorText, {opacity: showEmailError ? 1 : 0}]}>
+                    {emailError || t('register.errors.This field is required')}
+                </Text>
+                
+                {/* Password input field */}
                 <Text style={styles.passwordLabel}>{t('common.fields.Password')}</Text>
-                <View style={styles.input}>
+                <View style={[styles.input, showPasswordError && styles.inputError]}>
                     <TextInput
                         placeholder={t('register.placeholders.Enter your Password')}
                         secureTextEntry={true}
-                        onChangeText={newText => setPassword(newText)}
-                        defaultValue={password}
+                        onChangeText={newText => {
+                            setShowPasswordError(false);
+                            setPassword(newText);
+                        }}
+                        value={password}
                     />
                 </View>
+                <Text style={[styles.errorText, {opacity: showPasswordError ? 1 : 0}]}>
+                    {passwordError || t('register.errors.This field is required')}
+                </Text>
                 
+                {/* Password recovery link */}
                 <TouchableOpacity onPress={() => {}}>
                     <Text style={styles.lostPasswordText}>{t('login.buttons.lostPassword')}</Text>
                 </TouchableOpacity>
@@ -96,13 +183,13 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             {/* Buttons section - fixed at bottom */}
             <View style={styles.buttonsContainer}>
                 <TouchableOpacity 
-                    style={commonStyles.primaryButton}
-                    onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                        navigation.navigate('Dashboard');
-                    }}
+                    style={[commonStyles.primaryButton, loading && styles.buttonDisabled]}
+                    onPress={handleLogin}
+                    disabled={loading}
                 >
-                    <Text style={commonStyles.primaryButtonText}>{t('login.buttons.submit')}</Text>
+                    <Text style={commonStyles.primaryButtonText}>
+                        {loading ? t('login.buttons.Logging in...') : t('login.buttons.submit')}
+                    </Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity onPress={() => {
@@ -166,6 +253,16 @@ const styles = StyleSheet.create({
         textAlign: 'left',
         paddingHorizontal: 10,
     },
+    errorText: {
+        color: '#FF0000',
+        fontSize: 12,
+        textAlign: 'right',
+        marginTop: -5,
+        marginBottom: 5,
+        minHeight: 16,
+        lineHeight: 16,
+        paddingRight: 10,
+    },
 
     // ========== FORM ELEMENTS ==========
     input: {
@@ -174,6 +271,15 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         marginBottom: 10,
         width: '100%',
+    },
+    inputError: {
+        borderWidth: 2,
+        borderColor: '#FF0000',
+    },
+
+    // ========== BUTTONS ==========
+    buttonDisabled: {
+        opacity: 0.5,
     },
 });
 

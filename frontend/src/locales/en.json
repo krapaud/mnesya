@@ -38,6 +38,7 @@
     "title": "Caregiver Login",
     "buttons": {
       "submit": "Log in",
+      "Logging in...": "Logging in...",
       "lostPassword": "Lost password?",
       "createAccount": "Create an account"
     }
@@ -69,27 +70,23 @@
         "Password must contain at least one lowercase letter": "Password must contain at least one lowercase letter",
         "Password must contain at least one special character": "Password must contain at least one special character ($@#%*!~&)",
         "Passwords do not match": "Passwords do not match",
-        "All fields are required": "All fields are required"
-    },
-    "errors": {
-        "Email must be between 5 and 255 characters": "Email must be between 5 and 255 characters",
-        "Invalid email": "Invalid email format",
-        "Password must be at least 8 characters": "Password must be at least 8 characters",
-        "Password must be at most 20 characters": "Password must be at most 20 characters",
-        "Password must contain at least one digit": "Password must contain at least one digit",
-        "Password must contain at least one uppercase letter": "Password must contain at least one uppercase letter",
-        "Password must contain at least one lowercase letter": "Password must contain at least one lowercase letter",
-        "Password must contain at least one special character": "Password must contain at least one special character ($@#%*!~&)",
-        "Passwords do not match": "Passwords do not match",
         "All fields are required": "All fields are required",
-        "Name cannot be empty": "Name cannot be empty",
-        "Name must be at most 100 characters": "Name must be at most 100 characters"
+        "Name cannot be empty": "This field cannot be empty",
+        "Name must be at most 100 characters": "Name must be at most 100 characters",
+        "Please fix errors before submitting": "Please fix errors before submitting",
+        "Email already registered": "Email already registered",
+        "Please use a different email": "Please use a different email address",
+        "Registration failed": "Registration failed",
+        "Please try again": "Please try again later",
+        "This field is required": "This field is required"
     },
     "success": {
         "Valid email": "✓ Valid email",
         "Valid password": "✓ Valid password",
         "Passwords match": "✓ Passwords match",
-        "Valid name": "✓ Valid name"
+        "Valid name": "✓ Valid name",
+        "Account created": "Account created successfully!",
+        "Please log in": "Please log in with your credentials"
     }
   },
   "dashboard": {
