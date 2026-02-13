@@ -88,8 +88,4 @@ class UserFacade:
         Raises:
             Exception: If database operation fails
         """
-        user = self.user_repo.get(user_id)
-        if user:
-            self.user_repo.remove(user_id)
-            return True
-        return False
+        return self.user_repo.delete(user_id)

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List
 from app.services.caregiver_facade import CaregiverFacade
-from app.schemas.user_schema import UserCreate, UserResponse
+from app.schemas.user_schema import UserCreate, UserUpdate, UserResponse
 from app.services.user_facade import UserFacade
 from app.api.authentication import verify_token
 from app import get_db
@@ -202,6 +202,170 @@ async def get_profile(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve profile: {str(e)}"
+        )
+
+
+@router.put("/{profile_id}", response_model=UserResponse)
+async def update_profile(
+    profile_id: UUID,
+    request: UserUpdate,
+    caregiver_id: str = Depends(get_current_caregiver_id),
+    user_facade: UserFacade = Depends(get_user_facade)
+):
+    """Update an existing user profile.
+    
+    Updates profile details if the profile belongs to the authenticated caregiver.
+    Only provided fields will be updated (partial updates supported).
+    
+    Args:
+        profile_id (UUID): ID of the profile to update
+        request (UserUpdate): Updated profile data (all fields optional)
+        caregiver_id (str): ID of authenticated caregiver
+        user_facade (UserFacade): User service facade
+        
+    Returns:
+        UserResponse: Updated user profile
+        
+    Raises:
+        HTTPException: If profile not found, access denied, or validation error occurs
+    """
+    try:
+        # First verify the profile exists and caregiver has access
+        user = user_facade.get_user(profile_id)
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Profile not found"
+            )
+        
+        # Verify that this caregiver has access to this profile
+        if UUID(caregiver_id) not in user.caregiver_ids:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You don't have access to this profile"
+            )
+        
+        # Build update data from provided fields only
+        update_data = {}
+        if request.first_name is not None:
+            update_data["first_name"] = request.first_name
+        if request.last_name is not None:
+            update_data["last_name"] = request.last_name
+        if request.birthday is not None:
+            update_data["birthday"] = request.birthday
+        
+        # If no fields to update, return current data
+        if not update_data:
+            return UserResponse(
+                id=user.id,
+                first_name=user.first_name,
+                last_name=user.last_name,
+                birthday=user.birthday,
+                caregiver_ids=user.caregiver_ids,
+                created_at=user.created_at,
+                updated_at=user.updated_at
+            )
+        
+        # Perform update
+        updated_user = user_facade.update_user(profile_id, update_data)
+        
+        return UserResponse(
+            id=updated_user.id,
+            first_name=updated_user.first_name,
+            last_name=updated_user.last_name,
+            birthday=updated_user.birthday,
+            caregiver_ids=updated_user.caregiver_ids,
+            created_at=updated_user.created_at,
+            updated_at=updated_user.updated_at
+        )
+        
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update profile: {str(e)}"
+        )
+
+
+@router.delete("/{profile_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_profile(
+    profile_id: UUID,
+    caregiver_id: str = Depends(get_current_caregiver_id),
+    user_facade: UserFacade = Depends(get_user_facade),
+    caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade)
+):
+    """Delete a user profile.
+    
+    Deletes a profile if it belongs to the authenticated caregiver.
+    Also removes the user ID from all associated caregivers' user_ids lists.
+    
+    Args:
+        profile_id (UUID): ID of the profile to delete
+        caregiver_id (str): ID of authenticated caregiver
+        user_facade (UserFacade): User service facade
+        caregiver_facade (CaregiverFacade): Caregiver service facade
+        
+    Returns:
+        None: Returns 204 No Content on success
+        
+    Raises:
+        HTTPException: If profile not found or access denied
+    """
+    try:
+        # First verify the profile exists and caregiver has access
+        user = user_facade.get_user(profile_id)
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Profile not found"
+            )
+        
+        # Verify that this caregiver has access to this profile
+        if UUID(caregiver_id) not in user.caregiver_ids:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You don't have access to this profile"
+            )
+        
+        # Remove user from all associated caregivers
+        for cg_id in user.caregiver_ids:
+            try:
+                caregiver_facade.remove_user_from_caregiver(str(cg_id), profile_id)
+            except Exception as e:
+                # Log error but continue with deletion
+                import traceback
+                traceback.print_exc()
+                print(f"Warning: Could not remove user from caregiver {cg_id}: {e}")
+        
+        # Delete the profile
+        success = user_facade.delete_user(profile_id)
+        
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to delete profile"
+            )
+        
+        return None
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete profile: {str(e)}"
         )
 
 

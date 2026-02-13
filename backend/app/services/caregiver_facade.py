@@ -151,3 +151,25 @@ class CaregiverFacade:
         self.caregiver_repo.db.commit()
         self.caregiver_repo.db.refresh(caregiver)
         return caregiver
+
+    def remove_user_from_caregiver(self, caregiver_id: str, user_id: UUID) -> CaregiverModel:
+        """Remove a user from a caregiver's care list.
+        
+        Args:
+            caregiver_id (str): The caregiver's unique identifier
+            user_id (UUID): The user's unique identifier to remove
+            
+        Returns:
+            CaregiverModel: The updated caregiver
+            
+        Raises:
+            Exception: If caregiver not found or database operation fails
+        """
+        caregiver = self.caregiver_repo.get(caregiver_id)
+        if not caregiver:
+            raise ValueError("Caregiver not found")
+        
+        caregiver.remove_user(user_id)
+        self.caregiver_repo.db.commit()
+        self.caregiver_repo.db.refresh(caregiver)
+        return caregiver
