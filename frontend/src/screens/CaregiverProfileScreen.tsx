@@ -10,7 +10,7 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Modal, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +19,8 @@ import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { CaregiverTabsParamList, RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
+import { logout } from '../services/authService';
+import { useCaregiverProfile } from '../hooks';
 
 type Props = CompositeScreenProps<
     BottomTabScreenProps<CaregiverTabsParamList, 'Profile'>,
@@ -37,15 +39,13 @@ type Props = CompositeScreenProps<
 const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
 
+    // Use custom hook for profile management
+    const { caregiverData, loading, error, reload } = useCaregiverProfile(
+        () => navigation.navigate('Welcome')
+    );
+
     // Modal visibility state
     const [showLogoutModal, setShowLogoutModal] = useState(false);
-
-    // TODO: Replace with actual user data from context/store
-    const caregiverData = {
-        firstName: 'Jean',
-        lastName: 'Dupont',
-        email: 'jean.dupont@example.com'
-    };
 
     /**
      * Handles password change navigation.
@@ -67,13 +67,20 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
 
     /**
      * Handles logout confirmation.
-     * Closes modal and navigates to Welcome screen.
+     * Calls logout service and navigates to Welcome screen.
      */
-    const handleConfirmLogout = () => {
+    const handleConfirmLogout = async () => {
         setShowLogoutModal(false);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        // TODO: Clear authentication state
-        navigation.navigate('Welcome');
+        
+        try {
+            await logout();
+            navigation.navigate('Welcome');
+        } catch (err) {
+            console.error('Logout failed:', err);
+            // Even if logout fails, clear local state and navigate
+            navigation.navigate('Welcome');
+        }
     };
 
     /**
@@ -105,6 +112,27 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.title}>{t('caregiverProfile.title')}</Text>
             </View>
 
+            {/* Loading state */}
+            {loading && (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#4A90E2" />
+                    <Text style={styles.loadingText}>Loading profile...</Text>
+                </View>
+            )}
+
+            {/* Error state */}
+            {error && !loading && (
+                <View style={styles.errorContainer}>
+                    <Ionicons name="alert-circle-outline" size={48} color="#E53935" />
+                    <Text style={styles.errorText}>{error}</Text>
+                    <TouchableOpacity style={styles.retryButton} onPress={reload}>
+                        <Text style={styles.retryButtonText}>Retry</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
+
+            {/* Content - only shown when data is loaded */}
+            {!loading && !error && caregiverData && (
             <ScrollView style={styles.scrollContainer}>
                 {/* Profile Information Section */}
                 <View style={styles.section}>
@@ -116,7 +144,7 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                         <View style={styles.infoContent}>
                             <Text style={styles.infoLabel}>{t('caregiverProfile.fields.name')}</Text>
                             <Text style={styles.infoValue}>
-                                {caregiverData.firstName} {caregiverData.lastName}
+                                {caregiverData.first_name} {caregiverData.last_name}
                             </Text>
                         </View>
                     </View>
@@ -164,6 +192,7 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+            )}
 
             {/* Logout Confirmation Modal */}
             <Modal
@@ -358,6 +387,41 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         color: '#FFFFFF',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    loadingText: {
+        marginTop: 10,
+        fontSize: 16,
+        color: '#666',
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    errorText: {
+        marginTop: 15,
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    retryButton: {
+        backgroundColor: '#4A90E2',
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        borderRadius: 10,
+    },
+    retryButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
 
