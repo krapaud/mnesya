@@ -6,8 +6,8 @@ Caregivers are responsible for managing and monitoring elderly users.
 
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, DateTime, ARRAY, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String, DateTime, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from app import database
 import validators
 from passlib.hash import bcrypt
@@ -185,7 +185,10 @@ class CaregiverModel(database):
         Returns:
             list[UUID]: List of user UUIDs, empty list if none
         """
-        return self._user_ids or []
+        # Convert tuple to list if needed (SQLAlchemy returns tuples for ARRAY columns)
+        if self._user_ids is None:
+            return []
+        return list(self._user_ids) if isinstance(self._user_ids, tuple) else self._user_ids
 
     @user_ids.setter
     def user_ids(self, value: list) -> None:
@@ -225,8 +228,12 @@ class CaregiverModel(database):
         Note:
             Will not add duplicate IDs - user can only be added once
         """
+        # Convert to list if it's a tuple (SQLAlchemy returns tuples for ARRAY columns)
         if self._user_ids is None:
             self._user_ids = []
+        elif isinstance(self._user_ids, tuple):
+            self._user_ids = list(self._user_ids)
+        
         if user_id not in self._user_ids:
             self._user_ids.append(user_id)
 

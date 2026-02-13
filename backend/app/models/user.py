@@ -6,8 +6,8 @@ Users are the elderly individuals being cared for by caregivers.
 
 import uuid
 from datetime import datetime, timezone, date
-from sqlalchemy import Column, String, DateTime, ARRAY, Date, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String, DateTime, Date, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from app import database
 
 class UserModel(database):
@@ -142,7 +142,10 @@ class UserModel(database):
         Returns:
             list[UUID]: List of caregiver UUIDs, empty list if none
         """
-        return self._caregiver_ids or []
+        # Convert tuple to list if needed (SQLAlchemy returns tuples for ARRAY columns)
+        if self._caregiver_ids is None:
+            return []
+        return list(self._caregiver_ids) if isinstance(self._caregiver_ids, tuple) else self._caregiver_ids
 
     @caregiver_ids.setter
     def caregiver_ids(self, value: list) -> None:
@@ -182,8 +185,12 @@ class UserModel(database):
         Note:
             Will not add duplicate IDs - caregiver can only be added once
         """
+        # Convert to list if it's a tuple (SQLAlchemy returns tuples for ARRAY columns)
         if self._caregiver_ids is None:
             self._caregiver_ids = []
+        elif isinstance(self._caregiver_ids, tuple):
+            self._caregiver_ids = list(self._caregiver_ids)
+        
         if caregiver_id not in self._caregiver_ids:
             self._caregiver_ids.append(caregiver_id)
 
