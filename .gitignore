@@ -17,6 +17,14 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Testing
+coverage/
+.nyc_output/
+junit.xml
+*.lcov
+.cache/
+test-results/
+
 # React Native
 .expo/
 .expo-shared/
