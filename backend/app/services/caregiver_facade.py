@@ -76,6 +76,19 @@ class CaregiverFacade:
         """
         return self.caregiver_repo.get_caregiver_by_email(email)
 
+    def get_caregiver_by_id(self, id: UUID) -> object:
+        """Retrieve a caregiver by id address.
+        
+        Used primarily for authentication and login.
+        
+        Args:
+            id (str): The caregiver's id address
+            
+        Returns:
+            CaregiverModel: The caregiver if found, None otherwise
+        """
+        return self.caregiver_repo.get_caregiver_by_id(id)
+
     def get_all_caregivers(self) -> list:
         """Retrieve all caregivers.
         
