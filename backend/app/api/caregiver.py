@@ -1,7 +1,7 @@
-"""caregiver/Profile API module.
+"""Caregiver Profile API module.
 
-This module provides endpoints for managing caregiver profiles (elderly persons).
-Caregivers can create and manage profiles for the people they care for.
+This module provides endpoints for managing caregiver profiles.
+Caregivers can view and update their own profile information.
 """
 
 from fastapi import APIRouter, HTTPException, Depends, status
@@ -9,12 +9,12 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List
 from app.services.caregiver_facade import CaregiverFacade
-from app.schemas.caregiver_schema import CaregiverCreate, CaregiverUpdate, CaregiverResponse
+from app.schemas.caregiver_schema import CaregiverUpdate, CaregiverResponse
 from app.api.authentication import verify_token
 from app import get_db
 
 # Router
-router = APIRouter(prefix="/api/profiles", tags=["caregiver Profiles"])
+router = APIRouter(prefix="/api/caregivers", tags=["Caregivers"])
 
 
 def get_caregiver_facade(db: Session = Depends(get_db)) -> CaregiverFacade:
@@ -43,40 +43,32 @@ def get_current_caregiver_id(token_payload: dict = Depends(verify_token)) -> str
 
 
 
-@router.get("/{caregiver_id}", response_model=CaregiverResponse)
-async def get_caregiver(
-    caregiver_id: UUID,
+@router.get("/me", response_model=CaregiverResponse)
+async def get_my_profile(
+    caregiver_id: str = Depends(get_current_caregiver_id),
     caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade)
 ):
-    """Get details of a specific caregiver caregiver.
+    """Get current caregiver's profile.
     
-    Returns caregiver details if the caregiver belongs to the authenticated caregiver.
+    Returns the authenticated caregiver's profile details.
     
     Args:
-        caregiver_id (UUID): ID of the caregiver to retrieve
         caregiver_id (str): ID of authenticated caregiver
-        caregiver_facade (caregiverFacade): caregiver service facade
+        caregiver_facade (CaregiverFacade): Caregiver service facade
         
     Returns:
-        caregiverResponse: caregiver caregiver details
+        CaregiverResponse: Caregiver profile details
         
     Raises:
-        HTTPException: If caregiver not found or access denied
+        HTTPException: If caregiver not found
     """
     try:
-        caregiver = caregiver_facade.get_caregiver(caregiver_id)
+        caregiver = caregiver_facade.get_caregiver(UUID(caregiver_id))
         
         if not caregiver:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="caregiver not found"
-            )
-        
-        # Verify that this caregiver has access to this caregiver
-        if UUID(caregiver_id) not in caregiver.caregiver_ids:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You don't have access to this caregiver"
+                detail="Caregiver not found"
             )
         
         return CaregiverResponse(
@@ -98,45 +90,36 @@ async def get_caregiver(
         )
 
 
-@router.put("/{profile_id}", response_model=CaregiverResponse)
-async def update_profile(
-    profile_id: UUID,
+@router.put("/me", response_model=CaregiverResponse)
+async def update_my_profile(
     request: CaregiverUpdate,
     caregiver_id: str = Depends(get_current_caregiver_id),
     caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade)
 ):
-    """Update an existing caregiver profile.
+    """Update current caregiver's profile.
     
-    Updates profile details if the profile belongs to the authenticated caregiver.
+    Updates the authenticated caregiver's profile details.
     Only provided fields will be updated (partial updates supported).
     
     Args:
-        profile_id (UUID): ID of the profile to update
-        request (caregiverUpdate): Updated profile data (all fields optional)
+        request (CaregiverUpdate): Updated profile data (all fields optional)
         caregiver_id (str): ID of authenticated caregiver
-        caregiver_facade (caregiverFacade): caregiver service facade
+        caregiver_facade (CaregiverFacade): Caregiver service facade
         
     Returns:
-        caregiverResponse: Updated caregiver profile
+        CaregiverResponse: Updated caregiver profile
         
     Raises:
-        HTTPException: If profile not found, access denied, or validation error occurs
+        HTTPException: If profile not found or validation error occurs
     """
     try:
-        # First verify the profile exists and caregiver has access
-        caregiver = caregiver_facade.get_caregiver(profile_id)
+        # Verify the profile exists
+        caregiver = caregiver_facade.get_caregiver(UUID(caregiver_id))
         
         if not caregiver:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Profile not found"
-            )
-        
-        # Verify that this caregiver has access to this profile
-        if UUID(caregiver_id) not in caregiver.caregiver_ids:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You don't have access to this profile"
+                detail="Caregiver profile not found"
             )
         
         # Build update data from provided fields only
@@ -145,32 +128,30 @@ async def update_profile(
             update_data["first_name"] = request.first_name
         if request.last_name is not None:
             update_data["last_name"] = request.last_name
-        if request.birthday is not None:
-            update_data["birthday"] = request.birthday
+        if request.email is not None:
+            update_data["email"] = request.email
+        if request.password is not None:
+            update_data["password"] = request.password
         
         # If no fields to update, return current data
         if not update_data:
             return CaregiverResponse(
-                id=caregiver.id,
+                id=str(caregiver.id),
                 first_name=caregiver.first_name,
                 last_name=caregiver.last_name,
-                birthday=caregiver.birthday,
-                caregiver_ids=caregiver.caregiver_ids,
-                created_at=caregiver.created_at,
-                updated_at=caregiver.updated_at
+                email=caregiver.email,
+                created_at=caregiver.created_at
             )
         
         # Perform update
-        updated_caregiver = caregiver_facade.update_caregiver(profile_id, update_data)
+        updated_caregiver = caregiver_facade.update_caregiver(UUID(caregiver_id), update_data)
         
         return CaregiverResponse(
-            id=updated_caregiver.id,
+            id=str(updated_caregiver.id),
             first_name=updated_caregiver.first_name,
             last_name=updated_caregiver.last_name,
-            birthday=updated_caregiver.birthday,
-            caregiver_ids=updated_caregiver.caregiver_ids,
-            created_at=updated_caregiver.created_at,
-            updated_at=updated_caregiver.updated_at
+            email=updated_caregiver.email,
+            created_at=updated_caregiver.created_at
         )
         
     except HTTPException:
@@ -189,63 +170,43 @@ async def update_profile(
         )
 
 
-@router.delete("/{profile_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_profile(
-    profile_id: UUID,
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_my_profile(
     caregiver_id: str = Depends(get_current_caregiver_id),
     caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade)
 ):
-    """Delete a caregiver profile.
+    """Delete current caregiver's account.
     
-    Deletes a profile if it belongs to the authenticated caregiver.
-    Also removes the caregiver ID from all associated caregivers' caregiver_ids lists.
+    Deletes the authenticated caregiver's account.
+    Warning: This action is irreversible.
     
     Args:
-        profile_id (UUID): ID of the profile to delete
         caregiver_id (str): ID of authenticated caregiver
-        caregiver_facade (caregiverFacade): caregiver service facade
         caregiver_facade (CaregiverFacade): Caregiver service facade
         
     Returns:
         None: Returns 204 No Content on success
         
     Raises:
-        HTTPException: If profile not found or access denied
+        HTTPException: If deletion fails
     """
     try:
-        # First verify the profile exists and caregiver has access
-        caregiver = caregiver_facade.get_caregiver(profile_id)
+        # Verify the profile exists
+        caregiver = caregiver_facade.get_caregiver(UUID(caregiver_id))
         
         if not caregiver:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Profile not found"
+                detail="Caregiver profile not found"
             )
         
-        # Verify that this caregiver has access to this profile
-        if UUID(caregiver_id) not in caregiver.caregiver_ids:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You don't have access to this profile"
-            )
-        
-        # Remove caregiver from all associated caregivers
-        for cg_id in caregiver.caregiver_ids:
-            try:
-                caregiver_facade.remove_caregiver_from_caregiver(str(cg_id), profile_id)
-            except Exception as e:
-                # Log error but continue with deletion
-                import traceback
-                traceback.print_exc()
-                print(f"Warning: Could not remove caregiver from caregiver {cg_id}: {e}")
-        
-        # Delete the profile
-        success = caregiver_facade.delete_caregiver(profile_id)
+        # Delete the caregiver account
+        success = caregiver_facade.delete_caregiver(UUID(caregiver_id))
         
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to delete profile"
+                detail="Failed to delete caregiver account"
             )
         
         return None
@@ -257,7 +218,7 @@ async def delete_profile(
         traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete profile: {str(e)}"
+            detail=f"Failed to delete account: {str(e)}"
         )
 
 
