@@ -101,13 +101,13 @@ export const useFormValidation = (config: FormConfig): UseFormValidationReturn =
             const value = values[fieldName];
             let error: string | null = null;
 
-            // Check if required field is empty
-            if (fieldConfig.required !== false && !value.trim()) {
-                error = fieldConfig.requiredMessage || 'register.errors.This field is required';
-            } 
-            // Run validation if provided and field has value
-            else if (fieldConfig.validate) {
+            // Run custom validation if provided
+            if (fieldConfig.validate) {
                 error = fieldConfig.validate(value);
+            }
+            // Otherwise check if required field is empty (fallback for fields without custom validation)
+            else if (fieldConfig.required !== false && !value.trim()) {
+                error = fieldConfig.requiredMessage || 'register.errors.This field is required';
             }
 
             if (error) {
