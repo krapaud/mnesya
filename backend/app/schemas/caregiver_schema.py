@@ -216,28 +216,20 @@ class CaregiverResponse(BaseModel):
     """Schema for caregiver API responses.
     
     Used when returning caregiver data from API endpoints.
+    Does not include sensitive data like password hash.
     
     Attributes:
         id (UUID): Caregiver's unique identifier
         first_name (str): Caregiver's first name
         last_name (str): Caregiver's last name
         email (str): Caregiver's email address
-        password (str): Hashed password
-        user_ids (List[UUID]): List of users under care
         created_at (datetime): Creation timestamp
-        updated_at (datetime): Last update timestamp
-        
-    Warning:
-        Password should not be returned in production APIs
     """
     id: UUID
     first_name: str
     last_name: str
     email : str
-    password : str
-    user_ids: List[UUID]
     created_at: datetime
-    updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)  # Enables ORM model conversion
 
