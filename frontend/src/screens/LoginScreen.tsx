@@ -12,7 +12,7 @@
  * 
  * @module LoginScreen
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -21,7 +21,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { validateEmail } from '../utils/validation';
-import { useAuth } from '../hooks';
+import { useAuth, useFormValidation } from '../hooks';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -41,18 +41,15 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     /** Authentication hook for login operations */
     const { login, loading } = useAuth();
     
-    /** Email input state */
-    const [email, setEmail] = useState<string>('');
-    /** Password input state */
-    const [password, setPassword] = useState<string>('');
-    /** Email validation error message */
-    const [emailError, setEmailError] = useState<string>('');
-    /** Password validation error message */
-    const [passwordError, setPasswordError] = useState<string>('');
-    /** Visual error indicator for email field */
-    const [showEmailError, setShowEmailError] = useState<boolean>(false);
-    /** Visual error indicator for password field */
-    const [showPasswordError, setShowPasswordError] = useState<boolean>(false);
+    /** Form validation hook managing all field states and validation logic */
+    const { values, errors, showErrors, handleChange, validateAll, setError } = useFormValidation({
+        email: { 
+            validate: validateEmail 
+        },
+        password: { 
+            validate: () => null  // No complex validation for password on login
+        }
+    });
 
     /**
      * Handles login form submission.
@@ -60,37 +57,16 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
      * Validates fields and calls backend API for authentication.
      */
     const handleLogin = async () => {
-        // Reset all visual error indicators
-        setShowEmailError(false);
-        setShowPasswordError(false);
-
-        let hasError = false;
-
-        // Validate email
-        const emailValidation = validateEmail(email);
-        if (!email.trim() || emailValidation) {
-            setEmailError(emailValidation ? t(emailValidation) : t('register.errors.This field is required'));
-            setShowEmailError(true);
-            hasError = true;
-        }
-        
-        // Validate password
-        if (!password) {
-            setPasswordError(t('register.errors.This field is required'));
-            setShowPasswordError(true);
-            hasError = true;
-        }
-
-        // If there are errors, vibrate and stop
-        if (hasError) {
+        // Validate all fields using the form validation hook
+        if (!validateAll()) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             return;
         }
 
         // Call login function from hook
         const success = await login({
-            email: email.trim(),
-            password: password
+            email: values.email.trim(),
+            password: values.password
         });
         
         if (success) {
@@ -101,9 +77,9 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             // Handle login errors (hook already set loading state)
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             
-            // Show error on email field (invalid credentials)
-            setShowEmailError(true);
-            setShowPasswordError(true);
+            // Show error on both fields (invalid credentials)
+            setError('email', 'login.errors.invalidCredentials');
+            setError('password', 'login.errors.invalidCredentials');
         }
     };
 
@@ -139,39 +115,31 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.formContainer}>
                 {/* Email input field */}
                 <Text style={styles.emailLabel}>{t('common.fields.Email')}</Text>
-                <View style={[styles.input, showEmailError && styles.inputError]}>
+                <View style={[styles.input, showErrors.email && styles.inputError]}>
                     <TextInput
                         autoCapitalize="none"
                         autoCorrect={false}
                         placeholder={t('register.placeholders.Enter your Email')}
-                        onChangeText={newText => {
-                            setShowEmailError(false);
-                            setEmail(newText);
-                            const error = validateEmail(newText);
-                            setEmailError(error ? t(error) : '');
-                        }}
-                        value={email}
+                        onChangeText={handleChange('email')}
+                        value={values.email}
                     />
                 </View>
-                <Text style={[styles.errorText, {opacity: showEmailError ? 1 : 0}]}>
-                    {emailError || t('register.errors.This field is required')}
+                <Text style={[styles.errorText, {opacity: showErrors.email ? 1 : 0}]}>
+                    {t(errors.email) || t('register.errors.This field is required')}
                 </Text>
                 
                 {/* Password input field */}
                 <Text style={styles.passwordLabel}>{t('common.fields.Password')}</Text>
-                <View style={[styles.input, showPasswordError && styles.inputError]}>
+                <View style={[styles.input, showErrors.password && styles.inputError]}>
                     <TextInput
                         placeholder={t('register.placeholders.Enter your Password')}
                         secureTextEntry={true}
-                        onChangeText={newText => {
-                            setShowPasswordError(false);
-                            setPassword(newText);
-                        }}
-                        value={password}
+                        onChangeText={handleChange('password')}
+                        value={values.password}
                     />
                 </View>
-                <Text style={[styles.errorText, {opacity: showPasswordError ? 1 : 0}]}>
-                    {passwordError || t('register.errors.This field is required')}
+                <Text style={[styles.errorText, {opacity: showErrors.password ? 1 : 0}]}>
+                    {t(errors.password) || t('register.errors.This field is required')}
                 </Text>
                 
                 {/* Password recovery link */}
@@ -230,14 +198,14 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '500',
         marginBottom: 5,
-        marginTop: -180,
+        marginTop: -50,
         paddingHorizontal: 10,
     },
     passwordLabel: {
         fontSize: 18,
         fontWeight: '500',
         marginBottom: 5,
-        marginTop: 50,
+        marginTop: 20,
         paddingHorizontal: 10,
     },
     createAccountText: {

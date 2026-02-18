@@ -8,6 +8,19 @@
  */
 
 /**
+ * Cleans text input by removing consecutive spaces.
+ * 
+ * Replaces multiple consecutive spaces with a single space.
+ * Useful for name fields and text inputs.
+ * 
+ * @param text - Text to clean
+ * @returns Cleaned text with single spaces
+ */
+export const cleanText = (text: string): string => {
+    return text.replace(/\s{2,}/g, ' ');
+};
+
+/**
  * Validates email address format and length.
  * 
  * Checks for valid email format and ensures length is between 5-255 characters.

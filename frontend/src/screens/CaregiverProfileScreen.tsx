@@ -124,9 +124,9 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
             {error && !loading && (
                 <View style={styles.errorContainer}>
                     <Ionicons name="alert-circle-outline" size={48} color="#E53935" />
-                    <Text style={styles.errorText}>{error}</Text>
+                    <Text style={styles.errorText}>{t(error)}</Text>
                     <TouchableOpacity style={styles.retryButton} onPress={reload}>
-                        <Text style={styles.retryButtonText}>Retry</Text>
+                        <Text style={styles.retryButtonText}>{t('caregiverProfile.buttons.retry')}</Text>
                     </TouchableOpacity>
                 </View>
             )}
