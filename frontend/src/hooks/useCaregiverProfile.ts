@@ -33,12 +33,12 @@ export const useCaregiverProfile = (
       setError(null);
       const profile = await getCurrentUser();
       setCaregiverData(profile);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load caregiver profile:', err);
       setError('common.errors.failedToLoadProfile');
       
-      // Handle authentication errors (401 Unauthorized)
-      if (err instanceof Error && err.message.includes('401')) {
+      // Handle authentication errors (401 Unauthorized, 403 Forbidden)
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
         onAuthError?.();
       }
     } finally {

@@ -107,7 +107,7 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>{t('UserProfileDetail.modals.update.title')}</Text>
-                            <TouchableOpacity onPress={onClose}>
+                            <TouchableOpacity onPress={onClose} testID="close-button">
                                 <Ionicons name="close" size={28} color="#666" />
                             </TouchableOpacity>
                         </View>
@@ -184,7 +184,7 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
                                     disabled={isUpdating}
                                 >
                                     {isUpdating ? (
-                                        <ActivityIndicator size="small" color="#FFFFFF" />
+                                        <ActivityIndicator size="small" color="#FFFFFF" testID="activity-indicator" />
                                     ) : (
                                         <Text style={styles.saveButtonText}>{t('UserProfileDetail.buttons.Save')}</Text>
                                     )}
