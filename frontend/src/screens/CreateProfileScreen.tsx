@@ -8,7 +8,7 @@
  * @module CreateProfileScreen
  */
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,9 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { PlatformDatePicker } from '../components';
+import { validateName, cleanText } from '../utils/validation';
+import { useFormValidation } from '../hooks';
+import { createProfile } from '../services/profileService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateProfile'>;
 
@@ -29,30 +32,83 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CreateProfile'>;
  * @returns Profile creation form screen
  */
 const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
-        const { t } = useTranslation();
-        /** User's first name input state */
-        const [firstname, setFirstname] = useState<string>('');
-        /** User's last name input state */
-        const [lastname, setLastname] = useState<string>('');
-        /** User's birthday date state */
-        const [birthday, setBirthday] = useState<Date>(new Date());
-        /** Controls date picker visibility */
-        const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+    const { t } = useTranslation();
+    
+    /** Form validation hook managing firstname and lastname validation */
+    const { values, errors, showErrors, handleChange, validateAll } = useFormValidation({
+        firstname: { validate: validateName },
+        lastname: { validate: validateName }
+    });
+    
+    /** User's birthday date state */
+    const [birthday, setBirthday] = useState<Date>(new Date());
+    /** Controls date picker visibility */
+    const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+    /** Loading state during profile creation */
+    const [isCreating, setIsCreating] = useState<boolean>(false);
 
-        /**
-         * Formats a date to DD/MM/YYYY string format for display.
-         * 
-         * @param date - Date object to format
-         * @returns Formatted date string
-         */
-        const formatDate = (date: Date): string => {
-            const day = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const year = date.getFullYear();
-            return `${day}/${month}/${year}`;
-        };
-        
-        return (
+    /**
+     * Formats a date to DD/MM/YYYY string format for display.
+     * 
+     * @param date - Date object to format
+     * @returns Formatted date string
+     */
+    const formatDate = (date: Date): string => {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    };
+
+    /**
+     * Formats a date to YYYY-MM-DD string format for backend API.
+     * 
+     * @param date - Date object to format
+     * @returns ISO formatted date string
+     */
+    const formatDateForAPI = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    /**
+     * Handles profile creation form submission.
+     * 
+     * Validates form fields, formats data, and calls backend API to create profile.
+     * Navigates to dashboard on success.
+     */
+    const handleCreateProfile = async () => {
+        // Validate form fields
+        if (!validateAll()) {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            return;
+        }
+
+        try {
+            setIsCreating(true);
+            
+            // Create profile via API
+            await createProfile({
+                first_name: values.firstname.trim(),
+                last_name: values.lastname.trim(),
+                birthday: formatDateForAPI(birthday)
+            });
+
+            // Success - navigate back to dashboard
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            navigation.navigate('Dashboard');
+        } catch (error) {
+            // Handle error
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            console.error('Failed to create profile:', error);
+        } finally {
+            setIsCreating(false);
+        }
+    };
+    
+    return (
             <View style={commonStyles.container}>
                 {/* Header with back button and logo */}
                 <View style={commonStyles.header}>
@@ -79,23 +135,38 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                 <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                     <Text style={styles.title}>{t('CreateProfile.title')}</Text>
                     
+                    {/* First name input field */}
                     <Text style={styles.firstLabel}>{t('CreateProfile.fields.First Name')}</Text>
-                <View style={styles.input}>
+                    <View style={[styles.input, showErrors.firstname && styles.inputError]}>
                         <TextInput
+                            autoCapitalize="sentences"
+                            autoCorrect={false}
                             placeholder={t('CreateProfile.placeholders.Enter the profile First Name')}
-                            onChangeText={newText => setFirstname(newText)}
-                            defaultValue={firstname}
+                            onChangeText={(text) => handleChange('firstname')(cleanText(text))}
+                            value={values.firstname}
                         />
                     </View>
+                    <Text style={[styles.errorText, {opacity: showErrors.firstname ? 1 : 0}]}>
+                        {t(errors.firstname) || t('register.errors.This field is required')}
+                    </Text>
+                    
+                    {/* Last name input field */}
                     <Text style={styles.label}>{t('CreateProfile.fields.Last Name')}</Text>
-                    <View style={styles.input}>
+                    <View style={[styles.input, showErrors.lastname && styles.inputError]}>
                         <TextInput
+                            autoCapitalize="sentences"
+                            autoCorrect={false}
                             placeholder={t('CreateProfile.placeholders.Enter the profile Last Name')}
-                            onChangeText={newText => setLastname(newText)}
-                            defaultValue={lastname}
+                            onChangeText={(text) => handleChange('lastname')(cleanText(text))}
+                            value={values.lastname}
                         />
                     </View>
-                     <Text style={styles.label}>{t('CreateProfile.fields.Birthday')}</Text>
+                    <Text style={[styles.errorText, {opacity: showErrors.lastname ? 1 : 0}]}>
+                        {t(errors.lastname) || t('register.errors.This field is required')}
+                    </Text>
+                    
+                    {/* Birthday date picker */}
+                    <Text style={styles.label}>{t('CreateProfile.fields.Birthday')}</Text>
                     <TouchableOpacity 
                         style={styles.input}
                         onPress={() => setShowDatePicker(true)}
@@ -110,23 +181,29 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                         visible={showDatePicker}
                         onClose={() => setShowDatePicker(false)}
                         displayFormat={formatDate}
+                        allowPastDates={true}
                     />
                 </ScrollView>
                 
                 {/* Buttons section - fixed at bottom */}
                 <View style={styles.buttonsContainer}>
-                {/* Create button - navigates back to Dashboard after profile creation */}
+                    {/* Create button - creates profile and navigates to Dashboard */}
                     {!showDatePicker && (
-                    <TouchableOpacity 
-                        style={commonStyles.primaryButton}
-                        onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                            navigation.navigate('Dashboard');
-                        }}>
-                        <Text style={commonStyles.primaryButtonText}>{t('CreateProfile.buttons.Create profile')}</Text>
-                    </TouchableOpacity>
+                        <TouchableOpacity 
+                            style={[commonStyles.primaryButton, isCreating && styles.buttonDisabled]}
+                            onPress={handleCreateProfile}
+                            disabled={isCreating}
+                        >
+                            {isCreating ? (
+                                <ActivityIndicator color="#FFFFFF" />
+                            ) : (
+                                <Text style={commonStyles.primaryButtonText}>
+                                    {t('CreateProfile.buttons.Create profile')}
+                                </Text>
+                            )}
+                        </TouchableOpacity>
                     )}
-                    </View>
+                </View>
             </View>
         );
     };
@@ -161,6 +238,16 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         marginTop: 5,
     },
+    errorText: {
+        color: '#FF0000',
+        fontSize: 12,
+        textAlign: 'right',
+        marginTop: -5,
+        marginBottom: 5,
+        minHeight: 16,
+        lineHeight: 16,
+        paddingRight: 10,
+    },
 
     // ========== FORM ELEMENTS ==========
     input: {
@@ -169,6 +256,15 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         marginBottom: 10,
         width: '100%',
+    },
+    inputError: {
+        borderWidth: 2,
+        borderColor: '#FF0000',
+    },
+
+    // ========== BUTTONS ==========
+    buttonDisabled: {
+        opacity: 0.5,
     },
 });
 

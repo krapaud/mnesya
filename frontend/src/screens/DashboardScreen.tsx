@@ -3,17 +3,19 @@
  * Displays a list of managed profiles and provides quick actions to create new profiles or reminders
  * Features a centered header with app branding and a scrollable list of profile cards
  */
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import React, { useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
+import { useFocusEffect } from '@react-navigation/native';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList, CaregiverTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { fakeProfiles } from '../data/fakeData';
+import { useUserProfiles } from '../hooks';
+import { calculateAge } from '../utils/dateUtils';
 
 type Props = CompositeScreenProps<
     BottomTabScreenProps<CaregiverTabsParamList, 'Home'>,
@@ -22,8 +24,15 @@ type Props = CompositeScreenProps<
 
 const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
-    // Managed profiles data - currently using mock data, will be replaced with API in Sprint 1
-    const [profiles, setProfiles] = useState(fakeProfiles);
+    // Load user profiles from API
+    const { userData, loading, error, reload } = useUserProfiles();
+
+    // Reload profiles when screen comes into focus
+    useFocusEffect(
+        useCallback(() => {
+            reload();
+        }, [reload])
+    );
 
     return (
         <View style={commonStyles.container}>
@@ -66,37 +75,55 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 
                 <Text style={styles.sectionTitle}>{t('dashboard.profilesListTitle')}</Text>
                 
+                {/* Loading state */}
+                {loading && (
+                    <View style={commonStyles.loadingContainer}>
+                        <ActivityIndicator size="large" color="#4A90E2" />
+                        <Text style={commonStyles.loadingText}>{t('common.messages.loading')}</Text>
+                    </View>
+                )}
+
+                {/* Error state */}
+                {error && !loading && (
+                    <View style={commonStyles.errorContainer}>
+                        <Ionicons name="alert-circle-outline" size={48} color="#E53935" />
+                        <Text style={commonStyles.errorText}>{t(error)}</Text>
+                    </View>
+                )}
+                
                 {/* 
                  * Scrollable list of profile cards
                  * Each card displays user name, age, and a view button to access profile details
                  */}
-                <ScrollView showsVerticalScrollIndicator={false} style={styles.profilesList}>
-                    {profiles.length === 0 ? (
-                        <Text style={styles.emptyMessage}>{t('dashboard.messages.No profiles yet')}</Text>
-                    ) : (
-                        profiles.map((profile) => (
-                            <View key={profile.id} style={styles.profileCard}>
-                                <View style={styles.profileInfo}>
-                                    <View>
-                                        <Text style={styles.textUser}>{profile.firstName + ' ' + profile.lastName}</Text>
-                                        <Text style={styles.textUserInfo}>{profile.age} {t('common.units.years old')}</Text>
+                {!loading && !error && (
+                    <ScrollView showsVerticalScrollIndicator={false} style={styles.profilesList}>
+                        {!userData || userData.length === 0 ? (
+                            <Text style={styles.emptyMessage}>{t('dashboard.messages.No profiles yet')}</Text>
+                        ) : (
+                            userData.map((profile) => (
+                                <View key={profile.id} style={styles.profileCard}>
+                                    <View style={styles.profileInfo}>
+                                        <View>
+                                            <Text style={styles.textUser}>{profile.first_name + ' ' + profile.last_name}</Text>
+                                            <Text style={styles.textUserInfo}>{calculateAge(profile.birthday)} {t('common.units.years old')}</Text>
+                                        </View>
+                                        
+                                        {/* View button with arrow icon */}
+                                        <TouchableOpacity 
+                                            style={styles.viewButton}
+                                            onPress={() => {
+                                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                                navigation.navigate('UserProfileDetails', { profileId: String(profile.id) });
+                                            }}>
+                                            <Text style={styles.viewButtonText}>{t('dashboard.buttons.View')}</Text>
+                                            <Ionicons name="arrow-forward" size={20} color="#4A90E2" />
+                                        </TouchableOpacity>
                                     </View>
-                                    
-                                    {/* View button with arrow icon */}
-                                    <TouchableOpacity 
-                                        style={styles.viewButton}
-                                        onPress={() => {
-                                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                            navigation.navigate('UserProfileDetails', { profileId: profile.id });
-                                        }}>
-                                        <Text style={styles.viewButtonText}>{t('dashboard.buttons.View')}</Text>
-                                        <Ionicons name="arrow-forward" size={20} color="#4A90E2" />
-                                    </TouchableOpacity>
                                 </View>
-                            </View>
-                        ))
-                    )}
-                </ScrollView>
+                            ))
+                        )}
+                    </ScrollView>
+                )}
             </View>
         </View>
     );

@@ -9,7 +9,7 @@
  */
 
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Modal } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Modal, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
@@ -27,6 +27,8 @@ interface PlatformDatePickerProps {
     onClose: () => void;
     /** Optional custom date formatting function */
     displayFormat?: (date: Date) => string;
+    /** Allow selecting dates in the past (default: false) */
+    allowPastDates?: boolean;
 }
 
 /**
@@ -43,10 +45,13 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     onChange,
     visible,
     onClose,
-    displayFormat
+    displayFormat,
+    allowPastDates = false
 }) => {
     const { t } = useTranslation();
     const [currentMonth, setCurrentMonth] = useState(new Date(value.getFullYear(), value.getMonth(), 1));
+    const [showYearPicker, setShowYearPicker] = useState(false);
+    const [showMonthPicker, setShowMonthPicker] = useState(false);
 
     /**
      * Formats date for display.
@@ -77,6 +82,52 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
             'July', 'August', 'September', 'October', 'November', 'December'
         ];
         return months[date.getMonth()];
+    };
+
+    /**
+     * Gets short month names for picker.
+     * 
+     * @returns Array of short month names
+     */
+    const getMonthNames = (): string[] => {
+        return [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+    };
+
+    /**
+     * Generates array of years for year picker.
+     * 
+     * @returns Array of years from 1920 to current year + 1
+     */
+    const generateYears = (): number[] => {
+        const currentYear = new Date().getFullYear();
+        const years: number[] = [];
+        for (let year = 1920; year <= currentYear + 1; year++) {
+            years.push(year);
+        }
+        return years.reverse(); // Most recent first
+    };
+
+    /**
+     * Handles year selection.
+     * 
+     * @param year - Selected year
+     */
+    const handleYearSelect = (year: number) => {
+        setCurrentMonth(new Date(year, currentMonth.getMonth(), 1));
+        setShowYearPicker(false);
+    };
+
+    /**
+     * Handles month selection.
+     * 
+     * @param monthIndex - Selected month index (0-11)
+     */
+    const handleMonthSelect = (monthIndex: number) => {
+        setCurrentMonth(new Date(currentMonth.getFullYear(), monthIndex, 1));
+        setShowMonthPicker(false);
     };
 
     /**
@@ -186,14 +237,95 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
         >
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
+                    {/* Show Year Picker if active */}
+                    {showYearPicker && (
+                        <View style={styles.pickerOverlay}>
+                            <View style={styles.pickerContent}>
+                                <View style={styles.pickerHeader}>
+                                    <Text style={styles.pickerTitle}>Select Year</Text>
+                                    <TouchableOpacity onPress={() => setShowYearPicker(false)}>
+                                        <Ionicons name="close" size={24} color="#666" />
+                                    </TouchableOpacity>
+                                </View>
+                                <ScrollView style={styles.yearList}>
+                                    {generateYears().map((year) => (
+                                        <TouchableOpacity
+                                            key={year}
+                                            style={[
+                                                styles.yearItem,
+                                                year === currentMonth.getFullYear() && styles.selectedYearItem
+                                            ]}
+                                            onPress={() => handleYearSelect(year)}
+                                        >
+                                            <Text style={[
+                                                styles.yearText,
+                                                year === currentMonth.getFullYear() && styles.selectedYearText
+                                            ]}>
+                                                {year}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
+                            </View>
+                        </View>
+                    )}
+
+                    {/* Show Month Picker if active */}
+                    {showMonthPicker && (
+                        <View style={styles.pickerOverlay}>
+                            <View style={styles.pickerContent}>
+                                <View style={styles.pickerHeader}>
+                                    <Text style={styles.pickerTitle}>Select Month</Text>
+                                    <TouchableOpacity onPress={() => setShowMonthPicker(false)}>
+                                        <Ionicons name="close" size={24} color="#666" />
+                                    </TouchableOpacity>
+                                </View>
+                                <View style={styles.monthGrid}>
+                                    {getMonthNames().map((month, index) => (
+                                        <TouchableOpacity
+                                            key={index}
+                                            style={[
+                                                styles.monthItem,
+                                                index === currentMonth.getMonth() && styles.selectedMonthItem
+                                            ]}
+                                            onPress={() => handleMonthSelect(index)}
+                                        >
+                                            <Text style={[
+                                                styles.monthText,
+                                                index === currentMonth.getMonth() && styles.selectedMonthText
+                                            ]}>
+                                                {month.substring(0, 3)}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            </View>
+                        </View>
+                    )}
+
                     {/* Header with month navigation */}
                     <View style={styles.header}>
                         <TouchableOpacity onPress={goToPreviousMonth} style={styles.navButton}>
                             <Ionicons name="chevron-back" size={24} color="#4A90E2" />
                         </TouchableOpacity>
-                        <Text style={styles.monthTitle}>
-                            {getMonthName(currentMonth)} {currentMonth.getFullYear()}
-                        </Text>
+                        <View style={styles.monthTitleContainer}>
+                            <TouchableOpacity 
+                                onPress={() => setShowMonthPicker(true)}
+                                style={styles.monthTitleButton}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={styles.monthTitle}>{getMonthName(currentMonth)}</Text>
+                                <Ionicons name="chevron-down" size={16} color="#4A90E2" style={styles.dropdownIcon} />
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                onPress={() => setShowYearPicker(true)}
+                                style={styles.yearTitleButton}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={styles.monthTitle}>{currentMonth.getFullYear()}</Text>
+                                <Ionicons name="chevron-down" size={16} color="#4A90E2" style={styles.dropdownIcon} />
+                            </TouchableOpacity>
+                        </View>
                         <TouchableOpacity onPress={goToNextMonth} style={styles.navButton}>
                             <Ionicons name="chevron-forward" size={24} color="#4A90E2" />
                         </TouchableOpacity>
@@ -219,6 +351,7 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
                             const todayHighlight = isToday(date);
                             const selectedHighlight = isSelected(date);
                             const isPast = isPastDate(date);
+                            const isDisabled = !allowPastDates && isPast;
 
                             return (
                                 <TouchableOpacity
@@ -229,14 +362,15 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
                                         selectedHighlight && styles.selectedCell
                                     ]}
                                     onPress={() => {
-                                        if (isPast) return;
+                                        if (isDisabled) return;
                                         handleDateSelect(date);
                                     }}
+                                    disabled={isDisabled}
                                 >
                                     <Text style={[
                                         styles.dayText,
                                         selectedHighlight && styles.selectedDayText,
-                                        isPast && styles.pastDayText,
+                                        isDisabled && styles.pastDayText,
                                     ]}>
                                         {date.getDate()}
                                     </Text>
@@ -347,6 +481,110 @@ const styles = StyleSheet.create({
     closeButtonText: {
         fontSize: 16,
         fontWeight: '600',
+    },
+    monthTitleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
+    },
+    monthTitleButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+        backgroundColor: '#F0F8FF',
+    },
+    yearTitleButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+        backgroundColor: '#F0F8FF',
+        marginLeft: 5,
+    },
+    dropdownIcon: {
+        marginLeft: 2,
+    },
+    // Year and Month Picker Overlay Styles
+    pickerOverlay: {
+        position: 'absolute',
+        top: 70,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'transparent',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 50,
+    },
+    pickerContent: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 15,
+        padding: 20,
+        width: '100%',
+        maxHeight: '95%',
+    },
+    pickerHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 15,
+        paddingBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
+    },
+    pickerTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    yearList: {
+        maxHeight: 400,
+    },
+    yearItem: {
+        padding: 15,
+        borderRadius: 8,
+        marginVertical: 4,
+        backgroundColor: '#F5F5F5',
+    },
+    selectedYearItem: {
+        backgroundColor: '#4A90E2',
+    },
+    yearText: {
+        fontSize: 16,
+        textAlign: 'center',
+        color: '#333',
+    },
+    selectedYearText: {
+        color: '#FFFFFF',
+        fontWeight: 'bold',
+    },
+    monthGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        paddingBottom: 80,
+    },
+    monthItem: {
+        width: '30%',
+        padding: 15,
+        marginVertical: 5,
+        borderRadius: 8,
+        backgroundColor: '#F5F5F5',
+        alignItems: 'center',
+    },
+    selectedMonthItem: {
+        backgroundColor: '#4A90E2',
+    },
+    monthText: {
+        fontSize: 14,
+        color: '#333',
+    },
+    selectedMonthText: {
+        color: '#FFFFFF',
+        fontWeight: 'bold',
     },
 });
 

@@ -17,8 +17,9 @@ RUN apk add --no-cache \
 COPY package*.json ./
 COPY app.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (including devDependencies for Expo dev server)
+# Use --legacy-peer-deps to resolve React version conflicts
+RUN npm ci --legacy-peer-deps
 
 # Copy source code
 COPY . .

@@ -6,7 +6,7 @@
  * 
  * @module RegisterScreen
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -14,8 +14,8 @@ import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { validateEmail, validatePassword, validateName, validatePasswordMatch } from '../utils/validation';
-import { useAuth } from '../hooks';
+import { validateEmail, validatePassword, validateName, validatePasswordMatch, cleanText } from '../utils/validation';
+import { useAuth, useFormValidation } from '../hooks';
 
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
@@ -37,36 +37,24 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     /** Authentication hook for registration operations */
     const { register, loading, error: authError } = useAuth();
     
-    /** First name input state */
-    const [firstname, setFirstname] = useState<string>('');
-    /** Last name input state */
-    const [lastname, setLastname] = useState<string>('');
-    /** Email address input state */
-    const [email, setEmail] = useState<string>('');
-    /** Password input state */
-    const [password, setPassword] = useState<string>('');
-    /** Password confirmation input state */
-    const [confirmpassword, setConfirmPassword] = useState<string>('');
-    /** Email validation error message */
-    const [emailError, setEmailError] = useState<string>('');
-    /** Password validation error message */
-    const [passwordError, setPasswordError] = useState<string>('');
-    /** Password confirmation error message */
-    const [confirmPasswordError, setConfirmPasswordError] = useState<string>('');
-    /** First name validation error message */
-    const [firstnameError, setFirstnameError] = useState<string>('');
-    /** Last name validation error message */
-    const [lastnameError, setLastnameError] = useState<string>('');
-    /** Visual error indicator for first name field */
-    const [showFirstnameError, setShowFirstnameError] = useState<boolean>(false);
-    /** Visual error indicator for last name field */
-    const [showLastnameError, setShowLastnameError] = useState<boolean>(false);
-    /** Visual error indicator for email field */
-    const [showEmailError, setShowEmailError] = useState<boolean>(false);
-    /** Visual error indicator for password field */
-    const [showPasswordError, setShowPasswordError] = useState<boolean>(false);
-    /** Visual error indicator for confirm password field */
-    const [showConfirmPasswordError, setShowConfirmPasswordError] = useState<boolean>(false);
+    /** Form validation hook managing all field states and validation logic */
+    const { values, errors, showErrors, handleChange, validateAll, setError } = useFormValidation({
+        firstname: { 
+            validate: validateName
+        },
+        lastname: { 
+            validate: validateName
+        },
+        email: { 
+            validate: validateEmail 
+        },
+        password: { 
+            validate: validatePassword 
+        },
+        confirmpassword: { 
+            validate: (value) => validatePasswordMatch(values.password, value)
+        }
+    });
 
     /**
      * Handles registration form submission.
@@ -75,69 +63,18 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
      * Performs comprehensive validation before submission.
      */
     const handleRegister = async () => {
-        // Reset all visual error indicators
-        setShowFirstnameError(false);
-        setShowLastnameError(false);
-        setShowEmailError(false);
-        setShowPasswordError(false);
-        setShowConfirmPasswordError(false);
-
-        let hasError = false;
-
-        // Validate all fields directly
-        const firstnameValidation = validateName(firstname);
-        const lastnameValidation = validateName(lastname);
-        const emailValidation = validateEmail(email);
-        const passwordValidation = validatePassword(password);
-        const confirmPasswordValidation = validatePasswordMatch(password, confirmpassword);
-
-        // Check firstname
-        if (!firstname.trim() || firstnameValidation) {
-            setFirstnameError(firstnameValidation ? t(firstnameValidation) : t('register.errors.This field is required'));
-            setShowFirstnameError(true);
-            hasError = true;
-        }
-        
-        // Check lastname
-        if (!lastname.trim() || lastnameValidation) {
-            setLastnameError(lastnameValidation ? t(lastnameValidation) : t('register.errors.This field is required'));
-            setShowLastnameError(true);
-            hasError = true;
-        }
-        
-        // Check email
-        if (!email.trim() || emailValidation) {
-            setEmailError(emailValidation ? t(emailValidation) : t('register.errors.This field is required'));
-            setShowEmailError(true);
-            hasError = true;
-        }
-        
-        // Check password
-        if (!password || passwordValidation) {
-            setPasswordError(passwordValidation ? t(passwordValidation) : t('register.errors.This field is required'));
-            setShowPasswordError(true);
-            hasError = true;
-        }
-        
-        // Check confirm password
-        if (!confirmpassword || confirmPasswordValidation) {
-            setConfirmPasswordError(confirmPasswordValidation ? t(confirmPasswordValidation) : t('register.errors.This field is required'));
-            setShowConfirmPasswordError(true);
-            hasError = true;
-        }
-
-        // If there are any errors, vibrate and stop
-        if (hasError) {
+        // Validate all fields using the form validation hook
+        if (!validateAll()) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             return;
         }
 
         // Call registration function from hook
         const success = await register({
-            first_name: firstname.trim(),
-            last_name: lastname.trim(),
-            email: email.trim(),
-            password: password
+            first_name: values.firstname.trim(),
+            last_name: values.lastname.trim(),
+            email: values.email.trim(),
+            password: values.password
         });
         
         if (success) {
@@ -150,11 +87,9 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             
             // If error contains email-related messages, highlight email field
             if (authError?.includes('Email already registered') || authError?.includes('email')) {
-                setEmailError(t('register.errors.Please use a different email'));
-                setShowEmailError(true);
+                setError('email', t('register.errors.Please use a different email'));
             } else if (authError) {
-                setEmailError(authError);
-                setShowEmailError(true);
+                setError('email', authError);
             }
         }
     };
@@ -188,101 +123,74 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                 
                 {/* First name input field */}
                 <Text style={styles.firstLabel}>{t('register.fields.First Name')}</Text>
-                <View style={[styles.input, showFirstnameError && styles.inputError]}>
+                <View style={[styles.input, showErrors.firstname && styles.inputError]}>
                     <TextInput
                         autoCorrect={false}
                         placeholder={t('register.placeholders.Enter your First Name')}
-                        onChangeText={newText => {
-                            setShowFirstnameError(false);
-                            const cleaned = newText.replace(/\s{2,}/g, ' ');
-                            setFirstname(cleaned);
-                            const error = validateName(cleaned);
-                            setFirstnameError(error ? t(error) : '');
-                        }}
-                        value={firstname}
+                        onChangeText={(text) => handleChange('firstname')(cleanText(text))}
+                        value={values.firstname}
                     />
                 </View>
-                <Text style={[styles.errorText, {opacity: showFirstnameError ? 1 : 0}]}>
-                    {firstnameError || t('register.errors.This field is required')}
+                <Text style={[styles.errorText, {opacity: showErrors.firstname ? 1 : 0}]}>
+                    {t(errors.firstname) || t('register.errors.This field is required')}
                 </Text>
                 
                 {/* Last name input field */}
                 <Text style={styles.label}>{t('register.fields.Last Name')}</Text>
-                <View style={[styles.input, showLastnameError && styles.inputError]}>
+                <View style={[styles.input, showErrors.lastname && styles.inputError]}>
                     <TextInput
                         autoCorrect={false}
                         placeholder={t('register.placeholders.Enter your Last Name')}
-                        onChangeText={newText => {
-                            setShowLastnameError(false);
-                            const cleaned = newText.replace(/\s{2,}/g, ' ');
-                            setLastname(cleaned);
-                            const error = validateName(cleaned);
-                            setLastnameError(error ? t(error) : '');
-                        }}
-                        value={lastname}
+                        onChangeText={(text) => handleChange('lastname')(cleanText(text))}
+                        value={values.lastname}
                     />
                 </View>
-                <Text style={[styles.errorText, {opacity: showLastnameError ? 1 : 0}]}>
-                    {lastnameError || t('register.errors.This field is required')}
+                <Text style={[styles.errorText, {opacity: showErrors.lastname ? 1 : 0}]}>
+                    {t(errors.lastname) || t('register.errors.This field is required')}
                 </Text>
                 
                 {/* Email input field */}
                 <Text style={styles.label}>{t('common.fields.Email')}</Text>
-                <View style={[styles.input, showEmailError && styles.inputError]}>
+                <View style={[styles.input, showErrors.email && styles.inputError]}>
                     <TextInput
                         placeholder={t('register.placeholders.Enter your Email')}
                         autoCapitalize="none"
                         autoCorrect={false}
                         keyboardType="email-address"
-                        onChangeText={newText => {
-                            setShowEmailError(false);
-                            setEmail(newText);
-                            const error = validateEmail(newText);
-                            setEmailError(error ? t(error) : '');
-                        }}
-                        value={email}
+                        onChangeText={handleChange('email')}
+                        value={values.email}
                     />
                 </View>
-                <Text style={[styles.errorText, {opacity: showEmailError ? 1 : 0}]}>
-                    {emailError || t('register.errors.This field is required')}
+                <Text style={[styles.errorText, {opacity: showErrors.email ? 1 : 0}]}>
+                    {t(errors.email) || t('register.errors.This field is required')}
                 </Text>
                 
                 {/* Password input field */}
                 <Text style={styles.label}>{t('common.fields.Password')}</Text>
-                <View style={[styles.input, showPasswordError && styles.inputError]}>
+                <View style={[styles.input, showErrors.password && styles.inputError]}>
                     <TextInput
                         placeholder={t('register.placeholders.Enter your Password')}
                         secureTextEntry={true}
-                        onChangeText={newText => {
-                            setShowPasswordError(false);
-                            setPassword(newText);
-                            const error = validatePassword(newText);
-                            setPasswordError(error ? t(error) : '');
-                        }}
-                        value={password}
+                        onChangeText={handleChange('password')}
+                        value={values.password}
                     />
                 </View>
-                <Text style={[styles.errorText, {opacity: showPasswordError ? 1 : 0}]}>
-                    {passwordError || t('register.errors.This field is required')}
+                <Text style={[styles.errorText, {opacity: showErrors.password ? 1 : 0}]}>
+                    {t(errors.password) || t('register.errors.This field is required')}
                 </Text>
                 
                 {/* Password confirmation input field */}
                 <Text style={styles.label}>{t('common.fields.Confirm Password')}</Text>
-                <View style={[styles.input, showConfirmPasswordError && styles.inputError]}>
+                <View style={[styles.input, showErrors.confirmpassword && styles.inputError]}>
                     <TextInput
                         placeholder={t('register.placeholders.Confirm your password')}
                         secureTextEntry={true}
-                        onChangeText={newText => {
-                            setShowConfirmPasswordError(false);
-                            setConfirmPassword(newText);
-                            const error = validatePasswordMatch(password, newText);
-                            setConfirmPasswordError(error ? t(error) : '');
-                        }}
-                        value={confirmpassword}
+                        onChangeText={handleChange('confirmpassword')}
+                        value={values.confirmpassword}
                     />
                 </View>
-                <Text style={[styles.errorText, {opacity: showConfirmPasswordError ? 1 : 0}]}>
-                    {confirmPasswordError || t('register.errors.This field is required')}
+                <Text style={[styles.errorText, {opacity: showErrors.confirmpassword ? 1 : 0}]}>
+                    {t(errors.confirmpassword) || t('register.errors.This field is required')}
                 </Text>
             </ScrollView>
                 
@@ -333,7 +241,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '500',
         marginBottom: 10,
-        marginTop: 30,
+        marginTop: 15,
     },
     label: {
         fontSize: 18,
