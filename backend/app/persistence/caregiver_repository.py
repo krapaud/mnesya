@@ -31,7 +31,7 @@ class CaregiverRepository(BaseRepository[CaregiverModel]):
             Email is indexed in the database for fast lookup
             Used for login authentication
         """
-        return self.db.query(self.model).filter(self.model.email == email).first()
+        return self.db.query(self.model).filter(self.model._email == email).first()
 
     def get_caregiver_by_id(self, id: UUID):
         """Get a caregiver by their id address.

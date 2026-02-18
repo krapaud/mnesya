@@ -1,5 +1,109 @@
 # Bug Reports & Technical Issues
 
+## Backend Issues
+
+### 1. Caregiver Authentication - Repository Column Reference Bug
+
+**Date:** 18 February 2026  
+**Component:** `backend/app/persistence/caregiver_repository.py`  
+**Severity:** Critical - Blocking
+
+#### Problem Description
+
+I discovered a critical bug that prevented ALL caregiver login attempts from working. Every login attempt returned a 401 "Invalid email or password" error, even with correct credentials. This completely blocked access to the application and made it impossible to test any features.
+
+#### Initial Symptoms
+
+When I tried to log in with my test account (test@test.com / Test1234!), I got:
+- 401 Unauthorized response
+- Error message: "Invalid email or password"
+- Backend logs showed: "❌ CAREGIVER NOT FOUND: test@test.com"
+
+This was confusing because I had just created the account through the registration endpoint.
+
+#### My Investigation Process
+
+I systematically debugged each layer of the authentication flow:
+
+1. **Frontend Token Storage**: I added logging to `tokenService.ts` to verify expo-secure-store was working correctly - ✅ It was
+2. **Frontend API Calls**: I logged the exact credentials being sent in `authService.ts` - ✅ Correct data (email: 13 chars, password: "Test1234!" 9 chars)
+3. **Backend Reception**: I added print statements in `authentication.py` login endpoint - ✅ Backend received correct credentials
+4. **Password Hashing**: I ran a direct Python test with bcrypt.verify() - ✅ Hash verification returned True
+5. **Database Check**: I queried PostgreSQL directly - ✅ Account existed with valid bcrypt hash ($2b$12$...)
+
+At this point I knew:
+- The credentials were correct
+- The password hash was valid
+- The account existed in the database
+- But the backend kept saying "CAREGIVER NOT FOUND"
+
+#### Root Cause Discovery
+
+I isolated the issue to the **repository layer**. When I examined `caregiver_repository.py`, I found an inconsistency:
+
+```python
+# Line 32 - get_caregiver_by_email() - ❌ WRONG
+caregiver = self.db.query(self.model).filter(
+    self.model.email == email  # Using Python property instead of SQL column!
+).first()
+
+# Line 61 - email_exists() - ✅ CORRECT
+exists = self.db.query(self.model).filter(
+    self.model._email == email  # Using actual database column
+).count() > 0
+```
+
+The bug: `self.model.email` is the **Python property** on the Caregiver model, but SQLAlchemy needs `self.model._email` to reference the actual **database column** in the WHERE clause.
+
+#### Why This Happened
+
+Looking at the Caregiver model definition:
+- The database column is named `_email` (with underscore)
+- There's a Python property `email` that provides access without the underscore
+- For SQLAlchemy ORM queries, you must use the actual column name (`_email`)
+- For Python object access, you use the property (`caregiver.email`)
+
+I mixed up which one to use in the repository query.
+
+#### The Fix
+
+I changed line 32 in `caregiver_repository.py`:
+
+```python
+# Before (WRONG):
+self.model.email == email
+
+# After (CORRECT):
+self.model._email == email
+```
+
+One character difference (adding the underscore) fixed the entire authentication system!
+
+#### Impact
+
+- **Severity**: Critical - No one could log in
+- **Duration**: ~2 hours of debugging
+- **Affected**: Every login attempt since implementing caregiver authentication
+- **Root Cause**: Misunderstanding SQLAlchemy property vs column reference
+
+#### What I Learned
+
+1. **ORM Column Naming**: When a SQLAlchemy model uses a private column name (like `_email`) with a public property (like `email`), always use the private name in queries
+2. **Consistency Checking**: Code inconsistencies (like `email_exists()` working but `get_caregiver_by_email()` failing) are red flags pointing to the exact bug location
+3. **Systematic Debugging**: Adding logs at every layer (frontend → API → service → repository → database) helped isolate the issue quickly
+4. **Direct Testing**: Testing Python functions directly (like bcrypt.verify()) helps eliminate possibilities and narrow down the problem
+5. **Backend Logs**: Print statements in the API endpoint showed exactly what the backend received, proving the issue wasn't with data transmission
+
+#### Prevention
+
+To avoid this in the future:
+- When writing repository methods, always check how other methods reference columns
+- Use the database schema or model definition as reference for column names
+- Test authentication immediately after implementing to catch this type of bug early
+- Consider consistent naming patterns (either always use underscores or never use them)
+
+---
+
 ## Frontend Issues
 
 ### 1. User Authentication - PIN Removal Decision

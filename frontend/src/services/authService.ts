@@ -7,7 +7,7 @@
  * @module authService
  */
 import apiClient from './api';
-import { saveToken, deleteToken } from './tokenService';
+import { saveToken, deleteToken, getToken } from './tokenService';
 import { LoginData, RegisterData, AuthResponse, CaregiverProfile } from '../types/interfaces';
 
 /**
@@ -51,6 +51,7 @@ export const register = async (data: RegisterData): Promise<void> => {
  * @returns Promise that resolves when logout is complete
  */
 export const logout = async (): Promise<void> => {
+  await apiClient.post('/api/auth/logout');
   await deleteToken();
 };
 
@@ -65,5 +66,24 @@ export const logout = async (): Promise<void> => {
  */
 export const getCurrentUser = async (): Promise<CaregiverProfile> => {
   const response = await apiClient.get('/api/auth/me');
+  return response.data;
+};
+
+/**
+ * Updates the current caregiver's profile information.
+ * 
+ * Sends updated profile data to the backend. The caregiver can modify
+ * their first name, last name, and email address.
+ * 
+ * @param data - Updated profile information
+ * @returns Promise resolving to updated caregiver profile
+ * @throws Error if validation fails or request fails
+ */
+export const updateCaregiverProfile = async (data: {
+  first_name: string;
+  last_name: string;
+  email: string;
+}): Promise<CaregiverProfile> => {
+  const response = await apiClient.put('/api/auth/me', data);
   return response.data;
 };

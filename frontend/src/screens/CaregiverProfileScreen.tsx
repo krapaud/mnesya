@@ -3,6 +3,7 @@
  * 
  * Displays caregiver account information and provides access to:
  * - Profile information (name, email)
+ * - Profile editing functionality
  * - Password change functionality
  * - Logout action with confirmation modal
  * 
@@ -19,8 +20,9 @@ import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { CaregiverTabsParamList, RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { logout } from '../services/authService';
+import { logout, updateCaregiverProfile } from '../services/authService';
 import { useCaregiverProfile } from '../hooks';
+import { UpdateCaregiverProfileModal } from '../components';
 
 type Props = CompositeScreenProps<
     BottomTabScreenProps<CaregiverTabsParamList, 'Profile'>,
@@ -44,8 +46,10 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
         () => navigation.navigate('Welcome')
     );
 
-    // Modal visibility state
+    // Modal visibility states
     const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
+    const [showUpdateModal, setShowUpdateModal] = useState(false);
 
     /**
      * Handles password change navigation.
@@ -84,6 +88,31 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
     };
 
     /**
+     * Opens the profile edit modal.
+     */
+    const handleEditProfile = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        setShowMenu(false);
+        setShowUpdateModal(true);
+    };
+
+    /**
+     * Handles profile update.
+     * 
+     * Sends updated profile data to backend and refreshes caregiver data on success.
+     */
+    const handleUpdateProfile = async (data: { first_name: string; last_name: string; email: string }) => {
+        try {
+            await updateCaregiverProfile(data);
+            await reload(); // Refresh profile data
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } catch (err) {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            throw err;
+        }
+    };
+
+    /**
      * Handles logout cancellation.
      * Closes the confirmation modal.
      */
@@ -94,29 +123,40 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
 
     return (
         <View style={commonStyles.container}>
-            {/* Header with logo */}
-            <View style={commonStyles.header}>
-                <View style={commonStyles.headerSpacer} />
-                <View style={commonStyles.headerCenter}>
-                    <Image 
-                        source={require('../../assets/mnesya-logo.png')} 
-                        style={commonStyles.logo}
-                    />
-                    <Text style={commonStyles.appName}>Mnesya</Text>
+            {/* Header with back button and logo */}
+        <View style={commonStyles.header}>
+            <TouchableOpacity onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                navigation.goBack();
+            }}>
+                <View style={commonStyles.ArrowIconCircle}>
+                    <Ionicons name="arrow-back" size={24} color='#4A90E2'
+                />
                 </View>
-                <View style={commonStyles.headerSpacer} />
+            </TouchableOpacity>
+            <View style={commonStyles.headerCenter}>
+                <Image 
+                    source={require('../../assets/mnesya-logo.png')} 
+                    style={commonStyles.logo}
+                />
+                <Text style={commonStyles.appName}>Mnesya</Text>
             </View>
-
-            {/* Page title */}
-            <View style={styles.titleSection}>
-                <Text style={styles.title}>{t('caregiverProfile.title')}</Text>
-            </View>
+            <TouchableOpacity 
+                onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setShowMenu(true);
+                }}
+                style={styles.menuButton}
+            >
+                <Ionicons name="ellipsis-vertical" size={24} color="#4A90E2" />
+            </TouchableOpacity>
+        </View>
 
             {/* Loading state */}
             {loading && (
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#4A90E2" />
-                    <Text style={styles.loadingText}>Loading profile...</Text>
+                    <Text style={styles.loadingText}>{t('common.messages.loading')}</Text>
                 </View>
             )}
 
@@ -239,6 +279,46 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                     </View>
                 </View>
             </Modal>
+
+            {/* Context Menu Overlay */}
+            {showMenu && (
+                <Modal
+                    visible={showMenu}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={() => setShowMenu(false)}
+                >
+                    <TouchableOpacity 
+                        style={styles.menuOverlay}
+                        activeOpacity={1}
+                        onPress={() => setShowMenu(false)}
+                    >
+                        <View style={styles.menuContainer}>
+                            <TouchableOpacity 
+                                style={styles.menuItem}
+                                onPress={handleEditProfile}
+                            >
+                                <Ionicons name="create-outline" size={20} color="#4A90E2" />
+                                <Text style={styles.menuItemText}>{t('common.buttons.Edit')}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
+            )}
+
+            {/* Update Profile Modal */}
+            {caregiverData && (
+                <UpdateCaregiverProfileModal
+                    visible={showUpdateModal}
+                    onClose={() => setShowUpdateModal(false)}
+                    onSave={handleUpdateProfile}
+                    initialData={{
+                        first_name: caregiverData.first_name,
+                        last_name: caregiverData.last_name,
+                        email: caregiverData.email,
+                    }}
+                />
+            )}
         </View>
     );
 };
@@ -422,6 +502,41 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '600',
+    },
+
+    // MENU STYLES
+    menuButton: {
+        padding: 8,
+    },
+    menuOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-end',
+        paddingTop: 105,
+        paddingRight: 15,
+    },
+    menuContainer: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 10,
+        paddingVertical: 5,
+        minWidth: 150,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 15,
+        gap: 10,
+    },
+    menuItemText: {
+        fontSize: 16,
+        color: '#333',
     },
 });
 
