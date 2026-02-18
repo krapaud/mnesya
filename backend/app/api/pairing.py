@@ -35,7 +35,7 @@ async def generate_code(
     try:
         # Verify caregiver owns this user
         user_repo = UserRepository(db)
-        user = user_repo.find_by_id(request.user_id)
+        user = user_repo.get(request.user_id)
         
         if not user:
             raise HTTPException(
@@ -72,7 +72,7 @@ async def generate_code(
         pairing_code.caregiver_id = UUID(caregiver_id)
         pairing_code.expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
         
-        pairing_repo.save_instance(pairing_code)
+        pairing_repo.add(pairing_code)
         
         return PairingCodeResponse(
             code=pairing_code.code,
@@ -109,16 +109,19 @@ async def verify_code(
         
         # Mark code as used
         pairing_code.is_used = True
-        pairing_repo.save_instance(pairing_code)
+        pairing_repo.add(pairing_code)
         
         # Get user info
         user_repo = UserRepository(db)
-        user = user_repo.find_by_id(pairing_code.user_id)
+        user = user_repo.get(pairing_code.user_id)
         
+        from app.schemas.pairing_code_schema import UserInfo
         return PairingCodeVerifyResponse(
             user_id=user.id,
-            user_first_name=user.first_name,
-            user_last_name=user.last_name,
+            user=UserInfo(
+                first_name=user.first_name,
+                last_name=user.last_name
+            ),
             caregiver_id=pairing_code.caregiver_id
         )
         

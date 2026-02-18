@@ -140,12 +140,23 @@ class CaregiverModel(database):
         - At least one special character ($@#%*!~&)
         
         Args:
-            value (str): The password to set
+            value (str): The password to set (plaintext will be validated and hashed, bcrypt hash will be stored directly)
             
         Raises:
             ValueError: If password doesn't meet security requirements
+            
+        Note:
+            If value is already a bcrypt hash (starts with $2a$ or $2b$), 
+            it will be stored directly without validation.
+            Plaintext passwords will be validated and hashed automatically.
         """
         value = value.strip()
+        
+        # If it's already a bcrypt hash, store it directly
+        if value.startswith('$2a$') or value.startswith('$2b$'):
+            self._password = value
+            return
+        
         SpecialSym = ['$', '@', '#', '%', '*', '!', '~', '&']
 
         # Length validation
@@ -176,7 +187,9 @@ class CaregiverModel(database):
             raise ValueError('Password should have at least one lowercase letter')
         if not has_sym:
             raise ValueError('Password should have at least one of the symbols $@#%*!~&')
-        self._password = value
+        
+        # Hash the plaintext password before storing
+        self._password = bcrypt.hash(value)
 
     @property
     def user_ids(self) -> list:

@@ -56,7 +56,8 @@ async def create_profile(
     request: UserCreate,
     caregiver_id: str = Depends(get_current_caregiver_id),
     user_facade: UserFacade = Depends(get_user_facade),
-    caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade)
+    caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade),
+    db: Session = Depends(get_db)
 ):
     """Create a new user profile and generate pairing code."""
     try:
@@ -80,7 +81,6 @@ async def create_profile(
         def generate_code():
             return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
         
-        db = next(get_db())
         pairing_repo = PairingCodeRepository(db)
         
         code = generate_code()
@@ -93,7 +93,7 @@ async def create_profile(
         pairing_code.caregiver_id = UUID(caregiver_id)
         pairing_code.expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
         
-        pairing_repo.save_instance(pairing_code)
+        pairing_repo.add(pairing_code)
         
         return {
             "user": {
@@ -105,8 +105,10 @@ async def create_profile(
                 "created_at": user.created_at.isoformat(),
                 "updated_at": user.updated_at.isoformat()
             },
-            "pairing_code": code,
-            "expires_at": pairing_code.expires_at.isoformat()
+            "pairing_code": {
+                "code": code,
+                "expires_at": pairing_code.expires_at.isoformat()
+            }
         }
 
     except ValueError as e:

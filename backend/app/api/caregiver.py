@@ -41,55 +41,6 @@ def get_current_caregiver_id(token_payload: dict = Depends(verify_token)) -> str
         )
     return caregiver_id
 
-
-
-@router.get("/me", response_model=CaregiverResponse)
-async def get_my_profile(
-    caregiver_id: str = Depends(get_current_caregiver_id),
-    caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade)
-):
-    """Get current caregiver's profile.
-    
-    Returns the authenticated caregiver's profile details.
-    
-    Args:
-        caregiver_id (str): ID of authenticated caregiver
-        caregiver_facade (CaregiverFacade): Caregiver service facade
-        
-    Returns:
-        CaregiverResponse: Caregiver profile details
-        
-    Raises:
-        HTTPException: If caregiver not found
-    """
-    try:
-        caregiver = caregiver_facade.get_caregiver(UUID(caregiver_id))
-        
-        if not caregiver:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Caregiver not found"
-            )
-        
-        return CaregiverResponse(
-            id=str(caregiver.id),
-            first_name=caregiver.first_name,
-            last_name=caregiver.last_name,
-            email=caregiver.email,
-            created_at=caregiver.created_at
-        )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve profile: {str(e)}"
-        )
-
-
 @router.put("/me", response_model=CaregiverResponse)
 async def update_my_profile(
     request: CaregiverUpdate,

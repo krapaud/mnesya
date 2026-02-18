@@ -3,11 +3,11 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from uuid import UUID
+from typing import Optional
 
 class PairingCodeCreate(BaseModel):
     """Schema for creating a pairing code."""
     user_id: UUID
-    caregiver_id: UUID
 
 class PairingCodeResponse(BaseModel):
     """Schema for pairing code response."""
@@ -18,9 +18,13 @@ class PairingCodeVerify(BaseModel):
     """Schema for verifying a pairing code."""
     code: str = Field(..., min_length=6, max_length=6)
 
+class UserInfo(BaseModel):
+    """Schema for user information in pairing code verification."""
+    first_name: str
+    last_name: str
+
 class PairingCodeVerifyResponse(BaseModel):
     """Schema for pairing code verification response."""
     user_id: UUID
-    user_first_name: str
-    user_last_name: str
+    user: UserInfo
     caregiver_id: UUID
