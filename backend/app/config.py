@@ -5,11 +5,9 @@ class config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'secret-key-mnesya')
     DEBUG=False
 
-conn = psycopg2.connect(database = "datacamp_courses", 
-                        user = "mnesya_user", 
-                        host= 'localhost',
-                        password = "mnesya_password",
-                        port = 5432)
+def get_database_url():
+    """Get the database URL from environment variables."""
+    return os.getenv('DATABASE_URL', 'postgresql://mnesya_user:mnesya_password@db:5432/mnesya_db')
 
 class Config:
     env_file = ".env"

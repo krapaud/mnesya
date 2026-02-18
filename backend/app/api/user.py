@@ -13,10 +13,14 @@ from app.schemas.user_schema import UserCreate, UserUpdate, UserResponse
 from app.services.user_facade import UserFacade
 from app.api.authentication import verify_token
 from app import get_db
+import string
+import random
 
 # Router
-router = APIRouter(prefix="/api/profiles", tags=["User Profiles"])
+router = APIRouter(prefix="/api/users", tags=["Users"])
 
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
 
 def get_user_facade(db: Session = Depends(get_db)) -> UserFacade:
     """Dependency to create UserFacade instance with database session."""
@@ -28,13 +32,13 @@ def get_caregiver_facade(db: Session = Depends(get_db)) -> CaregiverFacade:
 
 def get_current_caregiver_id(token_payload: dict = Depends(verify_token)) -> str:
     """Extract caregiver ID from JWT token.
-    
+
     Args:
         token_payload (dict): Decoded JWT token
-        
+
     Returns:
         str: Caregiver ID
-        
+
     Raises:
         HTTPException: If token is invalid
     """
@@ -47,29 +51,17 @@ def get_current_caregiver_id(token_payload: dict = Depends(verify_token)) -> str
     return caregiver_id
 
 
-@router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=dict)  # Change response model
 async def create_profile(
     request: UserCreate,
     caregiver_id: str = Depends(get_current_caregiver_id),
     user_facade: UserFacade = Depends(get_user_facade),
-    caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade)
+    caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade),
+    db: Session = Depends(get_db)
 ):
-    """Create a new user profile.
-    
-    Creates a profile for an elderly person and associates it with the authenticated caregiver.
-    
-    Args:
-        request (UserCreate): User profile data
-        caregiver_id (str): ID of authenticated caregiver
-        user_facade (UserFacade): User service facade
-        
-    Returns:
-        UserResponse: Created user profile
-        
-    Raises:
-        HTTPException: If validation fails or creation error occurs
-    """
+    """Create a new user profile and generate pairing code."""
     try:
+        # Create user
         user_data = {
             "first_name": request.first_name,
             "last_name": request.last_name,
@@ -78,17 +70,47 @@ async def create_profile(
         
         user = user_facade.create_user(user_data, UUID(caregiver_id))
         caregiver_facade.add_user_to_caregiver(caregiver_id, user.id)
-
-        return UserResponse(
-            id=user.id,
-            first_name=user.first_name,
-            last_name=user.last_name,
-            birthday=user.birthday,
-            caregiver_ids=user.caregiver_ids,
-            created_at=user.created_at,
-            updated_at=user.updated_at
-        )
         
+        # Generate pairing code
+        from app.persistence.pairing_code_repository import PairingCodeRepository
+        from app.models.pairing_code import PairingCodeModel
+        from datetime import datetime, timezone, timedelta
+        import string
+        import random
+        
+        def generate_code():
+            return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+        
+        pairing_repo = PairingCodeRepository(db)
+        
+        code = generate_code()
+        while pairing_repo.find_by_code(code):
+            code = generate_code()
+        
+        pairing_code = PairingCodeModel()
+        pairing_code.code = code
+        pairing_code.user_id = user.id
+        pairing_code.caregiver_id = UUID(caregiver_id)
+        pairing_code.expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
+        
+        pairing_repo.add(pairing_code)
+        
+        return {
+            "user": {
+                "id": str(user.id),
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "birthday": user.birthday.isoformat(),
+                "caregiver_ids": [str(cid) for cid in user.caregiver_ids],
+                "created_at": user.created_at.isoformat(),
+                "updated_at": user.updated_at.isoformat()
+            },
+            "pairing_code": {
+                "code": code,
+                "expires_at": pairing_code.expires_at.isoformat()
+            }
+        }
+
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -109,22 +131,22 @@ async def list_profiles(
     user_facade: UserFacade = Depends(get_user_facade)
 ):
     """List all profiles for the authenticated caregiver.
-    
+
     Returns all user profiles associated with the current caregiver.
-    
+
     Args:
         caregiver_id (str): ID of authenticated caregiver
         user_facade (UserFacade): User service facade
-        
+
     Returns:
         List[UserResponse]: List of user profiles
-        
+
     Raises:
         HTTPException: If retrieval error occurs
     """
     try:
         users = user_facade.get_users_by_caregiver(UUID(caregiver_id))
-        
+
         return [
             UserResponse(
                 id=user.id,
@@ -137,7 +159,7 @@ async def list_profiles(
             )
             for user in users
         ]
-        
+
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -154,36 +176,36 @@ async def get_profile(
     user_facade: UserFacade = Depends(get_user_facade)
 ):
     """Get details of a specific user profile.
-    
+
     Returns profile details if the profile belongs to the authenticated caregiver.
-    
+
     Args:
         profile_id (UUID): ID of the profile to retrieve
         caregiver_id (str): ID of authenticated caregiver
         user_facade (UserFacade): User service facade
-        
+
     Returns:
         UserResponse: User profile details
-        
+
     Raises:
         HTTPException: If profile not found or access denied
     """
     try:
         user = user_facade.get_user(profile_id)
-        
+
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Profile not found"
             )
-        
+
         # Verify that this caregiver has access to this profile
         if UUID(caregiver_id) not in user.caregiver_ids:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You don't have access to this profile"
             )
-        
+
         return UserResponse(
             id=user.id,
             first_name=user.first_name,
@@ -193,7 +215,7 @@ async def get_profile(
             created_at=user.created_at,
             updated_at=user.updated_at
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:

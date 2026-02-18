@@ -43,12 +43,10 @@ class CaregiverFacade:
             Exception: If database operation fails or email already exists
             
         Note:
-            Password is automatically hashed before storage
+            Password is automatically hashed before storage by the model setter
         """
-        # Create caregiver (password is validated by setter)
+        # Create caregiver (password is validated and hashed by setter)
         caregiver = CaregiverModel(**caregiver_data)
-        # Hash the validated password
-        caregiver.hash_password(caregiver_data['password'])
         self.caregiver_repo.add(caregiver)
         return caregiver
 

@@ -29,3 +29,4 @@ httpx==0.25.2
 # Development/Testing
 pytest==7.4.3
 pytest-asyncio==0.21.1
+pytest-cov==4.1.0
