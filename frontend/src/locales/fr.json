@@ -3,7 +3,9 @@
     "buttons": {
       "New reminder": "Nouveau Rappel",
       "Validate": "Valider",
-      "Cancel": "Annuler"
+      "Cancel": "Annuler",
+      "Edit": "Modifier",
+      "Confirm": "Confirmer"
     },
     "fields": {
       "Email": "Email",
@@ -55,7 +57,8 @@
     "title": "Créez votre compte",
     "fields": {
         "First Name": "Prénom",
-        "Last Name": "Nom"
+        "Last Name": "Nom",
+        "Email": "Email"
     },
     "placeholders": {
         "Enter your First Name": "Entrez votre prénom",

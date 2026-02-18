@@ -3,7 +3,9 @@
     "buttons": {
       "New reminder": "New Reminder",
       "Validate": "Validate",
-      "Cancel": "Cancel"
+      "Cancel": "Cancel",
+      "Edit": "Edit",
+      "Confirm": "Confirm"
     },
     "fields": {
       "Email": "Email",
@@ -57,7 +59,8 @@
     "title": "Create an account",
     "fields": {
         "First Name": "First Name",
-        "Last Name": "Last Name"
+        "Last Name": "Last Name",
+        "Email": "Email"
     },
     "placeholders": {
         "Enter your First Name": "Enter your First Name",

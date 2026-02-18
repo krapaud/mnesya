@@ -11,8 +11,8 @@ import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { PairingCodeModal, UpdateProfileModal, ConfirmationModal } from '../components';
 import { useUserProfile } from '../hooks';
+import { PairingCodeModal, UpdateUserProfileModal, ConfirmationModal } from '../components';
 import { calculateAge } from '../utils/dateUtils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'UserProfileDetails'>;
@@ -177,7 +177,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
         />
 
         {/* Update Profile Modal */}
-        <UpdateProfileModal
+        <UpdateUserProfileModal
             visible={showUpdateModal}
             onClose={() => setShowUpdateModal(false)}
             onSave={handleUpdateProfile}
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     },
     menuContainer: {
         position: 'absolute',
-        top: 120,
+        top: 105,
         right: 10,
         backgroundColor: '#FFFFFF',
         borderRadius: 10,
