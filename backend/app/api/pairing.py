@@ -13,10 +13,15 @@ from app.schemas.pairing_code_schema import (
     PairingCodeVerify,
     PairingCodeVerifyResponse
 )
+
+from app.schemas.authentication_schema import TokenResponse
+
 from app.persistence.pairing_code_repository import PairingCodeRepository
 from app.persistence.user_repository import UserRepository
-from app.api.authentication import verify_token
+from app.api.authentication import verify_token, create_access_token
 from app import get_db
+
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 router = APIRouter(prefix="/api/pairing", tags=["Pairing"])
 
@@ -114,19 +119,22 @@ async def verify_code(
         # Get user info
         user_repo = UserRepository(db)
         user = user_repo.get(pairing_code.user_id)
-        
-        from app.schemas.pairing_code_schema import UserInfo
-        return PairingCodeVerifyResponse(
-            user_id=user.id,
-            user=UserInfo(
-                first_name=user.first_name,
-                last_name=user.last_name
-            ),
-            caregiver_id=pairing_code.caregiver_id
+
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": str(user.id), "firstname": user.first_name, "lastname": user.last_name},
+            expires_delta=access_token_expires
         )
-        
-    except ValueError as e:
+        return TokenResponse(
+            access_token=access_token,
+            token_type="bearer",
+            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Login failed: {str(e)}"
         )
