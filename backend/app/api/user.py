@@ -124,6 +124,50 @@ async def create_profile(
             detail=f"Failed to create profile: {str(e)}"
         )
 
+@router.get("/me", response_model=UserResponse)
+async def get_current_user_profile(
+    token_payload: dict = Depends(verify_token),
+    user_facade: UserFacade = Depends(get_user_facade)
+):
+    """Get current authenticated user profile.
+    
+    Args:
+        token_payload (dict): Decoded JWT token
+        user_facade (UserFacade): User service facade
+        
+    Returns:
+        UserResponse: Current user profile
+        
+    Raises:
+        HTTPException: If user not found
+    """
+    try:
+        user_id = token_payload.get("sub")
+        user = user_facade.get_user(UUID(user_id))
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        return UserResponse(
+            id=user.id,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            birthday=user.birthday,
+            caregiver_ids=user.caregiver_ids,
+            created_at=user.created_at,
+            updated_at=user.updated_at
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get profile: {str(e)}"
+        )
 
 @router.get("", response_model=List[UserResponse])
 async def list_profiles(
