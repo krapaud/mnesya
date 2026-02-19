@@ -13,14 +13,9 @@ from app.schemas.user_schema import UserCreate, UserUpdate, UserResponse
 from app.services.user_facade import UserFacade
 from app.api.authentication import verify_token
 from app import get_db
-import string
-import random
 
 # Router
 router = APIRouter(prefix="/api/users", tags=["Users"])
-
-def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))
 
 def get_user_facade(db: Session = Depends(get_db)) -> UserFacade:
     """Dependency to create UserFacade instance with database session."""
@@ -51,7 +46,7 @@ def get_current_caregiver_id(token_payload: dict = Depends(verify_token)) -> str
     return caregiver_id
 
 
-@router.post("", response_model=dict)  # Change response model
+@router.post("", response_model=UserResponse)
 async def create_profile(
     request: UserCreate,
     caregiver_id: str = Depends(get_current_caregiver_id),
@@ -67,34 +62,10 @@ async def create_profile(
             "last_name": request.last_name,
             "birthday": request.birthday
         }
-        
+
         user = user_facade.create_user(user_data, UUID(caregiver_id))
         caregiver_facade.add_user_to_caregiver(caregiver_id, user.id)
-        
-        # Generate pairing code
-        from app.persistence.pairing_code_repository import PairingCodeRepository
-        from app.models.pairing_code import PairingCodeModel
-        from datetime import datetime, timezone, timedelta
-        import string
-        import random
-        
-        def generate_code():
-            return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
-        
-        pairing_repo = PairingCodeRepository(db)
-        
-        code = generate_code()
-        while pairing_repo.find_by_code(code):
-            code = generate_code()
-        
-        pairing_code = PairingCodeModel()
-        pairing_code.code = code
-        pairing_code.user_id = user.id
-        pairing_code.caregiver_id = UUID(caregiver_id)
-        pairing_code.expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
-        
-        pairing_repo.add(pairing_code)
-        
+
         return {
             "user": {
                 "id": str(user.id),
@@ -104,10 +75,6 @@ async def create_profile(
                 "caregiver_ids": [str(cid) for cid in user.caregiver_ids],
                 "created_at": user.created_at.isoformat(),
                 "updated_at": user.updated_at.isoformat()
-            },
-            "pairing_code": {
-                "code": code,
-                "expires_at": pairing_code.expires_at.isoformat()
             }
         }
 
