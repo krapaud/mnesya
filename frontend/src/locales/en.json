@@ -3,7 +3,9 @@
     "buttons": {
       "New reminder": "New Reminder",
       "Validate": "Validate",
-      "Cancel": "Cancel"
+      "Cancel": "Cancel",
+      "Edit": "Edit",
+      "Confirm": "Confirm"
     },
     "fields": {
       "Email": "Email",
@@ -16,7 +18,14 @@
     "messages": {
         "profileCreated": "Profile created",
         "profileUpdated": "Profile updated",
-        "profileDeleted": "Profile deleted"
+        "profileDeleted": "Profile deleted",
+        "loading": "Loading..."
+    },
+    "errors": {
+        "failedToLoadProfiles": "Failed to load profiles",
+        "failedToLoadProfile": "Failed to load profile",
+        "failedToUpdateProfile": "Failed to update profile",
+        "failedToDeleteProfile": "Failed to delete profile"
     },
     "pickersText": {
         "All Profiles": "All",
@@ -41,13 +50,17 @@
       "Logging in...": "Logging in...",
       "lostPassword": "Lost password?",
       "createAccount": "Create an account"
+    },
+    "errors": {
+      "invalidCredentials": "Invalid email or password"
     }
   },
   "register" : {
     "title": "Create an account",
     "fields": {
         "First Name": "First Name",
-        "Last Name": "Last Name"
+        "Last Name": "Last Name",
+        "Email": "Email"
     },
     "placeholders": {
         "Enter your First Name": "Enter your First Name",
@@ -146,6 +159,12 @@
     "success": {
         "title": "Success",
         "Reminder created successfully": "Reminder created successfully!"
+    },
+    "modal": {
+        "title": "Confirm Reminder",
+        "message": "Are you sure you want to create this reminder?",
+        "cancel": "Cancel",
+        "confirm": "Confirm"
     }
   },
   "UserPairing": {
@@ -190,7 +209,10 @@
   "UserProfileDetail": {
     "title": "Profile Details",
     "buttons": {
-        "Generate pairing code": "Generate pairing code"
+        "Generate pairing code": "Generate pairing code",
+        "Edit": "Edit",
+        "Delete": "Delete",
+        "Save": "Save Changes"
     },
     "sections": {
         "Active Reminders": "Active Reminders"
@@ -198,6 +220,15 @@
     "messages": {
         "Profile not found": "Profile not found",
         "No active reminders": "No active reminders"
+    },
+    "modals": {
+        "update": {
+            "title": "Edit Profile"
+        },
+        "delete": {
+            "title": "Delete Profile?",
+            "message": "This action cannot be undone. All data associated with this profile will be permanently deleted."
+        }
     }
   },
   "pairingCode": {
@@ -231,7 +262,8 @@
     },
     "buttons": {
       "changePassword": "Change Password",
-      "logout": "Logout"
+      "logout": "Logout",
+      "retry": "Retry"
     },
     "modal": {
       "title": "Confirm Logout",

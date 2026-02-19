@@ -1,17 +1,17 @@
 /**
  * Unit tests for token service
  * 
- * Tests token storage, retrieval, and deletion using AsyncStorage.
- * Uses mocked AsyncStorage to avoid actual device storage during tests.
+ * Tests token storage, retrieval, and deletion using SecureStore.
+ * Uses mocked SecureStore to avoid actual device storage during tests.
  */
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { saveToken, getToken, deleteToken } from '../tokenService';
 
-// Mock AsyncStorage module
-jest.mock('@react-native-async-storage/async-storage', () => ({
-  setItem: jest.fn(),
-  getItem: jest.fn(),
-  removeItem: jest.fn(),
+// Mock SecureStore module
+jest.mock('expo-secure-store', () => ({
+  setItemAsync: jest.fn(),
+  getItemAsync: jest.fn(),
+  deleteItemAsync: jest.fn(),
 }));
 
 describe('tokenService', () => {
@@ -21,14 +21,14 @@ describe('tokenService', () => {
   });
 
   describe('saveToken', () => {
-    it('should save token to AsyncStorage with correct key', async () => {
+    it('should save token to SecureStore with correct key', async () => {
       const testToken = 'test-jwt-token-12345';
       
       await saveToken(testToken);
       
-      expect(AsyncStorage.setItem).toHaveBeenCalledTimes(1);
-      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
-        '@mnesya/auth_token',
+      expect(SecureStore.setItemAsync).toHaveBeenCalledTimes(1);
+      expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
+        'auth_token',
         testToken
       );
     });
@@ -38,73 +38,73 @@ describe('tokenService', () => {
       
       await saveToken(emptyToken);
       
-      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
-        '@mnesya/auth_token',
+      expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
+        'auth_token',
         emptyToken
       );
     });
 
-    it('should handle very long token strings', async () => {
+    it('should handle long token strings', async () => {
       const longToken = 'a'.repeat(1000);
       
       await saveToken(longToken);
       
-      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
-        '@mnesya/auth_token',
+      expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
+        'auth_token',
         longToken
       );
     });
   });
 
   describe('getToken', () => {
-    it('should retrieve token from AsyncStorage', async () => {
+    it('should retrieve token from SecureStore', async () => {
       const mockToken = 'stored-token-67890';
-      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(mockToken);
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(mockToken);
       
       const result = await getToken();
       
-      expect(AsyncStorage.getItem).toHaveBeenCalledTimes(1);
-      expect(AsyncStorage.getItem).toHaveBeenCalledWith('@mnesya/auth_token');
+      expect(SecureStore.getItemAsync).toHaveBeenCalledTimes(1);
+      expect(SecureStore.getItemAsync).toHaveBeenCalledWith('auth_token');
       expect(result).toBe(mockToken);
     });
 
     it('should return null when no token is stored', async () => {
-      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
       
       const result = await getToken();
       
       expect(result).toBeNull();
     });
 
-    it('should handle AsyncStorage errors gracefully', async () => {
-      const mockError = new Error('AsyncStorage read error');
-      (AsyncStorage.getItem as jest.Mock).mockRejectedValue(mockError);
+    it('should handle SecureStore errors gracefully', async () => {
+      const mockError = new Error('SecureStore read error');
+      (SecureStore.getItemAsync as jest.Mock).mockRejectedValue(mockError);
       
-      await expect(getToken()).rejects.toThrow('AsyncStorage read error');
+      await expect(getToken()).rejects.toThrow('SecureStore read error');
     });
   });
 
   describe('deleteToken', () => {
-    it('should remove token from AsyncStorage', async () => {
+    it('should remove token from SecureStore', async () => {
       await deleteToken();
       
-      expect(AsyncStorage.removeItem).toHaveBeenCalledTimes(1);
-      expect(AsyncStorage.removeItem).toHaveBeenCalledWith('@mnesya/auth_token');
+      expect(SecureStore.deleteItemAsync).toHaveBeenCalledTimes(1);
+      expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith('auth_token');
     });
 
     it('should handle deletion when no token exists', async () => {
-      (AsyncStorage.removeItem as jest.Mock).mockResolvedValue(undefined);
+      (SecureStore.deleteItemAsync as jest.Mock).mockResolvedValue(undefined);
       
       await deleteToken();
       
-      expect(AsyncStorage.removeItem).toHaveBeenCalled();
+      expect(SecureStore.deleteItemAsync).toHaveBeenCalled();
     });
 
-    it('should handle AsyncStorage deletion errors', async () => {
-      const mockError = new Error('AsyncStorage deletion error');
-      (AsyncStorage.removeItem as jest.Mock).mockRejectedValue(mockError);
+    it('should handle SecureStore deletion errors', async () => {
+      const mockError = new Error('SecureStore deletion error');
+      (SecureStore.deleteItemAsync as jest.Mock).mockRejectedValue(mockError);
       
-      await expect(deleteToken()).rejects.toThrow('AsyncStorage deletion error');
+      await expect(deleteToken()).rejects.toThrow('SecureStore deletion error');
     });
   });
 
@@ -113,8 +113,8 @@ describe('tokenService', () => {
       const testToken = 'integration-test-token';
       
       // Mock both save and get
-      (AsyncStorage.setItem as jest.Mock).mockResolvedValue(undefined);
-      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(testToken);
+      (SecureStore.setItemAsync as jest.Mock).mockResolvedValue(undefined);
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(testToken);
       
       await saveToken(testToken);
       const retrievedToken = await getToken();
@@ -124,8 +124,8 @@ describe('tokenService', () => {
 
     it('should return null after token deletion', async () => {
       // Mock delete and subsequent get returning null
-      (AsyncStorage.removeItem as jest.Mock).mockResolvedValue(undefined);
-      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
+      (SecureStore.deleteItemAsync as jest.Mock).mockResolvedValue(undefined);
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
       
       await deleteToken();
       const retrievedToken = await getToken();

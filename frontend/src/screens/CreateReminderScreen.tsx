@@ -9,16 +9,16 @@
  * @module CreateReminderScreen
  */
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, Modal, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { fakeProfiles } from '../data/fakeData';
 import { PlatformDatePicker, PlatformTimePicker, PlatformProfilePicker } from '../components';
 import { scheduleReminderWithRepetitions } from '../utils/notifications';
+import { useUserProfiles } from '../hooks';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateReminder'>;
 
@@ -34,6 +34,10 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CreateReminder'>;
  */
 const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
+    
+    // Load user profiles from API
+    const { userData, loading: loadingProfiles, error: profilesError } = useUserProfiles();
+    
     /** Reminder title input state */
     const [reminderTitle, setReminderTitle] = useState<string>('');
     /** Reminder message/description input state */
@@ -49,9 +53,20 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const [showProfilePicker, setShowProfilePicker] = useState<boolean>(false);
     /** Selected profile ID */
     const [selectedProfile, setSelectedProfile] = useState<string | number>('');
+    
+    /** Controls confirmation modal visibility */
+    const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+    
+    /** Error states for inline validation */
+    const [profileError, setProfileError] = useState<string>('');
+    const [titleError, setTitleError] = useState<string>('');
+    const [messageError, setMessageError] = useState<string>('');
+    const [showProfileError, setShowProfileError] = useState<boolean>(false);
+    const [showTitleError, setShowTitleError] = useState<boolean>(false);
+    const [showMessageError, setShowMessageError] = useState<boolean>(false);
 
     /** Currently selected profile data object */
-    const selectedProfileData = fakeProfiles.find(p => p.id === Number(selectedProfile));
+    const selectedProfileData = userData?.find(p => p.id === selectedProfile);
 
     /**
      * Formats a date to DD/MM/YYYY string format for display.
@@ -108,21 +123,53 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
         setShowTimePicker(false);
     };
 
-    const handleSaveReminder = async () => {
+    const handleSaveReminder = () => {
+        // Reset all visual error indicators
+        setShowProfileError(false);
+        setShowTitleError(false);
+        setShowMessageError(false);
+
+        let hasError = false;
+
+        // Validate profile selection
         if (!selectedProfile) {
-            Alert.alert(t('CreateReminder.errors.title'), t('CreateReminder.errors.Please select a profile'));
-            return;
+            setProfileError(t('CreateReminder.errors.Please select a profile'));
+            setShowProfileError(true);
+            hasError = true;
         }
 
+        // Validate title
         if (!reminderTitle.trim()) {
-            Alert.alert(t('CreateReminder.errors.title'), t('CreateReminder.errors.Please enter a title'));
+            setTitleError(t('CreateReminder.errors.Please enter a title'));
+            setShowTitleError(true);
+            hasError = true;
+        }
+
+        // Validate message
+        if (!reminderMessage.trim()) {
+            setMessageError(t('CreateReminder.errors.Please enter a message'));
+            setShowMessageError(true);
+            hasError = true;
+        }
+
+        // If there are errors, vibrate and stop
+        if (hasError) {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             return;
         }
 
-        if (!reminderMessage.trim()) {
-            Alert.alert(t('CreateReminder.errors.title'), t('CreateReminder.errors.Please enter a message'));
-            return;
-        }
+        // Open confirmation modal if validation passes
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        setShowConfirmModal(true);
+    };
+
+    /**
+     * Handles reminder creation confirmation.
+     * Creates the reminder and schedules notifications.
+     */
+    const handleConfirmSave = async () => {
+        setShowConfirmModal(false);
+        
         try {
             const notificationIds = await scheduleReminderWithRepetitions(
                 reminderTitle,
@@ -142,14 +189,23 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
             console.log('Reminder saved (local)');
 
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            Alert.alert(t('CreateReminder.success.title'), t('CreateReminder.success.Reminder created successfully'));
             navigation.navigate('Dashboard');
             
         } catch (error) {
-            Alert.alert(t('CreateReminder.errors.title'), t('CreateReminder.errors.Error scheduling notification'));
-            console.error(error);
-            return;
+            console.error('Error scheduling notification:', error);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            // Show error inline on message field
+            setMessageError(t('CreateReminder.errors.Error scheduling notification'));
+            setShowMessageError(true);
         }
+    };
+
+    /**
+     * Handles reminder creation cancellation.
+     */
+    const handleCancelSave = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        setShowConfirmModal(false);
     };
 
     return (
@@ -182,7 +238,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
             <ScrollView style={styles.scrollContainer}>
                 <Text style={styles.label}>{t('CreateReminder.fields.For Profile')}</Text>
                 <TouchableOpacity 
-                    style={styles.input}
+                    style={[styles.input, showProfileError && styles.inputError]}
                     onPress={openProfilePicker}
                 >
                     <View style={styles.profilePicker}>
@@ -190,26 +246,41 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                         <Ionicons name="chevron-down" size={20} color="#999" />
                     </View>
                 </TouchableOpacity>
+                <Text style={[styles.errorText, {opacity: showProfileError ? 1 : 0}]}>
+                    {profileError || t('CreateReminder.errors.Please select a profile')}
+                </Text>
                 {!showProfilePicker && (
                     <>
                     <Text style={styles.label}>{t('CreateReminder.fields.Reminder Title')}</Text>
-                <View style={styles.input}>
+                <View style={[styles.input, showTitleError && styles.inputError]}>
                     <TextInput
                         placeholder={t('CreateReminder.placeholders.Ex. : Take Medication')}
-                        onChangeText={newText => setReminderTitle(newText)}
+                        onChangeText={newText => {
+                            setShowTitleError(false);
+                            setReminderTitle(newText);
+                        }}
                         defaultValue={reminderTitle}
                     />
                 </View>
+                <Text style={[styles.errorText, {opacity: showTitleError ? 1 : 0}]}>
+                    {titleError || t('CreateReminder.errors.Please enter a title')}
+                </Text>
                 <Text style={styles.messageLabel}>Message</Text>
-                <View style={[styles.input, styles.messageInput]}>
+                <View style={[styles.input, styles.messageInput, showMessageError && styles.inputError]}>
                     <TextInput multiline={true}
                         numberOfLines={4}
                         maxLength={120}
                         placeholder={t('CreateReminder.placeholders.Enter the description about your reminder')}
-                        onChangeText={newText => setReminderMessage(newText)}
+                        onChangeText={newText => {
+                            setShowMessageError(false);
+                            setReminderMessage(newText);
+                        }}
                         defaultValue={reminderMessage}
                     />
                 </View>
+                <Text style={[styles.errorText, {opacity: showMessageError ? 1 : 0}]}>
+                    {messageError || t('CreateReminder.errors.Please enter a message')}
+                </Text>
                 <Text style={[styles.text, { paddingBottom: 10 }]}>
                     {t('CreateReminder.message.Be careful not to enter sensitive confidential information.')}</Text>
                 <View style={styles.pickerContainer}>
@@ -280,7 +351,53 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                         <Text style={commonStyles.primaryButtonText}>{t('CreateReminder.buttons.Save Reminder')}</Text>
                     </TouchableOpacity>
                     )}
+                </View>
+
+            {/* Confirmation Modal */}
+            <Modal
+                visible={showConfirmModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={handleCancelSave}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        {/* Confirmation icon */}
+                        <View style={styles.confirmIconContainer}>
+                            <Ionicons name="notifications-outline" size={48} color="#4A90E2" />
+                        </View>
+
+                        {/* Title */}
+                        <Text style={styles.modalTitle}>{t('CreateReminder.modal.title')}</Text>
+
+                        {/* Confirmation message */}
+                        <Text style={styles.modalMessage}>
+                            {t('CreateReminder.modal.message')}
+                        </Text>
+
+                        {/* Buttons */}
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity 
+                                style={[styles.modalButton, styles.cancelButton]}
+                                onPress={handleCancelSave}
+                            >
+                                <Text style={styles.cancelButtonText}>
+                                    {t('CreateReminder.modal.cancel')}
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity 
+                                style={[styles.modalButton, styles.confirmButton]}
+                                onPress={handleConfirmSave}
+                            >
+                                <Text style={styles.confirmButtonText}>
+                                    {t('CreateReminder.modal.confirm')}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
+                </View>
+            </Modal>
             </View>
     );
 };
@@ -334,6 +451,20 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         width: '100%',
     },
+    inputError: {
+        borderWidth: 2,
+        borderColor: '#FF0000',
+    },
+    errorText: {
+        color: '#FF0000',
+        fontSize: 12,
+        textAlign: 'right',
+        marginTop: -5,
+        marginBottom: 5,
+        minHeight: 16,
+        lineHeight: 16,
+        paddingRight: 10,
+    },
     profilePicker: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -363,6 +494,73 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         marginBottom: 15,
         width: '100%',
+    },
+
+    // ========== MODAL ==========
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 15,
+        padding: 25,
+        width: '85%',
+        alignItems: 'center',
+    },
+    confirmIconContainer: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: '#E3F2FD',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 20,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 15,
+        textAlign: 'center',
+    },
+    modalMessage: {
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
+        lineHeight: 24,
+        marginBottom: 25,
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        gap: 10,
+        width: '100%',
+    },
+    modalButton: {
+        flex: 1,
+        paddingVertical: 20,
+        paddingHorizontal: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    cancelButton: {
+        backgroundColor: '#E0E0E0',
+    },
+    cancelButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+    },
+    confirmButton: {
+        backgroundColor: '#4A90E2',
+    },
+    confirmButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#FFFFFF',
     },
 });
 

@@ -1,5 +1,109 @@
 # Bug Reports & Technical Issues
 
+## Backend Issues
+
+### 1. Caregiver Authentication - Repository Column Reference Bug
+
+**Date:** 18 February 2026  
+**Component:** `backend/app/persistence/caregiver_repository.py`  
+**Severity:** Critical - Blocking
+
+#### Problem Description
+
+I discovered a critical bug that prevented ALL caregiver login attempts from working. Every login attempt returned a 401 "Invalid email or password" error, even with correct credentials. This completely blocked access to the application and made it impossible to test any features.
+
+#### Initial Symptoms
+
+When I tried to log in with my test account (test@test.com / Test1234!), I got:
+- 401 Unauthorized response
+- Error message: "Invalid email or password"
+- Backend logs showed: "❌ CAREGIVER NOT FOUND: test@test.com"
+
+This was confusing because I had just created the account through the registration endpoint.
+
+#### My Investigation Process
+
+I systematically debugged each layer of the authentication flow:
+
+1. **Frontend Token Storage**: I added logging to `tokenService.ts` to verify expo-secure-store was working correctly - ✅ It was
+2. **Frontend API Calls**: I logged the exact credentials being sent in `authService.ts` - ✅ Correct data (email: 13 chars, password: "Test1234!" 9 chars)
+3. **Backend Reception**: I added print statements in `authentication.py` login endpoint - ✅ Backend received correct credentials
+4. **Password Hashing**: I ran a direct Python test with bcrypt.verify() - ✅ Hash verification returned True
+5. **Database Check**: I queried PostgreSQL directly - ✅ Account existed with valid bcrypt hash ($2b$12$...)
+
+At this point I knew:
+- The credentials were correct
+- The password hash was valid
+- The account existed in the database
+- But the backend kept saying "CAREGIVER NOT FOUND"
+
+#### Root Cause Discovery
+
+I isolated the issue to the **repository layer**. When I examined `caregiver_repository.py`, I found an inconsistency:
+
+```python
+# Line 32 - get_caregiver_by_email() - ❌ WRONG
+caregiver = self.db.query(self.model).filter(
+    self.model.email == email  # Using Python property instead of SQL column!
+).first()
+
+# Line 61 - email_exists() - ✅ CORRECT
+exists = self.db.query(self.model).filter(
+    self.model._email == email  # Using actual database column
+).count() > 0
+```
+
+The bug: `self.model.email` is the **Python property** on the Caregiver model, but SQLAlchemy needs `self.model._email` to reference the actual **database column** in the WHERE clause.
+
+#### Why This Happened
+
+Looking at the Caregiver model definition:
+- The database column is named `_email` (with underscore)
+- There's a Python property `email` that provides access without the underscore
+- For SQLAlchemy ORM queries, you must use the actual column name (`_email`)
+- For Python object access, you use the property (`caregiver.email`)
+
+I mixed up which one to use in the repository query.
+
+#### The Fix
+
+I changed line 32 in `caregiver_repository.py`:
+
+```python
+# Before (WRONG):
+self.model.email == email
+
+# After (CORRECT):
+self.model._email == email
+```
+
+One character difference (adding the underscore) fixed the entire authentication system!
+
+#### Impact
+
+- **Severity**: Critical - No one could log in
+- **Duration**: ~2 hours of debugging
+- **Affected**: Every login attempt since implementing caregiver authentication
+- **Root Cause**: Misunderstanding SQLAlchemy property vs column reference
+
+#### What I Learned
+
+1. **ORM Column Naming**: When a SQLAlchemy model uses a private column name (like `_email`) with a public property (like `email`), always use the private name in queries
+2. **Consistency Checking**: Code inconsistencies (like `email_exists()` working but `get_caregiver_by_email()` failing) are red flags pointing to the exact bug location
+3. **Systematic Debugging**: Adding logs at every layer (frontend → API → service → repository → database) helped isolate the issue quickly
+4. **Direct Testing**: Testing Python functions directly (like bcrypt.verify()) helps eliminate possibilities and narrow down the problem
+5. **Backend Logs**: Print statements in the API endpoint showed exactly what the backend received, proving the issue wasn't with data transmission
+
+#### Prevention
+
+To avoid this in the future:
+- When writing repository methods, always check how other methods reference columns
+- Use the database schema or model definition as reference for column names
+- Test authentication immediately after implementing to catch this type of bug early
+- Consider consistent naming patterns (either always use underscores or never use them)
+
+---
+
 ## Frontend Issues
 
 ### 1. User Authentication - PIN Removal Decision
@@ -1300,6 +1404,315 @@ For similar components in the future:
 
 ---
 
+## Testing Issues
+
+### 1. Form Validation Logic Bug in useFormValidation Hook
+
+**Date:** 18 February 2026  
+**Component:** `frontend/src/hooks/useFormValidation.ts`  
+**Severity:** High - Custom validation functions not executing correctly  
+**Discovered By:** Unit tests for UpdateCaregiverProfileModal and UpdateUserProfileModal
+
+#### Problem Description
+
+I discovered a critical logic bug in the `useFormValidation` hook while writing unit tests for the profile update modals. The bug prevented custom validation functions from running on empty fields, causing incorrect error messages to be displayed to users.
+
+#### How Tests Revealed The Bug
+
+When I ran the modal tests, they failed with:
+```
+Unable to find an element with text: register.errors.Name cannot be empty
+```
+
+The tests were expecting the specific error message from `validateName()` function, but the component was showing a generic "This field is required" message instead. This immediately told me something was wrong with the validation logic.
+
+#### Initial Symptoms
+
+- **User Impact**: When users left name fields empty and clicked save, they saw generic "This field is required" instead of the specific "Name cannot be empty" message
+- **Test Failure**: 4 modal tests failing because expected error messages weren't appearing  
+- **Inconsistent UX**: Different error messages for the same validation across different forms
+
+#### My Investigation Process
+
+1. **Verified Test Setup**: Checked that the `validateName()` mock was correct - ✅ It was returning the right message
+2. **Checked Component Integration**: Verified the modal was calling `validateAll()` - ✅ It was
+3. **Added Debug Logging**: Put console.log in the validation function - ❌ It was never being called for empty fields!
+4. **Read Hook Implementation**: Found the bug in the `validateAll()` method
+
+#### Root Cause Discovery
+
+The `validateAll()` function in `useFormValidation.ts` had incorrect conditional logic:
+
+```typescript
+// BEFORE (❌ WRONG):
+const validateAll = useCallback((): boolean => {
+    Object.keys(config).forEach(fieldName => {
+        const fieldConfig = config[fieldName];
+        const value = values[fieldName];
+        let error: string | null = null;
+
+        // Check if required field is empty FIRST
+        if (fieldConfig.required !== false && !value.trim()) {
+            error = fieldConfig.requiredMessage || 'register.errors.This field is required';
+        } 
+        // Only run custom validation if field is NOT empty
+        else if (fieldConfig.validate) {  // ❌ This 'else if' is the bug!
+            error = fieldConfig.validate(value);
+        }
+    });
+}, [config, values]);
+```
+
+**The Problem**: The `else if` creates **mutual exclusivity**:
+- If field is empty → Show generic message
+- **Else** if custom validation exists → Run it
+
+This means custom validation **never runs** for empty fields! But `validateName()` specifically checks for empty fields with its own message: "Name cannot be empty".
+
+#### Real-World Impact
+
+**Before Fix:**
+- User empties a name field and clicks save
+- Sees: "This field is required" (generic, unclear)
+- Expected: "Name cannot be empty" (specific, helpful)
+
+**Why This Matters:**
+- Generic messages are less helpful for users
+- Different error messages for same validation creates confusion
+- Custom validation functions couldn't control their full behavior
+
+#### The Fix
+
+I changed the validation order to **always prioritize custom validation**:
+
+```typescript
+// AFTER (✅ CORRECT):
+const validateAll = useCallback((): boolean => {
+    Object.keys(config).forEach(fieldName => {
+        const fieldConfig = config[fieldName];
+        const value = values[fieldName];
+        let error: string | null = null;
+
+        // Run custom validation FIRST if provided
+        if (fieldConfig.validate) {
+            error = fieldConfig.validate(value);  // ✅ Handles all cases including empty!
+        }
+        // Fallback: check required only for fields WITHOUT custom validation
+        else if (fieldConfig.required !== false && !value.trim()) {
+            error = fieldConfig.requiredMessage || 'register.errors.This field is required';
+        }
+    });
+}, [config, values]);
+```
+
+**New Logic:**
+1. If you provided a custom validation function → Use it (it owns ALL validation including empty checks)
+2. Otherwise, if field is required → Use generic required message  
+3. Otherwise → No error
+
+#### Test Results
+
+**Before Fix:**
+- ❌ 4 modal validation tests failing
+- ❌ Generic "This field is required" showing for empty names
+- ❌ Custom validation bypassed for empty inputs
+
+**After Fix:**
+- ✅ All 98 tests passing
+- ✅ Specific "Name cannot be empty" message showing correctly
+- ✅ Custom validation controls full field behavior
+
+#### What I Learned
+
+1. **Tests Catch Design Flaws**: Unit tests immediately exposed this logic error that could have gone unnoticed in manual testing
+2. **Validation Ownership**: Custom validation functions should own ALL validation logic for their field, including empty state
+3. **Conditional Logic Order**: The order of if/else statements drastically changes behavior - always prioritize explicit overrides before defaults
+4. **User Experience**: Specific, contextual error messages are much more helpful than generic ones
+5. **Test-Driven Development**: Writing tests forces you to think through all edge cases (empty inputs, invalid inputs, valid inputs)
+
+#### Why The Original Logic Seemed Reasonable
+
+When I first wrote the hook, the logic seemed helpful:
+- "Check if required fields are empty first"
+- "Then run other validations"
+
+But this breaks down when custom validations **also** want to handle empty fields with specific messages. The "helpful" default was actually limiting flexibility.
+
+#### Prevention Strategies
+
+For future hooks and utilities:
+
+- **Explicit Overrides**: Always let user-provided customization override defaults
+- **Fallback Pattern**: Only apply defaults when no custom behavior is specified
+- **Test All Branches**: Write tests for each conditional path (empty, invalid, valid)
+- **Document Expectations**: Clearly document whether custom functions should handle empty inputs
+- **Think Like The User**: Consider all the ways a user might configure your hook
+
+#### Files Changed
+
+- `frontend/src/hooks/useFormValidation.ts` (lines 95-127)
+
+#### Related Components
+
+This bug affected all components using the hook:
+- `UpdateCaregiverProfileModal` - Name fields showing wrong error messages
+- `UpdateUserProfileModal` - Name fields showing wrong error messages
+- Any future forms using `useFormValidation` with custom validation
+
+---
+
+### 2. Authentication Error Detection Bug in useCaregiverProfile Hook
+
+**Date:** 18 February 2026  
+**Component:** `frontend/src/hooks/useCaregiverProfile.ts`  
+**Severity:** Critical - Logout not triggered on 401/403 errors  
+**Discovered By:** Unit tests for useCaregiverProfile hook
+
+#### Problem Description
+
+I discovered a critical bug while writing tests for the `useCaregiverProfile` hook. The hook was supposed to trigger logout when receiving 401 (Unauthorized) or 403 (Forbidden) errors from the API, but the error detection logic was completely wrong, so users would never be logged out even when their session expired.
+
+#### How Tests Revealed The Bug
+
+When I ran the authentication error tests, they failed:
+```
+expect(mockOnLogout).toHaveBeenCalledTimes(1)
+Expected: 1
+Received: 0
+```
+
+The test was mocking a 401 error response, and the hook should have called `onAuthError()` (which triggers logout), but it never did. This immediately showed me the error detection wasn't working.
+
+#### Initial Symptoms
+
+- **User Impact**: Users with expired tokens stayed "logged in" with broken functionality instead of being redirected to login screen
+- **Test Failure**: 2 authentication error tests failing (401 and 403 scenarios)
+- **Silent Failure**: No logout triggered, just error message shown
+
+#### My Investigation Process
+
+1. **Checked Test Mock**: Verified the mock was structured correctly with `{ response: { status: 401 } }` - ✅ Correct Axios error structure
+2. **Read Hook Code**: Found the bug in the error handling logic
+3. **Understood Axios Errors**: Researched how Axios structures error objects
+
+#### Root Cause Discovery
+
+The hook was checking for authentication errors incorrectly:
+
+```typescript
+// BEFORE (❌ WRONG):
+catch (err) {
+    console.error('Failed to load caregiver profile:', err);
+    setError('common.errors.failedToLoadProfile');
+    
+    // Handle authentication errors (401 Unauthorized)
+    if (err instanceof Error && err.message.includes('401')) {  // ❌ This never matches!
+        onAuthError?.();
+    }
+}
+```
+
+**The Problem**: 
+- Axios errors have the structure: `{ response: { status: 401, data: {...} } }`
+- The code was checking `err.message.includes('401')` 
+- But `err.message` is something like "Request failed with status code 401", not guaranteed to contain "401"
+- Even worse, 403 errors were completely ignored
+
+#### Real-World Impact
+
+**Before Fix:**
+1. User's JWT token expires
+2. API returns 401 Unauthorized
+3. Hook catches error but doesn't trigger logout
+4. User stays on screen seeing "Failed to load profile" error
+5. User can't do anything, app appears broken
+6. User has to manually refresh or navigate away
+
+**After Fix:**
+1. User's JWT token expires
+2. API returns 401 Unauthorized  
+3. Hook detects auth error and triggers logout
+4. User automatically redirected to login screen
+5. Clear state, user can log in again
+
+#### The Fix
+
+I changed the error detection to properly check the Axios error structure:
+
+```typescript
+// AFTER (✅ CORRECT):
+catch (err: any) {
+    console.error('Failed to load caregiver profile:', err);
+    setError('common.errors.failedToLoadProfile');
+    
+    // Handle authentication errors (401 Unauthorized, 403 Forbidden)
+    if (err?.response?.status === 401 || err?.response?.status === 403) {  // ✅ Correct!
+        onAuthError?.();
+    }
+}
+```
+
+**What Changed:**
+- Use optional chaining to safely access `err?.response?.status`
+- Check the actual HTTP status code (401, 403)
+- Handle both 401 (Unauthorized) and 403 (Forbidden) properly
+
+#### Test Results
+
+**Before Fix:**
+- ❌ Test "should call onLogout when receiving 401 error" - FAILED
+- ❌ Test "should trigger logout on 403 forbidden error" - FAILED
+- ❌ Logout never triggered on auth errors
+
+**After Fix:**
+- ✅ All 9 useCaregiverProfile tests passing
+- ✅ Logout correctly triggered on 401 errors
+- ✅ Logout correctly triggered on 403 errors
+- ✅ Non-auth errors (500, network) don't trigger logout
+
+#### What I Learned
+
+1. **Test Different Error Types**: Don't just test success cases - test all error scenarios (401, 403, 500, network errors)
+2. **Understand Library Structures**: Learn how your HTTP client (Axios) structures error objects
+3. **String Matching is Fragile**: Checking `message.includes('401')` is unreliable - use structured data (status codes)
+4. **Optional Chaining**: Use `?.` to safely access nested properties that might not exist
+5. **Comprehensive Error Handling**: Handle all relevant error types (401 AND 403 for auth, not just 401)
+
+#### Why The Original Logic Was Wrong
+
+I think I assumed Axios errors would be simple Error objects with messages. But Axios wraps HTTP errors in a structured object with `response`, `request`, and `message` properties. 
+
+Checking `err.message` is unreliable because:
+- Message format can vary between Axios versions
+- Messages are meant for debugging, not programmatic checks
+- HTTP status codes are the proper way to identify error types
+
+#### Prevention Strategies
+
+For future error handling:
+
+- **Check Library Documentation**: Look up how libraries structure their error objects
+- **Use Structured Data**: Check status codes, error codes, not string messages
+- **Test Error Scenarios**: Write tests for each error type you want to handle
+- **TypeScript Types**: Use proper typing for error objects to get autocomplete
+- **Log Error Structure**: console.log errors during development to see their actual shape
+
+#### Files Changed
+
+- `frontend/src/hooks/useCaregiverProfile.ts` (lines 36-42)
+
+#### Related Security Impact
+
+This bug had **security implications**:
+- Users with expired/invalid tokens could appear "logged in" 
+- Broken functionality instead of clean logout
+- Potential access to cached data after token expiration
+- Poor user experience with auth failures
+
+After the fix, the app properly handles session expiration and maintains security by forcing re-authentication.
+
+---
+
 ## Backend Issues
 
 No issues reported yet
@@ -1315,3 +1728,5 @@ No issues reported yet
 ## Integration Issues
 
 No issues reported yet
+
+

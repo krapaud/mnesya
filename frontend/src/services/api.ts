@@ -10,7 +10,7 @@ import axios from 'axios';
 import { getToken } from './tokenService';
 
 /** Base URL for the backend API */
-const BASE_API_URL = 'http://192.168.1.104:8000';
+const BASE_API_URL = 'http://localhost:8000';
 
 /**
  * Configured axios instance for making authenticated API requests.

@@ -3,7 +3,9 @@
     "buttons": {
       "New reminder": "Nouveau Rappel",
       "Validate": "Valider",
-      "Cancel": "Annuler"
+      "Cancel": "Annuler",
+      "Edit": "Modifier",
+      "Confirm": "Confirmer"
     },
     "fields": {
       "Email": "Email",
@@ -16,7 +18,14 @@
     "messages": {
         "profileCreated": "Profil créé",
         "profileUpdated": "Profil mis à jour",
-        "profileDeleted": "Profil supprimé"
+        "profileDeleted": "Profil supprimé",
+        "loading": "Chargement..."
+    },
+    "errors": {
+        "failedToLoadProfiles": "Échec du chargement des profils",
+        "failedToLoadProfile": "Échec du chargement du profil",
+        "failedToUpdateProfile": "Échec de la mise à jour du profil",
+        "failedToDeleteProfile": "Échec de la suppression du profil"
     },
     "pickersText": {
         "All Profiles": "Tous",
@@ -39,13 +48,17 @@
     "buttons": {
       "submit": "Se connecter",      "Logging in...": "Connexion en cours...",      "lostPassword": "Mot de passe oublié",
       "createAccount": "Créer un compte"
+    },
+    "errors": {
+      "invalidCredentials": "Email ou mot de passe invalide"
     }
   },
   "register" : {
     "title": "Créez votre compte",
     "fields": {
         "First Name": "Prénom",
-        "Last Name": "Nom"
+        "Last Name": "Nom",
+        "Email": "Email"
     },
     "placeholders": {
         "Enter your First Name": "Entrez votre prénom",
@@ -144,6 +157,12 @@
     "success": {
         "title": "Succès",
         "Reminder created successfully": "Rappel créé avec succès !"
+    },
+    "modal": {
+        "title": "Confirmer le rappel",
+        "message": "Êtes-vous sûr de vouloir créer ce rappel ?",
+        "cancel": "Annuler",
+        "confirm": "Confirmer"
     }
   },
   "UserPairing": {
@@ -188,7 +207,10 @@
   "UserProfileDetail": {
     "title": "Détails du Profil",
     "buttons": {
-        "Generate pairing code": "Générer un code d'appairage"
+        "Generate pairing code": "Générer un code d'appairage",
+        "Edit": "Modifier",
+        "Delete": "Supprimer",
+        "Save": "Enregistrer"
     },
     "sections": {
         "Active Reminders": "Rappels Actifs"
@@ -196,6 +218,15 @@
     "messages": {
         "Profile not found": "Profil introuvable",
         "No active reminders": "Aucun rappel actif"
+    },
+    "modals": {
+        "update": {
+            "title": "Modifier le Profil"
+        },
+        "delete": {
+            "title": "Supprimer le Profil ?",
+            "message": "Cette action est irréversible. Toutes les données associées à ce profil seront définitivement supprimées."
+        }
     }
   },  "pairingCode": {
     "title": "Code de jumelage",
@@ -227,7 +258,8 @@
     },
     "buttons": {
       "changePassword": "Changer le mot de passe",
-      "logout": "Déconnexion"
+      "logout": "Déconnexion",
+      "retry": "Réessayer"
     },
     "modal": {
       "title": "Confirmer la déconnexion",

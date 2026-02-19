@@ -1,12 +1,3 @@
-/**
- * Custom hook for managing caregiver profile data.
- * 
- * Provides profile loading functionality with loading, error, and data states.
- * Automatically loads profile on mount and provides reload capability.
- * 
- * @module useCaregiverProfile
- */
-
 import { useState, useEffect } from 'react';
 import { getCurrentUser } from '../services/authService';
 import type { CaregiverProfile } from '../types/interfaces';
@@ -25,26 +16,6 @@ interface UseCaregiverProfileResult {
   reload: () => Promise<void>;
 }
 
-/**
- * Hook to fetch and manage current caregiver profile.
- * 
- * Automatically loads profile data on mount. Provides loading state,
- * error handling, and manual reload capability.
- * 
- * @param onAuthError - Optional callback when authentication fails (401)
- * @returns Profile data, loading state, error state, and reload function
- * 
- * @example
- * ```tsx
- * const { caregiverData, loading, error, reload } = useCaregiverProfile(
- *   () => navigation.navigate('Welcome')
- * );
- * 
- * if (loading) return <LoadingSpinner />;
- * if (error) return <ErrorMessage error={error} onRetry={reload} />;
- * return <ProfileView data={caregiverData} />;
- * ```
- */
 export const useCaregiverProfile = (
   onAuthError?: () => void
 ): UseCaregiverProfileResult => {
@@ -62,12 +33,12 @@ export const useCaregiverProfile = (
       setError(null);
       const profile = await getCurrentUser();
       setCaregiverData(profile);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load caregiver profile:', err);
-      setError('Failed to load profile');
+      setError('common.errors.failedToLoadProfile');
       
-      // Handle authentication errors (401 Unauthorized)
-      if (err instanceof Error && err.message.includes('401')) {
+      // Handle authentication errors (401 Unauthorized, 403 Forbidden)
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
         onAuthError?.();
       }
     } finally {

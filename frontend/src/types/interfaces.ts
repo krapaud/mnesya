@@ -47,3 +47,25 @@ export interface CaregiverProfile {
   email: string;
   created_at: string;
 }
+
+export interface CreateUserProfileData {
+  first_name: string;
+  last_name: string;
+  birthday: string;
+}
+
+export interface UpdateUserProfileData {
+  first_name?: string;
+  last_name?: string;
+  birthday?: string;
+}
+
+export interface UserProfileData {
+  id: string;
+  first_name: string;
+  last_name: string;
+  birthday: string;
+  caregiver_id: string;
+  created_at: string;
+  updated_at: string;
+}

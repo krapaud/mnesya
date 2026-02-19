@@ -1,10 +1,10 @@
 /**
  * Unit tests for authentication service
  * 
- * Tests login, registration, logout, and user profile retrieval.
+ * Tests login, registration, logout, user profile retrieval, and profile updates.
  * Uses mocked API client and token service to isolate functionality.
  */
-import { login, register, logout, getCurrentUser } from '../authService';
+import { login, register, logout, getCurrentUser, updateCaregiverProfile } from '../authService';
 import apiClient from '../api';
 import { saveToken, deleteToken } from '../tokenService';
 import { LoginData, RegisterData, AuthResponse, CaregiverProfile } from '../../types/interfaces';
@@ -13,6 +13,7 @@ import { LoginData, RegisterData, AuthResponse, CaregiverProfile } from '../../t
 jest.mock('../api', () => ({
   post: jest.fn(),
   get: jest.fn(),
+  put: jest.fn(),
 }));
 
 // Mock the token service
@@ -328,6 +329,141 @@ describe('authService', () => {
       // Logout
       await logout();
       expect(deleteToken).toHaveBeenCalled();
+    });
+  });
+
+  describe('updateCaregiverProfile', () => {
+    it('should successfully update caregiver profile', async () => {
+      const mockUpdateData = {
+        first_name: 'Jane',
+        last_name: 'Smith',
+        email: 'jane.smith@example.com',
+      };
+
+      const mockUpdatedProfile: CaregiverProfile = {
+        id: '123',
+        first_name: 'Jane',
+        last_name: 'Smith',
+        email: 'jane.smith@example.com',
+        created_at: '2026-01-01T00:00:00Z',
+      };
+
+      (apiClient.put as jest.Mock).mockResolvedValue({
+        data: mockUpdatedProfile
+      });
+
+      const result = await updateCaregiverProfile(mockUpdateData);
+
+      expect(apiClient.put).toHaveBeenCalledTimes(1);
+      expect(apiClient.put).toHaveBeenCalledWith('/api/auth/me', mockUpdateData);
+      expect(result).toEqual(mockUpdatedProfile);
+    });
+
+    it('should handle email already in use error', async () => {
+      const mockUpdateData = {
+        first_name: 'Jane',
+        last_name: 'Smith',
+        email: 'existing@example.com',
+      };
+
+      const mockError = new Error('Email already registered');
+      (apiClient.put as jest.Mock).mockRejectedValue(mockError);
+
+      await expect(updateCaregiverProfile(mockUpdateData)).rejects.toThrow('Email already registered');
+    });
+
+    it('should handle validation errors during update', async () => {
+      const mockUpdateData = {
+        first_name: '',
+        last_name: '',
+        email: 'invalid-email',
+      };
+
+      const validationError = new Error('Validation failed');
+      (apiClient.put as jest.Mock).mockRejectedValue(validationError);
+
+      await expect(updateCaregiverProfile(mockUpdateData)).rejects.toThrow('Validation failed');
+    });
+
+    it('should handle unauthorized error when token is invalid', async () => {
+      const mockUpdateData = {
+        first_name: 'Jane',
+        last_name: 'Smith',
+        email: 'jane.smith@example.com',
+      };
+
+      const authError = {
+        response: {
+          status: 401,
+          data: { detail: 'Invalid authentication credentials' }
+        }
+      };
+      (apiClient.put as jest.Mock).mockRejectedValue(authError);
+
+      await expect(updateCaregiverProfile(mockUpdateData)).rejects.toEqual(authError);
+    });
+
+    it('should update only provided fields', async () => {
+      const mockUpdateData = {
+        first_name: 'Jane',
+        last_name: 'Doe',
+        email: 'same@example.com',
+      };
+
+      const mockUpdatedProfile: CaregiverProfile = {
+        id: '123',
+        first_name: 'Jane',
+        last_name: 'Doe',
+        email: 'same@example.com',
+        created_at: '2026-01-01T00:00:00Z',
+      };
+
+      (apiClient.put as jest.Mock).mockResolvedValue({
+        data: mockUpdatedProfile
+      });
+
+      const result = await updateCaregiverProfile(mockUpdateData);
+
+      expect(result.first_name).toBe('Jane');
+      expect(result.email).toBe('same@example.com');
+    });
+
+    it('should handle network errors during update', async () => {
+      const mockUpdateData = {
+        first_name: 'Jane',
+        last_name: 'Smith',
+        email: 'jane.smith@example.com',
+      };
+
+      const networkError = new Error('Network request failed');
+      (apiClient.put as jest.Mock).mockRejectedValue(networkError);
+
+      await expect(updateCaregiverProfile(mockUpdateData)).rejects.toThrow('Network request failed');
+    });
+
+    it('should update profile with special characters in names', async () => {
+      const mockUpdateData = {
+        first_name: "Marie-José",
+        last_name: "O'Connor",
+        email: 'marie.jose@example.com',
+      };
+
+      const mockUpdatedProfile: CaregiverProfile = {
+        id: '123',
+        first_name: "Marie-José",
+        last_name: "O'Connor",
+        email: 'marie.jose@example.com',
+        created_at: '2026-01-01T00:00:00Z',
+      };
+
+      (apiClient.put as jest.Mock).mockResolvedValue({
+        data: mockUpdatedProfile
+      });
+
+      const result = await updateCaregiverProfile(mockUpdateData);
+
+      expect(result.first_name).toBe("Marie-José");
+      expect(result.last_name).toBe("O'Connor");
     });
   });
 });

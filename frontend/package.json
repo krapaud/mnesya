@@ -25,6 +25,7 @@
     "expo-device": "~8.0.10",
     "expo-haptics": "~15.0.8",
     "expo-notifications": "~0.32.16",
+    "expo-secure-store": "~15.0.8",
     "i18next": "^25.8.0",
     "react": "19.1.0",
     "react-i18next": "^16.5.4",
@@ -43,6 +44,7 @@
     "@types/jest": "^30.0.0",
     "@types/react": "~19.1.10",
     "jest": "^30.2.0",
+    "react-test-renderer": "^19.1.0",
     "ts-jest": "^29.4.6",
     "typescript": "~5.9.3"
   }
