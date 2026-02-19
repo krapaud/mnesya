@@ -23,7 +23,6 @@ class ReminderCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     description: Optional[str] = None
     scheduled_at: datetime
-    caregiver_id: UUID
     user_id: UUID
 
     @field_validator('title')
