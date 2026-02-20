@@ -11,7 +11,7 @@
  * @param {Props} navigation - Navigation object for screen transitions
  */
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Modal, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -20,21 +20,28 @@ import type { UserTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { fakeReminders } from '../data/fakeData';
 import { getUserInfo } from '../services/tokenService';
+import { useRefresh } from '../contexts/RefreshContext';
 
-type Props = NativeStackScreenProps<UserTabsParamList, 'Home'>;
+type Props = NativeStackScreenProps<UserTabsParamList, 'Refresh'>;
 
 const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
+    const { refreshTrigger, isRefreshing, setIsRefreshing } = useRefresh();
 
     const [showAlert, setShowAlert] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [userReminders, setUserReminders] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
     /**
-     * Fetches user information and filters reminders based on the user's full name
+     * Loads user data and filters reminders.
+     * Re-runs when refreshTrigger changes (when user taps refresh button).
+     * Ensures loading indicator displays for minimum 1 seconds for better UX.
      */
     useEffect(() => {
         const loadUserData = async () => {
+            const startTime = Date.now();
+            
             const user = await getUserInfo();
             setCurrentUser(user);
             
@@ -44,10 +51,19 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                 );
                 setUserReminders(filtered);
             }
+            
+            // Ensure minimum 1 second display time for loading indicator
+            const elapsedTime = Date.now() - startTime;
+            const remainingTime = Math.max(0, 1000 - elapsedTime);
+            
+            setTimeout(() => {
+                setLoading(false);
+                setIsRefreshing(false);
+            }, remainingTime);
         };
         
         loadUserData();
-    }, []);
+    }, [refreshTrigger]);
 
     /**
      * Checks if a reminder is available (date/time has passed)
@@ -90,7 +106,11 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                  * Reminder list with empty state handling
                  * Each reminder displayed as a card with tap feedback for accessibility
                  */}
-                {userReminders.length === 0 ? (
+                {loading ? (
+                    <View style={commonStyles.loadingContainer}>
+                        <ActivityIndicator size="large" color="#4A90E2" />
+                    </View>
+                ) : userReminders.length === 0 ? (
                     <Text style={commonStyles.emptyMessage}>{t('UserHome.messages.noReminders')}</Text>
                 ) : (
                     userReminders.map((reminder) => (
@@ -149,6 +169,14 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                     </View>
                 </View>
             </Modal>
+            {isRefreshing && (
+              <View style={styles.refreshOverlay}>
+                <View style={styles.refreshIndicator}>
+                  <ActivityIndicator size="large" color="#4A90E2" />
+                  <Text style={styles.loadingText}>{t('common.messages.loading')}</Text>
+                </View>
+              </View>
+            )}
         </View>
     );
 };
@@ -180,5 +208,36 @@ const styles = StyleSheet.create({
         minWidth: 44,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    refreshOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'transparent',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
+    },
+    refreshIndicator: {
+        backgroundColor: 'white',
+        padding: 30,
+        borderRadius: 15,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    loadingText: {
+        fontSize: 16,
+        color: '#333',
+        marginTop: 10,
+        fontWeight: '600',
     },
 });

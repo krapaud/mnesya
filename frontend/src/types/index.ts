@@ -29,6 +29,5 @@ export type CaregiverTabsParamList = {
 }
 
 export type UserTabsParamList = {
-    Home: undefined;
-    Profile: undefined;
+    Refresh: undefined;
 }

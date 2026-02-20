@@ -43,6 +43,8 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
 
     const [isGeneratingCode, setIsGeneratingCode] = useState(false);
 
+    const [expiresAt, setExpiresAt] = useState<string | null>(null);
+
     /**
      * Handles profile update.
      */
@@ -82,6 +84,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
             const response = await generatePairingCode(profileId);
 
             setPairingCode(response.code);
+            setExpiresAt(response.expires_at);
             setShowPairingModal(true);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         } catch (err) {
@@ -185,6 +188,8 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
             visible={showPairingModal}
             onClose={() => setShowPairingModal(false)}
             pairingCode={pairingCode}
+            expiresAt={expiresAt}
+            onExpired={handleGeneratePairingCode}
         />
 
         {/* Update Profile Modal */}
