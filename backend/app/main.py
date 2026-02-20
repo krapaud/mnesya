@@ -3,7 +3,7 @@ import os
 from app.api import authentication, user, caregiver, pairing, reminder
 
 # Initialize database
-database_url = os.getenv('DATABASE_URL', 'postgresql://mnesya_user:mnesya_password@localhost:5432/mnesya_db')
+database_url = os.environ["DATABASE_URL"]
 init_app(database_url)
 
 # Create FastAPI app
