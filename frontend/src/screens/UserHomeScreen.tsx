@@ -19,7 +19,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { UserTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { fakeReminders } from '../data/fakeData';
-import { getUserInfo } from '../services/tokenService';
+import { getUserInfo, deleteToken, deleteUserInfo } from '../services/tokenService';
 import { useRefresh } from '../contexts/RefreshContext';
 
 type Props = NativeStackScreenProps<UserTabsParamList, 'Refresh'>;
@@ -29,6 +29,8 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
     const { refreshTrigger, isRefreshing, setIsRefreshing } = useRefresh();
 
     const [showAlert, setShowAlert] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [userReminders, setUserReminders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -47,7 +49,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
             
             if (user?.first_name && user?.last_name) {
                 const filtered = fakeReminders.filter(
-                    r => r.profileName === `${user.first_name} ${user.last_name}`
+                    r => r.profileName == `${user.first_name} ${user.last_name}`
                 );
                 setUserReminders(filtered);
             }
@@ -78,6 +80,30 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
         return reminderDateTime <= new Date();
     };
 
+    /**
+     * Handles user logout by clearing tokens and navigation reset.
+     * Removes stored authentication token and user info, then redirects to Welcome screen.
+     */
+    const handleLogout = async () => {
+        setShowLogoutConfirm(true);
+    };
+
+    const handleLogoutConfirm = async () => {
+        try {
+            await deleteToken();
+            await deleteUserInfo();
+            
+            // Reset navigation to Welcome screen
+            navigation.getParent()?.reset({
+                index: 0,
+                routes: [{ name: 'Welcome' }],
+            });
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
+        setShowLogoutConfirm(false);
+    };
+
     return (
         <View style={commonStyles.container}>
             {/* Header with logo */}
@@ -90,7 +116,14 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                     />
                     <Text style={commonStyles.appName}>Mnesya</Text>
                 </View>
-                <View style={commonStyles.headerSpacer} />
+                    <TouchableOpacity 
+                    style={commonStyles.headerSpacer}
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setShowMenu(true);
+                    }}>
+                    <Ionicons name="ellipsis-vertical" size={24} color="#333" />
+                </TouchableOpacity>
             </View>
 
             {/* 
@@ -166,6 +199,70 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                 </View>
             </Modal>
 
+            {/* Menu Modal */}
+            <Modal
+                transparent={true}
+                visible={showMenu}
+                animationType="fade"
+                onRequestClose={() => setShowMenu(false)}
+            >
+                <TouchableOpacity 
+                    style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}
+                    activeOpacity={1}
+                    onPress={() => setShowMenu(false)}
+                >
+                    <View style={styles.menuContainer}>
+                        <View style={styles.menuContent}>
+                            <TouchableOpacity 
+                                style={styles.menuItem}
+                                onPress={async () => {
+                                    setShowMenu(false);
+                                    setShowLogoutConfirm(true);
+                                }}
+                            >
+                                <Ionicons name="log-out-outline" size={24} color="#E74C3C" />
+                                <Text style={styles.menuItemText}>{t('UserProfile.buttons.Logout')}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            {/* Logout Confirm Modal */}
+            <Modal
+                transparent={true}
+                visible={showLogoutConfirm}
+                animationType="fade"
+                onRequestClose={() => setShowLogoutConfirm(false)}
+            >
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, width: '80%' }}>
+                        <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }}>
+                            {t('caregiverProfile.modal.title')}
+                        </Text>
+                        <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 20, color: '#666' }}>
+                            {t('caregiverProfile.modal.message')}
+                        </Text>
+                        <TouchableOpacity 
+                            style={{ backgroundColor: '#E74C3C', padding: 15, borderRadius: 8, marginBottom: 10 }}
+                            onPress={handleLogoutConfirm}
+                        >
+                            <Text style={{ color: 'white', textAlign: 'center', fontSize: 16, fontWeight: 'bold' }}>
+                                {t('caregiverProfile.modal.confirm')}
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            style={{ backgroundColor: '#f0f0f0', padding: 15, borderRadius: 8 }}
+                            onPress={() => setShowLogoutConfirm(false)}
+                        >
+                            <Text style={{ color: '#333', textAlign: 'center', fontSize: 16 }}>
+                                {t('caregiverProfile.modal.cancel')}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
             {/* Refresh loading overlay */}
             {isRefreshing && (
                 <View style={styles.refreshOverlay}>
@@ -229,5 +326,34 @@ const styles = StyleSheet.create({
         marginTop: 15,
         fontSize: 16,
         color: '#666',
+    },
+    // Menu styles
+    menuContainer: {
+        flex: 1,
+        justifyContent: 'flex-start',
+        alignItems: 'flex-end',
+        paddingTop: 110,
+        paddingRight: 20,
+    },
+    menuContent: {
+        backgroundColor: 'white',
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        minWidth: 200,
+    },
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 15,
+        gap: 10,
+    },
+    menuItemText: {
+        fontSize: 16,
+        color: '#E74C3C',
+        fontWeight: '500',
     },
 });
