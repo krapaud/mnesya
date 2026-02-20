@@ -28,3 +28,6 @@ class PairingCodeVerifyResponse(BaseModel):
     user_id: UUID
     user: UserInfo
     caregiver_id: UUID
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int = 3600
