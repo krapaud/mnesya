@@ -36,7 +36,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
     /**
      * Loads user data and filters reminders.
      * Re-runs when refreshTrigger changes (when user taps refresh button).
-     * Ensures loading indicator displays for minimum 1 seconds for better UX.
+     * Ensures loading indicator displays for minimum 1 second for better UX.
      */
     useEffect(() => {
         const loadUserData = async () => {
@@ -106,11 +106,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                  * Reminder list with empty state handling
                  * Each reminder displayed as a card with tap feedback for accessibility
                  */}
-                {loading ? (
-                    <View style={commonStyles.loadingContainer}>
-                        <ActivityIndicator size="large" color="#4A90E2" />
-                    </View>
-                ) : userReminders.length === 0 ? (
+                {userReminders.length === 0 ? (
                     <Text style={commonStyles.emptyMessage}>{t('UserHome.messages.noReminders')}</Text>
                 ) : (
                     userReminders.map((reminder) => (
@@ -169,13 +165,15 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                     </View>
                 </View>
             </Modal>
+
+            {/* Refresh loading overlay */}
             {isRefreshing && (
-              <View style={styles.refreshOverlay}>
-                <View style={styles.refreshIndicator}>
-                  <ActivityIndicator size="large" color="#4A90E2" />
-                  <Text style={styles.loadingText}>{t('common.messages.loading')}</Text>
+                <View style={styles.refreshOverlay}>
+                    <View style={styles.refreshIndicator}>
+                        <ActivityIndicator size="large" color="#4A90E2" />
+                        <Text style={styles.refreshText}>{t('common.messages.loading')}</Text>
+                    </View>
                 </View>
-              </View>
             )}
         </View>
     );
@@ -209,16 +207,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    // Refresh overlay styles
     refreshOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        ...StyleSheet.absoluteFillObject,
         backgroundColor: 'transparent',
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 1000,
     },
     refreshIndicator: {
         backgroundColor: 'white',
@@ -226,18 +220,14 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         alignItems: 'center',
         shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
     },
-    loadingText: {
+    refreshText: {
+        marginTop: 15,
         fontSize: 16,
-        color: '#333',
-        marginTop: 10,
-        fontWeight: '600',
+        color: '#666',
     },
 });
