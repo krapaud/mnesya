@@ -20,7 +20,7 @@ const API_BASE_URL_LOCAL = 'http://127.0.0.1:8000';
 const API_BASE_URL_VPS = 'https://api.mnesya.app';
 
 // Active configuration - change this based on your current location
-export const API_BASE_URL = API_BASE_URL_HOME;
+export const API_BASE_URL = API_BASE_URL_VPS;
 
 // Fallback configuration
 export const BACKUP_API_URL = 'http://localhost:8000';
