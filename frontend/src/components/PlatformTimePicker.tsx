@@ -11,6 +11,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Modal, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { commonStyles } from '../styles/commonStyles';
 
 /**
  * Props for the PlatformTimePicker component.
@@ -213,7 +214,7 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
             animationType="slide"
             onRequestClose={onClose}
         >
-            <View style={styles.modalOverlay}>
+            <View style={commonStyles.modalOverlay}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>{t('common.pickersText.Select Time')}</Text>
                     
@@ -325,12 +326,6 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
 };
 
 const styles = StyleSheet.create({
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     modalContent: {
         backgroundColor: '#FFFFFF',
         borderRadius: 15,
@@ -377,16 +372,16 @@ const styles = StyleSheet.create({
     },
     timeValueText: {
         fontSize: 24,
-        color: '#999',
+        color: '#999999',
         fontWeight: '400',
     },
     selectedValueText: {
-        color: '#000',
+        color: '#000000',
         fontWeight: '600',
         fontSize: 28,
     },
     pastTimeText: {
-        color: '#999',
+        color: '#999999',
         opacity: 0.4,
     },
     selectionOverlay: {
@@ -427,7 +422,7 @@ const styles = StyleSheet.create({
     cancelButtonText: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#333',
+        color: '#333333',
     },
     validateButton: {
         flex: 1,

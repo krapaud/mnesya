@@ -9,7 +9,7 @@
  * @module CreateReminderScreen
  */
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, Modal, ActivityIndicator} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -179,7 +179,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                     reminderId: Date.now(),
                     message: reminderMessage,
                     profileId: selectedProfile,
-                    profileName: selectedProfileData ? `${selectedProfileData.firstName} ${selectedProfileData.lastName}` : 'Utilisateur',
+                    profileName: selectedProfileData ? `${selectedProfileData.first_name} ${selectedProfileData.last_name}` : 'Utilisateur',
                     allNotificationIds: []
                 }
             );
@@ -237,13 +237,14 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
             {/* Content */}
             <ScrollView style={styles.scrollContainer}>
                 <Text style={styles.label}>{t('CreateReminder.fields.For Profile')}</Text>
+                    {profilesError && <Text style={styles.errorText}>{profilesError}</Text>}
                 <TouchableOpacity 
-                    style={[styles.input, showProfileError && styles.inputError]}
+                    style={[styles.input, showProfileError && commonStyles.inputError]}
                     onPress={openProfilePicker}
                 >
                     <View style={styles.profilePicker}>
-                        <Text>{selectedProfileData ? `${selectedProfileData.firstName} ${selectedProfileData.lastName}` : t('common.pickersText.Select a profile')}</Text>
-                        <Ionicons name="chevron-down" size={20} color="#999" />
+                        <Text>{selectedProfileData ? `${selectedProfileData.first_name} ${selectedProfileData.last_name}` : t('common.pickersText.Select a profile')}</Text>
+                        {loadingProfiles ? <ActivityIndicator size='small' color='#999999' /> : <Ionicons name="chevron-down" size={20} color="#999999" />}
                     </View>
                 </TouchableOpacity>
                 <Text style={[styles.errorText, {opacity: showProfileError ? 1 : 0}]}>
@@ -252,7 +253,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 {!showProfilePicker && (
                     <>
                     <Text style={styles.label}>{t('CreateReminder.fields.Reminder Title')}</Text>
-                <View style={[styles.input, showTitleError && styles.inputError]}>
+                <View style={[styles.input, showTitleError && commonStyles.inputError]}>
                     <TextInput
                         placeholder={t('CreateReminder.placeholders.Ex. : Take Medication')}
                         onChangeText={newText => {
@@ -266,7 +267,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                     {titleError || t('CreateReminder.errors.Please enter a title')}
                 </Text>
                 <Text style={styles.messageLabel}>Message</Text>
-                <View style={[styles.input, styles.messageInput, showMessageError && styles.inputError]}>
+                <View style={[styles.input, styles.messageInput, showMessageError && commonStyles.inputError]}>
                     <TextInput multiline={true}
                         numberOfLines={4}
                         maxLength={120}
@@ -292,7 +293,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 >
                     <View style={styles.pickerRow}>
                         <Text>{formatDate(reminderDate)}</Text>
-                        <Ionicons name="calendar-outline" size={20} color="#999" />
+                        <Ionicons name="calendar-outline" size={20} color="#999999" />
                     </View>
                 </TouchableOpacity>
                 </View>
@@ -304,7 +305,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 >
                     <View style={styles.pickerRow}>
                         <Text>{formatTime(reminderDate)}</Text>
-                        <Ionicons name="time-outline" size={20} color="#999" />
+                        <Ionicons name="time-outline" size={20} color="#999999" />
                     </View>
                 </TouchableOpacity>
                         </View>
@@ -332,7 +333,11 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 
                 {/* Cross-platform profile picker component */}
                 <PlatformProfilePicker
-                    profiles={fakeProfiles}
+                    profiles={userData?.map(item => ({
+                        id: item.id,
+                        firstName: item.first_name,
+                        lastName: item.last_name,
+                    })) ?? []}
                     selectedValue={selectedProfile}
                     onValueChange={setSelectedProfile}
                     visible={showProfilePicker}
@@ -360,7 +365,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 animationType="fade"
                 onRequestClose={handleCancelSave}
             >
-                <View style={styles.modalOverlay}>
+                <View style={commonStyles.modalOverlay}>
                     <View style={styles.modalContent}>
                         {/* Confirmation icon */}
                         <View style={styles.confirmIconContainer}>
@@ -451,10 +456,6 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         width: '100%',
     },
-    inputError: {
-        borderWidth: 2,
-        borderColor: '#FF0000',
-    },
     errorText: {
         color: '#FF0000',
         fontSize: 12,
@@ -497,12 +498,6 @@ const styles = StyleSheet.create({
     },
 
     // ========== MODAL ==========
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     modalContent: {
         backgroundColor: '#FFFFFF',
         borderRadius: 15,
@@ -522,13 +517,13 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#333333',
         marginBottom: 15,
         textAlign: 'center',
     },
     modalMessage: {
         fontSize: 16,
-        color: '#666',
+        color: '#666666',
         textAlign: 'center',
         lineHeight: 24,
         marginBottom: 25,
@@ -552,7 +547,7 @@ const styles = StyleSheet.create({
     cancelButtonText: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#333',
+        color: '#333333',
     },
     confirmButton: {
         backgroundColor: '#4A90E2',

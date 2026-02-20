@@ -1,5 +1,16 @@
+/**
+ * Refresh context for triggering data reload across screens.
+ *
+ * Provides a shared state to signal that data should be refreshed,
+ * used after create/update/delete operations to keep all screens in sync.
+ *
+ * @module RefreshContext
+ */
 import React, { createContext, useContext, useState, useCallback } from 'react';
 
+/**
+ * Shape of the refresh context value.
+ */
 type RefreshContextType = {
   refreshTrigger: number;
   isRefreshing: boolean;

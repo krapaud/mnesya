@@ -17,15 +17,19 @@ from app import get_db
 # Router
 router = APIRouter(prefix="/api/users", tags=["Users"])
 
+
 def get_user_facade(db: Session = Depends(get_db)) -> UserFacade:
     """Dependency to create UserFacade instance with database session."""
     return UserFacade(db)
+
 
 def get_caregiver_facade(db: Session = Depends(get_db)) -> CaregiverFacade:
     """Dependency to create CaregiverFacade instance with database session."""
     return CaregiverFacade(db)
 
-def get_current_caregiver_id(token_payload: dict = Depends(verify_token)) -> str:
+
+def get_current_caregiver_id(
+        token_payload: dict = Depends(verify_token)) -> str:
     """Extract caregiver ID from JWT token.
 
     Args:
@@ -89,33 +93,34 @@ async def create_profile(
             detail=f"Failed to create profile: {str(e)}"
         )
 
+
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_profile(
     token_payload: dict = Depends(verify_token),
     user_facade: UserFacade = Depends(get_user_facade)
 ):
     """Get current authenticated user profile.
-    
+
     Args:
         token_payload (dict): Decoded JWT token
         user_facade (UserFacade): User service facade
-        
+
     Returns:
         UserResponse: Current user profile
-        
+
     Raises:
         HTTPException: If user not found
     """
     try:
         user_id = token_payload.get("sub")
         user = user_facade.get_user(UUID(user_id))
-        
+
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
-        
+
         return UserResponse(
             id=user.id,
             first_name=user.first_name,
@@ -125,7 +130,7 @@ async def get_current_user_profile(
             created_at=user.created_at,
             updated_at=user.updated_at
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -133,6 +138,7 @@ async def get_current_user_profile(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get profile: {str(e)}"
         )
+
 
 @router.get("", response_model=List[UserResponse])
 async def list_profiles(
@@ -244,39 +250,39 @@ async def update_profile(
     user_facade: UserFacade = Depends(get_user_facade)
 ):
     """Update an existing user profile.
-    
+
     Updates profile details if the profile belongs to the authenticated caregiver.
     Only provided fields will be updated (partial updates supported).
-    
+
     Args:
         profile_id (UUID): ID of the profile to update
         request (UserUpdate): Updated profile data (all fields optional)
         caregiver_id (str): ID of authenticated caregiver
         user_facade (UserFacade): User service facade
-        
+
     Returns:
         UserResponse: Updated user profile
-        
+
     Raises:
         HTTPException: If profile not found, access denied, or validation error occurs
     """
     try:
         # First verify the profile exists and caregiver has access
         user = user_facade.get_user(profile_id)
-        
+
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Profile not found"
             )
-        
+
         # Verify that this caregiver has access to this profile
         if UUID(caregiver_id) not in user.caregiver_ids:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You don't have access to this profile"
             )
-        
+
         # Build update data from provided fields only
         update_data = {}
         if request.first_name is not None:
@@ -285,7 +291,7 @@ async def update_profile(
             update_data["last_name"] = request.last_name
         if request.birthday is not None:
             update_data["birthday"] = request.birthday
-        
+
         # If no fields to update, return current data
         if not update_data:
             return UserResponse(
@@ -297,10 +303,10 @@ async def update_profile(
                 created_at=user.created_at,
                 updated_at=user.updated_at
             )
-        
+
         # Perform update
         updated_user = user_facade.update_user(profile_id, update_data)
-        
+
         return UserResponse(
             id=updated_user.id,
             first_name=updated_user.first_name,
@@ -310,7 +316,7 @@ async def update_profile(
             created_at=updated_user.created_at,
             updated_at=updated_user.updated_at
         )
-        
+
     except HTTPException:
         raise
     except ValueError as e:
@@ -335,60 +341,62 @@ async def delete_profile(
     caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade)
 ):
     """Delete a user profile.
-    
+
     Deletes a profile if it belongs to the authenticated caregiver.
     Also removes the user ID from all associated caregivers' user_ids lists.
-    
+
     Args:
         profile_id (UUID): ID of the profile to delete
         caregiver_id (str): ID of authenticated caregiver
         user_facade (UserFacade): User service facade
         caregiver_facade (CaregiverFacade): Caregiver service facade
-        
+
     Returns:
         None: Returns 204 No Content on success
-        
+
     Raises:
         HTTPException: If profile not found or access denied
     """
     try:
         # First verify the profile exists and caregiver has access
         user = user_facade.get_user(profile_id)
-        
+
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Profile not found"
             )
-        
+
         # Verify that this caregiver has access to this profile
         if UUID(caregiver_id) not in user.caregiver_ids:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You don't have access to this profile"
             )
-        
+
         # Remove user from all associated caregivers
         for cg_id in user.caregiver_ids:
             try:
-                caregiver_facade.remove_user_from_caregiver(str(cg_id), profile_id)
+                caregiver_facade.remove_user_from_caregiver(
+                    str(cg_id), profile_id)
             except Exception as e:
                 # Log error but continue with deletion
                 import traceback
                 traceback.print_exc()
-                print(f"Warning: Could not remove user from caregiver {cg_id}: {e}")
-        
+                print(
+                    f"Warning: Could not remove user from caregiver {cg_id}: {e}")
+
         # Delete the profile
         success = user_facade.delete_user(profile_id)
-        
+
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to delete profile"
             )
-        
+
         return None
-        
+
     except HTTPException:
         raise
     except Exception as e:

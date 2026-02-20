@@ -10,25 +10,27 @@ from uuid import UUID
 
 T = TypeVar('T')  # Generic type for the model class
 
+
 class BaseRepository(Generic[T]):
     """Generic base repository providing standard CRUD operations.
-    
+
     This class implements the Repository pattern for database access,
     providing a consistent interface for all entity types.
-    
+
     Type Parameters:
         T: The model class this repository manages
-        
+
     Attributes:
         model (Type[T]): The SQLAlchemy model class
         db (Session): Database session for queries
-        
+
     Note:
         The session is automatically closed when the repository is destroyed.
     """
+
     def __init__(self, model: Type[T], db: Session):
         """Initialize the repository with a model class.
-        
+
         Args:
             model (Type[T]): The SQLAlchemy model class to manage
         """
@@ -37,13 +39,13 @@ class BaseRepository(Generic[T]):
 
     def add(self, entity: T) -> T:
         """Add a new entity to the database.
-        
+
         Args:
             entity (T): The entity instance to add
-            
+
         Returns:
             T: The added entity with populated ID and timestamps
-            
+
         Raises:
             Exception: If database operation fails (transaction is rolled back)
         """
@@ -58,21 +60,22 @@ class BaseRepository(Generic[T]):
 
     def get(self, entity_id: UUID) -> Optional[T]:
         """Retrieve a single entity by its ID.
-        
+
         Args:
             entity_id (UUID): The unique identifier of the entity
-            
+
         Returns:
             Optional[T]: The entity if found, None otherwise
         """
-        return self.db.query(self.model).filter(self.model._id == entity_id).first()
+        return self.db.query(self.model).filter(
+            self.model._id == entity_id).first()
 
     def get_all(self) -> List[T]:
         """Retrieve all entities of this type.
-        
+
         Returns:
             List[T]: List of all entities (may be empty)
-            
+
         Warning:
             Use with caution on large tables - consider pagination
         """
@@ -80,17 +83,17 @@ class BaseRepository(Generic[T]):
 
     def update(self, entity_id: UUID, data: dict) -> Optional[T]:
         """Update an existing entity with new data.
-        
+
         Args:
             entity_id (UUID): The unique identifier of the entity to update
             data (dict): Dictionary of field names and new values
-            
+
         Returns:
             Optional[T]: The updated entity if found, None if not found
-            
+
         Raises:
             Exception: If database operation fails (transaction is rolled back)
-            
+
         Note:
             Only updates fields that exist in the model (prefixed with underscore)
             Uses property setters which include validation
@@ -111,13 +114,13 @@ class BaseRepository(Generic[T]):
 
     def delete(self, entity_id: UUID) -> bool:
         """Delete an entity by its ID.
-        
+
         Args:
             entity_id (UUID): The unique identifier of the entity to delete
-            
+
         Returns:
             bool: True if entity was found and deleted, False if not found
-            
+
         Raises:
             Exception: If database operation fails (transaction is rolled back)
         """

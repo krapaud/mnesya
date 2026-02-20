@@ -1,7 +1,11 @@
 /**
- * AppNavigator - Main navigation stack configuration
- * Defines the navigation structure and screen routes for the entire application
- * Uses React Navigation's native stack navigator for optimal performance
+ * AppNavigator - Main navigation stack configuration.
+ *
+ * Defines the navigation structure and screen routes for the entire application.
+ * Determines the initial route based on authentication and user type (caregiver or user).
+ * Uses React Navigation's native stack navigator for optimal performance.
+ *
+ * @module AppNavigator
  */
 import React, { useState, useEffect } from "react";
 import { View, ActivityIndicator } from "react-native";

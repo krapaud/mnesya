@@ -1,7 +1,13 @@
 /**
- * API Configuration
- * Switch between different IP addresses based on your location
- * Uncomment the line matching your current network setup
+ * API base URL configuration.
+ *
+ * Defines backend endpoint URLs for different environments.
+ * Update the active export to switch between development locations,
+ * local testing, and production.
+ *
+ * To find your local IP on macOS: ipconfig getifaddr en0
+ *
+ * @module api
  */
 
 // Development configurations for different locations

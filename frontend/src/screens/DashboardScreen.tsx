@@ -1,7 +1,11 @@
 /**
- * DashboardScreen - Main screen for caregivers
- * Displays a list of managed profiles and provides quick actions to create new profiles or reminders
- * Features a centered header with app branding and a scrollable list of profile cards
+ * DashboardScreen - Main screen for caregivers.
+ *
+ * Displays a list of managed elderly user profiles with quick actions
+ * to create new profiles or reminders. Features a centered header with
+ * app branding and a scrollable list of profile cards.
+ *
+ * @module DashboardScreen
  */
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
@@ -163,11 +167,11 @@ const styles = StyleSheet.create({
     },
     textUserInfo: {
         fontSize: 16,
-        color: '#666',
+        color: '#666666',
     },
     emptyMessage: {
         fontSize: 16,
-        color: '#666',
+        color: '#666666',
         textAlign: 'center',
         marginTop: 200,
         fontStyle: 'italic',

@@ -12,6 +12,7 @@ import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Modal, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { commonStyles } from '../styles/commonStyles';
 
 /**
  * Props for the PlatformDatePicker component.
@@ -235,7 +236,7 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
             animationType="slide"
             onRequestClose={onClose}
         >
-            <View style={styles.modalOverlay}>
+            <View style={commonStyles.modalOverlay}>
                 <View style={styles.modalContent}>
                     {/* Show Year Picker if active */}
                     {showYearPicker && (
@@ -244,7 +245,7 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
                                 <View style={styles.pickerHeader}>
                                     <Text style={styles.pickerTitle}>Select Year</Text>
                                     <TouchableOpacity onPress={() => setShowYearPicker(false)}>
-                                        <Ionicons name="close" size={24} color="#666" />
+                                        <Ionicons name="close" size={24} color="#666666" />
                                     </TouchableOpacity>
                                 </View>
                                 <ScrollView style={styles.yearList}>
@@ -277,7 +278,7 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
                                 <View style={styles.pickerHeader}>
                                     <Text style={styles.pickerTitle}>Select Month</Text>
                                     <TouchableOpacity onPress={() => setShowMonthPicker(false)}>
-                                        <Ionicons name="close" size={24} color="#666" />
+                                        <Ionicons name="close" size={24} color="#666666" />
                                     </TouchableOpacity>
                                 </View>
                                 <View style={styles.monthGrid}>
@@ -393,12 +394,6 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
 };
 
 const styles = StyleSheet.create({
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     modalContent: {
         backgroundColor: '#FFFFFF',
         borderRadius: 15,
@@ -417,7 +412,7 @@ const styles = StyleSheet.create({
     monthTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#333333',
     },
     weekDaysRow: {
         flexDirection: 'row',
@@ -431,7 +426,7 @@ const styles = StyleSheet.create({
     weekDayText: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#666',
+        color: '#666666',
     },
     calendarGrid: {
         flexDirection: 'row',
@@ -456,13 +451,13 @@ const styles = StyleSheet.create({
     },
     dayText: {
         fontSize: 16,
-        color: '#333',
+        color: '#333333',
         textAlign: 'center',
         lineHeight: 20,
     },
     pastDayText: {
         fontSize: 16,
-        color: '#333',
+        color: '#333333',
         textAlign: 'center',
         lineHeight: 20,
         opacity: 0.4,
@@ -538,7 +533,7 @@ const styles = StyleSheet.create({
     pickerTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#333333',
     },
     yearList: {
         maxHeight: 400,
@@ -555,7 +550,7 @@ const styles = StyleSheet.create({
     yearText: {
         fontSize: 16,
         textAlign: 'center',
-        color: '#333',
+        color: '#333333',
     },
     selectedYearText: {
         color: '#FFFFFF',
@@ -580,7 +575,7 @@ const styles = StyleSheet.create({
     },
     monthText: {
         fontSize: 14,
-        color: '#333',
+        color: '#333333',
     },
     selectedMonthText: {
         color: '#FFFFFF',

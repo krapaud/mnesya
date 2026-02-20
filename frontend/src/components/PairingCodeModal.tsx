@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     appName: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#333333',
     },
     headerSpacer: {
         width: 40,
@@ -215,12 +215,12 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 32,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#333333',
         marginBottom: 15,
     },
     description: {
         fontSize: 16,
-        color: '#999',
+        color: '#999999',
         textAlign: 'center',
         marginBottom: 50,
         paddingHorizontal: 20,
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     },
     expirationLabel: {
         fontSize: 16,
-        color: '#666',
+        color: '#666666',
         fontWeight: '500',
     },
     expirationTime: {

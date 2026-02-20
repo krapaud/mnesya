@@ -9,11 +9,12 @@ from datetime import datetime, date
 from uuid import UUID
 from typing import List, Optional
 
+
 class UserCreate(BaseModel):
     """Schema for creating a new user.
-    
+
     Validates input data when creating a user via API.
-    
+
     Attributes:
         first_name (str): User's first name (1-100 chars)
         last_name (str): User's last name (1-100 chars)
@@ -26,13 +27,13 @@ class UserCreate(BaseModel):
     @field_validator('first_name', 'last_name')
     def validate_name(cls, value: str) -> str:
         """Validate and sanitize name fields.
-        
+
         Args:
             value (str): The name value to validate
-            
+
         Returns:
             str: Trimmed name
-            
+
         Raises:
             ValueError: If name is empty, only whitespace, or too long
         """
@@ -40,11 +41,12 @@ class UserCreate(BaseModel):
             raise ValueError("First name is required and must be <= 100 chars")
         return value.strip()
 
+
 class UserUpdate(BaseModel):
     """Schema for updating an existing user.
-    
+
     All fields are optional for partial updates.
-    
+
     Attributes:
         first_name (Optional[str]): Updated first name (1-100 chars)
         last_name (Optional[str]): Updated last name (1-100 chars)
@@ -57,13 +59,13 @@ class UserUpdate(BaseModel):
     @field_validator('first_name', 'last_name')
     def validate_name(cls, value: Optional[str]) -> Optional[str]:
         """Validate and sanitize name fields if provided.
-        
+
         Args:
             value (Optional[str]): The name value to validate
-            
+
         Returns:
             Optional[str]: Trimmed name or None
-            
+
         Raises:
             ValueError: If name is only whitespace or too long
         """
@@ -71,11 +73,12 @@ class UserUpdate(BaseModel):
             raise ValueError("First name is required and must be <= 100 chars")
         return value.strip() if value else None
 
+
 class UserResponse(BaseModel):
     """Schema for user API responses.
-    
+
     Used when returning user data from API endpoints.
-    
+
     Attributes:
         id (UUID): User's unique identifier
         first_name (str): User's first name
@@ -93,11 +96,13 @@ class UserResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)  # Enables ORM model conversion
+    # Enables ORM model conversion
+    model_config = ConfigDict(from_attributes=True)
+
 
 class UserListResponse(BaseModel):
     """Schema for paginated user list responses.
-    
+
     Attributes:
         users (List[UserResponse]): List of user objects
         total (int): Total count of users

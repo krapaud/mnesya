@@ -1,10 +1,13 @@
 /**
- * WelcomeScreen - Initial profile type selection screen
- * Allows users to choose between User or Caregiver profile
- * Entry point of the application flow
+ * WelcomeScreen - Initial profile type selection screen.
+ *
+ * Entry point of the application flow. Allows users to choose
+ * between an elderly user profile or a caregiver profile.
+ *
+ * @module WelcomeScreen
  */
 import React from 'react';
-import { View, Text, StyleSheet, Button, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -49,7 +52,7 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
                 >
                     <View style={styles.buttonContent}>
                         <View style={styles.iconCircle}>
-                            <Ionicons name="person" size={50} color="#fff" />
+                            <Ionicons name="person" size={50} color="#FFFFFF" />
                         </View>
                         <Text style={styles.buttonText}>{t('welcome.userButton')}</Text>
                     </View>
@@ -65,7 +68,7 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
                 >
                     <View style={styles.buttonContent}>
                         <View style={styles.iconCircle}>
-                            <Ionicons name="heart" size={50} color="#fff" />
+                            <Ionicons name="heart" size={50} color="#FFFFFF" />
                         </View>
                         <Text style={styles.buttonText}>{t('welcome.caregiverButton')}</Text>
                     </View>
@@ -99,7 +102,7 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         fontSize: 18,
-        color: '#666',
+        color: '#666666',
         marginBottom: 40,
     },
     

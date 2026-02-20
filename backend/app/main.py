@@ -16,6 +16,7 @@ app.include_router(caregiver.router)
 app.include_router(pairing.router)
 app.include_router(reminder.router)
 
+
 @app.get("/")
 async def root():
     return {"message": "Welcome to Mnesya API"}

@@ -8,9 +8,10 @@ from typing import Optional
 from datetime import datetime
 import validators
 
+
 class LoginRequest(BaseModel):
     """Schema for user login request.
-    
+
     Attributes:
         email (str): Caregiver's email address
         password (str): Caregiver's password
@@ -26,9 +27,10 @@ class LoginRequest(BaseModel):
             raise ValueError("Invalid email format")
         return value
 
+
 class RegisterRequest(BaseModel):
     """Schema for caregiver registration.
-    
+
     Attributes:
         first_name (str): Caregiver's first name
         last_name (str): Caregiver's last name
@@ -82,17 +84,22 @@ class RegisterRequest(BaseModel):
         if not has_digit:
             raise ValueError('Password must contain at least one digit')
         if not has_upper:
-            raise ValueError('Password must contain at least one uppercase letter')
+            raise ValueError(
+                'Password must contain at least one uppercase letter')
         if not has_lower:
-            raise ValueError('Password must contain at least one lowercase letter')
+            raise ValueError(
+                'Password must contain at least one lowercase letter')
         if not has_sym:
-            raise ValueError(f'Password must contain at least one special character: {", ".join(SpecialSym)}')
+            raise ValueError(
+                f'Password must contain at least one special character: {
+                    ", ".join(SpecialSym)}')
 
         return value
 
+
 class TokenResponse(BaseModel):
     """Schema for authentication token response.
-    
+
     Attributes:
         access_token (str): JWT access token
         token_type (str): Type of token (Bearer)
@@ -102,9 +109,10 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     expires_in: int = 3600
 
+
 class CaregiverProfile(BaseModel):
     """Schema for caregiver profile response.
-    
+
     Attributes:
         id (str): Caregiver's unique identifier
         first_name (str): Caregiver's first name

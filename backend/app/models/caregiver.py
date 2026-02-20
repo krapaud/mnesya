@@ -1,7 +1,8 @@
 """Caregiver model module.
 
-This module defines the Caregiver entity with authentication and user management.
-Caregivers are responsible for managing and monitoring elderly users.
+This module defines the Caregiver entity with authentication and user
+management. Caregivers are responsible for managing and monitoring elderly
+users.
 """
 
 import uuid
@@ -12,12 +13,13 @@ from app import database
 import validators
 from passlib.hash import bcrypt
 
+
 class CaregiverModel(database):
     """Caregiver model representing a care provider in the system.
-    
-    This model stores caregiver information including authentication credentials
-    and relationships with users they care for.
-    
+
+    This model stores caregiver information including authentication
+    credentials and relationships with users they care for.
+
     Attributes:
         id (UUID): Unique identifier for the caregiver
         first_name (str): Caregiver's first name (max 100 chars)
@@ -29,21 +31,44 @@ class CaregiverModel(database):
         updated_at (datetime): Timestamp of last update
     """
     __tablename__ = 'caregiver'
-    _id = Column('id', UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    _id = Column(
+        'id',
+        UUID(
+            as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4)
     _first_name = Column('first_name', String(100), nullable=False)
     _last_name = Column('last_name', String(100), nullable=False)
-    _email = Column('email', String(255), unique=True, nullable=False, index=True)
+    _email = Column(
+        'email',
+        String(255),
+        unique=True,
+        nullable=False,
+        index=True)
     _password = Column('password', String(255), nullable=False)
-    _user_ids = Column('user_ids', ARRAY(UUID(as_uuid=True), ForeignKey('user.id')), default=list)
-    _created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
-    _updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+    _user_ids = Column(
+        'user_ids',
+        ARRAY(
+            UUID(
+                as_uuid=True),
+            ForeignKey('user.id')),
+        default=list)
+    _created_at = Column(
+        DateTime(
+            timezone=True), default=lambda: datetime.now(
+            timezone.utc), nullable=False)
+    _updated_at = Column(
+        DateTime(
+            timezone=True), default=lambda: datetime.now(
+            timezone.utc), onupdate=lambda: datetime.now(
+                timezone.utc), nullable=False)
 
     # ==================== Getter Setter ====================
 
     @property
     def id(self):
         """Get the caregiver's unique identifier.
-        
+
         Returns:
             UUID: The caregiver's ID
         """
@@ -52,7 +77,7 @@ class CaregiverModel(database):
     @property
     def first_name(self) -> str:
         """Get the caregiver's first name.
-        
+
         Returns:
             str: The caregiver's first name
         """
@@ -61,12 +86,13 @@ class CaregiverModel(database):
     @first_name.setter
     def first_name(self, value: str) -> None:
         """Set the caregiver's first name with validation.
-        
+
         Args:
             value (str): The first name to set
-            
+
         Raises:
-            ValueError: If name is empty, only whitespace, or exceeds 100 characters
+            ValueError: If name is empty, only whitespace, or exceeds
+                100 characters
         """
         if (not value or len(value) > 100 or len(value.strip()) == 0):
             raise ValueError("First name is required and must be <= 100 chars")
@@ -75,7 +101,7 @@ class CaregiverModel(database):
     @property
     def last_name(self) -> str:
         """Get the caregiver's last name.
-        
+
         Returns:
             str: The caregiver's last name
         """
@@ -84,12 +110,13 @@ class CaregiverModel(database):
     @last_name.setter
     def last_name(self, value: str) -> None:
         """Set the caregiver's last name with validation.
-        
+
         Args:
             value (str): The last name to set
-            
+
         Raises:
-            ValueError: If name is empty, only whitespace, or exceeds 100 characters
+            ValueError: If name is empty, only whitespace, or exceeds
+                100 characters
         """
         if (not value or len(value) > 100 or len(value.strip()) == 0):
             raise ValueError("last name is required and must be <= 100 chars")
@@ -98,7 +125,7 @@ class CaregiverModel(database):
     @property
     def email(self) -> str:
         """Get the caregiver's email address.
-        
+
         Returns:
             str: The caregiver's email
         """
@@ -107,10 +134,10 @@ class CaregiverModel(database):
     @email.setter
     def email(self, value: str) -> None:
         """Set the caregiver's email with validation.
-        
+
         Args:
             value (str): The email address to set
-            
+
         Raises:
             ValueError: If email format is invalid
         """
@@ -122,7 +149,7 @@ class CaregiverModel(database):
     @property
     def password(self) -> str:
         """Get the caregiver's hashed password.
-        
+
         Returns:
             str: The hashed password
         """
@@ -131,32 +158,33 @@ class CaregiverModel(database):
     @password.setter
     def password(self, value: str) -> None:
         """Set the caregiver's password with strict security validation.
-        
+
         Password must meet the following requirements:
         - Length: 8-20 characters
         - At least one digit (0-9)
         - At least one uppercase letter (A-Z)
         - At least one lowercase letter (a-z)
         - At least one special character ($@#%*!~&)
-        
+
         Args:
-            value (str): The password to set (plaintext will be validated and hashed, bcrypt hash will be stored directly)
-            
+            value (str): The password to set (plaintext will be validated
+            and hashed, bcrypt hash will be stored directly)
+
         Raises:
             ValueError: If password doesn't meet security requirements
-            
+
         Note:
-            If value is already a bcrypt hash (starts with $2a$ or $2b$), 
+            If value is already a bcrypt hash (starts with $2a$ or $2b$),
             it will be stored directly without validation.
             Plaintext passwords will be validated and hashed automatically.
         """
         value = value.strip()
-        
+
         # If it's already a bcrypt hash, store it directly
         if value.startswith('$2a$') or value.startswith('$2b$'):
             self._password = value
             return
-        
+
         SpecialSym = ['$', '@', '#', '%', '*', '!', '~', '&']
 
         # Length validation
@@ -182,31 +210,36 @@ class CaregiverModel(database):
         if not has_digit:
             raise ValueError('Password should have at least one numeral')
         if not has_upper:
-            raise ValueError('Password should have at least one uppercase letter')
+            raise ValueError(
+                'Password should have at least one uppercase letter')
         if not has_lower:
-            raise ValueError('Password should have at least one lowercase letter')
+            raise ValueError(
+                'Password should have at least one lowercase letter')
         if not has_sym:
-            raise ValueError('Password should have at least one of the symbols $@#%*!~&')
-        
+            raise ValueError(
+                'Password should have at least one of the symbols $@#%*!~&')
+
         # Hash the plaintext password before storing
         self._password = bcrypt.hash(value)
 
     @property
     def user_ids(self) -> list:
         """Get the list of user IDs under this caregiver's care.
-        
+
         Returns:
             list[UUID]: List of user UUIDs, empty list if none
         """
-        # Convert tuple to list if needed (SQLAlchemy returns tuples for ARRAY columns)
+        # Convert tuple to list if needed (SQLAlchemy returns tuples for ARRAY
+        # columns)
         if self._user_ids is None:
             return []
-        return list(self._user_ids) if isinstance(self._user_ids, tuple) else self._user_ids
+        return list(self._user_ids) if isinstance(
+            self._user_ids, tuple) else self._user_ids
 
     @user_ids.setter
     def user_ids(self, value: list) -> None:
         """Set the list of user IDs.
-        
+
         Args:
             value (list[UUID]): List of user UUIDs
         """
@@ -215,7 +248,7 @@ class CaregiverModel(database):
     @property
     def created_at(self) -> datetime:
         """Get the creation timestamp.
-        
+
         Returns:
             datetime: When this caregiver was created
         """
@@ -224,7 +257,7 @@ class CaregiverModel(database):
     @property
     def updated_at(self) -> datetime:
         """Get the last update timestamp.
-        
+
         Returns:
             datetime: When this caregiver was last updated
         """
@@ -234,28 +267,29 @@ class CaregiverModel(database):
 
     def add_user(self, user_id: uuid.UUID) -> None:
         """Add a user to this caregiver's care list.
-        
+
         Args:
             user_id (UUID): The user's unique identifier
-            
+
         Note:
             Will not add duplicate IDs - user can only be added once
         """
-        # Convert to list if it's a tuple (SQLAlchemy returns tuples for ARRAY columns)
+        # Convert to list if it's a tuple (SQLAlchemy returns tuples for ARRAY
+        # columns)
         if self._user_ids is None:
             self._user_ids = []
         elif isinstance(self._user_ids, tuple):
             self._user_ids = list(self._user_ids)
-        
+
         if user_id not in self._user_ids:
             self._user_ids.append(user_id)
 
     def remove_user(self, user_id: uuid.UUID) -> None:
         """Remove a user from this caregiver's care list.
-        
+
         Args:
             user_id (UUID): The user's unique identifier
-            
+
         Note:
             Silently does nothing if user is not in the list
         """
@@ -264,7 +298,7 @@ class CaregiverModel(database):
 
     def hash_password(self, password: str) -> None:
         """Hash a plaintext password using bcrypt and store it.
-        
+
         Args:
             password (str): The plaintext password to hash
         """
@@ -273,10 +307,10 @@ class CaregiverModel(database):
 
     def verify_password(self, password: str) -> bool:
         """Verify a plaintext password against the stored hash.
-        
+
         Args:
             password (str): The plaintext password to verify
-            
+
         Returns:
             bool: True if password matches, False otherwise
         """

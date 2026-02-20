@@ -29,9 +29,11 @@ from uuid import UUID
 
 router = APIRouter(prefix="/api/reminder", tags=["Reminder"])
 
+
 def get_reminder_facade(db: Session = Depends(get_db)) -> ReminderFacade:
     """Dependency to create ReminderFacade instance with database session."""
     return ReminderFacade(db)
+
 
 def get_user_facade(db: Session = Depends(get_db)) -> UserFacade:
     """Dependency to create UserFacade instance with database session."""
@@ -41,7 +43,8 @@ def get_user_facade(db: Session = Depends(get_db)) -> UserFacade:
 @router.post("", response_model=ReminderResponse)
 async def create_reminder(
     request: ReminderCreate,
-    caregiver_id: str = Depends(lambda token=Depends(verify_token): token.get("sub")),
+    caregiver_id: str = Depends(
+        lambda token=Depends(verify_token): token.get("sub")),
     reminder_facade: ReminderFacade = Depends(get_reminder_facade),
     user_facade: UserFacade = Depends(get_user_facade)
 ):
@@ -60,7 +63,7 @@ async def create_reminder(
             "user_id": request.user_id,
             "caregiver_id": UUID(caregiver_id)
         }
-        
+
         reminder = reminder_facade.create_reminder(reminder_data)
 
         return ReminderResponse(
@@ -73,7 +76,7 @@ async def create_reminder(
             created_at=reminder.created_at,
             updated_at=reminder.updated_at
         )
-    
+
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

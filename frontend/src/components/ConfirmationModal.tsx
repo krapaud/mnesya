@@ -11,6 +11,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { commonStyles } from '../styles/commonStyles';
 
 /**
  * Props for ConfirmationModal component.
@@ -65,7 +66,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             animationType="fade"
             onRequestClose={onClose}
         >
-            <View style={styles.modalOverlay}>
+            <View style={commonStyles.modalOverlay}>
                 <View style={styles.modalContent}>
                     <Ionicons name={icon} size={60} color={iconColor} />
                     <Text style={styles.modalTitle}>{title}</Text>
@@ -97,12 +98,6 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 };
 
 const styles = StyleSheet.create({
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     modalContent: {
         backgroundColor: '#FFFFFF',
         borderRadius: 15,
@@ -113,13 +108,13 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 22,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#333333',
         marginTop: 15,
         marginBottom: 10,
     },
     modalMessage: {
         fontSize: 16,
-        color: '#666',
+        color: '#666666',
         textAlign: 'center',
         marginBottom: 25,
     },
@@ -138,7 +133,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#E0E0E0',
     },
     cancelButtonText: {
-        color: '#666',
+        color: '#666666',
         fontSize: 16,
         fontWeight: '600',
     },

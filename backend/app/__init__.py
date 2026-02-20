@@ -14,19 +14,22 @@ database = declarative_base()
 engine = None
 SessionLocal = None
 
+
 def init_app(database_url: str):
     global engine, SessionLocal
     engine = create_engine(database_url)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     database.metadata.create_all(bind=engine)
 
+
 def get_db() -> Generator[Session, None, None]:
     """Dependency to get database session."""
     db = SessionLocal()
-    try: 
+    try:
         yield db
     finally:
         db.close()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -36,7 +39,9 @@ async def lifespan(app: FastAPI):
 
 security = HTTPBasic()
 
-def verify_docs_credentials(credentials: HTTPBasicCredentials = Depends(security)):
+
+def verify_docs_credentials(
+        credentials: HTTPBasicCredentials = Depends(security)):
     """Protects Swagger and ReDoc with HTTP Basic Auth using environment variables."""
     correct_username = secrets.compare_digest(
         credentials.username, os.environ["DOCS_USERNAME"]
@@ -51,8 +56,13 @@ def verify_docs_credentials(credentials: HTTPBasicCredentials = Depends(security
             headers={"WWW-Authenticate": "Basic"},
         )
 
+
 def create_app():
-    app = FastAPI(title="Mnesya app", lifespan=lifespan, docs_url=None, redoc_url=None)
+    app = FastAPI(
+        title="Mnesya app",
+        lifespan=lifespan,
+        docs_url=None,
+        redoc_url=None)
 
     app.add_middleware(
         CORSMiddleware,
@@ -63,13 +73,17 @@ def create_app():
     )
 
     @app.get("/docs", include_in_schema=False)
-    async def custom_swagger(credentials: HTTPBasicCredentials = Depends(security)):
+    async def custom_swagger(
+            credentials: HTTPBasicCredentials = Depends(security)):
         verify_docs_credentials(credentials)
-        return get_swagger_ui_html(openapi_url="/openapi.json", title="Mnesya API Docs")
+        return get_swagger_ui_html(
+            openapi_url="/openapi.json", title="Mnesya API Docs")
 
     @app.get("/redoc", include_in_schema=False)
-    async def custom_redoc(credentials: HTTPBasicCredentials = Depends(security)):
+    async def custom_redoc(
+            credentials: HTTPBasicCredentials = Depends(security)):
         verify_docs_credentials(credentials)
-        return get_redoc_html(openapi_url="/openapi.json", title="Mnesya API ReDoc")
+        return get_redoc_html(openapi_url="/openapi.json",
+                              title="Mnesya API ReDoc")
 
     return app
