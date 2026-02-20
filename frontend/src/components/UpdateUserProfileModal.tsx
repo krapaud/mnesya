@@ -133,7 +133,7 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
                                     value={values.firstname}
                                     onChangeText={handleChange('firstname')}
                                     placeholder={t('CreateProfile.placeholders.Enter the profile First Name')}
-                                    autoCapitalize="words"
+                                    autoCapitalize="sentences"
                                 />
                                 {showErrors.firstname && errors.firstname && (
                                     <Text style={styles.errorText}>{t(errors.firstname)}</Text>
@@ -151,7 +151,7 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
                                     value={values.lastname}
                                     onChangeText={handleChange('lastname')}
                                     placeholder={t('CreateProfile.placeholders.Enter the profile Last Name')}
-                                    autoCapitalize="characters"
+                                    autoCapitalize="sentences"
                                 />
                                 {showErrors.lastname && errors.lastname && (
                                     <Text style={styles.errorText}>{t(errors.lastname)}</Text>

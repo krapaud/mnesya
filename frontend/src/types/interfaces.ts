@@ -69,3 +69,27 @@ export interface UserProfileData {
   created_at: string;
   updated_at: string;
 }
+
+export interface PairingCodeCreate {
+  user_id: string;
+}
+
+export interface PairingCodeResponse {
+  code: string;
+  expires_at: string;
+}
+
+export interface PairingCodeVerify {
+  code: string;
+}
+
+export interface PairingCodeVerifyResponse {
+  user_id: string;
+  user: UserInfo;
+  caregiver_id: string;
+}
+
+export interface UserInfo {
+  first_name: string;
+  last_name: string;
+}

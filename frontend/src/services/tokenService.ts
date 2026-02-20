@@ -12,6 +12,9 @@ import * as SecureStore from 'expo-secure-store';
 /** Storage key for the JWT authentication token */
 const AUTH_TOKEN_KEY = 'auth_token';
 
+/** Storage key for the user info */
+const USER_INFO_KEY = 'user_info';
+
 /**
  * Saves the authentication token to secure storage.
  * 
@@ -40,4 +43,24 @@ export const getToken = async (): Promise<string | null> => {
  */
 export const deleteToken = async (): Promise<void> => {
   await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+};
+
+/**
+ * Saves the user info to secure storage.
+ * 
+ * @param userInfo - User info to store securely
+ * @returns Promise that resolves when user info is saved
+ */
+export const saveUserInfo = async (userInfo: any): Promise<void> => {
+  await SecureStore.setItemAsync(USER_INFO_KEY, JSON.stringify(userInfo));
+};
+
+/**
+ * Retrieves the user info from secure storage.
+ * 
+ * @returns Promise that resolves to the stored user info, or null if no user info exists
+ */
+export const getUserInfo = async (): Promise<any | null> => {
+  const data = await SecureStore.getItemAsync(USER_INFO_KEY);
+  return data ? JSON.parse(data) : null;
 };
