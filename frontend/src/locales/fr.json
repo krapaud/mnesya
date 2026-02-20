@@ -238,7 +238,8 @@
       "copyCode": "Copier le code",
       "done": "Terminé"
     },
-    "tip": "Astuce : Ce code expire dans 5 minutes"
+    "tip": "Astuce : Ce code expire dans 5 minutes",
+    "expiresIn": "Expire dans"
   },  "ReminderNotification": {
     "buttons": {
         "Done": "Terminé",
@@ -305,6 +306,7 @@
   "tabs": {
     "Home": "Accueil",
     "Profile": "Profil",
-    "Reminders": "Rappels"
+    "Reminders": "Rappels",
+    "Refresh": "Actualiser"
   }
 }
