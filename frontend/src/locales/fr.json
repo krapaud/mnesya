@@ -171,6 +171,9 @@
     "tipText": "Astuce : Votre accompagnant peut vous fournir le code de jumelage pour connecter vos comptes.",
     "buttons": {
         "Back to profile type": "Retour vers choix du type de profil"
+    },
+    "error": {
+        "invalid_code": "Code invalide ou expiré. Veuillez réessayer."
     }
   },
   "CreateProfile": {
@@ -235,7 +238,8 @@
       "copyCode": "Copier le code",
       "done": "Terminé"
     },
-    "tip": "Astuce : Ce code expire dans 5 minutes"
+    "tip": "Astuce : Ce code expire dans 5 minutes",
+    "expiresIn": "Expire dans"
   },  "ReminderNotification": {
     "buttons": {
         "Done": "Terminé",
@@ -302,6 +306,7 @@
   "tabs": {
     "Home": "Accueil",
     "Profile": "Profil",
-    "Reminders": "Rappels"
+    "Reminders": "Rappels",
+    "Refresh": "Actualiser"
   }
 }
