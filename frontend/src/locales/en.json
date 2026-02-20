@@ -173,6 +173,9 @@
     "tipText": "Tip: Ask your caregiver for the pairing code to link your account.",
     "buttons": {
         "Back to profile type": "Back to profile type"
+    },
+    "error": {
+        "invalid_code": "Invalid or expired code. Please try again."
     }
   },
   "CreateProfile": {

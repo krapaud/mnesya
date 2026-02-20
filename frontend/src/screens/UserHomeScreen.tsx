@@ -10,7 +10,7 @@
  * @component
  * @param {Props} navigation - Navigation object for screen transitions
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -18,19 +18,36 @@ import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { UserTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { fakeProfiles, fakeReminders } from '../data/fakeData';
+import { fakeReminders } from '../data/fakeData';
+import { getUserInfo } from '../services/tokenService';
 
 type Props = NativeStackScreenProps<UserTabsParamList, 'Home'>;
-
-// Temporary simulation using fake data to test the UI flow
-// Will be replaced with real authentication context in Sprint 2
-const currentUser = fakeProfiles.find(p => p.firstName === "Marie");
-const userReminders = fakeReminders.filter(r => r.profileName === `${currentUser?.firstName} ${currentUser?.lastName}`);
 
 const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
 
     const [showAlert, setShowAlert] = useState(false);
+    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [userReminders, setUserReminders] = useState<any[]>([]);
+
+    /**
+     * Fetches user information and filters reminders based on the user's full name
+     */
+    useEffect(() => {
+        const loadUserData = async () => {
+            const user = await getUserInfo();
+            setCurrentUser(user);
+            
+            if (user?.first_name && user?.last_name) {
+                const filtered = fakeReminders.filter(
+                    r => r.profileName === `${user.first_name} ${user.last_name}`
+                );
+                setUserReminders(filtered);
+            }
+        };
+        
+        loadUserData();
+    }, []);
 
     /**
      * Checks if a reminder is available (date/time has passed)
@@ -65,7 +82,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
              * Helps elderly users feel comfortable with the app
              */}
             <View style={styles.titleSection}>
-                <Text style={styles.title}>{t('UserHome.greeting')} {currentUser?.firstName} !</Text>
+                <Text style={styles.title}>{t('UserHome.greeting')} {currentUser?.first_name} !</Text>
                 <Text style={styles.subtitle}>{t('UserHome.subtitle')}</Text>
             </View>
             <ScrollView>

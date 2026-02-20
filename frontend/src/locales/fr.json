@@ -171,6 +171,9 @@
     "tipText": "Astuce : Votre accompagnant peut vous fournir le code de jumelage pour connecter vos comptes.",
     "buttons": {
         "Back to profile type": "Retour vers choix du type de profil"
+    },
+    "error": {
+        "invalid_code": "Code invalide ou expiré. Veuillez réessayer."
     }
   },
   "CreateProfile": {

@@ -118,16 +118,21 @@ async def verify_code(
         # Get user info
         user_repo = UserRepository(db)
         user = user_repo.get(pairing_code.user_id)
-
-        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(
-            data={"sub": str(user.id), "firstname": user.first_name, "lastname": user.last_name},
-            expires_delta=access_token_expires
-        )
-        return TokenResponse(
-            access_token=access_token,
-            token_type="bearer",
-            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        from app.schemas.pairing_code_schema import UserInfo
+        return PairingCodeVerifyResponse(
+            user_id=user.id,
+            user=UserInfo(
+                first_name=user.first_name,
+                last_name=user.last_name
+            ),
+            caregiver_id=pairing_code.caregiver_id
         )
 
     except HTTPException:
