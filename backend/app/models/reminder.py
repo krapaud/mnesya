@@ -10,12 +10,13 @@ from sqlalchemy import Column, String, DateTime, Text, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from app import database
 
+
 class ReminderModel(database):
     """Reminder model representing a scheduled care task or event.
-    
+
     This model stores reminder information including what needs to be done,
     when it should occur, and who is involved.
-    
+
     Attributes:
         id (UUID): Unique identifier for the reminder
         title (str): Brief description of the reminder (max 200 chars)
@@ -27,21 +28,39 @@ class ReminderModel(database):
         updated_at (datetime): Timestamp of last update
     """
     __tablename__ = 'reminder'
-    _id = Column('id', UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    _id = Column(
+        'id',
+        UUID(
+            as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4)
     _title = Column('title', String(200), nullable=False)
     _description = Column('description', Text, nullable=True)
-    _scheduled_at = Column('scheduled_at', DateTime(timezone=True), nullable=False)
-    _caregiver_id = Column('caregiver_id', UUID(as_uuid=True), ForeignKey('caregiver.id'))
+    _scheduled_at = Column(
+        'scheduled_at', DateTime(
+            timezone=True), nullable=False)
+    _caregiver_id = Column(
+        'caregiver_id',
+        UUID(
+            as_uuid=True),
+        ForeignKey('caregiver.id'))
     _user_id = Column('user_id', UUID(as_uuid=True), ForeignKey('user.id'))
-    _created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
-    _updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+    _created_at = Column(
+        DateTime(
+            timezone=True), default=lambda: datetime.now(
+            timezone.utc), nullable=False)
+    _updated_at = Column(
+        DateTime(
+            timezone=True), default=lambda: datetime.now(
+            timezone.utc), onupdate=lambda: datetime.now(
+                timezone.utc), nullable=False)
 
     # ==================== Getter Setter ====================
 
     @property
     def id(self):
         """Get the reminder's unique identifier.
-        
+
         Returns:
             UUID: The reminder's ID
         """
@@ -50,7 +69,7 @@ class ReminderModel(database):
     @property
     def title(self) -> str:
         """Get the reminder's title.
-        
+
         Returns:
             str: The reminder's title
         """
@@ -59,10 +78,10 @@ class ReminderModel(database):
     @title.setter
     def title(self, value: str) -> None:
         """Set the reminder's title with validation.
-        
+
         Args:
             value (str): The title to set
-            
+
         Raises:
             ValueError: If title is empty, only whitespace, or exceeds 200 characters
         """
@@ -73,7 +92,7 @@ class ReminderModel(database):
     @property
     def description(self) -> str:
         """Get the reminder's detailed description.
-        
+
         Returns:
             str: The reminder's description (may be None)
         """
@@ -82,7 +101,7 @@ class ReminderModel(database):
     @description.setter
     def description(self, value: str) -> None:
         """Set the reminder's description.
-        
+
         Args:
             value (str): The description to set (optional)
         """
@@ -91,7 +110,7 @@ class ReminderModel(database):
     @property
     def scheduled_at(self) -> datetime:
         """Get the reminder's scheduled datetime.
-        
+
         Returns:
             datetime: When this reminder is scheduled to trigger
         """
@@ -100,13 +119,13 @@ class ReminderModel(database):
     @scheduled_at.setter
     def scheduled_at(self, value: datetime) -> None:
         """Set the reminder's scheduled datetime with validation.
-        
+
         Args:
             value (datetime or str): Datetime object or ISO format string
-            
+
         Raises:
             ValueError: If format is invalid or value is not a datetime
-            
+
         Note:
             Accepts ISO 8601 format strings, including 'Z' suffix for UTC
         """
@@ -115,18 +134,20 @@ class ReminderModel(database):
             try:
                 value = datetime.fromisoformat(value.replace('Z', '+00:00'))
             except ValueError:
-                raise ValueError("scheduled_at must be a valid ISO datetime format")
-        
+                raise ValueError(
+                    "scheduled_at must be a valid ISO datetime format")
+
         # Validate type
         if not isinstance(value, datetime):
-            raise ValueError("scheduled_at must be a datetime object or ISO string")
-        
+            raise ValueError(
+                "scheduled_at must be a datetime object or ISO string")
+
         self._scheduled_at = value
 
     @property
     def caregiver_id(self) -> uuid.UUID:
         """Get the ID of the caregiver who created this reminder.
-        
+
         Returns:
             UUID: The caregiver's ID
         """
@@ -135,7 +156,7 @@ class ReminderModel(database):
     @caregiver_id.setter
     def caregiver_id(self, value: uuid.UUID) -> None:
         """Set the caregiver ID.
-        
+
         Args:
             value (UUID): The caregiver's unique identifier
         """
@@ -144,7 +165,7 @@ class ReminderModel(database):
     @property
     def user_id(self) -> uuid.UUID:
         """Get the ID of the user this reminder is for.
-        
+
         Returns:
             UUID: The user's ID
         """
@@ -153,7 +174,7 @@ class ReminderModel(database):
     @user_id.setter
     def user_id(self, value: uuid.UUID) -> None:
         """Set the user ID.
-        
+
         Args:
             value (UUID): The user's unique identifier
         """
@@ -162,7 +183,7 @@ class ReminderModel(database):
     @property
     def created_at(self) -> datetime:
         """Get the creation timestamp.
-        
+
         Returns:
             datetime: When this reminder was created
         """
@@ -171,7 +192,7 @@ class ReminderModel(database):
     @property
     def updated_at(self) -> datetime:
         """Get the last update timestamp.
-        
+
         Returns:
             datetime: When this reminder was last updated
         """

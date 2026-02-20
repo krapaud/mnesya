@@ -12,7 +12,7 @@
  * 
  * @module LoginScreen
  */
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -50,6 +50,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             validate: () => null  // No complex validation for password on login
         }
     });
+    const [showPassword, setShowPassword] = useState(false);
 
     /**
      * Handles login form submission.
@@ -83,6 +84,19 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         }
     };
 
+    const timerShowPassRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleShowPassword = () => {
+        setShowPassword(true);
+        timerShowPassRef.current = setTimeout(() => setShowPassword(false), 1000);
+    };
+
+    useEffect(() => {
+        return () => {
+          if (timerShowPassRef.current) clearTimeout(timerShowPassRef.current);
+        };
+    }, [])
+
     return (
         <View style={commonStyles.container}>
             {/* Header with back button and logo */}
@@ -115,7 +129,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.formContainer}>
                 {/* Email input field */}
                 <Text style={styles.emailLabel}>{t('common.fields.Email')}</Text>
-                <View style={[styles.input, showErrors.email && styles.inputError]}>
+                <View style={[styles.input, showErrors.email && commonStyles.inputError]}>
                     <TextInput
                         autoCapitalize="none"
                         autoCorrect={false}
@@ -130,13 +144,17 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                 
                 {/* Password input field */}
                 <Text style={styles.passwordLabel}>{t('common.fields.Password')}</Text>
-                <View style={[styles.input, showErrors.password && styles.inputError]}>
+                <View style={[styles.input, styles.inputRow, showErrors.password && commonStyles.inputError]}>
                     <TextInput
+                        style={styles.inputFlex}
                         placeholder={t('register.placeholders.Enter your Password')}
-                        secureTextEntry={true}
+                        secureTextEntry={!showPassword}
                         onChangeText={handleChange('password')}
                         value={values.password}
                     />
+                    <TouchableOpacity onPress={handleShowPassword}>
+                        <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={22} color="#999999" />
+                    </TouchableOpacity>
                 </View>
                 <Text style={[styles.errorText, {opacity: showErrors.password ? 1 : 0}]}>
                     {t(errors.password) || t('register.errors.This field is required')}
@@ -216,7 +234,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     lostPasswordText: {
-        color: '#666',
+        color: '#666666',
         fontSize: 16,
         textAlign: 'left',
         paddingHorizontal: 10,
@@ -240,9 +258,12 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         width: '100%',
     },
-    inputError: {
-        borderWidth: 2,
-        borderColor: '#FF0000',
+    inputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    inputFlex: {
+        flex: 1,
     },
 
     // ========== BUTTONS ==========

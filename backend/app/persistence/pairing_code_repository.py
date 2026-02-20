@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.pairing_code import PairingCodeModel
 from app.persistence.base_repository import BaseRepository
 
+
 class PairingCodeRepository(BaseRepository[PairingCodeModel]):
     """Repository for pairing code data access."""
 
@@ -18,11 +19,12 @@ class PairingCodeRepository(BaseRepository[PairingCodeModel]):
             self.model._code == code.upper()
         ).first()
 
-    def find_active_by_user_id(self, user_id: UUID) -> Optional[PairingCodeModel]:
+    def find_active_by_user_id(
+            self, user_id: UUID) -> Optional[PairingCodeModel]:
         """Find an active (unused, non-expired) pairing code for a user."""
         from datetime import datetime, timezone
         return self.db.query(self.model).filter(
             self.model._user_id == user_id,
-            self.model._is_used == False,
+            self.model._is_used.is_(False),
             self.model._expires_at > datetime.now(timezone.utc)
         ).first()

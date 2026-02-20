@@ -137,7 +137,7 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                     
                     {/* First name input field */}
                     <Text style={styles.firstLabel}>{t('CreateProfile.fields.First Name')}</Text>
-                    <View style={[styles.input, showErrors.firstname && styles.inputError]}>
+                    <View style={[styles.input, showErrors.firstname && commonStyles.inputError]}>
                         <TextInput
                             autoCapitalize="sentences"
                             autoCorrect={false}
@@ -152,7 +152,7 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                     
                     {/* Last name input field */}
                     <Text style={styles.label}>{t('CreateProfile.fields.Last Name')}</Text>
-                    <View style={[styles.input, showErrors.lastname && styles.inputError]}>
+                    <View style={[styles.input, showErrors.lastname && commonStyles.inputError]}>
                         <TextInput
                             autoCapitalize="sentences"
                             autoCorrect={false}
@@ -257,11 +257,6 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         width: '100%',
     },
-    inputError: {
-        borderWidth: 2,
-        borderColor: '#FF0000',
-    },
-
     // ========== BUTTONS ==========
     buttonDisabled: {
         opacity: 0.5,

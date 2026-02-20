@@ -10,11 +10,12 @@ from uuid import UUID
 from typing import List, Optional
 import validators
 
+
 class CaregiverCreate(BaseModel):
     """Schema for creating a new caregiver.
-    
+
     Validates input data when registering a caregiver via API.
-    
+
     Attributes:
         first_name (str): Caregiver's first name (1-100 chars)
         last_name (str): Caregiver's last name (1-100 chars)
@@ -23,19 +24,19 @@ class CaregiverCreate(BaseModel):
     """
     first_name: str = Field(..., min_length=1, max_length=100)
     last_name: str = Field(..., min_length=1, max_length=100)
-    email : str = Field(..., min_length=5, max_length=255)
-    password : str = Field(..., min_length=8, max_length=255)
+    email: str = Field(..., min_length=5, max_length=255)
+    password: str = Field(..., min_length=8, max_length=255)
 
     @field_validator('first_name', 'last_name')
     def validate_name(cls, value: str) -> str:
         """Validate and sanitize name fields.
-        
+
         Args:
             value (str): The name value to validate
-            
+
         Returns:
             str: Trimmed name
-            
+
         Raises:
             ValueError: If name is empty, only whitespace, or too long
         """
@@ -46,13 +47,13 @@ class CaregiverCreate(BaseModel):
     @field_validator('email')
     def validate_email(cls, value: str) -> str:
         """Validate email format.
-        
+
         Args:
             value (str): The email to validate
-            
+
         Returns:
             str: Trimmed email
-            
+
         Raises:
             ValueError: If email format is invalid
         """
@@ -64,20 +65,20 @@ class CaregiverCreate(BaseModel):
     @field_validator('password')
     def validate_password(cls, value: str) -> str:
         """Validate password meets security requirements.
-        
+
         Password must contain:
         - 8-20 characters in length
         - At least one digit (0-9)
         - At least one uppercase letter (A-Z)
         - At least one lowercase letter (a-z)
         - At least one special character ($@#%*!~&)
-        
+
         Args:
             value (str): The password to validate
-            
+
         Returns:
             str: Trimmed password
-            
+
         Raises:
             ValueError: If password doesn't meet requirements
         """
@@ -107,18 +108,22 @@ class CaregiverCreate(BaseModel):
         if not has_digit:
             raise ValueError('Password should have at least one numeral')
         if not has_upper:
-            raise ValueError('Password should have at least one uppercase letter')
+            raise ValueError(
+                'Password should have at least one uppercase letter')
         if not has_lower:
-            raise ValueError('Password should have at least one lowercase letter')
+            raise ValueError(
+                'Password should have at least one lowercase letter')
         if not has_sym:
-            raise ValueError('Password should have at least one of the symbols $@#%*!~&')
+            raise ValueError(
+                'Password should have at least one of the symbols $@#%*!~&')
         return value
+
 
 class CaregiverUpdate(BaseModel):
     """Schema for updating an existing caregiver.
-    
+
     All fields are optional for partial updates.
-    
+
     Attributes:
         first_name (Optional[str]): Updated first name (1-100 chars)
         last_name (Optional[str]): Updated last name (1-100 chars)
@@ -133,13 +138,13 @@ class CaregiverUpdate(BaseModel):
     @field_validator('first_name', 'last_name')
     def validate_name(cls, value: Optional[str]) -> Optional[str]:
         """Validate and sanitize name fields if provided.
-        
+
         Args:
             value (Optional[str]): The name value to validate
-            
+
         Returns:
             Optional[str]: Trimmed name or None
-            
+
         Raises:
             ValueError: If name is only whitespace or too long
         """
@@ -150,13 +155,13 @@ class CaregiverUpdate(BaseModel):
     @field_validator('email')
     def validate_email(cls, value: Optional[str]) -> Optional[str]:
         """Validate email format if provided.
-        
+
         Args:
             value (Optional[str]): The email to validate
-            
+
         Returns:
             Optional[str]: Trimmed email or None
-            
+
         Raises:
             ValueError: If email format is invalid
         """
@@ -167,19 +172,19 @@ class CaregiverUpdate(BaseModel):
     @field_validator('password')
     def validate_password(cls, value: Optional[str]) -> Optional[str]:
         """Validate password meets security requirements if provided.
-        
+
         Args:
             value (Optional[str]): The password to validate
-            
+
         Returns:
             Optional[str]: Trimmed password or None
-            
+
         Raises:
             ValueError: If password doesn't meet requirements
         """
         if value is None:
             return None
-            
+
         SpecialSym = ['$', '@', '#', '%', '*', '!', '~', '&']
 
         # Length validation
@@ -205,19 +210,23 @@ class CaregiverUpdate(BaseModel):
         if not has_digit:
             raise ValueError('Password should have at least one numeral')
         if not has_upper:
-            raise ValueError('Password should have at least one uppercase letter')
+            raise ValueError(
+                'Password should have at least one uppercase letter')
         if not has_lower:
-            raise ValueError('Password should have at least one lowercase letter')
+            raise ValueError(
+                'Password should have at least one lowercase letter')
         if not has_sym:
-            raise ValueError('Password should have at least one of the symbols $@#%*!~&')
+            raise ValueError(
+                'Password should have at least one of the symbols $@#%*!~&')
         return value.strip()
+
 
 class CaregiverResponse(BaseModel):
     """Schema for caregiver API responses.
-    
+
     Used when returning caregiver data from API endpoints.
     Does not include sensitive data like password hash.
-    
+
     Attributes:
         id (UUID): Caregiver's unique identifier
         first_name (str): Caregiver's first name
@@ -228,14 +237,16 @@ class CaregiverResponse(BaseModel):
     id: UUID
     first_name: str
     last_name: str
-    email : str
+    email: str
     created_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)  # Enables ORM model conversion
+    # Enables ORM model conversion
+    model_config = ConfigDict(from_attributes=True)
+
 
 class UserListResponse(BaseModel):
     """Schema for paginated caregiver list responses.
-    
+
     Attributes:
         caregivers (List[CaregiverResponse]): List of caregiver objects
         total (int): Total count of caregivers

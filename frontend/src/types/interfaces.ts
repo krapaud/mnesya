@@ -1,8 +1,13 @@
 /**
- * Shared interfaces used across the application
+ * Shared interfaces and types used across the entire application.
+ *
+ * Defines data models for profiles, reminders, authentication,
+ * and API communication.
+ *
+ * @module interfaces
  */
 
-// Profile interface for elderly users
+/** Profile model for elderly users managed by a caregiver. */
 export interface ProfileItem {
     id: number;
     firstName: string;
@@ -10,7 +15,7 @@ export interface ProfileItem {
     age: number;
 }
 
-// Reminder interface for reminder items
+/** Reminder model including status and assignment to a user profile. */
 export interface ReminderItem {
     id: number;
     title: string;
@@ -21,7 +26,7 @@ export interface ReminderItem {
     profileName: string;
 }
 
-// Authentication interfaces
+/** Credentials payload for the login endpoint. */
 export interface LoginData {
   email: string;
   password: string;

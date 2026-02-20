@@ -1,16 +1,14 @@
 /**
- * UserHomeScreen - Main screen for elderly users to view their reminders
- * 
- * Displays upcoming reminders in a simple, accessible way following elderly-friendly
- * design principles with large text and high contrast.
- * 
- * Currently uses fake data for testing. Backend API integration planned for Sprint 2.
+ * UserHomeScreen - Main screen for elderly users to view their reminders.
+ *
+ * Displays upcoming reminders in a simple, accessible way following
+ * elderly-friendly design principles with large text and high contrast.
+ * Fetches reminders from the backend API and presents them as scrollable cards.
  * Each reminder card shows the title, date, and time with a bell icon to view details.
- * 
- * @component
- * @param {Props} navigation - Navigation object for screen transitions
+ *
+ * @module UserHomeScreen
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Modal, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -34,6 +32,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [userReminders, setUserReminders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const loadUserTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     /**
      * Loads user data and filters reminders.
@@ -58,13 +57,18 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
             const elapsedTime = Date.now() - startTime;
             const remainingTime = Math.max(0, 1000 - elapsedTime);
             
-            setTimeout(() => {
+            loadUserTimerRef.current = setTimeout(() => {
                 setLoading(false);
                 setIsRefreshing(false);
             }, remainingTime);
         };
-        
         loadUserData();
+
+        return () => {
+            if (loadUserTimerRef.current) {
+                clearTimeout(loadUserTimerRef.current);
+            }
+        };
     }, [refreshTrigger]);
 
     /**
@@ -122,7 +126,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         setShowMenu(true);
                     }}>
-                    <Ionicons name="ellipsis-vertical" size={24} color="#333" />
+                    <Ionicons name="ellipsis-vertical" size={24} color="#333333" />
                 </TouchableOpacity>
             </View>
 
@@ -168,11 +172,11 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                             
                             <View style={commonStyles.reminderDetails}>
                                 <View style={commonStyles.detailRow}>
-                                    <Ionicons name="calendar-outline" size={16} color="#666" />
+                                    <Ionicons name="calendar-outline" size={16} color="#666666" />
                                     <Text style={commonStyles.detailText}>{reminder.date}</Text>
                                 </View>
                                 <View style={commonStyles.detailRow}>
-                                    <Ionicons name="time-outline" size={16} color="#666" />
+                                    <Ionicons name="time-outline" size={16} color="#666666" />
                                     <Text style={commonStyles.detailText}>{reminder.time}</Text>
                                 </View>
                             </View>
@@ -186,14 +190,14 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                 animationType="fade"
             >
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, width: '80%' }}>
+                    <View style={{ backgroundColor: '#FFFFFF', padding: 20, borderRadius: 10, width: '80%' }}>
                         <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }}>{t('UserHome.messages.notAvailableTitle')}</Text>
                         <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 20 }}>{t('UserHome.messages.notAvailableMessage')}</Text>
                         <TouchableOpacity 
                             style={{ backgroundColor: '#4A90E2', padding: 18, borderRadius: 5 }}
                             onPress={() => setShowAlert(false)}
                         >
-                            <Text style={{ color: 'white', textAlign: 'center', fontSize: 16 }}>{t('UserHome.messages.ok')}</Text>
+                            <Text style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 16 }}>{t('UserHome.messages.ok')}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -236,26 +240,26 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                 onRequestClose={() => setShowLogoutConfirm(false)}
             >
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, width: '80%' }}>
+                    <View style={{ backgroundColor: '#FFFFFF', padding: 20, borderRadius: 10, width: '80%' }}>
                         <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }}>
                             {t('caregiverProfile.modal.title')}
                         </Text>
-                        <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 20, color: '#666' }}>
+                        <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 20, color: '#666666' }}>
                             {t('caregiverProfile.modal.message')}
                         </Text>
                         <TouchableOpacity 
                             style={{ backgroundColor: '#E74C3C', padding: 15, borderRadius: 8, marginBottom: 10 }}
                             onPress={handleLogoutConfirm}
                         >
-                            <Text style={{ color: 'white', textAlign: 'center', fontSize: 16, fontWeight: 'bold' }}>
+                            <Text style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 16, fontWeight: 'bold' }}>
                                 {t('caregiverProfile.modal.confirm')}
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity 
-                            style={{ backgroundColor: '#f0f0f0', padding: 15, borderRadius: 8 }}
+                            style={{ backgroundColor: '#F0F0F0', padding: 15, borderRadius: 8 }}
                             onPress={() => setShowLogoutConfirm(false)}
                         >
-                            <Text style={{ color: '#333', textAlign: 'center', fontSize: 16 }}>
+                            <Text style={{ color: '#333333', textAlign: 'center', fontSize: 16 }}>
                                 {t('caregiverProfile.modal.cancel')}
                             </Text>
                         </TouchableOpacity>
@@ -295,7 +299,7 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         fontSize: 18,
-        color: '#666',
+        color: '#666666',
         marginBottom: 40,
     },
     bellIcon: {
@@ -312,11 +316,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     refreshIndicator: {
-        backgroundColor: 'white',
+        backgroundColor: '#FFFFFF',
         padding: 30,
         borderRadius: 15,
         alignItems: 'center',
-        shadowColor: '#000',
+        shadowColor: '#000000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
@@ -325,7 +329,7 @@ const styles = StyleSheet.create({
     refreshText: {
         marginTop: 15,
         fontSize: 16,
-        color: '#666',
+        color: '#666666',
     },
     // Menu styles
     menuContainer: {
@@ -336,9 +340,9 @@ const styles = StyleSheet.create({
         paddingRight: 20,
     },
     menuContent: {
-        backgroundColor: 'white',
+        backgroundColor: '#FFFFFF',
         borderRadius: 10,
-        shadowColor: '#000',
+        shadowColor: '#000000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,

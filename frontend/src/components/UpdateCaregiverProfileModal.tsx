@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useFormValidation } from '../hooks';
 import { validateName, validateEmail } from '../utils/validation';
+import { commonStyles } from '../styles/commonStyles';
 
 /**
  * Props for UpdateCaregiverProfileModal component.
@@ -103,12 +104,12 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
                 animationType="slide"
                 onRequestClose={onClose}
             >
-                <View style={styles.modalOverlay}>
+                <View style={commonStyles.modalOverlay}>
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>{t('UserProfileDetail.modals.update.title')}</Text>
                             <TouchableOpacity onPress={onClose} testID="close-button">
-                                <Ionicons name="close" size={28} color="#666" />
+                                <Ionicons name="close" size={28} color="#666666" />
                             </TouchableOpacity>
                         </View>
 
@@ -199,12 +200,6 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
 };
 
 const styles = StyleSheet.create({
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     modalContent: {
         backgroundColor: '#FFFFFF',
         borderRadius: 15,
@@ -221,7 +216,7 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#333333',
     },
     inputGroup: {
         marginBottom: 15,
@@ -230,7 +225,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         marginBottom: 5,
-        color: '#333',
+        color: '#333333',
     },
     input: {
         borderWidth: 1,
@@ -259,7 +254,7 @@ const styles = StyleSheet.create({
     },
     dateButtonText: {
         fontSize: 16,
-        color: '#333',
+        color: '#333333',
     },
     modalActions: {
         flexDirection: 'row',
@@ -277,7 +272,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#E0E0E0',
     },
     cancelButtonText: {
-        color: '#666',
+        color: '#666666',
         fontSize: 16,
         fontWeight: '600',
     },

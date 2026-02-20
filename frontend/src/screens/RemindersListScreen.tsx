@@ -128,7 +128,7 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                                     <Text style={styles.filterDropdownText}>
                                         {selectedProfile || t('common.pickersText.All Profiles')}
                                     </Text>
-                                    <Ionicons name="chevron-down" size={20} color="#666" />
+                                    <Ionicons name="chevron-down" size={20} color="#666666" />
                                 </TouchableOpacity>
                             </View>
 
@@ -144,7 +144,7 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                                     <Text style={styles.filterDropdownText}>
                                         {selectedDate || t('common.pickersText.All Dates')}
                                     </Text>
-                                    <Ionicons name="chevron-down" size={20} color="#666" />
+                                    <Ionicons name="chevron-down" size={20} color="#666666" />
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -246,15 +246,15 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                                         <View style={commonStyles.reminderDetails}>
                                             <View style={commonStyles.detailRow}>
-                                                <Ionicons name="person-outline" size={16} color="#666" />
+                                                <Ionicons name="person-outline" size={16} color="#666666" />
                                                 <Text style={commonStyles.detailText}>{reminder.profileName}</Text>
                                             </View>
                                             <View style={commonStyles.detailRow}>
-                                                <Ionicons name="calendar-outline" size={16} color="#666" />
+                                                <Ionicons name="calendar-outline" size={16} color="#666666" />
                                                 <Text style={commonStyles.detailText}>{reminder.date}</Text>
                                             </View>
                                             <View style={commonStyles.detailRow}>
-                                                <Ionicons name="time-outline" size={16} color="#666" />
+                                                <Ionicons name="time-outline" size={16} color="#666666" />
                                                 <Text style={commonStyles.detailText}>{reminder.time}</Text>
                                             </View>
                                         </View>
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         marginBottom: 5,
-        color: '#333',
+        color: '#333333',
     },
     filterDropdown: {
         flexDirection: 'row',
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
     },
     filterDropdownText: {
         fontSize: 16,
-        color: '#333',
+        color: '#333333',
     },
     resetButton: {
         flexDirection: 'row',

@@ -1,3 +1,11 @@
+/**
+ * Hook for loading and refreshing the authenticated caregiver's profile.
+ *
+ * Fetches profile data on mount and exposes a reload function for manual refresh.
+ * Handles authentication errors via an optional callback.
+ *
+ * @module useCaregiverProfile
+ */
 import { useState, useEffect } from 'react';
 import { getCurrentUser } from '../services/authService';
 import type { CaregiverProfile } from '../types/interfaces';

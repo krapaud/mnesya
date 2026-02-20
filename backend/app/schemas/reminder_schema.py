@@ -8,11 +8,12 @@ from datetime import datetime
 from uuid import UUID
 from typing import List, Optional
 
+
 class ReminderCreate(BaseModel):
     """Schema for creating a new reminder.
-    
+
     Validates input data when creating a reminder via API.
-    
+
     Attributes:
         title (str): Brief description (1-200 chars)
         description (Optional[str]): Detailed description (optional)
@@ -28,13 +29,13 @@ class ReminderCreate(BaseModel):
     @field_validator('title')
     def validate_title(cls, value: str) -> str:
         """Validate and sanitize title field.
-        
+
         Args:
             value (str): The title to validate
-            
+
         Returns:
             str: Trimmed title
-            
+
         Raises:
             ValueError: If title is empty, only whitespace, or too long
         """
@@ -45,9 +46,9 @@ class ReminderCreate(BaseModel):
 
 class ReminderUpdate(BaseModel):
     """Schema for updating an existing reminder.
-    
+
     All fields are optional for partial updates.
-    
+
     Attributes:
         title (Optional[str]): Updated title (1-200 chars)
         description (Optional[str]): Updated description
@@ -64,13 +65,13 @@ class ReminderUpdate(BaseModel):
     @field_validator('title')
     def validate_title(cls, value: Optional[str]) -> Optional[str]:
         """Validate and sanitize title if provided.
-        
+
         Args:
             value (Optional[str]): The title to validate
-            
+
         Returns:
             Optional[str]: Trimmed title or None
-            
+
         Raises:
             ValueError: If title is only whitespace or too long
         """
@@ -81,9 +82,9 @@ class ReminderUpdate(BaseModel):
 
 class ReminderResponse(BaseModel):
     """Schema for reminder API responses.
-    
+
     Used when returning reminder data from API endpoints.
-    
+
     Attributes:
         id (UUID): Reminder's unique identifier
         title (str): Reminder title
@@ -103,12 +104,13 @@ class ReminderResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)  # Enables ORM model conversion
+    # Enables ORM model conversion
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ReminderListResponse(BaseModel):
     """Schema for paginated reminder list responses.
-    
+
     Attributes:
         reminders (List[ReminderResponse]): List of reminder objects
         total (int): Total count of reminders

@@ -78,7 +78,7 @@ const PlatformProfilePicker: React.FC<PlatformProfilePickerProps> = ({
             animationType="slide"
             onRequestClose={onClose}
         >
-            <View style={styles.modalOverlay}>
+            <View style={commonStyles.modalOverlay}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>{placeholder}</Text>
                     <FlatList
@@ -108,12 +108,6 @@ const PlatformProfilePicker: React.FC<PlatformProfilePickerProps> = ({
 };
 
 const styles = StyleSheet.create({
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     modalContent: {
         backgroundColor: '#FFFFFF',
         borderRadius: 15,

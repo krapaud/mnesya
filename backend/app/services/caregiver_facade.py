@@ -9,16 +9,18 @@ from app.models.caregiver import CaregiverModel
 from app.persistence.caregiver_repository import CaregiverRepository
 from sqlalchemy.dialects.postgresql import UUID
 
+
 class CaregiverFacade:
     """Facade for Caregiver business logic operations.
-    
+
     This class implements the Facade pattern to provide a clean interface
     for caregiver-related operations. It handles authentication, user management,
     and coordinates between the model and repository layers.
-    
+
     Attributes:
         caregiver_repo (CaregiverRepository): Repository for caregiver data access
     """
+
     def __init__(self, db: Session):
         """Initialize the facade with a caregiver repository."""
         self.caregiver_repo = CaregiverRepository(db)
@@ -27,21 +29,21 @@ class CaregiverFacade:
 
     def create_caregiver(self, caregiver_data: dict) -> object:
         """Create a new caregiver with hashed password.
-        
+
         Business logic for caregiver registration. Creates the caregiver,
         hashes their password, and persists to the database.
-        
+
         Args:
             caregiver_data (dict): Dictionary containing caregiver fields
                                    (first_name, last_name, email, password)
-            
+
         Returns:
             CaregiverModel: The created caregiver with generated ID and timestamps
-            
+
         Raises:
             ValueError: If validation fails (from model setters)
             Exception: If database operation fails or email already exists
-            
+
         Note:
             Password is automatically hashed before storage by the model setter
         """
@@ -52,10 +54,10 @@ class CaregiverFacade:
 
     def get_caregiver(self, caregiver_id: str) -> object:
         """Retrieve a caregiver by ID.
-        
+
         Args:
             caregiver_id (str): The caregiver's unique identifier
-            
+
         Returns:
             CaregiverModel: The caregiver if found, None otherwise
         """
@@ -63,12 +65,12 @@ class CaregiverFacade:
 
     def get_caregiver_by_email(self, email: str) -> object:
         """Retrieve a caregiver by email address.
-        
+
         Used primarily for authentication and login.
-        
+
         Args:
             email (str): The caregiver's email address
-            
+
         Returns:
             CaregiverModel: The caregiver if found, None otherwise
         """
@@ -76,12 +78,12 @@ class CaregiverFacade:
 
     def get_caregiver_by_id(self, id: UUID) -> object:
         """Retrieve a caregiver by id address.
-        
+
         Used primarily for authentication and login.
-        
+
         Args:
             id (str): The caregiver's id address
-            
+
         Returns:
             CaregiverModel: The caregiver if found, None otherwise
         """
@@ -89,31 +91,32 @@ class CaregiverFacade:
 
     def get_all_caregivers(self) -> list:
         """Retrieve all caregivers.
-        
+
         Returns:
             list[CaregiverModel]: List of all caregivers in the system
-            
+
         Warning:
             Use with caution on large datasets - consider pagination
         """
         return self.caregiver_repo.get_all()
 
-    def update_caregiver(self, caregiver_id: str, caregiver_data: dict) -> object:
+    def update_caregiver(self, caregiver_id: str,
+                         caregiver_data: dict) -> object:
         """Update an existing caregiver.
-        
+
         Business logic for caregiver updates. Only updates provided fields.
-        
+
         Args:
             caregiver_id (str): The caregiver's unique identifier
             caregiver_data (dict): Dictionary of fields to update
-            
+
         Returns:
             CaregiverModel: The updated caregiver if found, None otherwise
-            
+
         Raises:
             ValueError: If validation fails (from model setters)
             Exception: If database operation fails
-            
+
         Note:
             If password is updated, it should be hashed before calling this method
         """
@@ -122,16 +125,16 @@ class CaregiverFacade:
 
     def delete_caregiver(self, caregiver_id: str) -> bool:
         """Delete a caregiver.
-        
+
         Args:
             caregiver_id (str): The caregiver's unique identifier
-            
+
         Returns:
             bool: True if caregiver was found and deleted, False if not found
-            
+
         Raises:
             Exception: If database operation fails
-            
+
         Warning:
             Consider impact on associated users before deletion
         """
@@ -141,45 +144,47 @@ class CaregiverFacade:
             return True
         return False
 
-    def add_user_to_caregiver(self, caregiver_id: str, user_id: UUID) -> CaregiverModel:
+    def add_user_to_caregiver(self, caregiver_id: str,
+                              user_id: UUID) -> CaregiverModel:
         """Add a user to a caregiver's care list.
-        
+
         Args:
             caregiver_id (str): The caregiver's unique identifier
             user_id (UUID): The user's unique identifier to add
-            
+
         Returns:
             CaregiverModel: The updated caregiver
-            
+
         Raises:
             Exception: If caregiver not found or database operation fails
         """
         caregiver = self.caregiver_repo.get(caregiver_id)
         if not caregiver:
             raise ValueError("Caregiver not found")
-        
+
         caregiver.add_user(user_id)
         self.caregiver_repo.db.commit()
         self.caregiver_repo.db.refresh(caregiver)
         return caregiver
 
-    def remove_user_from_caregiver(self, caregiver_id: str, user_id: UUID) -> CaregiverModel:
+    def remove_user_from_caregiver(
+            self, caregiver_id: str, user_id: UUID) -> CaregiverModel:
         """Remove a user from a caregiver's care list.
-        
+
         Args:
             caregiver_id (str): The caregiver's unique identifier
             user_id (UUID): The user's unique identifier to remove
-            
+
         Returns:
             CaregiverModel: The updated caregiver
-            
+
         Raises:
             Exception: If caregiver not found or database operation fails
         """
         caregiver = self.caregiver_repo.get(caregiver_id)
         if not caregiver:
             raise ValueError("Caregiver not found")
-        
+
         caregiver.remove_user(user_id)
         self.caregiver_repo.db.commit()
         self.caregiver_repo.db.refresh(caregiver)
