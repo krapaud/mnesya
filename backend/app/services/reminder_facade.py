@@ -4,6 +4,7 @@ This module implements the Facade pattern for Reminder business logic.
 It provides a simplified interface for reminder operations.
 """
 
+from sqlalchemy.orm import Session
 from app.models.reminder import ReminderModel
 from app.persistence.reminder_repository import ReminderRepository
 
@@ -17,9 +18,9 @@ class ReminderFacade:
     Attributes:
         reminder_repo (ReminderRepository): Repository for reminder data access
     """
-    def __init__(self):
+    def __init__(self, db: Session):
         """Initialize the facade with a reminder repository."""
-        self.reminder_repo = ReminderRepository()
+        self.reminder_repo = ReminderRepository(db)
 
     # ==================== REMINDER BUSINESS LOGIC ====================
 

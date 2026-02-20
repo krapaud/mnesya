@@ -33,9 +33,9 @@ def get_reminder_facade(db: Session = Depends(get_db)) -> ReminderFacade:
     """Dependency to create ReminderFacade instance with database session."""
     return ReminderFacade(db)
 
-def get_reminder_facade(db: Session = Depends(get_db)) -> ReminderFacade:
-    """Dependency to create ReminderFacade instance with database session."""
-    return ReminderFacade(db)
+def get_user_facade(db: Session = Depends(get_db)) -> UserFacade:
+    """Dependency to create UserFacade instance with database session."""
+    return UserFacade(db)
 
 
 @router.post("", response_model=ReminderResponse)
@@ -61,17 +61,18 @@ async def create_reminder(
             "caregiver_id": UUID(caregiver_id)
         }
         
-        reminder = reminder_facade.create_reminder(reminder_data, UUID(caregiver_id))
+        reminder = reminder_facade.create_reminder(reminder_data)
 
-        return {
-            "title": reminder.title,
-            "description": reminder.description,
-            "scheduled_at": reminder.scheduled_at,
-            "user_id": reminder.user_id,
-            "caregiver_id": reminder.caregiver_id,
-            "created_at": reminder.created_at.isoformat(),
-            "updated_at": reminder.updated_at.isoformat()
-        }
+        return ReminderResponse(
+            id=reminder.id,
+            title=reminder.title,
+            description=reminder.description,
+            scheduled_at=reminder.scheduled_at,
+            user_id=reminder.user_id,
+            caregiver_id=reminder.caregiver_id,
+            created_at=reminder.created_at,
+            updated_at=reminder.updated_at
+        )
     
     except ValueError as e:
         raise HTTPException(

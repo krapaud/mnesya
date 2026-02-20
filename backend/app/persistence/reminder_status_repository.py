@@ -5,6 +5,7 @@ This module provides data access operations specific to ReminderStatus entities.
 
 from typing import List
 from uuid import UUID
+from sqlalchemy.orm import Session
 from app.models.reminder_status import ReminderStatusModel
 from app.persistence.base_repository import BaseRepository
 
@@ -14,9 +15,9 @@ class ReminderStatusRepository(BaseRepository[ReminderStatusModel]):
     Extends BaseRepository with status-specific query methods
     for tracking reminder state history.
     """
-    def __init__(self):
-        """Initialize the ReminderStatusRepository with ReminderStatusModel."""
-        super().__init__(ReminderStatusModel)
+    def __init__(self, db: Session):
+        """Initialize the ReminderStatusRepository with ReminderStatusModel and database session."""
+        super().__init__(ReminderStatusModel, db)
 
     def get_statuses_by_reminder(self, reminder_id: UUID) -> List[ReminderStatusModel]:
         """Get all status entries for a specific reminder.
