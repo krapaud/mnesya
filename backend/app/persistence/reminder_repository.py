@@ -6,6 +6,7 @@ This module provides data access operations specific to Reminder entities.
 from typing import List
 from uuid import UUID
 from datetime import datetime
+from sqlalchemy.orm import Session
 from app.models.reminder import ReminderModel
 from app.persistence.base_repository import BaseRepository
 
@@ -15,9 +16,9 @@ class ReminderRepository(BaseRepository[ReminderModel]):
     Extends BaseRepository with reminder-specific query methods
     for filtering and ordering reminders by various criteria.
     """
-    def __init__(self):
-        """Initialize the ReminderRepository with ReminderModel."""
-        super().__init__(ReminderModel)
+    def __init__(self, db: Session):
+        """Initialize the ReminderRepository with ReminderModel and database session."""
+        super().__init__(ReminderModel, db)
 
     def get_reminders_by_caregiver(self, caregiver_id: UUID) -> List[ReminderModel]:
         """Get all reminders created by a specific caregiver.

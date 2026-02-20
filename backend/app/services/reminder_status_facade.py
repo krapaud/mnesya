@@ -4,6 +4,7 @@ This module implements the Facade pattern for ReminderStatus business logic.
 It provides a simplified interface for tracking reminder state changes.
 """
 
+from sqlalchemy.orm import Session
 from app.models.reminder_status import ReminderStatusModel
 from app.persistence.reminder_status_repository import ReminderStatusRepository
 
@@ -17,9 +18,9 @@ class ReminderStatusFacade:
     Attributes:
         reminder_status_repo (ReminderStatusRepository): Repository for status data access
     """
-    def __init__(self):
+    def __init__(self, db: Session):
         """Initialize the facade with a reminder status repository."""
-        self.reminder_status_repo = ReminderStatusRepository()
+        self.reminder_status_repo = ReminderStatusRepository(db)
 
     # ==================== REMINDER STATUS BUSINESS LOGIC ====================
 

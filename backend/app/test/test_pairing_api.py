@@ -180,6 +180,9 @@ class TestVerifyPairingCode:
         assert "user" in data
         assert data["user"]["first_name"] == user.first_name
         assert data["user"]["last_name"] == user.last_name
+        assert "access_token" in data
+        assert data["token_type"] == "bearer"
+        assert "expires_in" in data
     
     def test_verify_code_not_found(self, client):
         """Test verifying non-existent code."""

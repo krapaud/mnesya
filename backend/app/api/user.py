@@ -66,17 +66,15 @@ async def create_profile(
         user = user_facade.create_user(user_data, UUID(caregiver_id))
         caregiver_facade.add_user_to_caregiver(caregiver_id, user.id)
 
-        return {
-            "user": {
-                "id": str(user.id),
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "birthday": user.birthday.isoformat(),
-                "caregiver_ids": [str(cid) for cid in user.caregiver_ids],
-                "created_at": user.created_at.isoformat(),
-                "updated_at": user.updated_at.isoformat()
-            }
-        }
+        return UserResponse(
+            id=user.id,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            birthday=user.birthday,
+            caregiver_ids=user.caregiver_ids,
+            created_at=user.created_at,
+            updated_at=user.updated_at
+        )
 
     except ValueError as e:
         raise HTTPException(
