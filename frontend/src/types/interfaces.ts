@@ -87,6 +87,9 @@ export interface PairingCodeVerifyResponse {
   user_id: string;
   user: UserInfo;
   caregiver_id: string;
+  access_token: string;
+  token_type: string;
+  expires_in: number;
 }
 
 export interface UserInfo {

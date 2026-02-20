@@ -31,6 +31,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
     // Pairing code modal state
     const [showPairingModal, setShowPairingModal] = useState(false);
     const [pairingCode, setPairingCode] = useState('');
+    const [expiresAt, setExpiresAt] = useState<string | null>(null);
 
     // Update modal state
     const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -42,8 +43,6 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
     const [showMenu, setShowMenu] = useState(false);
 
     const [isGeneratingCode, setIsGeneratingCode] = useState(false);
-
-    const [expiresAt, setExpiresAt] = useState<string | null>(null);
 
     /**
      * Handles profile update.

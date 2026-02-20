@@ -18,7 +18,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { verifyPairingCode } from '../services/pairingService';
-import { saveUserInfo } from '../services/tokenService';
+import { saveUserInfo, saveToken } from '../services/tokenService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'UserPairing'>;
 
@@ -46,6 +46,10 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
         
         const response = await verifyPairingCode(code);
         
+        // Save JWT token for authenticated requests
+        await saveToken(response.access_token);
+        
+        // Save user info for app usage
         await saveUserInfo({
           user_id: response.user_id,
           first_name: response.user.first_name,
