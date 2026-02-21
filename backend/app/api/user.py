@@ -13,14 +13,9 @@ from app.schemas.user_schema import UserCreate, UserUpdate, UserResponse
 from app.services.user_facade import UserFacade
 from app.api.authentication import verify_token
 from app import get_db
-import string
-import random
 
 # Router
 router = APIRouter(prefix="/api/users", tags=["Users"])
-
-def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))
 
 def get_user_facade(db: Session = Depends(get_db)) -> UserFacade:
     """Dependency to create UserFacade instance with database session."""
@@ -67,7 +62,7 @@ async def create_profile(
             "last_name": request.last_name,
             "birthday": request.birthday
         }
-        
+
         user = user_facade.create_user(user_data, UUID(caregiver_id))
         caregiver_facade.add_user_to_caregiver(caregiver_id, user.id)
 

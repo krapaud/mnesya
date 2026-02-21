@@ -14,12 +14,13 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { UserTabsParamList } from '../types/index';
 
 import UserHomeScreen from '../screens/UserHomeScreen';
-import UserProfileScreen from '../screens/UserProfileScreen';
+import { RefreshProvider, useRefresh } from '../contexts/RefreshContext';
 
 const Tab = createBottomTabNavigator<UserTabsParamList>();
 
@@ -32,9 +33,10 @@ const Tab = createBottomTabNavigator<UserTabsParamList>();
  * 
  * @returns Tab navigator component for user interface
  */
-const UserTabs: React.FC = () => {
+const UserTabsContent: React.FC = () => {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
+    const { triggerRefresh } = useRefresh();
     
     return (
         <Tab.Navigator
@@ -51,26 +53,23 @@ const UserTabs: React.FC = () => {
                 tabBarLabelStyle: styles.tabBarLabel,
             }}
         >
-            {/* Home tab - Dashboard */}
+            {/* Refresh button - Single tab that reloads data */}
             <Tab.Screen 
-                name="Home" 
+                name="Refresh" 
                 component={UserHomeScreen}
+                listeners={() => ({
+                    tabPress: (e) => {
+                        e.preventDefault();
+                        // Trigger haptic feedback
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        // Trigger data refresh
+                        triggerRefresh();
+                    },
+                })}
                 options={{
-                    tabBarLabel: t('tabs.Home'),
+                    tabBarLabel: t('tabs.Refresh'),
                     tabBarIcon: ({ color, size }) => (
-                        <Ionicons name="home" size={size} color={color} />
-                    ),
-                }}
-            />
-            
-            {/* Profile tab */}
-            <Tab.Screen 
-                name="Profile" 
-                component={UserProfileScreen}
-                options={{
-                    tabBarLabel: t('tabs.Profile'),
-                    tabBarIcon: ({ color, size }) => (
-                        <Ionicons name="person" size={size} color={color} />
+                        <Ionicons name="refresh" size={size} color={color} />
                     ),
                 }}
             />
@@ -94,5 +93,13 @@ const styles = StyleSheet.create({
         fontSize: 12,
     },
 });
+
+const UserTabs: React.FC = () => {
+    return (
+        <RefreshProvider>
+            <UserTabsContent />
+        </RefreshProvider>
+    );
+};
 
 export default UserTabs;

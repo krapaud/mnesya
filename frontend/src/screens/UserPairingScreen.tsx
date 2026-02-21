@@ -17,6 +17,8 @@ import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
+import { verifyPairingCode } from '../services/pairingService';
+import { saveUserInfo } from '../services/tokenService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'UserPairing'>;
 
@@ -24,6 +26,8 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
     // Pairing code state and configuration
     const [code, setCode] = useState<string>('');
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const CELL_COUNT = 6; // 6-character alphanumeric code (e.g., A7X9K2)
     
     // Auto-blur when code is complete for better keyboard handling
@@ -35,12 +39,35 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
       setValue: setCode,
     });
 
+    const handleVerifyCode = async () => {
+      try {
+        setIsVerifying(true);
+        setError(null);
+        
+        const response = await verifyPairingCode(code);
+        
+        await saveUserInfo({
+          user_id: response.user_id,
+          first_name: response.user.first_name,
+          last_name: response.user.last_name,
+          caregiver_id: response.caregiver_id
+        });
+        
+        navigation.navigate('UserDashboard');
+      } catch (err) {
+        setError(t('UserPairing.error.invalid_code'));
+      } finally {
+        setIsVerifying(false);
+      }
+    };
+    
+
     // Auto-navigate to User Home when code is complete (all 6 characters entered)
     useEffect(() => {
       if (code.length === CELL_COUNT) {
         // 500ms delay provides visual feedback before navigation
         setTimeout(() => {
-          navigation.navigate('UserDashboard');
+          handleVerifyCode();
         }, 500);
       }
     }, [code, navigation]);
@@ -99,6 +126,11 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
                         )}
                       />
                     </View>
+                    
+                    {/* Error message display */}
+                    {error && (
+                      <Text style={styles.errorText}>{error}</Text>
+                    )}
                     
                     {/* Helpful tip section with icon */}
                     <View style={styles.tipSection}>
@@ -192,6 +224,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         flex: 1,
         flexWrap: 'wrap',
+    },
+    errorText: {
+        color: 'red',
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 10,
     },
 });
 

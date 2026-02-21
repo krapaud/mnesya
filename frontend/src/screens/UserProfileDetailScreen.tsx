@@ -14,6 +14,7 @@ import { commonStyles } from '../styles/commonStyles';
 import { useUserProfile } from '../hooks';
 import { PairingCodeModal, UpdateUserProfileModal, ConfirmationModal } from '../components';
 import { calculateAge } from '../utils/dateUtils';
+import { generatePairingCode } from '../services/pairingService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'UserProfileDetails'>;
 
@@ -39,6 +40,10 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
 
     // Menu modal state
     const [showMenu, setShowMenu] = useState(false);
+
+    const [isGeneratingCode, setIsGeneratingCode] = useState(false);
+
+    const [expiresAt, setExpiresAt] = useState<string | null>(null);
 
     /**
      * Handles profile update.
@@ -69,27 +74,24 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
     };
 
     /**
-     * Generates a random 6-character pairing code (alphanumeric).
-     * 
-     * @returns A random pairing code (e.g., 'A7X9K2')
-     */
-    const generatePairingCode = (): string => {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let code = '';
-        for (let i = 0; i < 6; i++) {
-            code += characters.charAt(Math.floor(Math.random() * characters.length));
-        }
-        return code;
-    };
-
-    /**
      * Handles pairing code generation and modal display.
      */
-    const handleGeneratePairingCode = () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        const newCode = generatePairingCode();
-        setPairingCode(newCode);
-        setShowPairingModal(true);
+    const handleGeneratePairingCode = async () => {
+        try {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setIsGeneratingCode(true);
+
+            const response = await generatePairingCode(profileId);
+
+            setPairingCode(response.code);
+            setExpiresAt(response.expires_at);
+            setShowPairingModal(true);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } catch (err) {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        } finally {
+            setIsGeneratingCode(false);
+        }
     };
 
     return (
@@ -159,8 +161,20 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
                 <TouchableOpacity 
                     style={commonStyles.primaryButton}
                     onPress={handleGeneratePairingCode}
+                    disabled={isGeneratingCode}
                 >
-                    <Text style={[commonStyles.primaryButtonText, { fontSize: 20 }]}>{t('UserProfileDetail.buttons.Generate pairing code')}</Text>
+                    {isGeneratingCode ? (
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <ActivityIndicator color="#FFFFFF" size="small" />
+                            <Text style={[commonStyles.primaryButtonText, { fontSize: 20, marginLeft: 10 }]}>
+                                {t('common.messages.loading')}
+                            </Text>
+                        </View>
+                    ) : (
+                        <Text style={[commonStyles.primaryButtonText, { fontSize: 20 }]}>
+                            {t('UserProfileDetail.buttons.Generate pairing code')}
+                        </Text>
+                    )}
                 </TouchableOpacity>
                 
                 {/* Active reminders section - displays filtered reminders for this profile */}
@@ -174,6 +188,8 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
             visible={showPairingModal}
             onClose={() => setShowPairingModal(false)}
             pairingCode={pairingCode}
+            expiresAt={expiresAt}
+            onExpired={handleGeneratePairingCode}
         />
 
         {/* Update Profile Modal */}

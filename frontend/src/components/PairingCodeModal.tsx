@@ -7,7 +7,7 @@
  * @module PairingCodeModal
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +24,10 @@ interface PairingCodeModalProps {
     onClose: () => void;
     /** The pairing code to display (6 characters) */
     pairingCode: string;
+    /** The expiration date of the pairing code */
+    expiresAt: string | null;
+    /** Callback triggered when code expires */
+    onExpired?: () => void;
 }
 
 /**
@@ -38,9 +42,56 @@ interface PairingCodeModalProps {
 const PairingCodeModal: React.FC<PairingCodeModalProps> = ({
     visible,
     onClose,
-    pairingCode
+    pairingCode,
+    expiresAt,
+    onExpired
 }) => {
     const { t } = useTranslation();
+    const [timeRemaining, setTimeRemaining] = useState<string>('');
+    const [hasExpired, setHasExpired] = useState(false);
+
+    /**
+     * Calculates and updates the time remaining until code expiration.
+     * Updates every second.
+     */
+    useEffect(() => {
+        if (!expiresAt || !visible) {
+            return;
+        }
+
+        // Reset hasExpired when modal opens with new code
+        setHasExpired(false);
+
+        const updateTimeRemaining = () => {
+            const now = new Date().getTime();
+            const expiresTime = new Date(expiresAt).getTime();
+            const difference = expiresTime - now;
+
+            if (difference <= 0) {
+                setTimeRemaining('00:00:00');
+                if (!hasExpired && onExpired) {
+                    setHasExpired(true);
+                    onExpired();
+                }
+                return;
+            }
+
+            const hours = Math.floor(difference / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            setTimeRemaining(formattedTime);
+        };
+
+        // Initial update
+        updateTimeRemaining();
+
+        // Update every second
+        const interval = setInterval(updateTimeRemaining, 1000);
+
+        return () => clearInterval(interval);
+    }, [expiresAt, visible, hasExpired, onExpired]);
 
     /**
      * Copies the pairing code to clipboard and provides haptic feedback.
@@ -102,23 +153,12 @@ const PairingCodeModal: React.FC<PairingCodeModalProps> = ({
                         </TouchableOpacity>
                     </View>
 
-                    {/* Tip box */}
-                    <View style={styles.tipBox}>
-                        <Text style={styles.tipIcon}>💡</Text>
-                        <Text style={styles.tipText}>
-                            {t('pairingCode.tip')}
-                        </Text>
+                    {/* Expiration countdown */}
+                    <View style={styles.expirationBox}>
+                        <Ionicons name="time-outline" size={24} color="#FF6B6B" />
+                        <Text style={styles.expirationLabel}>{t('pairingCode.expiresIn')}</Text>
+                        <Text style={styles.expirationTime}>{timeRemaining || '00:00:00'}</Text>
                     </View>
-                </View>
-
-                {/* Done button at bottom */}
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity 
-                        style={styles.doneButton}
-                        onPress={onClose}
-                    >
-                        <Text style={styles.doneButtonText}>{t('pairingCode.buttons.done')}</Text>
-                    </TouchableOpacity>
                 </View>
             </SafeAreaView>
         </Modal>
@@ -191,7 +231,9 @@ const styles = StyleSheet.create({
         padding: 30,
         width: '100%',
         alignItems: 'center',
-        marginBottom: 30,
+        marginBottom: 15,
+        borderWidth: 1,
+        borderColor: '#D6EAFF',
     },
     codeText: {
         fontSize: 48,
@@ -210,37 +252,29 @@ const styles = StyleSheet.create({
         color: '#4A90E2',
         fontWeight: '600',
     },
-    tipBox: {
+    expirationBox: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#E8F4FF',
+        justifyContent: 'center',
+        backgroundColor: '#FFF5F5',
         borderRadius: 12,
         padding: 15,
         width: '100%',
+        alignSelf: 'center',
         gap: 10,
+        borderWidth: 1,
+        borderColor: '#FFE0E0',
     },
-    tipIcon: {
-        fontSize: 20,
-    },
-    tipText: {
-        flex: 1,
-        fontSize: 14,
+    expirationLabel: {
+        fontSize: 16,
         color: '#666',
+        fontWeight: '500',
     },
-    buttonContainer: {
-        paddingHorizontal: 20,
-        paddingBottom: 20,
-    },
-    doneButton: {
-        backgroundColor: '#4A90E2',
-        borderRadius: 12,
-        padding: 18,
-        alignItems: 'center',
-    },
-    doneButtonText: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#FFFFFF',
+    expirationTime: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#FF6B6B',
+        letterSpacing: 1,
     },
 });
 
