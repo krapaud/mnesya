@@ -17,6 +17,9 @@ class ReminderRepository(BaseRepository[ReminderModel]):
     Extends BaseRepository with reminder-specific query methods
     for filtering and ordering reminders by various criteria.
     """
+    def __init__(self, db: Session):
+        """Initialize the ReminderRepository with ReminderModel and database session."""
+        super().__init__(ReminderModel, db)
 
     def __init__(self, db: Session):
         """Initialize the ReminderRepository with ReminderModel and database session."""

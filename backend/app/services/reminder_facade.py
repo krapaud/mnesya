@@ -7,6 +7,7 @@ It provides a simplified interface for reminder operations.
 from sqlalchemy.orm import Session
 from app.models.reminder import ReminderModel
 from app.persistence.reminder_repository import ReminderRepository
+from uuid import UUID
 
 
 class ReminderFacade:
@@ -19,7 +20,6 @@ class ReminderFacade:
     Attributes:
         reminder_repo (ReminderRepository): Repository for reminder data access
     """
-
     def __init__(self, db: Session):
         """Initialize the facade with a reminder repository."""
         self.reminder_repo = ReminderRepository(db)
@@ -69,6 +69,12 @@ class ReminderFacade:
             or use specific query methods (by_caregiver, by_user)
         """
         return self.reminder_repo.get_all()
+
+    def get_reminder_by_caregiver(self, caregiver_id: UUID) -> list:
+        return self.reminder_repo.get_reminders_by_caregiver(caregiver_id)
+
+    def get_reminder_by_user(self, user_id: UUID) -> list:
+        return self.reminder_repo.get_reminders_by_user(user_id)
 
     def update_reminder(self, reminder_id: str, reminder_data: dict) -> object:
         """Update an existing reminder.

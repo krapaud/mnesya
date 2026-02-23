@@ -128,8 +128,7 @@ async def verify_code(
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
             data={
-                "sub": str(
-                    user.id),
+                "sub": str(user.id),
                 "firstname": user.first_name,
                 "lastname": user.last_name},
             expires_delta=access_token_expires

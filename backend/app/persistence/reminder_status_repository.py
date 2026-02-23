@@ -17,6 +17,9 @@ class ReminderStatusRepository(BaseRepository[ReminderStatusModel]):
     Extends BaseRepository with status-specific query methods
     for tracking reminder state history.
     """
+    def __init__(self, db: Session):
+        """Initialize the ReminderStatusRepository with ReminderStatusModel and database session."""
+        super().__init__(ReminderStatusModel, db)
 
     def __init__(self, db: Session):
         """Initialize the ReminderStatusRepository with

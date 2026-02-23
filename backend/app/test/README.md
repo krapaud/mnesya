@@ -14,6 +14,7 @@ backend/app/test/
 ├── test_caregiver_api.py           # Tests pour /api/caregivers
 ├── test_user_api.py                # Tests pour /api/users
 ├── test_pairing_api.py             # Tests pour /api/pairing
+├── test_reminder_api.py            # Tests pour /api/reminder
 └── test.py                         # Tests existants (modèles, schemas, etc.)
 ```
 
@@ -41,6 +42,14 @@ backend/app/test/
 - **POST /generate** - Générer un code de jumelage
 - **POST /verify** - Vérifier un code de jumelage
 
+### 5. Reminder API (`/api/reminder`)
+- **POST /** - Créer un nouveau reminder
+- **GET /caregiver** - Obtenir tous les reminders du caregiver
+- **GET /user** - Obtenir tous les reminders de l'utilisateur
+- **GET /{reminder_id}** - Obtenir un reminder spécifique
+- **PUT /{reminder_id}** - Mettre à jour un reminder
+- **DELETE /{reminder_id}** - Supprimer un reminder
+
 ## Exécuter les Tests
 
 ### Tous les tests
@@ -61,6 +70,9 @@ docker exec mnesya-backend pytest app/test/test_user_api.py
 
 # Tests pairing
 docker exec mnesya-backend pytest app/test/test_pairing_api.py
+
+# Tests reminder
+docker exec mnesya-backend pytest app/test/test_reminder_api.py
 ```
 
 ### Tests d'une classe spécifique
@@ -110,6 +122,13 @@ Usage: `caregiver, password = create_test_caregiver()`
 ### `create_test_user`
 Factory pour créer des utilisateurs de test
 Usage: `user = create_test_user(caregiver_id)`
+
+### `create_test_reminder`
+Factory pour créer des reminders de test
+Usage: `reminder = create_test_reminder(caregiver_id, user_id, scheduled_at)`
+
+### `sample_reminder_data`
+Données d'exemple pour créer un reminder
 
 ## Couverture des Tests
 
