@@ -64,3 +64,14 @@ export const getUserInfo = async (): Promise<any | null> => {
   const data = await SecureStore.getItemAsync(USER_INFO_KEY);
   return data ? JSON.parse(data) : null;
 };
+
+/**
+ * Deletes the user info from secure storage.
+ * 
+ * Used during logout to remove the user's stored data.
+ * 
+ * @returns Promise that resolves when user info is deleted
+ */
+export const deleteUserInfo = async (): Promise<void> => {
+  await SecureStore.deleteItemAsync(USER_INFO_KEY);
+};

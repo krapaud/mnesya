@@ -1,7 +1,13 @@
 /**
- * API Configuration
- * Switch between different IP addresses based on your location
- * Uncomment the line matching your current network setup
+ * API base URL configuration.
+ *
+ * Defines backend endpoint URLs for different environments.
+ * Update the active export to switch between development locations,
+ * local testing, and production.
+ *
+ * To find your local IP on macOS: ipconfig getifaddr en0
+ *
+ * @module api
  */
 
 // Development configurations for different locations
@@ -16,8 +22,8 @@ const API_BASE_URL_OFFICE = 'http://10.6.2.140:8000';
 // Location 3: Localhost (Testing locally)
 const API_BASE_URL_LOCAL = 'http://127.0.0.1:8000';
 
-// Location 4: VPS
-const API_BASE_URL_VPS = 'https://api.mnesya.app'
+// Location 4: VPS (Production)
+const API_BASE_URL_VPS = 'https://api.mnesya.app';
 
 // Active configuration - change this based on your current location
 export const API_BASE_URL = API_BASE_URL_VPS;

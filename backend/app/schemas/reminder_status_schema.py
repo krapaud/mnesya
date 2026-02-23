@@ -8,11 +8,12 @@ from datetime import datetime
 from uuid import UUID
 from typing import List, Optional
 
+
 class ReminderStatusCreate(BaseModel):
     """Schema for creating a new reminder status entry.
-    
+
     Validates input data when creating a status via API.
-    
+
     Attributes:
         status (str): The status value (1-15 chars, e.g., 'pending', 'completed')
         reminder_id (UUID): ID of the reminder this status is for
@@ -23,13 +24,13 @@ class ReminderStatusCreate(BaseModel):
     @field_validator('status')
     def validate_status(cls, value: str) -> str:
         """Validate and sanitize status field.
-        
+
         Args:
             value (str): The status to validate
-            
+
         Returns:
             str: Trimmed status
-            
+
         Raises:
             ValueError: If status is empty, only whitespace, or too long
         """
@@ -40,9 +41,9 @@ class ReminderStatusCreate(BaseModel):
 
 class ReminderStatusUpdate(BaseModel):
     """Schema for updating an existing reminder status.
-    
+
     All fields are optional for partial updates.
-    
+
     Attributes:
         status (Optional[str]): Updated status value (1-15 chars)
         reminder_id (Optional[UUID]): Updated reminder ID
@@ -53,13 +54,13 @@ class ReminderStatusUpdate(BaseModel):
     @field_validator('status')
     def validate_status(cls, value: Optional[str]) -> Optional[str]:
         """Validate and sanitize status if provided.
-        
+
         Args:
             value (Optional[str]): The status to validate
-            
+
         Returns:
             Optional[str]: Trimmed status or None
-            
+
         Raises:
             ValueError: If status is only whitespace or too long
         """
@@ -70,9 +71,9 @@ class ReminderStatusUpdate(BaseModel):
 
 class ReminderStatusResponse(BaseModel):
     """Schema for reminder status API responses.
-    
+
     Used when returning status data from API endpoints.
-    
+
     Attributes:
         id (UUID): Status entry's unique identifier
         status (str): The status value
@@ -86,12 +87,13 @@ class ReminderStatusResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)  # Enables ORM model conversion
+    # Enables ORM model conversion
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ReminderStatusListResponse(BaseModel):
     """Schema for paginated reminder status list responses.
-    
+
     Attributes:
         reminder_statuses (List[ReminderStatusResponse]): List of status objects
         total (int): Total count of status entries

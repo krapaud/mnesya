@@ -1,7 +1,11 @@
 /**
- * UserProfileDetailScreen - Displays detailed information for a specific elderly user profile
- * Shows profile information (name, age) and active reminders for the selected profile
- * Accessible from Dashboard when clicking on a profile card
+ * UserProfileDetailScreen - Detailed view for a specific elderly user profile.
+ *
+ * Displays profile information (name, age) and active reminders for the
+ * selected profile. Accessible from Dashboard when clicking on a profile card.
+ * Provides options to edit or delete the profile.
+ *
+ * @module UserProfileDetailScreen
  */
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
@@ -31,6 +35,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
     // Pairing code modal state
     const [showPairingModal, setShowPairingModal] = useState(false);
     const [pairingCode, setPairingCode] = useState('');
+    const [expiresAt, setExpiresAt] = useState<string | null>(null);
 
     // Update modal state
     const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -42,8 +47,6 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
     const [showMenu, setShowMenu] = useState(false);
 
     const [isGeneratingCode, setIsGeneratingCode] = useState(false);
-
-    const [expiresAt, setExpiresAt] = useState<string | null>(null);
 
     /**
      * Handles profile update.
@@ -327,7 +330,7 @@ const styles = StyleSheet.create({
         right: 10,
         backgroundColor: '#FFFFFF',
         borderRadius: 10,
-        shadowColor: '#000',
+        shadowColor: '#000000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,

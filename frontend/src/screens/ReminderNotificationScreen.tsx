@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     reminderMessage: {
         fontSize: 18,
         alignContent: 'center',
-        color: '#666',
+        color: '#666666',
         marginTop: 10,
         textAlign: 'center',
         height: 85,

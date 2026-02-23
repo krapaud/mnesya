@@ -9,13 +9,14 @@ from app.models.reminder import ReminderModel
 from app.persistence.reminder_repository import ReminderRepository
 from uuid import UUID
 
+
 class ReminderFacade:
     """Facade for Reminder business logic operations.
-    
+
     This class implements the Facade pattern to provide a clean interface
     for reminder-related operations. It handles business logic and coordinates
     between the model and repository layers.
-    
+
     Attributes:
         reminder_repo (ReminderRepository): Repository for reminder data access
     """
@@ -27,17 +28,17 @@ class ReminderFacade:
 
     def create_reminder(self, reminder_data: dict) -> object:
         """Create a new reminder.
-        
+
         Business logic for reminder creation. Validates data through the model's
         property setters and persists to the database.
-        
+
         Args:
             reminder_data (dict): Dictionary containing reminder fields
                                   (title, description, scheduled_at, caregiver_id, user_id)
-            
+
         Returns:
             ReminderModel: The created reminder with generated ID and timestamps
-            
+
         Raises:
             ValueError: If validation fails (from model setters)
             Exception: If database operation fails
@@ -48,10 +49,10 @@ class ReminderFacade:
 
     def get_reminder(self, reminder_id: str) -> object:
         """Retrieve a reminder by ID.
-        
+
         Args:
             reminder_id (str): The reminder's unique identifier
-            
+
         Returns:
             ReminderModel: The reminder if found, None otherwise
         """
@@ -59,10 +60,10 @@ class ReminderFacade:
 
     def get_all_reminders(self) -> list:
         """Retrieve all reminders.
-        
+
         Returns:
             list[ReminderModel]: List of all reminders in the system
-            
+
         Warning:
             Use with caution on large datasets - consider pagination
             or use specific query methods (by_caregiver, by_user)
@@ -77,16 +78,16 @@ class ReminderFacade:
 
     def update_reminder(self, reminder_id: str, reminder_data: dict) -> object:
         """Update an existing reminder.
-        
+
         Business logic for reminder updates. Only updates provided fields.
-        
+
         Args:
             reminder_id (str): The reminder's unique identifier
             reminder_data (dict): Dictionary of fields to update
-            
+
         Returns:
             ReminderModel: The updated reminder if found, None otherwise
-            
+
         Raises:
             ValueError: If validation fails (from model setters)
             Exception: If database operation fails
@@ -96,16 +97,16 @@ class ReminderFacade:
 
     def delete_reminder(self, reminder_id: str) -> bool:
         """Delete a reminder.
-        
+
         Args:
             reminder_id (str): The reminder's unique identifier
-            
+
         Returns:
             bool: True if reminder was found and deleted, False if not found
-            
+
         Raises:
             Exception: If database operation fails
-            
+
         Note:
             Consider cascading deletion of associated reminder statuses
         """

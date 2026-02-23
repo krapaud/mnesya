@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
         color: '#4A90E2',
     },
     inactiveTab: {
-        color: '#999',
+        color: '#999999',
     },
     tabBar: {
         height: 70,

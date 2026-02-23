@@ -1,10 +1,13 @@
 /**
- * UserPairingScreen - User account pairing with caregiver
- * Allows users to enter a 6-character alphanumeric pairing code
- * Automatically navigates to PIN setup after code completion
+ * UserPairingScreen - User account pairing with a caregiver.
+ *
+ * Allows elderly users to enter a 6-character alphanumeric pairing code
+ * provided by their caregiver, linking the two accounts together.
+ *
+ * @module UserPairingScreen
  */
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   CodeField,
@@ -18,7 +21,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { verifyPairingCode } from '../services/pairingService';
-import { saveUserInfo } from '../services/tokenService';
+import { saveUserInfo, saveToken } from '../services/tokenService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'UserPairing'>;
 
@@ -33,10 +36,15 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
     // Auto-blur when code is complete for better keyboard handling
     const ref = useBlurOnFulfill({value: code, cellCount: CELL_COUNT});
     
+    const handleCodeChange = (newCode: string) => {
+      setCode(newCode);
+      setError(null);
+    };
+
     // Clear cell on focus for better UX - allows easy correction of typos
     const [props, getCellOnLayoutHandler] = useClearByFocusCell({
       value: code,
-      setValue: setCode,
+      setValue: handleCodeChange,
     });
 
     const handleVerifyCode = async () => {
@@ -46,6 +54,10 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
         
         const response = await verifyPairingCode(code);
         
+        // Save JWT token for authenticated requests
+        await saveToken(response.access_token);
+        
+        // Save user info for app usage
         await saveUserInfo({
           user_id: response.user_id,
           first_name: response.user.first_name,
@@ -60,15 +72,18 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
         setIsVerifying(false);
       }
     };
-    
 
     // Auto-navigate to User Home when code is complete (all 6 characters entered)
     useEffect(() => {
       if (code.length === CELL_COUNT) {
         // 500ms delay provides visual feedback before navigation
-        setTimeout(() => {
+        const timer = setTimeout(() => {
           handleVerifyCode();
         }, 500);
+
+        return () => {
+          clearTimeout(timer);
+        };
       }
     }, [code, navigation]);
 
@@ -109,7 +124,7 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
                         ref={ref}
                         {...props}
                         value={code}
-                        onChangeText={setCode}
+                        onChangeText={handleCodeChange}
                         cellCount={CELL_COUNT}
                         keyboardType="default"
                         autoFocus={true}
@@ -117,7 +132,7 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
                         renderCell={({index, symbol, isFocused}) => (
                           <View
                             key={index}
-                            style={[styles.cell, isFocused && styles.focusCell]}
+                            style={[styles.cell, isFocused && styles.focusCell, error && styles.errorCell]}
                             onLayout={getCellOnLayoutHandler(index)}>
                             <Text style={styles.cellText}>
                               {symbol || (isFocused ? <Cursor /> : null)}
@@ -130,6 +145,10 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
                     {/* Error message display */}
                     {error && (
                       <Text style={styles.errorText}>{error}</Text>
+                    )}
+
+                    {isVerifying && (
+                      <ActivityIndicator size='large' color='#4A90E2' />
                     )}
                     
                     {/* Helpful tip section with icon */}
@@ -170,11 +189,11 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 28,
         fontWeight: 'bold',
-        marginBottom: 70,
+        marginBottom: 10,
     },
     subtitle: {
         fontSize: 18,
-        color: '#666',
+        color: '#666666',
         paddingLeft: 10,
         marginBottom: 15,
     },
@@ -196,11 +215,14 @@ const styles = StyleSheet.create({
       borderColor: '#E0E0E0',
       borderRadius: 10,
       textAlign: 'center',
-      backgroundColor: '#FFF',
+      backgroundColor: '#FFFFFF',
       marginHorizontal: 5,
     },
     focusCell: {
       borderColor: '#4A90E2',
+    },
+    errorCell: {
+      borderColor: '#FF0000',
     },
     cellText: {
       fontSize: 24,
@@ -212,7 +234,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#E3F2FD',
         padding: 20,
         borderRadius: 20,
-        marginTop: 1,
+        marginTop: 30,
         marginBottom: 20,
         alignSelf: 'center',
         width: '100%',

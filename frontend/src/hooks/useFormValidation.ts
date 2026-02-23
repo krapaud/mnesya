@@ -1,3 +1,11 @@
+/**
+ * Form validation hook for managing field values, errors, and validation logic.
+ *
+ * Provides a generic form state manager accepting field configurations with
+ * custom validators. Supports required fields, initial values, and error display control.
+ *
+ * @module useFormValidation
+ */
 import { useState, useCallback } from 'react';
 
 export interface FieldConfig {

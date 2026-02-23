@@ -1,3 +1,11 @@
+/**
+ * Hook for loading, updating, and deleting a single user profile by ID.
+ *
+ * Fetches the profile on mount based on the provided ID and exposes
+ * action functions for CRUD operations.
+ *
+ * @module useUserProfile
+ */
 import { useState, useEffect, useCallback } from 'react';
 import { getProfile, updateProfile, deleteProfile } from '../services/profileService';
 import type { UserProfileData, UpdateUserProfileData } from '../types/interfaces';

@@ -180,7 +180,7 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                     
                     {/* Name */}
                     <View style={styles.infoRow}>
-                        <Ionicons name="person-outline" size={24} color="#666" />
+                        <Ionicons name="person-outline" size={24} color="#666666" />
                         <View style={styles.infoContent}>
                             <Text style={styles.infoLabel}>{t('caregiverProfile.fields.name')}</Text>
                             <Text style={styles.infoValue}>
@@ -191,7 +191,7 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
 
                     {/* Email */}
                     <View style={styles.infoRow}>
-                        <Ionicons name="mail-outline" size={24} color="#666" />
+                        <Ionicons name="mail-outline" size={24} color="#666666" />
                         <View style={styles.infoContent}>
                             <Text style={styles.infoLabel}>{t('caregiverProfile.fields.email')}</Text>
                             <Text style={styles.infoValue}>{caregiverData.email}</Text>
@@ -214,7 +214,7 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                                 {t('caregiverProfile.buttons.changePassword')}
                             </Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={24} color="#999" />
+                        <Ionicons name="chevron-forward" size={24} color="#999999" />
                     </TouchableOpacity>
 
                     {/* Logout Button */}
@@ -228,7 +228,7 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                                 {t('caregiverProfile.buttons.logout')}
                             </Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={24} color="#999" />
+                        <Ionicons name="chevron-forward" size={24} color="#999999" />
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -241,7 +241,7 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                 animationType="fade"
                 onRequestClose={handleCancelLogout}
             >
-                <View style={styles.modalOverlay}>
+                <View style={commonStyles.modalOverlay}>
                     <View style={styles.modalContent}>
                         {/* Warning icon */}
                         <View style={styles.warningIconContainer}>
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#333',
+        color: '#333333',
         marginBottom: 15,
     },
     infoRow: {
@@ -367,12 +367,12 @@ const styles = StyleSheet.create({
     },
     infoLabel: {
         fontSize: 16,
-        color: '#666',
+        color: '#666666',
         marginBottom: 4,
     },
     infoValue: {
         fontSize: 16,
-        color: '#333',
+        color: '#333333',
         fontWeight: '500',
     },
     actionButton: {
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
     },
     actionButtonText: {
         fontSize: 16,
-        color: '#333',
+        color: '#333333',
         fontWeight: '500',
     },
     logoutButton: {
@@ -402,12 +402,6 @@ const styles = StyleSheet.create({
     },
     logoutText: {
         color: '#E53935',
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     modalContent: {
         backgroundColor: '#FFFFFF',
@@ -428,13 +422,13 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#333333',
         marginBottom: 15,
         textAlign: 'center',
     },
     modalMessage: {
         fontSize: 16,
-        color: '#666',
+        color: '#666666',
         textAlign: 'center',
         lineHeight: 24,
         marginBottom: 25,
@@ -458,7 +452,7 @@ const styles = StyleSheet.create({
     cancelButtonText: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#333',
+        color: '#333333',
     },
     confirmButton: {
         backgroundColor: '#E53935',
@@ -477,7 +471,7 @@ const styles = StyleSheet.create({
     loadingText: {
         marginTop: 10,
         fontSize: 16,
-        color: '#666',
+        color: '#666666',
     },
     errorContainer: {
         flex: 1,
@@ -488,7 +482,7 @@ const styles = StyleSheet.create({
     errorText: {
         marginTop: 15,
         fontSize: 16,
-        color: '#666',
+        color: '#666666',
         textAlign: 'center',
         marginBottom: 20,
     },
@@ -521,7 +515,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingVertical: 5,
         minWidth: 150,
-        shadowColor: '#000',
+        shadowColor: '#000000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
@@ -536,7 +530,7 @@ const styles = StyleSheet.create({
     },
     menuItemText: {
         fontSize: 16,
-        color: '#333',
+        color: '#333333',
     },
 });
 

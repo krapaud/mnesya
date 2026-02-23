@@ -6,7 +6,7 @@
  * 
  * @module RegisterScreen
  */
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -55,6 +55,29 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             validate: (value) => validatePasswordMatch(values.password, value)
         }
     });
+    // States
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    //Refs
+    const timerPassRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const handleShowPassword = () => {
+        setShowPassword(true);
+        timerPassRef.current = setTimeout(() => setShowPassword(false), 1000);
+    };
+    const timerConfPassRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const handleShowConfirmPassword = () => {
+        setShowConfirmPassword(true);
+        timerConfPassRef.current =setTimeout(() => setShowConfirmPassword(false), 1000);
+    };
+
+    // Cleanup
+    useEffect(() => {
+            return () => {
+              if (timerPassRef.current) clearTimeout(timerPassRef.current);
+              if (timerConfPassRef.current) clearTimeout(timerConfPassRef.current);
+            };
+        }, [])
 
     /**
      * Handles registration form submission.
@@ -123,7 +146,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                 
                 {/* First name input field */}
                 <Text style={styles.firstLabel}>{t('register.fields.First Name')}</Text>
-                <View style={[styles.input, showErrors.firstname && styles.inputError]}>
+                <View style={[styles.input, showErrors.firstname && commonStyles.inputError]}>
                     <TextInput
                         autoCorrect={false}
                         placeholder={t('register.placeholders.Enter your First Name')}
@@ -137,7 +160,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                 
                 {/* Last name input field */}
                 <Text style={styles.label}>{t('register.fields.Last Name')}</Text>
-                <View style={[styles.input, showErrors.lastname && styles.inputError]}>
+                <View style={[styles.input, showErrors.lastname && commonStyles.inputError]}>
                     <TextInput
                         autoCorrect={false}
                         placeholder={t('register.placeholders.Enter your Last Name')}
@@ -151,7 +174,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                 
                 {/* Email input field */}
                 <Text style={styles.label}>{t('common.fields.Email')}</Text>
-                <View style={[styles.input, showErrors.email && styles.inputError]}>
+                <View style={[styles.input, showErrors.email && commonStyles.inputError]}>
                     <TextInput
                         placeholder={t('register.placeholders.Enter your Email')}
                         autoCapitalize="none"
@@ -167,13 +190,17 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                 
                 {/* Password input field */}
                 <Text style={styles.label}>{t('common.fields.Password')}</Text>
-                <View style={[styles.input, showErrors.password && styles.inputError]}>
+                <View style={[styles.input, styles.inputRow, showErrors.password && commonStyles.inputError]}>
                     <TextInput
+                        style={styles.inputFlex}
                         placeholder={t('register.placeholders.Enter your Password')}
-                        secureTextEntry={true}
+                        secureTextEntry={!showPassword}
                         onChangeText={handleChange('password')}
                         value={values.password}
                     />
+                    <TouchableOpacity onPress={handleShowPassword}>
+                        <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={22} color="#999999" />
+                    </TouchableOpacity>
                 </View>
                 <Text style={[styles.errorText, {opacity: showErrors.password ? 1 : 0}]}>
                     {t(errors.password) || t('register.errors.This field is required')}
@@ -181,13 +208,17 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                 
                 {/* Password confirmation input field */}
                 <Text style={styles.label}>{t('common.fields.Confirm Password')}</Text>
-                <View style={[styles.input, showErrors.confirmpassword && styles.inputError]}>
+                <View style={[styles.input, styles.inputRow, showErrors.confirmpassword && commonStyles.inputError]}>
                     <TextInput
+                        style={styles.inputFlex}
                         placeholder={t('register.placeholders.Confirm your password')}
-                        secureTextEntry={true}
+                        secureTextEntry={!showConfirmPassword}
                         onChangeText={handleChange('confirmpassword')}
                         value={values.confirmpassword}
                     />
+                    <TouchableOpacity onPress={handleShowConfirmPassword}>
+                        <Ionicons name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} size={22} color="#999999" />
+                    </TouchableOpacity>
                 </View>
                 <Text style={[styles.errorText, {opacity: showErrors.confirmpassword ? 1 : 0}]}>
                     {t(errors.confirmpassword) || t('register.errors.This field is required')}
@@ -274,9 +305,12 @@ const styles = StyleSheet.create({
         marginBottom: 7,
         width: '100%',
     },
-    inputError: {
-        borderWidth: 2,
-        borderColor: '#FF0000',
+    inputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    inputFlex: {
+        flex: 1,
     },
 
     // ========== BUTTONS ==========
@@ -289,12 +323,6 @@ const styles = StyleSheet.create({
         width: '95%',
     },
     signUpButtonDisabled: {
-        backgroundColor: '#F5F5F5',
-        padding: 20,
-        borderRadius: 10,
-        marginBottom: 10,
-        alignSelf: 'center',
-        width: '95%',
         opacity: 0.5,
     },
 });

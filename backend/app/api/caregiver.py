@@ -21,15 +21,17 @@ def get_caregiver_facade(db: Session = Depends(get_db)) -> CaregiverFacade:
     """Dependency to create CaregiverFacade instance with database session."""
     return CaregiverFacade(db)
 
-def get_current_caregiver_id(token_payload: dict = Depends(verify_token)) -> str:
+
+def get_current_caregiver_id(
+        token_payload: dict = Depends(verify_token)) -> str:
     """Extract caregiver ID from JWT token.
-    
+
     Args:
         token_payload (dict): Decoded JWT token
-        
+
     Returns:
         str: Caregiver ID
-        
+
     Raises:
         HTTPException: If token is invalid
     """
@@ -41,6 +43,7 @@ def get_current_caregiver_id(token_payload: dict = Depends(verify_token)) -> str
         )
     return caregiver_id
 
+
 @router.put("/me", response_model=CaregiverResponse)
 async def update_my_profile(
     request: CaregiverUpdate,
@@ -48,31 +51,31 @@ async def update_my_profile(
     caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade)
 ):
     """Update current caregiver's profile.
-    
+
     Updates the authenticated caregiver's profile details.
     Only provided fields will be updated (partial updates supported).
-    
+
     Args:
         request (CaregiverUpdate): Updated profile data (all fields optional)
         caregiver_id (str): ID of authenticated caregiver
         caregiver_facade (CaregiverFacade): Caregiver service facade
-        
+
     Returns:
         CaregiverResponse: Updated caregiver profile
-        
+
     Raises:
         HTTPException: If profile not found or validation error occurs
     """
     try:
         # Verify the profile exists
         caregiver = caregiver_facade.get_caregiver(UUID(caregiver_id))
-        
+
         if not caregiver:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Caregiver profile not found"
             )
-        
+
         # Build update data from provided fields only
         update_data = {}
         if request.first_name is not None:
@@ -83,7 +86,7 @@ async def update_my_profile(
             update_data["email"] = request.email
         if request.password is not None:
             update_data["password"] = request.password
-        
+
         # If no fields to update, return current data
         if not update_data:
             return CaregiverResponse(
@@ -93,10 +96,11 @@ async def update_my_profile(
                 email=caregiver.email,
                 created_at=caregiver.created_at
             )
-        
+
         # Perform update
-        updated_caregiver = caregiver_facade.update_caregiver(UUID(caregiver_id), update_data)
-        
+        updated_caregiver = caregiver_facade.update_caregiver(
+            UUID(caregiver_id), update_data)
+
         return CaregiverResponse(
             id=str(updated_caregiver.id),
             first_name=updated_caregiver.first_name,
@@ -104,7 +108,7 @@ async def update_my_profile(
             email=updated_caregiver.email,
             created_at=updated_caregiver.created_at
         )
-        
+
     except HTTPException:
         raise
     except ValueError as e:
@@ -127,41 +131,41 @@ async def delete_my_profile(
     caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade)
 ):
     """Delete current caregiver's account.
-    
+
     Deletes the authenticated caregiver's account.
     Warning: This action is irreversible.
-    
+
     Args:
         caregiver_id (str): ID of authenticated caregiver
         caregiver_facade (CaregiverFacade): Caregiver service facade
-        
+
     Returns:
         None: Returns 204 No Content on success
-        
+
     Raises:
         HTTPException: If deletion fails
     """
     try:
         # Verify the profile exists
         caregiver = caregiver_facade.get_caregiver(UUID(caregiver_id))
-        
+
         if not caregiver:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Caregiver profile not found"
             )
-        
+
         # Delete the caregiver account
         success = caregiver_facade.delete_caregiver(UUID(caregiver_id))
-        
+
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to delete caregiver account"
             )
-        
+
         return None
-        
+
     except HTTPException:
         raise
     except Exception as e:

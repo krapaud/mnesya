@@ -1,3 +1,10 @@
+/**
+ * Authentication hook for login, registration, and session management.
+ *
+ * Wraps authentication service calls with loading and error state management.
+ *
+ * @module useAuth
+ */
 import { useState, useCallback } from 'react';
 import { login as loginService, register as registerService, logout as logoutService } from '../services/authService';
 import { getToken } from '../services/tokenService';

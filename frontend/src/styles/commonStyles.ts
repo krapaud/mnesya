@@ -19,7 +19,7 @@ export const commonStyles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'flex-start',
-        backgroundColor: '#fff',
+        backgroundColor: '#FFFFFF',
         padding: 20,
     },
 
@@ -68,7 +68,7 @@ export const commonStyles = StyleSheet.create({
     loadingText: {
         marginTop: 10,
         fontSize: 16,
-        color: '#666',
+        color: '#666666',
     },
     errorContainer: {
         flex: 1,
@@ -79,8 +79,22 @@ export const commonStyles = StyleSheet.create({
     errorText: {
         marginTop: 10,
         fontSize: 16,
-        color: '#666',
+        color: '#666666',
         textAlign: 'center',
+    },
+
+    // ============ MODAL STYLES ============
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    // ============ FORM STYLES ============
+    inputError: {
+        borderWidth: 2,
+        borderColor: '#FF0000',
     },
 
     // ============ BUTTON STYLES ============
@@ -144,11 +158,11 @@ export const commonStyles = StyleSheet.create({
     },
     detailText: {
         fontSize: 16,
-        color: '#666',
+        color: '#666666',
     },
     emptyMessage: {
         fontSize: 16,
-        color: '#666',
+        color: '#666666',
         textAlign: 'center',
         marginTop: 50,
         fontStyle: 'italic',

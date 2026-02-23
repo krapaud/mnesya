@@ -10,12 +10,13 @@ from sqlalchemy import Column, String, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from app import database
 
+
 class ReminderStatusModel(database):
     """Reminder Status model representing the state of a reminder.
-    
+
     This model tracks the status history of reminders, allowing
     multiple status entries per reminder (e.g., pending, completed, missed).
-    
+
     Attributes:
         id (UUID): Unique identifier for this status entry
         status (str): The status value (max 15 chars, e.g., 'pending', 'completed')
@@ -24,18 +25,34 @@ class ReminderStatusModel(database):
         updated_at (datetime): Timestamp of last update
     """
     __tablename__ = 'reminder_status'
-    _id = Column('id', UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    _id = Column(
+        'id',
+        UUID(
+            as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4)
     _status = Column('status', String(15), nullable=False)
-    _reminder_id = Column('reminder_id', UUID(as_uuid=True), ForeignKey('reminder.id'))
-    _created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
-    _updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+    _reminder_id = Column(
+        'reminder_id',
+        UUID(
+            as_uuid=True),
+        ForeignKey('reminder.id'))
+    _created_at = Column(
+        DateTime(
+            timezone=True), default=lambda: datetime.now(
+            timezone.utc), nullable=False)
+    _updated_at = Column(
+        DateTime(
+            timezone=True), default=lambda: datetime.now(
+            timezone.utc), onupdate=lambda: datetime.now(
+                timezone.utc), nullable=False)
 
     # ==================== Getter Setter ====================
 
     @property
     def id(self):
         """Get the status entry's unique identifier.
-        
+
         Returns:
             UUID: The status entry's ID
         """
@@ -44,7 +61,7 @@ class ReminderStatusModel(database):
     @property
     def status(self) -> str:
         """Get the status value.
-        
+
         Returns:
             str: The status string (e.g., 'pending', 'completed', 'missed')
         """
@@ -53,13 +70,13 @@ class ReminderStatusModel(database):
     @status.setter
     def status(self, value: str) -> None:
         """Set the status value with validation.
-        
+
         Args:
             value (str): The status to set
-            
+
         Raises:
             ValueError: If status is empty, only whitespace, or exceeds 200 characters
-            
+
         Note:
             Common status values include: 'pending', 'completed', 'missed', 'cancelled'
         """
@@ -70,7 +87,7 @@ class ReminderStatusModel(database):
     @property
     def reminder_id(self) -> uuid.UUID:
         """Get the ID of the associated reminder.
-        
+
         Returns:
             UUID: The reminder's ID
         """
@@ -79,7 +96,7 @@ class ReminderStatusModel(database):
     @reminder_id.setter
     def reminder_id(self, value: uuid.UUID) -> None:
         """Set the reminder ID.
-        
+
         Args:
             value (UUID): The reminder's unique identifier
         """
@@ -88,7 +105,7 @@ class ReminderStatusModel(database):
     @property
     def created_at(self) -> datetime:
         """Get the creation timestamp.
-        
+
         Returns:
             datetime: When this status entry was created
         """
@@ -97,7 +114,7 @@ class ReminderStatusModel(database):
     @property
     def updated_at(self) -> datetime:
         """Get the last update timestamp.
-        
+
         Returns:
             datetime: When this status entry was last updated
         """

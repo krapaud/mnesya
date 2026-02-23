@@ -1,5 +1,10 @@
 """Pytest configuration and shared fixtures for API tests."""
 
+from app.models.pairing_code import PairingCodeModel
+from app.models.user import UserModel
+from app.models.caregiver import CaregiverModel
+from app import get_db, database as Base
+from app.main import app
 import pytest
 import sys
 import os
@@ -10,7 +15,12 @@ from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 
 # Add parent directory to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '../..')))
 
 from app.main import app
 from app import get_db, database as Base
@@ -27,16 +37,17 @@ TEST_DATABASE_URL = "postgresql://mnesya_user:mnesya_password@db:5432/mnesya_tes
 def db_session():
     """Create a fresh database session for each test."""
     engine = create_engine(TEST_DATABASE_URL)
-    
+
     # Create all tables
     Base.metadata.create_all(bind=engine)
-    
+
     # Create session
-    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    TestingSessionLocal = sessionmaker(
+        autocommit=False, autoflush=False, bind=engine)
     session = TestingSessionLocal()
-    
+
     yield session
-    
+
     # Cleanup
     session.close()
     Base.metadata.drop_all(bind=engine)
@@ -50,12 +61,12 @@ def client(db_session):
             yield db_session
         finally:
             pass
-    
+
     app.dependency_overrides[get_db] = override_get_db
-    
+
     with TestClient(app) as test_client:
         yield test_client
-    
+
     app.dependency_overrides.clear()
 
 
@@ -89,13 +100,13 @@ def create_test_caregiver(db_session):
         caregiver.last_name = "Caregiver"
         caregiver.email = email or f"test.{uuid4().hex[:8]}@example.com"
         caregiver.password = password  # Setter will validate and hash automatically
-        
+
         db_session.add(caregiver)
         db_session.commit()
         db_session.refresh(caregiver)
-        
+
         return caregiver, password
-    
+
     return _create_caregiver
 
 
@@ -107,16 +118,16 @@ def create_test_user(db_session):
         user.first_name = "Test"
         user.last_name = "User"
         user.birthday = date(1950, 1, 1)
-        
+
         if caregiver_id:
             user.add_caregiver(caregiver_id)
-        
+
         db_session.add(user)
         db_session.commit()
         db_session.refresh(user)
-        
+
         return user
-    
+
     return _create_user
 
 
@@ -124,19 +135,19 @@ def create_test_user(db_session):
 def authenticated_client(client, create_test_caregiver):
     """Create an authenticated test client with a valid JWT token."""
     caregiver, password = create_test_caregiver()
-    
+
     # Login to get token
     response = client.post(
         "/api/auth/login",
         json={"email": caregiver.email, "password": password}
     )
-    
+
     assert response.status_code == 200
     token = response.json()["access_token"]
-    
+
     # Add auth header to client
     client.headers.update({"Authorization": f"Bearer {token}"})
-    
+
     return client, caregiver
 
 
