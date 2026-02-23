@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, field_validator, ConfigDict
 from datetime import datetime
 from uuid import UUID
 from typing import List, Optional
+from app.models.reminder_status_enum import ReminderStatusEnum
 
 
 class ReminderStatusCreate(BaseModel):
@@ -15,10 +16,10 @@ class ReminderStatusCreate(BaseModel):
     Validates input data when creating a status via API.
 
     Attributes:
-        status (str): The status value (1-15 chars, e.g., 'pending', 'completed')
+        status (str): The status value (must be: PENDING, DONE, POSTPONED, or UNABLE)
         reminder_id (UUID): ID of the reminder this status is for
     """
-    status: str = Field(..., min_length=1, max_length=15)
+    status: str = Field(..., description="Status value: PENDING, DONE, POSTPONED, or UNABLE")
     reminder_id: UUID
 
     @field_validator('status')
@@ -29,44 +30,55 @@ class ReminderStatusCreate(BaseModel):
             value (str): The status to validate
 
         Returns:
-            str: Trimmed status
+            str: Uppercase status value
 
         Raises:
-            ValueError: If status is empty, only whitespace, or too long
+            ValueError: If status is not a valid enum value
         """
-        if not value or len(value) > 15 or len(value.strip()) == 0:
-            raise ValueError("Status is required and must be <= 15 chars")
-        return value.strip()
+        if not value or len(value.strip()) == 0:
+            raise ValueError("Status is required")
+        
+        value_upper = value.strip().upper()
+        if not ReminderStatusEnum.is_valid(value_upper):
+            valid_statuses = ", ".join(ReminderStatusEnum.values())
+            raise ValueError(f"Invalid status. Must be one of: {valid_statuses}")
+        
+        return value_upper
 
 
 class ReminderStatusUpdate(BaseModel):
-    """Schema for updating an existing reminder status.
+    """Schema for updating a reminder status.
 
-    All fields are optional for partial updates.
+    Note: In practice, we typically create new status entries rather than updating existing ones
+    to maintain a complete history. This schema exists for completeness.
 
     Attributes:
-        status (Optional[str]): Updated status value (1-15 chars)
-        reminder_id (Optional[UUID]): Updated reminder ID
+        status (Optional[str]): Updated status value (must be: PENDING, DONE, POSTPONED, or UNABLE)
     """
-    status: Optional[str] = Field(None, min_length=1, max_length=15)
-    reminder_id: Optional[UUID] = None
+    status: str = Field(..., description="Status value: PENDING, DONE, POSTPONED, or UNABLE")
 
     @field_validator('status')
-    def validate_status(cls, value: Optional[str]) -> Optional[str]:
+    def validate_status(cls, value: str) -> str:
         """Validate and sanitize status if provided.
 
         Args:
-            value (Optional[str]): The status to validate
+            value (str): The status to validate
 
         Returns:
-            Optional[str]: Trimmed status or None
+            str: Uppercase status value
 
         Raises:
-            ValueError: If status is only whitespace or too long
+            ValueError: If status is not a valid enum value
         """
-        if value is not None and (len(value) > 15 or len(value.strip()) == 0):
-            raise ValueError("Status must be <= 15 chars and not empty")
-        return value.strip() if value else None
+        if not value or len(value.strip()) == 0:
+            raise ValueError("Status is required")
+        
+        value_upper = value.strip().upper()
+        if not ReminderStatusEnum.is_valid(value_upper):
+            valid_statuses = ", ".join(ReminderStatusEnum.values())
+            raise ValueError(f"Invalid status. Must be one of: {valid_statuses}")
+        
+        return value_upper
 
 
 class ReminderStatusResponse(BaseModel):
