@@ -22,6 +22,12 @@ sys.path.insert(
             os.path.dirname(__file__),
             '../..')))
 
+from app.main import app
+from app import get_db, database as Base
+from app.models.caregiver import CaregiverModel
+from app.models.user import UserModel
+from app.models.pairing_code import PairingCodeModel
+from app.models.reminder import ReminderModel
 
 # Test database URL
 TEST_DATABASE_URL = "postgresql://mnesya_user:mnesya_password@db:5432/mnesya_test_db"
@@ -143,3 +149,33 @@ def authenticated_client(client, create_test_caregiver):
     client.headers.update({"Authorization": f"Bearer {token}"})
 
     return client, caregiver
+
+
+@pytest.fixture
+def create_test_reminder(db_session):
+    """Factory fixture to create test reminders."""
+    def _create_reminder(caregiver_id=None, user_id=None, scheduled_at=None):
+        reminder = ReminderModel()
+        reminder.title = "Test Reminder"
+        reminder.description = "This is a test reminder description"
+        reminder.scheduled_at = scheduled_at or datetime.now(timezone.utc) + timedelta(days=1)
+        reminder.caregiver_id = caregiver_id
+        reminder.user_id = user_id
+        
+        db_session.add(reminder)
+        db_session.commit()
+        db_session.refresh(reminder)
+        
+        return reminder
+    
+    return _create_reminder
+
+
+@pytest.fixture
+def sample_reminder_data():
+    """Sample reminder data for testing."""
+    return {
+        "title": "Take medication",
+        "description": "Remember to take your morning medication",
+        "scheduled_at": (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()
+    }

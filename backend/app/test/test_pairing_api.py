@@ -191,7 +191,7 @@ class TestVerifyPairingCode:
         assert "access_token" in data
         assert data["token_type"] == "bearer"
         assert "expires_in" in data
-
+    
     def test_verify_code_not_found(self, client):
         """Test verifying non-existent code."""
         response = client.post("/api/pairing/verify", json={

@@ -19,7 +19,6 @@ class ReminderStatusFacade:
     Attributes:
         reminder_status_repo (ReminderStatusRepository): Repository for status data access
     """
-
     def __init__(self, db: Session):
         """Initialize the facade with a reminder status repository."""
         self.reminder_status_repo = ReminderStatusRepository(db)
