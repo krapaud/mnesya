@@ -1,6 +1,6 @@
 from app import create_app, init_app
 import os
-from app.api import authentication, user, caregiver, pairing, reminder, reminder_status_api
+from app.api import authentication, user, caregiver, pairing, reminder, reminder_status_api, push_notification
 
 # Initialize database
 database_url = os.environ["DATABASE_URL"]
@@ -16,6 +16,7 @@ app.include_router(caregiver.router)
 app.include_router(pairing.router)
 app.include_router(reminder.router)
 app.include_router(reminder_status_api.router)
+app.include_router(push_notification.router)
 
 @app.get("/")
 async def root():
