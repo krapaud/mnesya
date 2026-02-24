@@ -22,6 +22,7 @@ apscheduler==3.10.4
 
 # Push notifications (Firebase)
 firebase-admin==6.3.0
+exponent-server-sdk==2.1.0
 
 # HTTP requests (for notifications)
 httpx==0.25.2

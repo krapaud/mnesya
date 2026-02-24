@@ -6,6 +6,7 @@ Caregivers can view and update their own profile information.
 
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from uuid import UUID
 from typing import List
 from app.services.caregiver_facade import CaregiverFacade
@@ -111,6 +112,17 @@ async def update_my_profile(
 
     except HTTPException:
         raise
+    except IntegrityError as e:
+        # Handle duplicate email constraint violation
+        if "ix_caregiver_email" in str(e.orig) or "unique constraint" in str(e.orig).lower():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email address already in use"
+            )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Database constraint violation"
+        )
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
