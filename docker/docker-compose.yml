@@ -1,4 +1,5 @@
-# Docker Compose configuration
+# Docker Compose configuration — développement local
+# Copier docker/.env.example en docker/.env avant de lancer
 
 services:
   # PostgreSQL Database
@@ -6,9 +7,9 @@ services:
     image: postgres:13-alpine
     container_name: mnesya-db
     environment:
-      POSTGRES_USER: mnesya_user
-      POSTGRES_PASSWORD: mnesya_password
-      POSTGRES_DB: mnesya_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -16,7 +17,7 @@ services:
     networks:
       - mnesya-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mnesya_user -d mnesya_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -30,8 +31,10 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://mnesya_user:mnesya_password@db:5432/mnesya_db
-      SECRET_KEY: your-secret-key-change-in-production
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      DOCS_USERNAME: ${DOCS_USERNAME}
+      DOCS_PASSWORD: ${DOCS_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
@@ -71,7 +74,7 @@ services:
       dockerfile: backend/Dockerfile
     container_name: mnesya-worker
     environment:
-      DATABASE_URL: postgresql://mnesya_user:mnesya_password@db:5432/mnesya_db
+      DATABASE_URL: ${DATABASE_URL}
     depends_on:
       db:
         condition: service_healthy
@@ -90,8 +93,8 @@ services:
     ports:
       - "5050:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@mnesya.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     depends_on:
       - db
     networks:
