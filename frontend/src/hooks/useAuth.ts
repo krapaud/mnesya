@@ -1,7 +1,5 @@
 /**
- * Authentication hook for login, registration, and session management.
- *
- * Wraps authentication service calls with loading and error state management.
+ * Hook for handling login, registration, and logout.
  *
  * @module useAuth
  */
@@ -10,23 +8,13 @@ import { login as loginService, register as registerService, logout as logoutSer
 import { getToken } from '../services/tokenService';
 import type { LoginData, RegisterData } from '../types/interfaces';
 
-/**
- * Return type for useAuth hook.
- */
 interface UseAuthResult {
-  /** Authenticates user with email and password */
   login: (credentials: LoginData) => Promise<boolean>;
-  /** Registers new caregiver account */
   register: (data: RegisterData) => Promise<boolean>;
-  /** Logs out current user */
   logout: () => Promise<void>;
-  /** Checks if user has valid authentication token */
   checkAuthStatus: () => Promise<boolean>;
-  /** Current loading state for auth operations */
   loading: boolean;
-  /** Current error message, null if no error */
   error: string | null;
-  /** Clears current error message */
   clearError: () => void;
 }
 
@@ -42,11 +30,12 @@ export const useAuth = (): UseAuthResult => {
       await loginService(credentials);
       
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       
-      // Extract error message from response
-      const errorMessage = err.response?.data?.detail || 
-                          err.message || 
+      // Try to get the error from the server response
+      const error = err as { response?: { data?: { detail?: string } }; message?: string };
+      const errorMessage = error.response?.data?.detail || 
+                          error.message || 
                           'Login failed. Please try again.';
       
       setError(errorMessage);
@@ -64,11 +53,12 @@ export const useAuth = (): UseAuthResult => {
       await registerService(data);
       
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       
-      // Extract error message from response
-      const errorMessage = err.response?.data?.detail || 
-                          err.message || 
+      // Try to get the error from the server response
+      const error = err as { response?: { data?: { detail?: string } }; message?: string };
+      const errorMessage = error.response?.data?.detail || 
+                          error.message || 
                           'Registration failed. Please try again.';
       
       setError(errorMessage);
@@ -84,7 +74,7 @@ export const useAuth = (): UseAuthResult => {
       setError(null);
       
       await logoutService();
-    } catch (err) {
+    } catch (_err) {
       // Don't set error for logout, it should always succeed
     } finally {
       setLoading(false);
@@ -95,7 +85,7 @@ export const useAuth = (): UseAuthResult => {
     try {
       const token = await getToken();
       return token !== null;
-    } catch (err) {
+    } catch (_err) {
       return false;
     }
   }, []);

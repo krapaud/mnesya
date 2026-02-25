@@ -1,3 +1,8 @@
+/**
+ * Hook for fetching all reminders created by the caregiver.
+ *
+ * @module useCaregiverReminders
+ */
 import { useState, useEffect, useCallback } from "react";
 import { getCaregiverReminders } from "../services/reminderService";
 import type { ReminderData } from "../types/interfaces";

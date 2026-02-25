@@ -1,8 +1,5 @@
 /**
- * Hook for loading the full list of user profiles managed by the authenticated caregiver.
- *
- * Fetches profiles on mount and exposes a reload function for manual refresh.
- * Handles authentication errors via an optional callback.
+ * Hook for loading the list of user profiles linked to the caregiver.
  *
  * @module useUserProfiles
  */
@@ -10,17 +7,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { getProfiles } from '../services/profileService';
 import type { UserProfileData } from '../types/interfaces';
 
-/**
- * Return type for useUserProfiles hook.
- */
 interface UseUserProfilesResult {
-    /** Array of user profiles, null if not yet loaded */
     userData: UserProfileData[] | null;
-    /** Loading state indicator */
     loading: boolean;
-    /** Error message, null if no error */
     error: string | null;
-    /** Function to reload the profiles list */
     reload: () => Promise<void>;
 }
 
@@ -31,10 +21,6 @@ export const useUserProfiles = (
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    /**
-     * Loads profiles from backend API.
-     * Memoized with useCallback to ensure stable reference for dependencies.
-     */
     const loadProfiles = useCallback(async () => {
         try {
             setLoading(true);

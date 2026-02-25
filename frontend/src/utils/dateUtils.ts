@@ -1,8 +1,4 @@
-/**
- * Calculates age from birthday string (YYYY-MM-DD format)
- * @param birthday - Birthday in YYYY-MM-DD format
- * @returns Age in years
- */
+/** Calculates age in years from a birthday string (YYYY-MM-DD). */
 export const calculateAge = (birthday: string): number => {
     const birthDate = new Date(birthday);
     const today = new Date();

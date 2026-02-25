@@ -39,12 +39,6 @@ interface ConfirmationModalProps {
     cancelText?: string;
 }
 
-/**
- * Generic confirmation modal with customizable appearance.
- * 
- * @param props - Component properties
- * @returns Confirmation modal component
- */
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     visible,
     onClose,

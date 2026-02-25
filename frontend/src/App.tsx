@@ -1,27 +1,19 @@
 /**
- * App - Root component of the application
- * 
- * Initializes and wraps the navigation structure with NavigationContainer.
- * Entry point for the entire React Native application.
- * 
- * Key responsibilities:
- * - Loads i18n configuration for multi-language support
- * - Provides navigation context via NavigationContainer
- * - Initializes the main application navigator
+ * Root component — sets up navigation and notifications.
  * 
  * @module App
  */
-import React, { useEffect, useRef } from "react"; // Ajoute useRef
+import React, { useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import type { NavigationContainerRef } from '@react-navigation/native'; // Nouveau type
-import type { RootStackParamList } from './types/index'; // Import du type
+import type { NavigationContainerRef } from '@react-navigation/native';
+import type { RootStackParamList } from './types/index';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import "./i18n"; // Initialize internationalization before any component renders
 import AppNavigator from './navigation/AppNavigator';
 import { registerForPushNotifications, cancelNotifications } from './utils/notifications';
 import * as Notifications from 'expo-notifications';
 
-// Set the comportment of notifications
+// Set the notification behavior
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,    // Show banner notification
@@ -31,11 +23,6 @@ Notifications.setNotificationHandler({
   }),
 });
 
-/**
- * Main application component that sets up navigation and i18n.
- * 
- * @returns The root component wrapped in NavigationContainer
- */
 const App: React.FC = () => {
     const navigationRef = React.createRef<NavigationContainerRef<RootStackParamList>>(); // Create reference to access navigation from outside the NavigationContainer
 
@@ -65,12 +52,9 @@ const App: React.FC = () => {
                         const notificationIds = JSON.parse(storedIds) as string[];
                         await cancelNotifications(notificationIds);
                         await AsyncStorage.removeItem(storageKey);
-                        console.log(`Cancelled ${notificationIds.length} remaining notifications`);
                         await Notifications.setBadgeCountAsync(0);
-                        console.log(`Badge set to 0`);
                     }
-                } catch (error) {
-                    console.error('Error cancelling notifications:', error);
+                } catch (_error) {
                 }
             }
             
@@ -86,6 +70,7 @@ const App: React.FC = () => {
 
         // Cleanup listener on component unmount
         return () => subscription.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

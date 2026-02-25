@@ -1,8 +1,5 @@
 /**
- * Shared interfaces and types used across the entire application.
- *
- * Defines data models for profiles, reminders, authentication,
- * and API communication.
+ * Shared types and interfaces used across the app.
  *
  * @module interfaces
  */
@@ -140,4 +137,17 @@ export interface UpdateReminder {
   scheduled_at?: string;
   caregiver_id?: string;
   user_id?: string;
+}
+
+export interface ReminderStatus {
+  id: string;
+  status: string;
+  reminder_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UpdateReminderStatus {
+  status?: string;
+  reminder_id?: string;
 }

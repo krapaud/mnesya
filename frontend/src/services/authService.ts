@@ -1,25 +1,13 @@
 /**
- * Authentication service for user login, registration, and logout.
- * 
- * Handles communication with the backend authentication API and manages
- * local token storage for authenticated sessions.
+ * Service for authentication — login, register, logout, and profile.
  * 
  * @module authService
  */
 import apiClient from './api';
-import { saveToken, deleteToken, getToken } from './tokenService';
+import { saveToken, deleteToken } from './tokenService';
 import { LoginData, RegisterData, AuthResponse, CaregiverProfile } from '../types/interfaces';
 
-/**
- * Authenticates a caregiver with email and password.
- * 
- * Sends login credentials to the backend and stores the received JWT token
- * for subsequent authenticated requests.
- * 
- * @param credentials - User email and password
- * @returns Promise resolving to authentication response with access token
- * @throws Error if credentials are invalid or network request fails
- */
+/** Logs in a caregiver and stores the token. */
 export const login = async (credentials: LoginData): Promise<AuthResponse> => {
   const response = await apiClient.post('/api/auth/login', credentials);
   
@@ -28,57 +16,24 @@ export const login = async (credentials: LoginData): Promise<AuthResponse> => {
   return response.data;
 };
 
-/**
- * Registers a new caregiver account.
- * 
- * Sends registration data to the backend to create a new user account.
- * Does not automatically log in the user after registration.
- * 
- * @param data - Registration information (first name, last name, email, password)
- * @returns Promise that resolves when registration is complete
- * @throws Error if email is already registered or validation fails
- */
+/** Creates a new caregiver account. */
 export const register = async (data: RegisterData): Promise<void> => {
   await apiClient.post('/api/auth/register', data);
 };
 
-/**
- * Logs out the current user.
- * 
- * Removes the stored authentication token from local storage,
- * effectively ending the user's session.
- * 
- * @returns Promise that resolves when logout is complete
- */
+/** Logs out the current user and removes the stored token. */
 export const logout = async (): Promise<void> => {
   await apiClient.post('/api/auth/logout');
   await deleteToken();
 };
 
-/**
- * Fetches the current authenticated caregiver's profile.
- * 
- * Retrieves profile information for the currently logged-in caregiver
- * using the stored JWT token for authentication.
- * 
- * @returns Promise resolving to caregiver profile data
- * @throws Error if not authenticated or request fails
- */
+/** Returns the profile of the currently logged-in caregiver. */
 export const getCurrentUser = async (): Promise<CaregiverProfile> => {
   const response = await apiClient.get('/api/auth/me');
   return response.data;
 };
 
-/**
- * Updates the current caregiver's profile information.
- * 
- * Sends updated profile data to the backend. The caregiver can modify
- * their first name, last name, and email address.
- * 
- * @param data - Updated profile information
- * @returns Promise resolving to updated caregiver profile
- * @throws Error if validation fails or request fails
- */
+/** Updates the caregiver's profile info (name, email). */
 export const updateCaregiverProfile = async (data: {
   first_name: string;
   last_name: string;

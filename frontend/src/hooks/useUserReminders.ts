@@ -1,3 +1,8 @@
+/**
+ * Hook for fetching all reminders assigned to the user.
+ *
+ * @module useUserReminders
+ */
 import { useState, useEffect, useCallback } from "react";
 import { getUserReminders } from "../services/reminderService";
 import type { ReminderData } from "../types/interfaces";

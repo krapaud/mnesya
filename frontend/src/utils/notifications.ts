@@ -1,8 +1,5 @@
 /**
- * Notification utilities for managing push notifications and reminders.
- * 
- * Handles permission requests, notification scheduling, and caregiver alerts
- * for the reminder system.
+ * Utility functions for managing push notifications and reminders.
  * 
  * @module notifications
  */
@@ -11,10 +8,7 @@ import * as Device from 'expo-device';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '../i18n';
 
-/**
- * Requests permission for push notifications
- * @returns {Promise<string | undefined>} The push token or undefined
- */
+/** Requests push notification permissions and returns the token. */
 export async function registerForPushNotifications(): Promise<string | undefined> {
   if (!Device.isDevice) {
     // Return undefined if not a physical device
@@ -36,18 +30,12 @@ export async function registerForPushNotifications(): Promise<string | undefined
   return 'granted';
 }
 
-/**
- * Schedules a single notification for a specific reminder
- * @param title - Notification title
- * @param body - Notification message
- * @param triggerDate - When to trigger
- * @param data - Additional data to pass
- * @returns {Promise<string>} Notification identifier
- */
+/** Schedules a single notification at the given date. */
 export async function scheduleReminderNotification(
   title: string,
   body: string,
   triggerDate: Date,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any
 ): Promise<string> {
   if (!Device.isDevice) {
@@ -77,38 +65,25 @@ export async function scheduleReminderNotification(
   return notificationId;
 }
 
-/**
- * Cancels multiple notifications by their IDs
- * Used to cancel remaining notifications when user responds to a reminder
- * 
- * @param notificationIds - Array of notification identifiers to cancel
- */
+/** Cancels multiple notifications by their IDs. */
 export async function cancelNotifications(notificationIds: string[]): Promise<void> {
   for (const id of notificationIds) {
     try {
       await Notifications.cancelScheduledNotificationAsync(id);
-      console.log(`Notification ${id} cancelled`);
-    } catch (error) {
-      console.warn(`Failed to cancel notification ${id}:`, error);
+    } catch (_error) {
     }
   }
 }
 
 /**
- * Schedules a reminder with automatic repetitions and caregiver alert
- * Creates 4 user notifications (0min, +2min, +5min, +10min) 
- * + 1 caregiver alert (+10min) if no response
- * 
- * @param title - Notification title
- * @param body - Notification message
- * @param triggerDate - When to trigger the first notification
- * @param data - Additional data (must include profileName for caregiver alert)
- * @returns {Promise<string[]>} Array of notification identifiers
+ * Schedules 4 user notifications (0min, +2min, +5min, +10min)
+ * plus a caregiver alert at +10min if no response.
  */
 export async function scheduleReminderWithRepetitions(
   title: string,
   body: string,
   triggerDate: Date,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any
 ): Promise<string[]> {
   if (!Device.isDevice) {

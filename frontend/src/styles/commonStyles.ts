@@ -1,14 +1,5 @@
 /**
- * Common styles shared across all application screens.
- * 
- * Contains ONLY truly shared components that are used identically across screens:
- * - Container and header elements
- * - Primary button (used consistently everywhere)
- * - Reminder card components (complete ecosystem)
- * - Empty message styling
- * 
- * All screen-specific styles (titles, forms, layouts) are now in local StyleSheets
- * to improve maintainability and clarity for learning purposes.
+ * Styles shared across multiple screens.
  * 
  * @module commonStyles
  */
