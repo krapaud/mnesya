@@ -34,12 +34,6 @@ interface UpdateProfileModalProps {
     } | null;
 }
 
-/**
- * Modal for updating user profile information.
- * 
- * @param props - Component properties
- * @returns Update profile modal component
- */
 const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
     visible,
     onClose,
@@ -80,6 +74,7 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
             setValue('lastname', initialData.last_name);
             setBirthday(new Date(initialData.birthday));
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialData]);
 
     /**
@@ -98,7 +93,7 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
                 birthday: formatDateForAPI(birthday),
             });
             onClose();
-        } catch (err) {
+        } catch (_err) {
             // Error handled by parent
         } finally {
             setIsUpdating(false);

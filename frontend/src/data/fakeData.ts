@@ -1,8 +1,5 @@
 /**
- * Mock data for testing and development purposes.
- * 
- * Contains sample profiles and reminders to simulate backend responses
- * during Sprint 1-2 before API integration in Sprint 3.
+ * Sample data kept for reference — no longer used in the app.
  * 
  * @module fakeData
  */

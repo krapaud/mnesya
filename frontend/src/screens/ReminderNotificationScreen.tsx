@@ -1,20 +1,10 @@
 /**
- * ReminderNotificationScreen - Fullscreen notification for elderly users
+ * Fullscreen notification screen for elderly users.
  * 
- * Displays reminder details with three clear action buttons.
- * The bell icon animates to grab attention, and all buttons are large and easy to tap.
- * 
- * Key features:
- * - Animated bell icon using React Native Animated API
- * - Three action buttons: Done (green), Remind later (orange), Unable (red)
- * - Text overflow handling with numberOfLines to prevent layout issues
- * - Haptic feedback on all interactions for better accessibility
- * 
- * Animation utilities centralized in utils/animations.ts for reusability.
+ * Shows the reminder message with three action buttons (Done, Remind later, Unable).
+ * The bell icon animates to grab attention.
  * 
  * @component
- * @param {Props} navigation - Navigation object for screen transitions
- * @param {Props} route - Route params containing reminderId
  */
 import React, { useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';
@@ -24,9 +14,9 @@ import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { fakeReminders } from '../data/fakeData';
 import { createBellSwingAnimation, getBellRotation } from '../utils/animations';
 import { scheduleReminderNotification } from '../utils/notifications';
+import { updateReminderStatus } from '../services/reminderService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ReminderNotification'>;
 
@@ -34,8 +24,8 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
     const { t } = useTranslation();
     const { reminderId, message, profileId } = route.params;
     
-    // Try to find in fakeReminders first, fallback to params data
-    const reminder = fakeReminders.find(r => r.id === reminderId) || {
+    // Build the reminder object from route params
+    const reminder = {
         id: reminderId,
         title: t('ReminderNotification.title'),
         message: message || t('ReminderNotification.defaultMessage'),
@@ -49,16 +39,10 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
     // useEffect with empty dependency array triggers it once on mount
     useEffect(() => {
         createBellSwingAnimation(bellAnimation).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    /**
-     * Handles reminder action and updates status
-     * @param status - The new status: 'Done', 'Postponed', or 'Unable'
-     */
     const handleReminderAction = async (status: string) => {
-        // Log the action for testing (will be API call in Sprint 3)
-        console.log(`Reminder ${reminderId} status changed to: ${status}`);
-        
         // If postponed, schedule a new notification in 5 minutes
         if (status === 'Postponed') {
             try {
@@ -69,14 +53,10 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
                     postponeDate,
                     { reminderId, profileId, isPostponed: true }
                 );
-                console.log(`Reminder postponed: will trigger again at ${postponeDate.toLocaleTimeString()}`);
-            } catch (error) {
-                console.error('Failed to schedule postponed notification:', error);
+            } catch (_error) {
             }
         }
-        
-        // TODO Sprint 3: Call API to update reminder status
-        // await updateReminderStatus(reminderId, status);
+        await updateReminderStatus(String(reminderId), { status: status.toUpperCase() });
         
         // Navigate back to UserHome
         navigation.goBack();
@@ -120,16 +100,7 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
                     {reminder.message}
                 </Text>
 
-                {/* 
-                 * Three action buttons for elderly-friendly interaction:
-                 * - Done (green): Task completed successfully
-                 * - Remind later (orange): Need more time, will try again
-                 * - Unable (red): Cannot complete the task
-                 * 
-                 * Color coding makes the meaning clear without reading
-                 * All buttons include haptic feedback for better user experience
-                 * Sprint 3 will add API calls to update reminder status
-                 */}
+                {/* Three action buttons: Done (green), Remind later (orange), Unable (red) */}
                 <TouchableOpacity 
                     style={[styles.bgButtonDone, { marginTop: 15}]}
                     onPress={() => {

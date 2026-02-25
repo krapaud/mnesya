@@ -7,7 +7,7 @@
  * @module RegisterScreen
  */
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -20,24 +20,11 @@ import { useAuth, useFormValidation } from '../hooks';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
 
-/**
- * Registration screen component for caregiver account creation.
- * 
- * Renders a multi-field registration form with comprehensive validation.
- * Provides real-time feedback on field validity and enforces password
- * strength requirements.
- * 
- * @param props - Navigation props
- * @returns Registration form screen
- */
 const RegisterScreen: React.FC<Props> = ({ navigation }) => {
-    /** Translation function for internationalization */
     const { t } = useTranslation();
-    
-    /** Authentication hook for registration operations */
+
     const { register, loading, error: authError } = useAuth();
-    
-    /** Form validation hook managing all field states and validation logic */
+
     const { values, errors, showErrors, handleChange, validateAll, setError } = useFormValidation({
         firstname: { 
             validate: validateName
@@ -103,7 +90,11 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
         if (success) {
             // Provide success feedback and navigate to login
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            navigation.navigate('Login');
+            Alert.alert(
+                t('register.success.Account created'),
+                t('register.success.Please log in'),
+                [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
+            );
         } else {
             // Handle registration errors (hook already set loading state)
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);

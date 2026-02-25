@@ -1,14 +1,5 @@
 /**
- * Caregiver authentication screen.
- * 
- * Provides email and password login form for caregiver accounts.
- * Includes navigation to registration screen and password recovery.
- * 
- * Features:
- * - Email and password input fields
- * - Form validation (to be implemented in Sprint 3)
- * - Navigation to registration
- * - Password recovery link (placeholder)
+ * Login screen for caregiver accounts.
  * 
  * @module LoginScreen
  */
@@ -25,17 +16,7 @@ import { useAuth, useFormValidation } from '../hooks';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-/**
- * Login screen component for caregiver authentication.
- * 
- * Renders a login form with email and password inputs. Currently navigates
- * directly to dashboard (authentication to be implemented in Sprint 3).
- * 
- * @param props - Navigation props
- * @returns Login form screen
- */
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
-    /** Translation function for internationalization */
     const { t } = useTranslation();
     
     /** Authentication hook for login operations */

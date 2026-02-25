@@ -33,12 +33,6 @@ interface UpdateCaregiverProfileModalProps {
     } | null;
 }
 
-/**
- * Modal for updating caregiver profile information.
- * 
- * @param props - Component properties
- * @returns Update caregiver profile modal component
- */
 const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = ({
     visible,
     onClose,
@@ -71,6 +65,7 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
             setValue('lastname', initialData.last_name);
             setValue('email', initialData.email);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialData]);
 
     /**
@@ -89,7 +84,7 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
                 email: values.email,
             });
             onClose();
-        } catch (err) {
+        } catch (_err) {
             // Error handled by parent
         } finally {
             setIsUpdating(false);

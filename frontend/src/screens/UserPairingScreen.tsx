@@ -1,8 +1,5 @@
 /**
- * UserPairingScreen - User account pairing with a caregiver.
- *
- * Allows elderly users to enter a 6-character alphanumeric pairing code
- * provided by their caregiver, linking the two accounts together.
+ * Screen where the user enters a pairing code to link with a caregiver.
  *
  * @module UserPairingScreen
  */
@@ -66,7 +63,7 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
         });
         
         navigation.navigate('UserDashboard');
-      } catch (err) {
+      } catch (_err) {
         setError(t('UserPairing.error.invalid_code'));
       } finally {
         setIsVerifying(false);
@@ -85,6 +82,7 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
           clearTimeout(timer);
         };
       }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [code, navigation]);
 
     return (

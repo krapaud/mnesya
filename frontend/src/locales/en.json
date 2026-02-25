@@ -25,16 +25,15 @@
         "failedToLoadProfiles": "Failed to load profiles",
         "failedToLoadProfile": "Failed to load profile",
         "failedToUpdateProfile": "Failed to update profile",
-        "failedToDeleteProfile": "Failed to delete profile"
+        "failedToDeleteProfile": "Failed to delete profile",
+        "failedToLoadReminders": "Failed to load reminders",
+        "failedToLoadRemindersStatus": "Failed to load reminder status"
     },
     "pickersText": {
         "All Profiles": "All",
         "All Dates": "All",
         "Select a profile": "Select a Profile",
-        "Select Date": "Select Date",
-        "Select Time": "Select Time",
-        "Today": "Today",
-        "Tomorrow": "Tomorrow"
+        "Select Time": "Select Time"
     }
   },
   "welcome": {
@@ -71,6 +70,7 @@
     },
     "buttons": {
         "Sign Up": "Sign Up",
+        "Signing up...": "Signing up...",
         "Already have an account? Log in": "Already have an account? Log in"
     },
     "errors": {
@@ -83,10 +83,8 @@
         "Password must contain at least one lowercase letter": "Password must contain at least one lowercase letter",
         "Password must contain at least one special character": "Password must contain at least one special character ($@#%*!~&)",
         "Passwords do not match": "Passwords do not match",
-        "All fields are required": "All fields are required",
         "Name cannot be empty": "This field cannot be empty",
         "Name must be at most 100 characters": "Name must be at most 100 characters",
-        "Please fix errors before submitting": "Please fix errors before submitting",
         "Email already registered": "Email already registered",
         "Please use a different email": "Please use a different email address",
         "Registration failed": "Registration failed",
@@ -150,15 +148,10 @@
         "Be careful not to enter sensitive confidential information.": "Warning: Avoid entering confidential information."
     },
     "errors": {
-        "title": "Error",
         "Please select a profile": "Please select a profile",
         "Please enter a title": "Please enter a title",
         "Please enter a message": "Please enter a message",
         "Error scheduling notification": "Error scheduling notification"
-    },
-    "success": {
-        "title": "Success",
-        "Reminder created successfully": "Reminder created successfully!"
     },
     "modal": {
         "title": "Confirm Reminder",
@@ -245,13 +238,12 @@
     "expiresIn": "Expires in"
   },
   "ReminderNotification": {
+    "title": "Reminder",
+    "defaultMessage": "You have a new reminder",
     "buttons": {
         "Done": "Done",
         "Remind later": "Remind later",
         "Unable": "Unable"
-    },
-    "messages": {
-        "Reminder not found": "Reminder not found"
     }
   },
   "caregiverProfile": {
@@ -276,26 +268,7 @@
       "confirm": "Logout"
     }
   },
-  "userProfile": {
-    "title": "My Profile",
-    "sections": {
-      "accountInfo": "My Information",
-      "actions": "Actions"
-    },
-    "fields": {
-      "name": "Name",
-      "age": "Age"
-    },
-    "buttons": {
-      "rePairing": "Re-Pair My Device"
-    },
-    "modal": {
-      "title": "Warning",
-      "message": "This action will reset your pairing. You will no longer receive notifications until you enter a new pairing code.",
-      "cancel": "Cancel",
-      "confirm": "Continue"
-    }
-  },
+
   "notifications": {
     "repetitions": {
         "reminder": "⏰ REMINDER: {{title}}",

@@ -1,10 +1,5 @@
 /**
- * CreateReminderScreen - Form for creating reminders for user profiles.
- * 
- * Allows caregivers to create scheduled reminders by selecting a profile,
- * entering a title and message, and choosing a date and time. Features
- * cross-platform pickers for profile, date, and time selection with
- * mutual exclusion to prevent UI overlap.
+ * Screen for creating a reminder for a user profile.
  * 
  * @module CreateReminderScreen
  */
@@ -19,19 +14,10 @@ import { commonStyles } from '../styles/commonStyles';
 import { PlatformDatePicker, PlatformTimePicker, PlatformProfilePicker } from '../components';
 import { scheduleReminderWithRepetitions } from '../utils/notifications';
 import { useUserProfiles } from '../hooks';
+import { createReminder } from '../services/reminderService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateReminder'>;
 
-/**
- * Screen component for creating reminders for user profiles.
- * 
- * Provides a comprehensive form with profile selection, title, message,
- * date and time inputs. Implements mutual exclusion between pickers to
- * ensure clean UI interaction.
- * 
- * @param props - Navigation props
- * @returns Reminder creation form screen
- */
 const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
     
@@ -44,20 +30,14 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const [reminderMessage, setReminderMessage] = useState<string>('');
     /** Selected date and time for the reminder */
     const [reminderDate, setReminderDate] = useState<Date>(new Date());
-    
-    /** Controls date picker visibility - mutually exclusive with other pickers */
+
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
-    /** Controls time picker visibility - mutually exclusive with other pickers */
     const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
-    /** Controls profile picker visibility - mutually exclusive with other pickers */
     const [showProfilePicker, setShowProfilePicker] = useState<boolean>(false);
-    /** Selected profile ID */
     const [selectedProfile, setSelectedProfile] = useState<string | number>('');
-    
-    /** Controls confirmation modal visibility */
+
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
-    
-    /** Error states for inline validation */
+
     const [profileError, setProfileError] = useState<string>('');
     const [titleError, setTitleError] = useState<string>('');
     const [messageError, setMessageError] = useState<string>('');
@@ -65,15 +45,8 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const [showTitleError, setShowTitleError] = useState<boolean>(false);
     const [showMessageError, setShowMessageError] = useState<boolean>(false);
 
-    /** Currently selected profile data object */
     const selectedProfileData = userData?.find(p => p.id === selectedProfile);
 
-    /**
-     * Formats a date to DD/MM/YYYY string format for display.
-     * 
-     * @param date - Date object to format
-     * @returns Formatted date string
-     */
     const formatDate = (date: Date): string => {
         const day = date.getDate().toString().padStart(2, '0');
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -81,12 +54,6 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
         return `${day}/${month}/${year}`;
     };
 
-    /**
-     * Formats a time to HH:MM string format for display.
-     * 
-     * @param date - Date object containing the time to format
-     * @returns Formatted time string
-     */
     const formatTime = (date: Date): string => {
         const hour = date.getHours().toString().padStart(2, '0');
         const minute = date.getMinutes().toString().padStart(2, '0');
@@ -171,12 +138,18 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
         setShowConfirmModal(false);
         
         try {
-            const notificationIds = await scheduleReminderWithRepetitions(
+            const reminder = await createReminder({
+                title: reminderTitle,
+                description: reminderMessage,
+                scheduled_at: reminderDate.toISOString(),
+                user_id: String(selectedProfile),
+            })
+            const _notificationIds = await scheduleReminderWithRepetitions(
                 reminderTitle,
                 reminderMessage,
                 reminderDate,
                 {
-                    reminderId: Date.now(),
+                    reminderId: reminder.id,
                     message: reminderMessage,
                     profileId: selectedProfile,
                     profileName: selectedProfileData ? `${selectedProfileData.first_name} ${selectedProfileData.last_name}` : 'Utilisateur',
@@ -184,15 +157,11 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 }
             );
 
-            console.log('Scheduled notifications with IDs:', notificationIds);
-            console.log(`${notificationIds.length} notifications scheduled (4 user + 1 caregiver)`);
-            console.log('Reminder saved (local)');
 
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             navigation.navigate('Dashboard');
             
-        } catch (error) {
-            console.error('Error scheduling notification:', error);
+        } catch (_error) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             // Show error inline on message field
             setMessageError(t('CreateReminder.errors.Error scheduling notification'));

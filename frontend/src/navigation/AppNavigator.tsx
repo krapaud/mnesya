@@ -1,9 +1,5 @@
 /**
- * AppNavigator - Main navigation stack configuration.
- *
- * Defines the navigation structure and screen routes for the entire application.
- * Determines the initial route based on authentication and user type (caregiver or user).
- * Uses React Navigation's native stack navigator for optimal performance.
+ * Main navigation stack — defines all routes and the initial screen based on auth state.
  *
  * @module AppNavigator
  */
@@ -11,7 +7,7 @@ import React, { useState, useEffect } from "react";
 import { View, ActivityIndicator } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import type { RootStackParamList } from '../types/index';
-import { getToken, saveToken } from "../services/tokenService";
+import { getToken } from "../services/tokenService";
 import { getCurrentUser } from "../services/authService";
 import { getUserInfo } from "../services/tokenService";
 
@@ -44,7 +40,7 @@ const AppNavigator: React.FC = () => {
                     try {
                         await getCurrentUser();
                         setInitialRoute('Dashboard');
-                    } catch (err) {
+                    } catch (_err) {
                         setInitialRoute('Welcome');
                     }
                 }
@@ -58,12 +54,12 @@ const AppNavigator: React.FC = () => {
     return (
         <>
             {isLoading ? (
-                // Écran de chargement temporaire
+                // Temporary loading screen while authentication status is checked
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <ActivityIndicator size="large" color="#4A90E2" />
                 </View>
             ) : (
-                // Navigation normale une fois le chargement terminé
+                // Main navigation once loading is complete
                 <Stack.Navigator id='root' initialRouteName={initialRoute}>
                     {/* Initial screen - Profile type selection */}
                     <Stack.Screen 

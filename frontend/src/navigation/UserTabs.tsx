@@ -1,12 +1,5 @@
 /**
- * Bottom tab navigation component for elderly user interface.
- * 
- * Provides a simplified two-tab navigation optimized for accessibility:
- * - Home: User dashboard with active reminders
- * - Profile: User settings and paired profiles
- * 
- * Uses larger tab icons and labels for improved visibility and ease of use
- * for elderly users. Implements safe area handling for Android system UI.
+ * Bottom tabs for the user interface (Home, Profile).
  * 
  * @module UserTabs
  */
@@ -24,15 +17,6 @@ import { RefreshProvider, useRefresh } from '../contexts/RefreshContext';
 
 const Tab = createBottomTabNavigator<UserTabsParamList>();
 
-/**
- * User tab navigation component.
- * 
- * Renders a simplified bottom tab navigator designed for elderly users.
- * Features dynamic height adjustment for Android compatibility and
- * accessibility-focused design.
- * 
- * @returns Tab navigator component for user interface
- */
 const UserTabsContent: React.FC = () => {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();

@@ -1,17 +1,7 @@
 /**
- * RemindersListScreen - Displays a filterable list of all reminders
- * 
- * Allows caregivers to view and manage reminders across all profiles.
- * Features dropdown filters for profile and date selection with dynamic filtering.
- * 
- * Key features:
- * - Filter by profile and/or date
- * - Reset filters button (only active when filters applied)
- * - Status badges with color coding for each reminder
- * - Scrollable list view with empty state handling
+ * Screen showing the full list of reminders with filters.
  * 
  * @component
- * @param {Props} navigation - Navigation object for screen transitions
  */
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
@@ -26,7 +16,9 @@ import type { RootStackParamList, CaregiverTabsParamList } from '../types/index'
 import { commonStyles } from '../styles/commonStyles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { cancelNotifications } from '../utils/notifications';
+import { deleteReminder } from '../services/reminderService';
 import { useCaregiverReminders } from '../hooks';
+import ReminderCard from '../components/ReminderCard';
 
 type Props = CompositeScreenProps<
     BottomTabScreenProps<CaregiverTabsParamList, 'Reminders'>,
@@ -35,8 +27,7 @@ type Props = CompositeScreenProps<
 
 const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
-    // Reminders data - currently using fake data, will be replaced with API in Sprint 2
-    const { reminderData, loading, error, reload } = useCaregiverReminders();
+    const { reminderData, loading: _loading, error: _error, reload } = useCaregiverReminders();
 
     useFocusEffect(
         useCallback(() => {
@@ -65,10 +56,6 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     // Get unique dates
     const uniqueDates = Array.from(new Set(reminderData?.map(r => r.scheduled_at)));
 
-    /**
-     * Deletes a reminder and cancels all its scheduled notifications
-     * @param reminderId - ID of the reminder to delete
-     */
     const handleDeleteReminder = async (reminderId: number) => {
         try {
 
@@ -79,14 +66,10 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                 const notificationIds = JSON.parse(storedIds) as string[];
                 await cancelNotifications(notificationIds);
                 await AsyncStorage.removeItem(storageKey);
-                console.log(`Cancelled ${notificationIds.length} notifications for reminder ${reminderId}`);
             }
-
-            // Update the reminder list by filtering out the deleted reminder
-            const updatedReminders = reminderData?.filter(reminder => reminder.id !== reminderId);
-
-        } catch (error) {
-            console.error('Error deleting reminder:', error);
+            await deleteReminder(String(reminderId));
+            reload();
+        } catch (_error) {
         }
     };
 
@@ -237,39 +220,15 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                     {/* Reminders list */}
                     {!showProfilePicker && !showDatePicker && (
                     <ScrollView showsVerticalScrollIndicator={false} style={styles.remindersList}>
-                        {getFilteredReminders?().length === 0 ? (
+                        {(getFilteredReminders?.() ?? []).length === 0 ? (
                             <Text style={commonStyles.emptyMessage}>No reminders yet</Text>
                         ) : (
-                            getFilteredReminders()?.map((reminder) => (
-                                <View key={reminder.id} style={commonStyles.reminderCard}>
-                                    <View style={commonStyles.reminderHeader}>
-                                        <Text style={commonStyles.reminderTitle}>{reminder.title}</Text>
-                                        <TouchableOpacity onPress={() => handleDeleteReminder([reminderData].id)}>
-                                            <Ionicons name="trash-outline" size={20} color="#FF3B30" />
-                                        </TouchableOpacity>
-                                    </View>
-                                    
-                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                                        <View style={commonStyles.reminderDetails}>
-                                            <View style={commonStyles.detailRow}>
-                                                <Ionicons name="person-outline" size={16} color="#666666" />
-                                                <Text style={commonStyles.detailText}>{reminder.user_id}</Text>
-                                            </View>
-                                            <View style={commonStyles.detailRow}>
-                                                <Ionicons name="calendar-outline" size={16} color="#666666" />
-                                                <Text style={commonStyles.detailText}>{reminder.scheduled_at}</Text>
-                                            </View>
-                                            <View style={commonStyles.detailRow}>
-                                                <Ionicons name="time-outline" size={16} color="#666666" />
-                                                <Text style={commonStyles.detailText}>{reminder.scheduled_at}</Text>
-                                            </View>
-                                        </View>
-                                        
-                                        <Text style={[commonStyles.statusText, commonStyles[`status${reminder.status}`]]}>
-                                            {t(`reminders.status.${reminder.status}`)}
-                                        </Text>
-                                    </View>
-                                </View>
+                            (getFilteredReminders?.() ?? []).map((reminder) => (
+                                <ReminderCard
+                                    key={reminder.id}
+                                    reminder={reminder}
+                                    onDelete={handleDeleteReminder}
+                                />
                             ))
                         )}
                     </ScrollView>

@@ -1,9 +1,5 @@
 /**
- * Token management service for JWT authentication.
- * 
- * Provides functions to store, retrieve, and delete authentication tokens
- * using SecureStore for encrypted persistent storage on mobile devices.
- * SecureStore uses the device's Keychain (iOS) or Keystore (Android) for secure storage.
+ * Service for storing and retrieving the JWT token and user info using SecureStore.
  * 
  * @module tokenService
  */
@@ -15,63 +11,35 @@ const AUTH_TOKEN_KEY = 'auth_token';
 /** Storage key for the user info */
 const USER_INFO_KEY = 'user_info';
 
-/**
- * Saves the authentication token to secure storage.
- * 
- * @param token - JWT access token to store securely
- * @returns Promise that resolves when token is saved
- */
+/** Saves the JWT token. */
 export const saveToken = async (token: string): Promise<void> => {
   await SecureStore.setItemAsync(AUTH_TOKEN_KEY, token);
 };
 
-/**
- * Retrieves the authentication token from secure storage.
- * 
- * @returns Promise that resolves to the stored token, or null if no token exists
- */
+/** Returns the stored JWT token, or null if not found. */
 export const getToken = async (): Promise<string | null> => {
   return await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
 };
 
-/**
- * Deletes the authentication token from secure storage.
- * 
- * Used during logout to remove the user's session.
- * 
- * @returns Promise that resolves when token is deleted
- */
+/** Deletes the stored JWT token (used on logout). */
 export const deleteToken = async (): Promise<void> => {
   await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
 };
 
-/**
- * Saves the user info to secure storage.
- * 
- * @param userInfo - User info to store securely
- * @returns Promise that resolves when user info is saved
- */
+/** Saves the user info. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const saveUserInfo = async (userInfo: any): Promise<void> => {
   await SecureStore.setItemAsync(USER_INFO_KEY, JSON.stringify(userInfo));
 };
 
-/**
- * Retrieves the user info from secure storage.
- * 
- * @returns Promise that resolves to the stored user info, or null if no user info exists
- */
+/** Returns the stored user info, or null if not found. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getUserInfo = async (): Promise<any | null> => {
   const data = await SecureStore.getItemAsync(USER_INFO_KEY);
   return data ? JSON.parse(data) : null;
 };
 
-/**
- * Deletes the user info from secure storage.
- * 
- * Used during logout to remove the user's stored data.
- * 
- * @returns Promise that resolves when user info is deleted
- */
+/** Deletes the stored user info (used on logout). */
 export const deleteUserInfo = async (): Promise<void> => {
   await SecureStore.deleteItemAsync(USER_INFO_KEY);
 };
