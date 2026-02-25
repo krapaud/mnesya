@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, field_validator, ConfigDict
 from datetime import datetime, date
 from uuid import UUID
 from typing import List, Optional
+from app.schemas.pairing_code_schema import PairingCodeResponse
 
 
 class UserCreate(BaseModel):
@@ -109,3 +110,17 @@ class UserListResponse(BaseModel):
     """
     users: List[UserResponse]
     total: int
+
+
+class UserWithPairingCodeResponse(BaseModel):
+    """Schema for user creation response with pairing code.
+
+    Returned when creating a new user, includes both user data
+    and the generated pairing code for app pairing.
+
+    Attributes:
+        user (UserResponse): Created user data
+        pairing_code (PairingCodeResponse): Generated pairing code
+    """
+    user: UserResponse
+    pairing_code: PairingCodeResponse

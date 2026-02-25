@@ -117,3 +117,25 @@ class ReminderStatusFacade:
             self.reminder_status_repo.delete(reminder_status_id)
             return True
         return False
+
+    def get_statuses_by_reminder(self, reminder_id):
+        """Get all status entries for a specific reminder.
+        
+        Args:
+            reminder_id (UUID): The reminder's unique identifier
+            
+        Returns:
+            List[ReminderStatusModel]: List of status entries ordered by creation time (newest first)
+        """
+        return self.reminder_status_repo.get_statuses_by_reminder(reminder_id)
+
+    def get_latest_status(self, reminder_id):
+        """Get the most recent status for a reminder.
+        
+        Args:
+            reminder_id (UUID): The reminder's unique identifier
+            
+        Returns:
+            ReminderStatusModel: The latest status entry, or None if no status exists
+        """
+        return self.reminder_status_repo.get_latest_status(reminder_id)
