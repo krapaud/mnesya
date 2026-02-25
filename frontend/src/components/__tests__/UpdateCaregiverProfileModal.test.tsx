@@ -112,7 +112,7 @@ describe('UpdateCaregiverProfileModal', () => {
 
   describe('form validation', () => {
     it('should show error when first name is empty', async () => {
-      const { getByDisplayValue, getByText, getByPlaceholderText } = render(
+      const { getByDisplayValue, getByText, getByPlaceholderText: _getByPlaceholderText } = render(
         <UpdateCaregiverProfileModal
           visible={true}
           onClose={mockOnClose}

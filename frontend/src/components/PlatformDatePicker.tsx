@@ -1,9 +1,5 @@
 /**
- * Cross-platform calendar date picker component.
- * 
- * Provides a consistent modal-based calendar interface matching the
- * application's design system. Displays an interactive monthly calendar
- * view with navigation and date selection.
+ * Modal calendar picker for selecting a date.
  * 
  * @module PlatformDatePicker
  */
@@ -32,15 +28,6 @@ interface PlatformDatePickerProps {
     allowPastDates?: boolean;
 }
 
-/**
- * Platform-adapted calendar date picker component.
- * 
- * Displays a modal with an interactive calendar. Provides month navigation,
- * visual date selection, and highlights today and selected dates.
- * 
- * @param props - Component properties
- * @returns Calendar date picker component or null if not visible
- */
 const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     value,
     onChange,
@@ -54,14 +41,8 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     const [showYearPicker, setShowYearPicker] = useState(false);
     const [showMonthPicker, setShowMonthPicker] = useState(false);
 
-    /**
-     * Formats date for display.
-     * Uses displayFormat if provided, otherwise defaults to DD/MM/YYYY format.
-     * 
-     * @param date - Date to format
-     * @returns Formatted date string
-     */
-    const formatDate = (date: Date): string => {
+    /** Formats a date for display (DD/MM/YYYY by default). */
+    const _formatDate = (date: Date): string => {
         if (displayFormat) {
             return displayFormat(date);
         }
@@ -71,12 +52,7 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
         return `${day}/${month}/${year}`;
     };
 
-    /**
-     * Gets month name from date.
-     * 
-     * @param date - Date to extract month from
-     * @returns Full month name
-     */
+    /** Returns the full name of a month from a date. */
     const getMonthName = (date: Date): string => {
         const months = [
             'January', 'February', 'March', 'April', 'May', 'June',
@@ -85,11 +61,7 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
         return months[date.getMonth()];
     };
 
-    /**
-     * Gets short month names for picker.
-     * 
-     * @returns Array of short month names
-     */
+    /** Returns the list of all month names. */
     const getMonthNames = (): string[] => {
         return [
             'January', 'February', 'March', 'April', 'May', 'June',
@@ -97,11 +69,7 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
         ];
     };
 
-    /**
-     * Generates array of years for year picker.
-     * 
-     * @returns Array of years from 1920 to current year + 1
-     */
+    /** Generates the list of selectable years (1920 to next year). */
     const generateYears = (): number[] => {
         const currentYear = new Date().getFullYear();
         const years: number[] = [];
@@ -111,46 +79,25 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
         return years.reverse(); // Most recent first
     };
 
-    /**
-     * Handles year selection.
-     * 
-     * @param year - Selected year
-     */
     const handleYearSelect = (year: number) => {
         setCurrentMonth(new Date(year, currentMonth.getMonth(), 1));
         setShowYearPicker(false);
     };
 
-    /**
-     * Handles month selection.
-     * 
-     * @param monthIndex - Selected month index (0-11)
-     */
     const handleMonthSelect = (monthIndex: number) => {
         setCurrentMonth(new Date(currentMonth.getFullYear(), monthIndex, 1));
         setShowMonthPicker(false);
     };
 
-    /**
-     * Navigates to previous month.
-     */
     const goToPreviousMonth = () => {
         setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
     };
 
-    /**
-     * Navigates to next month.
-     */
     const goToNextMonth = () => {
         setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
     };
 
-    /**
-     * Generates calendar days for current month view.
-     * Includes padding days from previous/next months for complete week rows.
-     * 
-     * @returns Array of dates (or null for empty cells) representing the calendar grid
-     */
+    /** Builds the grid of days for the current month (includes null for empty cells). */
     const generateCalendarDays = (): (Date | null)[] => {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth();
@@ -176,45 +123,22 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
         return days;
     };
 
-    /**
-     * Handles date selection and closes modal.
-     * 
-     * @param date - Selected date
-     */
     const handleDateSelect = (date: Date) => {
         onChange(date);
         onClose();
     };
 
-    /**
-     * Checks if a date is today.
-     * 
-     * @param date - Date to check
-     * @returns True if date is today
-     */
     const isToday = (date: Date | null): boolean => {
         if (!date) return false;
         const today = new Date();
         return date.toDateString() === today.toDateString();
     };
 
-    /**
-     * Checks if a date is currently selected.
-     * 
-     * @param date - Date to check
-     * @returns True if date is selected
-     */
     const isSelected = (date: Date | null): boolean => {
         if (!date) return false;
         return date.toDateString() === value.toDateString();
     };
 
-    /**
-     * Checks if a date is in the past.
-     * 
-     * @param date - Date to check
-     * @returns True if date is before today
-     */
     const isPastDate = (date: Date): boolean => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);

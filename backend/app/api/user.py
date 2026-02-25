@@ -8,11 +8,17 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List
+from datetime import datetime, timezone, timedelta
 from app.services.caregiver_facade import CaregiverFacade
-from app.schemas.user_schema import UserCreate, UserUpdate, UserResponse
+from app.schemas.user_schema import UserCreate, UserUpdate, UserResponse, UserWithPairingCodeResponse
+from app.schemas.pairing_code_schema import PairingCodeResponse
 from app.services.user_facade import UserFacade
 from app.api.authentication import verify_token
+from app.persistence.pairing_code_repository import PairingCodeRepository
+from app.models.pairing_code import PairingCodeModel
 from app import get_db
+import secrets
+import string
 
 # Router
 router = APIRouter(prefix="/api/users", tags=["Users"])
@@ -50,7 +56,7 @@ def get_current_caregiver_id(
     return caregiver_id
 
 
-@router.post("", response_model=UserResponse)
+@router.post("", response_model=UserWithPairingCodeResponse)
 async def create_profile(
     request: UserCreate,
     caregiver_id: str = Depends(get_current_caregiver_id),
@@ -70,7 +76,29 @@ async def create_profile(
         user = user_facade.create_user(user_data, UUID(caregiver_id))
         caregiver_facade.add_user_to_caregiver(caregiver_id, user.id)
 
-        return UserResponse(
+        # Generate pairing code
+        def generate_pairing_code() -> str:
+            """Generate a 6-digit numeric pairing code."""
+            return ''.join(secrets.choice(string.digits) for _ in range(6))
+
+        pairing_repo = PairingCodeRepository(db)
+        code = generate_pairing_code()
+        
+        # Ensure uniqueness
+        while pairing_repo.find_by_code(code):
+            code = generate_pairing_code()
+
+        # Create pairing code
+        pairing_code = PairingCodeModel()
+        pairing_code.code = code
+        pairing_code.user_id = user.id
+        pairing_code.caregiver_id = UUID(caregiver_id)
+        pairing_code.expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
+
+        pairing_repo.add(pairing_code)
+
+        # Build response
+        user_response = UserResponse(
             id=user.id,
             first_name=user.first_name,
             last_name=user.last_name,
@@ -78,6 +106,16 @@ async def create_profile(
             caregiver_ids=user.caregiver_ids,
             created_at=user.created_at,
             updated_at=user.updated_at
+        )
+
+        pairing_response = PairingCodeResponse(
+            code=pairing_code.code,
+            expires_at=pairing_code.expires_at
+        )
+
+        return UserWithPairingCodeResponse(
+            user=user_response,
+            pairing_code=pairing_response
         )
 
     except ValueError as e:

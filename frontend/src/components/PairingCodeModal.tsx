@@ -1,8 +1,5 @@
 /**
- * Pairing Code Modal Component
- * 
- * Displays a full-screen modal showing a generated pairing code that users can share
- * to pair their devices. Includes copy functionality and expiration notice.
+ * Modal showing a pairing code that the user can copy to share with a caregiver.
  * 
  * @module PairingCodeModal
  */
@@ -30,15 +27,6 @@ interface PairingCodeModalProps {
     onExpired?: () => void;
 }
 
-/**
- * Full-screen modal displaying a pairing code with copy functionality.
- * 
- * Shows a generated pairing code that can be shared with users to pair their devices.
- * Includes visual feedback, copy-to-clipboard feature, and expiration information.
- * 
- * @param props - Component properties
- * @returns Full-screen pairing code modal or null if not visible
- */
 const PairingCodeModal: React.FC<PairingCodeModalProps> = ({
     visible,
     onClose,

@@ -64,6 +64,8 @@ services:
 
   # APScheduler Worker (for reminders)
   worker:
+    profiles:
+      - worker  # Disabled by default, start with: docker-compose --profile worker up
     build:
       context: ..
       dockerfile: backend/Dockerfile

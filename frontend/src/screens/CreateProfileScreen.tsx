@@ -1,9 +1,5 @@
 /**
- * CreateProfileScreen - Form for creating new user profiles.
- * 
- * Allows caregivers to register elderly users by entering their personal information
- * including first name, last name, and date of birth. Utilizes a cross-platform
- * date picker for birthday selection.
+ * Screen for creating a new user profile.
  * 
  * @module CreateProfileScreen
  */
@@ -22,37 +18,18 @@ import { createProfile } from '../services/profileService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateProfile'>;
 
-/**
- * Screen component for creating a new user profile.
- * 
- * Provides a form with input fields for first name, last name, and birthday.
- * Includes validation and navigation back to dashboard upon successful creation.
- * 
- * @param props - Navigation props
- * @returns Profile creation form screen
- */
 const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
-    
-    /** Form validation hook managing firstname and lastname validation */
+
     const { values, errors, showErrors, handleChange, validateAll } = useFormValidation({
         firstname: { validate: validateName },
         lastname: { validate: validateName }
     });
-    
-    /** User's birthday date state */
+
     const [birthday, setBirthday] = useState<Date>(new Date());
-    /** Controls date picker visibility */
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
-    /** Loading state during profile creation */
     const [isCreating, setIsCreating] = useState<boolean>(false);
 
-    /**
-     * Formats a date to DD/MM/YYYY string format for display.
-     * 
-     * @param date - Date object to format
-     * @returns Formatted date string
-     */
     const formatDate = (date: Date): string => {
         const day = date.getDate().toString().padStart(2, '0');
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -60,12 +37,6 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
         return `${day}/${month}/${year}`;
     };
 
-    /**
-     * Formats a date to YYYY-MM-DD string format for backend API.
-     * 
-     * @param date - Date object to format
-     * @returns ISO formatted date string
-     */
     const formatDateForAPI = (date: Date): string => {
         const year = date.getFullYear();
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -99,10 +70,9 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
             // Success - navigate back to dashboard
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             navigation.navigate('Dashboard');
-        } catch (error) {
+        } catch (_error) {
             // Handle error
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-            console.error('Failed to create profile:', error);
         } finally {
             setIsCreating(false);
         }

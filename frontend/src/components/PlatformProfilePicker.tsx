@@ -1,8 +1,5 @@
 /**
- * Cross-platform user profile picker component.
- * 
- * Provides a native picker for selecting a profile from a list
- * of available user profiles.
+ * Modal picker for selecting a user profile.
  * 
  * @module PlatformProfilePicker
  */
@@ -12,46 +9,23 @@ import { View, TouchableOpacity, Text, StyleSheet, Modal, FlatList } from 'react
 import { useTranslation } from 'react-i18next';
 import { commonStyles } from '../styles/commonStyles';
 
-/**
- * Interface representing a user profile.
- */
 export interface Profile {
-    /** Unique profile identifier */
     id: number | string;
-    /** Person's first name */
     firstName: string;
-    /** Person's last name */
     lastName: string;
 }
 
-/**
- * Props for the PlatformProfilePicker component.
- */
 interface PlatformProfilePickerProps {
-    /** List of available profiles for selection */
     profiles: Profile[];
-    /** ID of the currently selected profile */
     selectedValue: string | number;
-    /** Callback triggered when selection changes */
     onValueChange: (profileId: string | number) => void;
-    /** Controls the visibility of the picker */
     visible: boolean;
-    /** Callback triggered when picker closes */
     onClose: () => void;
-    /** Optional placeholder text */
     placeholder?: string;
 }
-/**
- * Platform-adapted profile picker component.
- * 
- * Displays a modal with a list of profiles for selection.
- * 
- * @param props - Component properties
- * @returns Profile picker component or null if not visible
- */
 const PlatformProfilePicker: React.FC<PlatformProfilePickerProps> = ({
     profiles,
-    selectedValue,
+    selectedValue: _selectedValue,
     onValueChange,
     visible,
     onClose,

@@ -30,7 +30,7 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 - Maximum 3 buttons per screen
 - Linear journey without complex navigation
 
-### MVP Scope - Current Implementation (Feb 20, 2026)
+### MVP Scope - Current Implementation (Feb 25, 2026)
 
 - **12 screens implemented**:
   - 1 Shared screen: WelcomeScreen
@@ -38,8 +38,9 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
   - 3 User screens: UserPairingScreen, UserHomeScreen, ReminderNotificationScreen
 - **Internationalization**: Full bilingual support (FR/EN) with i18next
 - **Enhanced Notifications**: 4 automatic repetitions (0, +2, +5, +10 min) + caregiver alerts
-- **API Integration**: Frontend fully connected to backend (auth, profiles, pairing)
-- **Current status**: Frontend 100% connected, Backend ~75% (auth, profiles, pairing, reminders in progress)
+- **API Integration**: Frontend fully connected to backend (auth, profiles, pairing, reminders, reminder status)
+- **Code Quality**: ESLint v9 configured (0 errors, 0 warnings across all frontend files)
+- **Current status**: Frontend 100% connected, Backend 100% (auth, profiles, pairing, reminders, reminder status all live)
 - **Detailed User Stories**: See [Technical Documentation _ Mnesya.pdf](docs/Technical%20Documentation%20_%20Mnesya.pdf) (MoSCoW method, US-001 to US-027)
 
 ## Features
@@ -126,13 +127,13 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
    - Frontend: Fully integrated with pairingService
    - Backend: `/api/pairing` generate and verify endpoints live
 
-4. **Reminder Trigger** (local only): Caregiver creates → Local Expo Notifications (4 repetitions: 0, +2, +5, +10 min)
-   - Current: Fully implemented with local scheduling
-   - Future: Backend → Expo Push Service → User device (cross-device notifications)
+4. **Reminder Management** (done): Caregiver creates/edits/deletes reminders → Frontend → FastAPI → PostgreSQL
+   - Frontend: Integrated with real API via reminderService
+   - Backend: `/api/reminders` full CRUD implemented
 
-5. **Status Update** (UI done / backend pending): User responds → Local state update + notification cancellation
-   - Current: Local response handling with smart cancellation
-   - Future: User Frontend → FastAPI → PostgreSQL + Expo Push (caregiver alert)
+5. **Status Update** (done): User responds → Frontend → FastAPI → PostgreSQL + notification cancellation
+   - Frontend: Integrated with useReminderStatus hook
+   - Backend: `/api/reminders/{id}/status` endpoint live
 
 ## Technologies
 
@@ -144,13 +145,14 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 - **Navigation** : React Navigation 7 (Stack + Bottom Tabs)
 - **Internationalization**: i18next + react-i18next (FR/EN)
 - **Notifications** : Expo Notifications (local scheduling with 4 automatic repetitions + caregiver alerts)
+- **Code Quality**: ESLint v9 (flat config) with @typescript-eslint, eslint-plugin-react, eslint-plugin-react-hooks
 - **UI Components**:
   - Custom date/time pickers (cross-platform)
   - Haptic feedback (expo-haptics)
   - 6-character code input (react-native-confirmation-code-field)
   - PIN view (react-native-pin-view)
 
-### Backend - Partially Implemented
+### Backend - Fully Implemented
 
 - **Framework** : Python 3.9+ with FastAPI 0.104.1
 - **Database** : PostgreSQL 13+ with psycopg2-binary
@@ -171,7 +173,8 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
   - [done] Alembic migrations configured and applied
   - [done] Docker Compose full setup (PostgreSQL + Backend + Worker)
   - [done] pytest test suite (authentication, pairing, user, caregiver)
-  - [pending] Reminder API endpoints (`/api/reminders`)
+  - [done] Reminder API endpoints (`/api/reminders`) — full CRUD
+  - [done] Reminder status update endpoint (`/api/reminders/{id}/status`)
   - [pending] Expo Push Notification Service integration
 
 ### Infrastructure
@@ -182,10 +185,10 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 
 ## Installation
 
-### Current Status (Feb 20, 2026)
+### Current Status (Feb 25, 2026)
 
-**Frontend**: Fully operational — connected to real backend (auth, profiles, pairing)  
-**Backend**: Auth, profiles, and pairing live — reminders API in progress  
+**Frontend**: Fully operational — connected to real backend (auth, profiles, pairing, reminders, reminder status)  
+**Backend**: Fully operational — all MVP endpoints live  
 **Docker**: Fully configured with PostgreSQL, Backend, and Worker services
 
 ### Prerequisites
@@ -275,7 +278,7 @@ mnesya/
 │   │   │   ├── caregiver.py       # /api/caregivers (profile management)
 │   │   │   ├── user.py            # /api/users (profile CRUD)
 │   │   │   ├── pairing.py         # /api/pairing (generate + verify)
-│   │   │   └── reminder.py        # /api/reminders (in progress)
+│   │   │   └── reminder.py        # /api/reminders (full CRUD + status)
 │   │   ├── models/            # SQLAlchemy ORM models
 │   │   │   ├── caregiver.py
 │   │   │   ├── user.py
@@ -321,16 +324,20 @@ mnesya/
 │   │   │   ├── PlatformDatePicker.tsx
 │   │   │   ├── PlatformTimePicker.tsx
 │   │   │   ├── PlatformProfilePicker.tsx
+│   │   │   ├── ReminderCard.tsx
 │   │   │   ├── UpdateUserProfileModal.tsx
 │   │   │   └── UpdateCaregiverProfileModal.tsx
 │   │   ├── contexts/          # React contexts
 │   │   │   └── RefreshContext.tsx  # Global refresh trigger
 │   │   ├── hooks/             # Custom React hooks
 │   │   │   ├── useAuth.ts          # Auth state (login/logout/register)
-│   │   │   ├── useFormValidation.ts # Form validation logic
+│   │   │   ├── useFormValidation.ts        # Form validation logic
 │   │   │   ├── useCaregiverProfile.ts
 │   │   │   ├── useUserProfile.ts
-│   │   │   └── useUserProfiles.ts
+│   │   │   ├── useUserProfiles.ts
+│   │   │   ├── useUserReminders.ts         # Reminders list for users
+│   │   │   ├── useCaregiverReminders.ts    # Reminders with caregiver context
+│   │   │   └── useReminderStatus.ts        # Reminder status updates
 │   │   ├── locales/           # i18n translation files
 │   │   │   ├── en.json
 │   │   │   └── fr.json
@@ -356,6 +363,7 @@ mnesya/
 │   │   │   ├── authService.ts      # register, login (JWT)
 │   │   │   ├── tokenService.ts     # JWT storage + retrieval
 │   │   │   ├── profileService.ts   # Profile CRUD
+│   │   │   ├── reminderService.ts  # Reminder CRUD
 │   │   │   └── pairingService.ts   # Pairing code generate + verify
 │   │   ├── styles/
 │   │   │   └── commonStyles.ts     # Shared style definitions
@@ -374,8 +382,7 @@ mnesya/
 │   ├── babel.config.js
 │   ├── jest.config.js
 │   ├── jest.setup.js
-│   ├── tsconfig.json
-│   ├── index.tsx
+│   ├── tsconfig.json   ├── eslint.config.js│   ├── index.tsx
 │   └── package.json
 ├── docker/                    # Docker configuration
 │   ├── docker-compose.yml     # PostgreSQL + Backend + Worker services
@@ -430,7 +437,7 @@ mnesya/
 | `/api/pairing/generate`       | POST   | Generate 6-char code (24h valid) | Yes (Caregiver)  |
 | `/api/pairing/verify`         | POST   | Verify code and receive JWT      | No               |
 
-### Reminders (in progress)
+### Reminders (done)
 
 | Endpoint                     | Method | Description            | Auth            |
 |------------------------------|--------|------------------------|-----------------|
@@ -581,14 +588,23 @@ npm test
 npm test -- --coverage
 ```
 
-#### Frontend Test Files
+#### Frontend Test Files (163 tests across 14 suites)
 
 - `services/__tests__/authService.test.ts` — register, login API calls
 - `services/__tests__/tokenService.test.ts` — JWT storage and retrieval
-- `hooks/__tests__/useCaregiverProfile.test.ts` — Hook behaviour
-- `components/__tests__/UpdateUserProfileModal.test.tsx` — Modal rendering
-- `components/__tests__/UpdateCaregiverProfileModal.test.tsx` — Modal rendering
-- **Tools**: Jest + React Native Testing Library
+- `services/__tests__/reminderService.test.ts` — Reminder CRUD API calls
+- `services/__tests__/pairingService.test.ts` — Pairing code generate and verify
+- `services/__tests__/profileService.test.ts` — User profile CRUD API calls
+- `hooks/__tests__/useCaregiverProfile.test.ts` — Hook loading/error/reload behaviour
+- `hooks/__tests__/useUserProfile.test.ts` — User profile hook behaviour
+- `hooks/__tests__/useUserProfiles.test.ts` — Profiles list hook behaviour
+- `hooks/__tests__/useUserReminders.test.ts` — Reminders list hook behaviour
+- `hooks/__tests__/useCaregiverReminders.test.ts` — Caregiver reminders hook behaviour
+- `hooks/__tests__/useReminderStatus.test.ts` — Reminder status hook behaviour
+- `components/__tests__/UpdateUserProfileModal.test.tsx` — Modal rendering and validation
+- `components/__tests__/UpdateCaregiverProfileModal.test.tsx` — Modal rendering and validation
+- `utils/__tests__/validation.test.ts` — Form validation utility functions
+- **Tools**: Jest + React Native Testing Library + ESLint v9
 
 ### Manual Tests
 

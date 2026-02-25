@@ -1,9 +1,5 @@
 /**
- * DashboardScreen - Main screen for caregivers.
- *
- * Displays a list of managed elderly user profiles with quick actions
- * to create new profiles or reminders. Features a centered header with
- * app branding and a scrollable list of profile cards.
+ * Main screen for caregivers, showing the list of user profiles.
  *
  * @module DashboardScreen
  */
