@@ -14,9 +14,77 @@ import { commonStyles } from '../styles/commonStyles';
 import { getUserInfo, deleteToken, deleteUserInfo } from '../services/tokenService';
 import { useRefresh } from '../contexts/RefreshContext';
 import { getUserReminders } from '../services/reminderService';
+import { useReminderStatus } from '../hooks';
 import type { CaregiverProfile, ReminderData } from '../types/interfaces';
 
 type Props = NativeStackScreenProps<UserTabsParamList, 'Refresh'>;
+
+/** Maps reminder status keys to their corresponding style from commonStyles. */
+const statusColorMap: Record<string, object> = {
+    'DONE': commonStyles.statusDone,
+    'PENDING': commonStyles.statusPending,
+    'POSTPONED': commonStyles.statusPostponed,
+    'UNABLE': commonStyles.statusUnable,
+};
+
+interface UserReminderItemProps {
+    reminder: ReminderData;
+    onBellPress: () => void;
+}
+
+/**
+ * Displays a single reminder card with its status badge.
+ * The bell icon is disabled (grey) when the status is DONE or UNABLE.
+ *
+ * Extracted as a sub-component so that `useReminderStatus` can be called
+ * as a proper React hook (hooks cannot be called inside `.map()`).
+ */
+const UserReminderItem: React.FC<UserReminderItemProps> = ({ reminder, onBellPress }) => {
+    const { t } = useTranslation();
+    const { reminderStatus } = useReminderStatus(reminder.id);
+
+    const statusKey = reminderStatus?.status
+        ? reminderStatus.status.charAt(0).toUpperCase() + reminderStatus.status.slice(1).toLowerCase()
+        : null;
+
+    const isClosed = reminderStatus?.status === 'DONE' || reminderStatus?.status === 'UNABLE';
+
+    return (
+        <View style={commonStyles.reminderCard}>
+            <View style={commonStyles.reminderHeader}>
+                <Text style={commonStyles.reminderTitle}>{reminder.title}</Text>
+                <TouchableOpacity
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    onPress={isClosed ? undefined : onBellPress}
+                    disabled={isClosed}
+                >
+                    <Ionicons
+                        name="notifications-outline"
+                        size={28}
+                        color={isClosed ? '#CCCCCC' : '#4A90E2'}
+                    />
+                </TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <View style={commonStyles.reminderDetails}>
+                    <View style={commonStyles.detailRow}>
+                        <Ionicons name="calendar-outline" size={16} color="#666666" />
+                        <Text style={commonStyles.detailText}>{new Date(reminder.scheduled_at).toLocaleDateString('fr-FR')}</Text>
+                    </View>
+                    <View style={commonStyles.detailRow}>
+                        <Ionicons name="time-outline" size={16} color="#666666" />
+                        <Text style={commonStyles.detailText}>{new Date(reminder.scheduled_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</Text>
+                    </View>
+                </View>
+                {statusKey && (
+                    <Text style={[commonStyles.statusText, statusColorMap[reminderStatus!.status] ?? commonStyles.statusPending]}>
+                        {t(`reminders.status.${statusKey}`)}
+                    </Text>
+                )}
+            </View>
+        </View>
+    );
+};
 
 const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -130,40 +198,18 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                     <Text style={commonStyles.emptyMessage}>{t('UserHome.messages.noReminders')}</Text>
                 ) : (
                     userReminders.map((reminder) => (
-                        <View key={reminder.id} style={commonStyles.reminderCard}>
-                            <View style={commonStyles.reminderHeader}>
-                                <Text style={commonStyles.reminderTitle}>{reminder.title}</Text>
-                                {/* 
-                                 * Bell icon - always visible
-                                 * Shows alert if reminder not yet available, navigates otherwise
-                                 */}
-                                <TouchableOpacity 
-                                    style={styles.bellIcon}
-                                    onPress={() => {
-                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                        
-                                        if (isReminderAvailable(reminder.scheduled_at)) {
-                                            navigation.getParent()?.navigate('ReminderNotification', { reminderId: reminder.id });
-                                        } else {
-                                            setShowAlert(true);
-                                        }
-                                    }}
-                                >
-                                    <Ionicons name="notifications-outline" size={24} color="#4A90E2" />
-                                </TouchableOpacity>
-                            </View>
-                            
-                            <View style={commonStyles.reminderDetails}>
-                                <View style={commonStyles.detailRow}>
-                                    <Ionicons name="calendar-outline" size={16} color="#666666" />
-                                    <Text style={commonStyles.detailText}>{new Date(reminder.scheduled_at).toLocaleDateString('fr-FR')}</Text>
-                                </View>
-                                <View style={commonStyles.detailRow}>
-                                    <Ionicons name="time-outline" size={16} color="#666666" />
-                                    <Text style={commonStyles.detailText}>{new Date(reminder.scheduled_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</Text>
-                                </View>
-                            </View>
-                        </View>
+                        <UserReminderItem
+                            key={reminder.id}
+                            reminder={reminder}
+                            onBellPress={() => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                if (isReminderAvailable(reminder.scheduled_at)) {
+                                    navigation.getParent()?.navigate('ReminderNotification', { reminderId: reminder.id });
+                                } else {
+                                    setShowAlert(true);
+                                }
+                            }}
+                        />
                     ))
                 )}
             </ScrollView>
@@ -172,9 +218,8 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                 visible={showAlert}
                 animationType="fade"
             >
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                <View style={commonStyles.modalOverlay}>
                     <View style={{ backgroundColor: '#FFFFFF', padding: 20, borderRadius: 10, width: '80%' }}>
-                        <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }}>{t('UserHome.messages.notAvailableTitle')}</Text>
                         <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 20 }}>{t('UserHome.messages.notAvailableMessage')}</Text>
                         <TouchableOpacity 
                             style={{ backgroundColor: '#4A90E2', padding: 18, borderRadius: 5 }}
@@ -194,11 +239,10 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                 onRequestClose={() => setShowMenu(false)}
             >
                 <TouchableOpacity 
-                    style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}
+                    style={styles.menuOverlay}
                     activeOpacity={1}
                     onPress={() => setShowMenu(false)}
                 >
-                    <View style={styles.menuContainer}>
                         <View style={styles.menuContent}>
                             <TouchableOpacity 
                                 style={styles.menuItem}
@@ -211,7 +255,6 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                                 <Text style={styles.menuItemText}>{t('UserProfile.buttons.Logout')}</Text>
                             </TouchableOpacity>
                         </View>
-                    </View>
                 </TouchableOpacity>
             </Modal>
 
@@ -222,7 +265,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                 animationType="fade"
                 onRequestClose={() => setShowLogoutConfirm(false)}
             >
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                <View style={commonStyles.modalOverlay}>
                     <View style={{ backgroundColor: '#FFFFFF', padding: 20, borderRadius: 10, width: '80%' }}>
                         <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }}>
                             {t('caregiverProfile.modal.title')}
@@ -285,12 +328,6 @@ const styles = StyleSheet.create({
         color: '#666666',
         marginBottom: 40,
     },
-    bellIcon: {
-        minHeight: 44,
-        minWidth: 44,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     // Refresh overlay styles
     refreshOverlay: {
         ...StyleSheet.absoluteFillObject,
@@ -315,8 +352,9 @@ const styles = StyleSheet.create({
         color: '#666666',
     },
     // Menu styles
-    menuContainer: {
+    menuOverlay: {
         flex: 1,
+        backgroundColor: 'transparent',
         justifyContent: 'flex-start',
         alignItems: 'flex-end',
         paddingTop: 110,

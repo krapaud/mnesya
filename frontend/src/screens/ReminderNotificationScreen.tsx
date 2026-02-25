@@ -1,9 +1,12 @@
 /**
  * Fullscreen notification screen for elderly users.
- * 
+ *
  * Shows the reminder message with three action buttons (Done, Remind later, Unable).
  * The bell icon animates to grab attention.
- * 
+ *
+ * On mount, checks the current reminder status:
+ * if already DONE or UNABLE, navigates back immediately to prevent duplicate actions.
+ *
  * @component
  */
 import React, { useRef, useEffect } from 'react';
@@ -16,7 +19,7 @@ import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { createBellSwingAnimation, getBellRotation } from '../utils/animations';
 import { scheduleReminderNotification } from '../utils/notifications';
-import { updateReminderStatus } from '../services/reminderService';
+import { getReminderStatus, updateReminderStatus } from '../services/reminderService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ReminderNotification'>;
 
@@ -41,6 +44,22 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
         createBellSwingAnimation(bellAnimation).start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // If the reminder is already DONE or UNABLE, go back immediately
+    useEffect(() => {
+        const checkStatus = async () => {
+            try {
+                const current = await getReminderStatus(String(reminderId));
+                if (current.status === 'DONE' || current.status === 'UNABLE') {
+                    navigation.goBack();
+                }
+            } catch (_error) {
+                // No status yet (404) — reminder is still actionable, do nothing
+            }
+        };
+        checkStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [reminderId]);
 
     const handleReminderAction = async (status: string) => {
         // If postponed, schedule a new notification in 5 minutes

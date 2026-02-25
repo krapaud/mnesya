@@ -107,7 +107,8 @@ export const commonStyles = StyleSheet.create({
     // ============ REMINDER CARD STYLES ============
     reminderCard: {
         backgroundColor: '#F5F5F5',
-        padding: 15,
+        paddingVertical: 10,
+        paddingHorizontal: 15,
         borderRadius: 15,
         marginTop: 10,
     },

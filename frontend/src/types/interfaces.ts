@@ -125,6 +125,8 @@ export interface ReminderData {
   description: string;
   scheduled_at: string;
   user_id: string;
+  user_first_name?: string;
+  user_last_name?: string;
   caregiver_id: string;
   created_at: string;
   updated_at: string;

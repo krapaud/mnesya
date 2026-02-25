@@ -4,7 +4,7 @@
  * @module CaregiverProfileScreen
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Modal, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -27,9 +27,8 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
 
     // Use custom hook for profile management
-    const { caregiverData, loading, error, reload } = useCaregiverProfile(
-        () => navigation.navigate('Welcome')
-    );
+    const handleAuthError = useCallback(() => navigation.navigate('Welcome'), [navigation]);
+    const { caregiverData, loading, error, reload } = useCaregiverProfile(handleAuthError);
 
     // Modal visibility states
     const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -487,7 +486,7 @@ const styles = StyleSheet.create({
     },
     menuOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        backgroundColor: 'transparent',
         justifyContent: 'flex-start',
         alignItems: 'flex-end',
         paddingTop: 105,
