@@ -25,16 +25,15 @@
         "failedToLoadProfiles": "Échec du chargement des profils",
         "failedToLoadProfile": "Échec du chargement du profil",
         "failedToUpdateProfile": "Échec de la mise à jour du profil",
-        "failedToDeleteProfile": "Échec de la suppression du profil"
+        "failedToDeleteProfile": "Échec de la suppression du profil",
+        "failedToLoadReminders": "Échec du chargement des rappels",
+        "failedToLoadRemindersStatus": "Échec du chargement du statut des rappels"
     },
     "pickersText": {
         "All Profiles": "Tous",
         "All Dates": "Toutes",
         "Select a profile": "Sélectionner un Profil",
-        "Select Date": "Sélectionner une Date",
-        "Select Time": "Sélectionner une Heure",
-        "Today": "Aujourd'hui",
-        "Tomorrow": "Demain"
+        "Select Time": "Sélectionner une Heure"
     }
   },
   "welcome": {
@@ -69,6 +68,7 @@
     },
     "buttons": {
         "Sign Up": "S'enregistrer",
+        "Signing up...": "Inscription en cours...",
         "Already have an account? Log in": "Vous avez déjà un compte? Connectez vous"
     },
     "errors": {
@@ -81,10 +81,8 @@
         "Password must contain at least one lowercase letter": "Le mot de passe doit contenir au moins une minuscule",
         "Password must contain at least one special character": "Le mot de passe doit contenir au moins un caractère spécial ($@#%*!~&)",
         "Passwords do not match": "Les mots de passe ne correspondent pas",
-        "All fields are required": "Tous les champs sont requis",
         "Name cannot be empty": "Ce champ ne peut pas être vide",
         "Name must be at most 100 characters": "Le nom doit contenir au maximum 100 caractères",
-        "Please fix errors before submitting": "Veuillez corriger les erreurs avant de soumettre",
         "Email already registered": "Cet email est déjà enregistré",
         "Please use a different email": "Veuillez utiliser une adresse email différente",
         "Registration failed": "L'inscription a échoué",
@@ -148,15 +146,10 @@
         "Be careful not to enter sensitive confidential information.": "Attention: Évitez de saisir des informations confidentielles."
     },
     "errors": {
-        "title": "Erreur",
         "Please select a profile": "Veuillez sélectionner un profil",
         "Please enter a title": "Veuillez entrer un titre",
         "Please enter a message": "Veuillez entrer un message",
         "Error scheduling notification": "Erreur lors de la programmation de la notification"
-    },
-    "success": {
-        "title": "Succès",
-        "Reminder created successfully": "Rappel créé avec succès !"
     },
     "modal": {
         "title": "Confirmer le rappel",
@@ -241,13 +234,12 @@
     "tip": "Astuce : Ce code expire dans 5 minutes",
     "expiresIn": "Expire dans"
   },  "ReminderNotification": {
+    "title": "Rappel",
+    "defaultMessage": "Vous avez un nouveau rappel",
     "buttons": {
         "Done": "Terminé",
         "Remind later": "Me rappeler plus tard",
         "Unable": "Impossible"
-    },
-    "messages": {
-        "Reminder not found": "Rappel introuvable"
     }
   },
   "caregiverProfile": {
@@ -272,26 +264,7 @@
       "confirm": "Se déconnecter"
     }
   },
-  "userProfile": {
-    "title": "Mon Profil",
-    "sections": {
-      "accountInfo": "Mes informations",
-      "actions": "Actions"
-    },
-    "fields": {
-      "name": "Nom",
-      "age": "Âge"
-    },
-    "buttons": {
-      "rePairing": "Jumeler à nouveau"
-    },
-    "modal": {
-      "title": "Attention",
-      "message": "Cette action réinitialisera votre jumelage. Vous ne recevrez plus de notifications tant que vous n'aurez pas saisi un nouveau code de jumelage.",
-      "cancel": "Annuler",
-      "confirm": "Continuer"
-    }
-  },
+
   "notifications": {
     "repetitions": {
         "reminder": "⏰ RAPPEL: {{title}}",

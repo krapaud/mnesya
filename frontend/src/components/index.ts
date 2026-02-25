@@ -1,9 +1,5 @@
 /**
- * Centralized export file for shared components.
- * 
- * This module exports reusable components of the application,
- * primarily cross-platform pickers (iOS/Android) for date, time,
- * and profile selection.
+ * Barrel export for all shared components.
  */
 
 export { default as PlatformDatePicker } from './PlatformDatePicker';

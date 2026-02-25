@@ -1,7 +1,5 @@
 /**
- * Navigation type definitions for the application.
- * 
- * Defines parameter lists for stack and tab navigators used throughout the app.
+ * Navigation type definitions for the app.
  * 
  * @module types
  */

@@ -3,6 +3,7 @@
 from app.models.pairing_code import PairingCodeModel
 from app.models.user import UserModel
 from app.models.caregiver import CaregiverModel
+from app.models.push_token import PushTokenModel
 from app import get_db, database as Base
 from app.main import app
 import pytest
@@ -28,6 +29,7 @@ from app.models.caregiver import CaregiverModel
 from app.models.user import UserModel
 from app.models.pairing_code import PairingCodeModel
 from app.models.reminder import ReminderModel
+from app.models.push_token import PushTokenModel
 
 # Test database URL
 TEST_DATABASE_URL = "postgresql://mnesya_user:mnesya_password@db:5432/mnesya_test_db"

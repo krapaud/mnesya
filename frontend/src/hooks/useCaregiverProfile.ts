@@ -1,26 +1,16 @@
 /**
- * Hook for loading and refreshing the authenticated caregiver's profile.
- *
- * Fetches profile data on mount and exposes a reload function for manual refresh.
- * Handles authentication errors via an optional callback.
+ * Hook for loading the caregiver's own profile.
  *
  * @module useCaregiverProfile
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getCurrentUser } from '../services/authService';
 import type { CaregiverProfile } from '../types/interfaces';
 
-/**
- * Return type for useCaregiverProfile hook.
- */
 interface UseCaregiverProfileResult {
-  /** Current caregiver profile data, null if not loaded */
   caregiverData: CaregiverProfile | null;
-  /** Loading state indicator */
   loading: boolean;
-  /** Error message if loading failed, null otherwise */
   error: string | null;
-  /** Function to reload profile data */
   reload: () => Promise<void>;
 }
 
@@ -31,33 +21,29 @@ export const useCaregiverProfile = (
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Loads caregiver profile data from API.
-   * Handles loading states, errors, and authentication failures.
-   */
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const profile = await getCurrentUser();
       setCaregiverData(profile);
-    } catch (err: any) {
-      console.error('Failed to load caregiver profile:', err);
+    } catch (err: unknown) {
       setError('common.errors.failedToLoadProfile');
       
-      // Handle authentication errors (401 Unauthorized, 403 Forbidden)
-      if (err?.response?.status === 401 || err?.response?.status === 403) {
+      // If the user is not logged in, call the auth error callback
+      const error = err as { response?: { status?: number } };
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
         onAuthError?.();
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [onAuthError]);
 
   // Load profile on component mount
   useEffect(() => {
     loadProfile();
-  }, []);
+  }, [loadProfile]);
 
   return {
     caregiverData,

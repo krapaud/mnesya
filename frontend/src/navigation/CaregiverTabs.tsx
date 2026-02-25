@@ -1,13 +1,5 @@
 /**
- * Bottom tab navigation component for caregiver interface.
- * 
- * Provides a three-tab navigation bar optimized for caregiver workflows:
- * - Home: Dashboard with profile management
- * - Reminders: List and management of all reminders
- * - Profile: Caregiver account settings
- * 
- * Implements safe area handling for Android system UI to prevent overlap
- * with system navigation buttons.
+ * Bottom tabs for the caregiver interface (Home, Reminders, Profile).
  * 
  * @module CaregiverTabs
  */
@@ -25,15 +17,6 @@ import CaregiverProfileScreen from '../screens/CaregiverProfileScreen';
 
 const Tab = createBottomTabNavigator<CaregiverTabsParamList>();
 
-/**
- * Caregiver tab navigation component.
- * 
- * Renders a bottom tab navigator with dynamic height adjustment for
- * Android system UI compatibility. Uses Ionicons for tab icons and
- * supports internationalization.
- * 
- * @returns Tab navigator component for caregiver interface
- */
 const CaregiverTabs: React.FC = () => {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();

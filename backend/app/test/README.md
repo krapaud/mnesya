@@ -15,6 +15,7 @@ backend/app/test/
 ├── test_user_api.py                # Tests pour /api/users
 ├── test_pairing_api.py             # Tests pour /api/pairing
 ├── test_reminder_api.py            # Tests pour /api/reminder
+├── test_reminder_status_api.py     # Tests pour /api/reminder-status
 └── test.py                         # Tests existants (modèles, schemas, etc.)
 ```
 
@@ -50,6 +51,12 @@ backend/app/test/
 - **PUT /{reminder_id}** - Mettre à jour un reminder
 - **DELETE /{reminder_id}** - Supprimer un reminder
 
+### 6. Reminder Status API (`/api/reminder-status`)
+- **GET /{reminder_id}/current** - Obtenir le statut actuel d'un reminder
+- **GET /{reminder_id}/history** - Obtenir l'historique des statuts d'un reminder
+- **PUT /{reminder_id}** - Mettre à jour le statut d'un reminder
+- **GET /valid-statuses** - Obtenir la liste des statuts valides
+
 ## Exécuter les Tests
 
 ### Tous les tests
@@ -73,6 +80,9 @@ docker exec mnesya-backend pytest app/test/test_pairing_api.py
 
 # Tests reminder
 docker exec mnesya-backend pytest app/test/test_reminder_api.py
+
+# Tests reminder status
+docker exec mnesya-backend pytest app/test/test_reminder_status_api.py
 ```
 
 ### Tests d'une classe spécifique

@@ -1,33 +1,16 @@
 /**
- * Form validation utilities.
- * 
- * Provides validation functions for common form fields including email,
- * password, and name inputs. Returns error message keys for i18n translation.
+ * Validation functions for form fields.
+ * Returns a translation key string if invalid, or null if valid.
  * 
  * @module validation
  */
 
-/**
- * Cleans text input by removing consecutive spaces.
- * 
- * Replaces multiple consecutive spaces with a single space.
- * Useful for name fields and text inputs.
- * 
- * @param text - Text to clean
- * @returns Cleaned text with single spaces
- */
+/** Removes extra spaces from a text input. */
 export const cleanText = (text: string): string => {
     return text.replace(/\s{2,}/g, ' ');
 };
 
-/**
- * Validates email address format and length.
- * 
- * Checks for valid email format and ensures length is between 5-255 characters.
- * 
- * @param email - Email address to validate
- * @returns Error message key or null if valid
- */
+/** Checks email format and length. Returns an error key or null. */
 export const validateEmail = (email: string): string | null => {
     const trimmed = email.trim();
     
@@ -45,19 +28,7 @@ export const validateEmail = (email: string): string | null => {
     return null;
 };
 
-/**
- * Validates password strength and requirements.
- * 
- * Enforces password policy:
- * - Length: 8-20 characters
- * - Must contain at least one digit
- * - Must contain at least one uppercase letter
- * - Must contain at least one lowercase letter
- * - Must contain at least one special character ($@#%*!~&)
- * 
- * @param password - Password to validate
- * @returns Error message key or null if valid
- */
+/** Checks password strength (length, digits, uppercase, lowercase, special char). Returns an error key or null. */
 export const validatePassword = (password: string): string | null => {
     const trimmedPassword = password.trim();
     
@@ -92,14 +63,7 @@ export const validatePassword = (password: string): string | null => {
     return null;
 };
 
-/**
- * Validates name field (first name or last name).
- * 
- * Ensures name is not empty and does not exceed maximum length.
- * 
- * @param name - Name to validate
- * @returns Error message key or null if valid
- */
+/** Checks that the name is not empty and not too long. Returns an error key or null. */
 export const validateName = (name: string): string | null => {
     const trimmedName = name.trim();
     
@@ -116,13 +80,7 @@ export const validateName = (name: string): string | null => {
     return null;
 };
 
-/**
- * Validates password confirmation matches original password.
- * 
- * @param password - Original password
- * @param confirmPassword - Password confirmation
- * @returns Error message key or null if passwords match
- */
+/** Checks that the two passwords match. Returns an error key or null. */
 export const validatePasswordMatch = (password: string, confirmPassword: string): string | null => {
     if (password !== confirmPassword) {
         return 'register.errors.Passwords do not match';

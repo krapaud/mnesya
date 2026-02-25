@@ -6,7 +6,10 @@ It provides a simplified interface for reminder operations.
 
 from sqlalchemy.orm import Session
 from app.models.reminder import ReminderModel
+from app.models.reminder_status import ReminderStatusModel
+from app.models.reminder_status_enum import ReminderStatusEnum
 from app.persistence.reminder_repository import ReminderRepository
+from app.persistence.reminder_status_repository import ReminderStatusRepository
 from uuid import UUID
 
 
@@ -19,18 +22,21 @@ class ReminderFacade:
 
     Attributes:
         reminder_repo (ReminderRepository): Repository for reminder data access
+        reminder_status_repo (ReminderStatusRepository): Repository for status data access
     """
     def __init__(self, db: Session):
-        """Initialize the facade with a reminder repository."""
+        """Initialize the facade with reminder and status repositories."""
         self.reminder_repo = ReminderRepository(db)
+        self.reminder_status_repo = ReminderStatusRepository(db)
 
     # ==================== REMINDER BUSINESS LOGIC ====================
 
     def create_reminder(self, reminder_data: dict) -> object:
-        """Create a new reminder.
+        """Create a new reminder with an initial PENDING status.
 
         Business logic for reminder creation. Validates data through the model's
-        property setters and persists to the database.
+        property setters, persists to the database, and automatically creates
+        a PENDING status entry.
 
         Args:
             reminder_data (dict): Dictionary containing reminder fields
@@ -43,8 +49,16 @@ class ReminderFacade:
             ValueError: If validation fails (from model setters)
             Exception: If database operation fails
         """
+        # Create the reminder
         reminder = ReminderModel(**reminder_data)
         self.reminder_repo.add(reminder)
+        
+        # Automatically create initial PENDING status
+        initial_status = ReminderStatusModel()
+        initial_status.status = ReminderStatusEnum.PENDING.value
+        initial_status.reminder_id = reminder.id
+        self.reminder_status_repo.add(initial_status)
+        
         return reminder
 
     def get_reminder(self, reminder_id: str) -> object:

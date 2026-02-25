@@ -1,14 +1,10 @@
 /**
- * UserProfileDetailScreen - Detailed view for a specific elderly user profile.
- *
- * Displays profile information (name, age) and active reminders for the
- * selected profile. Accessible from Dashboard when clicking on a profile card.
- * Provides options to edit or delete the profile.
+ * Screen showing details and reminders for a specific user profile.
  *
  * @module UserProfileDetailScreen
  */
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -30,7 +26,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
     const profileId = route.params?.profileId;
     
     // Fetch user profile data from the backend
-    const { userData, loading, error, reload, update, remove } = useUserProfile(profileId);
+    const { userData, loading, error, reload: _reload, update, remove } = useUserProfile(profileId);
 
     // Pairing code modal state
     const [showPairingModal, setShowPairingModal] = useState(false);
@@ -70,7 +66,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             setShowDeleteModal(false);
             navigation.goBack();
-        } catch (err) {
+        } catch (_err) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             setShowDeleteModal(false);
         }
@@ -90,7 +86,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
             setExpiresAt(response.expires_at);
             setShowPairingModal(true);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        } catch (err) {
+        } catch (_err) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         } finally {
             setIsGeneratingCode(false);

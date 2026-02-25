@@ -1,6 +1,7 @@
 """Reminder Schema module.
 
-This module defines Pydantic schemas for Reminder entity validation and serialization.
+This module defines Pydantic schemas for Reminder entity validation and
+serialization.
 """
 
 from pydantic import BaseModel, Field, field_validator, ConfigDict

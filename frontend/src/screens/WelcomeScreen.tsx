@@ -1,8 +1,5 @@
 /**
- * WelcomeScreen - Initial profile type selection screen.
- *
- * Entry point of the application flow. Allows users to choose
- * between an elderly user profile or a caregiver profile.
+ * Welcome screen — lets the user choose between user and caregiver profiles.
  *
  * @module WelcomeScreen
  */

@@ -1,10 +1,5 @@
 /**
- * UserHomeScreen - Main screen for elderly users to view their reminders.
- *
- * Displays upcoming reminders in a simple, accessible way following
- * elderly-friendly design principles with large text and high contrast.
- * Fetches reminders from the backend API and presents them as scrollable cards.
- * Each reminder card shows the title, date, and time with a bell icon to view details.
+ * Main screen for elderly users, showing their upcoming reminders.
  *
  * @module UserHomeScreen
  */
@@ -16,9 +11,10 @@ import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { UserTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { fakeReminders } from '../data/fakeData';
 import { getUserInfo, deleteToken, deleteUserInfo } from '../services/tokenService';
 import { useRefresh } from '../contexts/RefreshContext';
+import { getUserReminders } from '../services/reminderService';
+import type { CaregiverProfile, ReminderData } from '../types/interfaces';
 
 type Props = NativeStackScreenProps<UserTabsParamList, 'Refresh'>;
 
@@ -29,9 +25,9 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
     const [showAlert, setShowAlert] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-    const [currentUser, setCurrentUser] = useState<any>(null);
-    const [userReminders, setUserReminders] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [currentUser, setCurrentUser] = useState<CaregiverProfile | null>(null);
+    const [userReminders, setUserReminders] = useState<ReminderData[]>([]);
+    const [_loading, setLoading] = useState(true);
     const loadUserTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     /**
@@ -46,12 +42,8 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
             const user = await getUserInfo();
             setCurrentUser(user);
             
-            if (user?.first_name && user?.last_name) {
-                const filtered = fakeReminders.filter(
-                    r => r.profileName == `${user.first_name} ${user.last_name}`
-                );
-                setUserReminders(filtered);
-            }
+            const reminders = await getUserReminders();
+            setUserReminders(reminders);
             
             // Ensure minimum 1 second display time for loading indicator
             const elapsedTime = Date.now() - startTime;
@@ -69,26 +61,18 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                 clearTimeout(loadUserTimerRef.current);
             }
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [refreshTrigger]);
 
-    /**
-     * Checks if a reminder is available (date/time has passed)
-     * @param date - Format "DD/MM/YYYY"
-     * @param time - Format "HH:MM"
-     * @returns true if reminder time has passed, false otherwise
-     */
-    const isReminderAvailable = (date: string, time: string): boolean => {
-        const [day, month, year] = date.split('/').map(Number);
-        const [hours, minutes] = time.split(':').map(Number);
-        const reminderDateTime = new Date(year, month - 1, day, hours, minutes);
-        return reminderDateTime <= new Date();
+    const isReminderAvailable = (scheduled_at: string): boolean => {
+        return new Date(scheduled_at) <= new Date();
     };
 
     /**
      * Handles user logout by clearing tokens and navigation reset.
      * Removes stored authentication token and user info, then redirects to Welcome screen.
      */
-    const handleLogout = async () => {
+    const _handleLogout = async () => {
         setShowLogoutConfirm(true);
     };
 
@@ -102,8 +86,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                 index: 0,
                 routes: [{ name: 'Welcome' }],
             });
-        } catch (error) {
-            console.error('Error during logout:', error);
+        } catch (_error) {
         }
         setShowLogoutConfirm(false);
     };
@@ -159,7 +142,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                                     onPress={() => {
                                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                                         
-                                        if (isReminderAvailable(reminder.date, reminder.time)) {
+                                        if (isReminderAvailable(reminder.scheduled_at)) {
                                             navigation.getParent()?.navigate('ReminderNotification', { reminderId: reminder.id });
                                         } else {
                                             setShowAlert(true);
@@ -173,11 +156,11 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                             <View style={commonStyles.reminderDetails}>
                                 <View style={commonStyles.detailRow}>
                                     <Ionicons name="calendar-outline" size={16} color="#666666" />
-                                    <Text style={commonStyles.detailText}>{reminder.date}</Text>
+                                    <Text style={commonStyles.detailText}>{new Date(reminder.scheduled_at).toLocaleDateString('fr-FR')}</Text>
                                 </View>
                                 <View style={commonStyles.detailRow}>
                                     <Ionicons name="time-outline" size={16} color="#666666" />
-                                    <Text style={commonStyles.detailText}>{reminder.time}</Text>
+                                    <Text style={commonStyles.detailText}>{new Date(reminder.scheduled_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</Text>
                                 </View>
                             </View>
                         </View>

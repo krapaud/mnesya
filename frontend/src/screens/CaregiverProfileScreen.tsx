@@ -1,11 +1,5 @@
 /**
- * CaregiverProfileScreen - Profile settings page for caregivers
- * 
- * Displays caregiver account information and provides access to:
- * - Profile information (name, email)
- * - Profile editing functionality
- * - Password change functionality
- * - Logout action with confirmation modal
+ * Screen showing the caregiver's profile info and settings.
  * 
  * @module CaregiverProfileScreen
  */
@@ -29,15 +23,6 @@ type Props = CompositeScreenProps<
     NativeStackScreenProps<RootStackParamList>
 >;
 
-/**
- * Caregiver profile settings screen component.
- * 
- * Displays account information and settings options for caregivers.
- * Provides logout and password change functionality.
- * 
- * @param props - Component properties
- * @returns Profile settings screen
- */
 const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
 
@@ -57,7 +42,6 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
     const handleChangePassword = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         // TODO: Navigate to password change screen when implemented
-        console.log('Change password clicked');
     };
 
     /**
@@ -80,8 +64,7 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
         try {
             await logout();
             navigation.navigate('Welcome');
-        } catch (err) {
-            console.error('Logout failed:', err);
+        } catch (_err) {
             // Even if logout fails, clear local state and navigate
             navigation.navigate('Welcome');
         }

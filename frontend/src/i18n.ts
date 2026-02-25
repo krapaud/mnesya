@@ -1,8 +1,5 @@
 /**
- * Internationalization configuration for the application.
- * 
- * Configures i18next for French/English bilingual support.
- * Default language is French, with fallback to French.
+ * i18n configuration — sets up French/English translations.
  * 
  * @module i18n
  */
@@ -12,10 +9,6 @@ import { initReactI18next } from "react-i18next";
 import fr from "./locales/fr.json";
 import en from "./locales/en.json";
 
-/**
- * Translation resources organized by language code.
- * Each language contains a 'translation' namespace with all app strings.
- */
 const resources = {
   fr: {
     translation: fr,
