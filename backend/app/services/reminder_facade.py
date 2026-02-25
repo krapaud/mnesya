@@ -22,7 +22,8 @@ class ReminderFacade:
 
     Attributes:
         reminder_repo (ReminderRepository): Repository for reminder data access
-        reminder_status_repo (ReminderStatusRepository): Repository for status data access
+        reminder_status_repo (ReminderStatusRepository): Repository for
+            status data access
     """
     def __init__(self, db: Session):
         """Initialize the facade with reminder and status repositories."""
@@ -34,16 +35,17 @@ class ReminderFacade:
     def create_reminder(self, reminder_data: dict) -> object:
         """Create a new reminder with an initial PENDING status.
 
-        Business logic for reminder creation. Validates data through the model's
-        property setters, persists to the database, and automatically creates
-        a PENDING status entry.
+        Business logic for reminder creation. Validates data through the
+        model's property setters, persists to the database, and automatically
+        creates a PENDING status entry.
 
         Args:
             reminder_data (dict): Dictionary containing reminder fields
-                                  (title, description, scheduled_at, caregiver_id, user_id)
+                (title, description, scheduled_at, caregiver_id, user_id)
 
         Returns:
-            ReminderModel: The created reminder with generated ID and timestamps
+            ReminderModel: The created reminder with generated ID and
+                timestamps
 
         Raises:
             ValueError: If validation fails (from model setters)
@@ -52,13 +54,13 @@ class ReminderFacade:
         # Create the reminder
         reminder = ReminderModel(**reminder_data)
         self.reminder_repo.add(reminder)
-        
+
         # Automatically create initial PENDING status
         initial_status = ReminderStatusModel()
         initial_status.status = ReminderStatusEnum.PENDING.value
         initial_status.reminder_id = reminder.id
         self.reminder_status_repo.add(initial_status)
-        
+
         return reminder
 
     def get_reminder(self, reminder_id: str) -> object:
@@ -70,7 +72,7 @@ class ReminderFacade:
         Returns:
             ReminderModel: The reminder if found, None otherwise
         """
-        return self.reminder_repo.get(reminder_id)
+        return self.reminder_repo.get(UUID(reminder_id))
 
     def get_all_reminders(self) -> list:
         """Retrieve all reminders.
@@ -106,11 +108,11 @@ class ReminderFacade:
             ValueError: If validation fails (from model setters)
             Exception: If database operation fails
         """
-        self.reminder_repo.update(reminder_id, reminder_data)
-        return self.reminder_repo.get(reminder_id)
+        self.reminder_repo.update(UUID(reminder_id), reminder_data)
+        return self.reminder_repo.get(UUID(reminder_id))
 
     def delete_reminder(self, reminder_id: str) -> bool:
-        """Delete a reminder.
+        """Delete a reminder and its associated statuses.
 
         Args:
             reminder_id (str): The reminder's unique identifier
@@ -120,12 +122,15 @@ class ReminderFacade:
 
         Raises:
             Exception: If database operation fails
-
-        Note:
-            Consider cascading deletion of associated reminder statuses
         """
-        reminder = self.reminder_repo.get(reminder_id)
+        reminder = self.reminder_repo.get(UUID(reminder_id))
         if reminder:
-            self.reminder_repo.delete(reminder_id)
+            # Delete associated statuses first to avoid FK constraint violation
+            statuses = self.reminder_status_repo.get_statuses_by_reminder(
+                reminder.id
+            )
+            for status in statuses:
+                self.reminder_status_repo.delete(status.id)
+            self.reminder_repo.delete(UUID(reminder_id))
             return True
         return False

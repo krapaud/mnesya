@@ -52,6 +52,8 @@ def build_reminder_response(reminder) -> ReminderResponse:
         scheduled_at=reminder.scheduled_at,
         caregiver_id=reminder.caregiver_id,
         user_id=reminder.user_id,
+        user_first_name=getattr(reminder, 'user_first_name', None),
+        user_last_name=getattr(reminder, 'user_last_name', None),
         created_at=reminder.created_at,
         updated_at=reminder.updated_at,
     )
