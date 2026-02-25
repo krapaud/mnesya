@@ -54,11 +54,13 @@ docs/trello-status.txt
 .DS_Store
 Thumbs.db
 
-# Environment
+# Environment — ne JAMAIS committer ces fichiers
 .env
 .env.local
+.env.*.local
 docker/.env
 backend/.env
+frontend/.env.local
 
 # Database
 *.db

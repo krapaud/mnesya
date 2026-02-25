@@ -31,8 +31,12 @@ from app.models.pairing_code import PairingCodeModel
 from app.models.reminder import ReminderModel
 from app.models.push_token import PushTokenModel
 
-# Test database URL
-TEST_DATABASE_URL = "postgresql://mnesya_user:mnesya_password@db:5432/mnesya_test_db"
+# Test database URL — définie via TEST_DATABASE_URL dans l'environnement
+# Fallback vers l'URL Docker si non définie (usage dans docker-compose uniquement)
+TEST_DATABASE_URL = os.getenv(
+    "TEST_DATABASE_URL",
+    "postgresql://mnesya_user:changeme@db:5432/mnesya_test_db"
+)
 
 
 @pytest.fixture(scope="function")
