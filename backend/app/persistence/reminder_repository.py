@@ -8,6 +8,7 @@ from uuid import UUID
 from datetime import datetime
 from sqlalchemy.orm import Session
 from app.models.reminder import ReminderModel
+from app.models.user import UserModel
 from app.persistence.base_repository import BaseRepository
 
 
@@ -21,13 +22,9 @@ class ReminderRepository(BaseRepository[ReminderModel]):
         """Initialize the ReminderRepository with ReminderModel and database session."""
         super().__init__(ReminderModel, db)
 
-    def __init__(self, db: Session):
-        """Initialize the ReminderRepository with ReminderModel and database session."""
-        super().__init__(ReminderModel, db)
-
     def get_reminders_by_caregiver(
             self, caregiver_id: UUID) -> List[ReminderModel]:
-        """Get all reminders created by a specific caregiver.
+        """Get all reminders created by a specific caregiver, enriched with user name.
 
         Args:
             caregiver_id (UUID): The caregiver's unique identifier
@@ -35,12 +32,20 @@ class ReminderRepository(BaseRepository[ReminderModel]):
         Returns:
             List[ReminderModel]: List of reminders ordered by scheduled time (newest first)
         """
-        return self.db.query(self.model).filter(
-            self.model._caregiver_id == caregiver_id
-        ).order_by(self.model._scheduled_at.desc()).all()
+        results = (
+            self.db.query(self.model, UserModel._first_name, UserModel._last_name)
+            .join(UserModel, self.model._user_id == UserModel._id)
+            .filter(self.model._caregiver_id == caregiver_id)
+            .order_by(self.model._scheduled_at.desc())
+            .all()
+        )
+        for reminder, first_name, last_name in results:
+            reminder.user_first_name = first_name
+            reminder.user_last_name = last_name
+        return [r for r, _, _ in results]
 
     def get_reminders_by_user(self, user_id: UUID) -> List[ReminderModel]:
-        """Get all reminders for a specific user.
+        """Get all reminders for a specific user, enriched with user name.
 
         Args:
             user_id (UUID): The user's unique identifier
@@ -48,9 +53,17 @@ class ReminderRepository(BaseRepository[ReminderModel]):
         Returns:
             List[ReminderModel]: List of reminders ordered by scheduled time (newest first)
         """
-        return self.db.query(self.model).filter(
-            self.model._user_id == user_id
-        ).order_by(self.model._scheduled_at.desc()).all()
+        results = (
+            self.db.query(self.model, UserModel._first_name, UserModel._last_name)
+            .join(UserModel, self.model._user_id == UserModel._id)
+            .filter(self.model._user_id == user_id)
+            .order_by(self.model._scheduled_at.desc())
+            .all()
+        )
+        for reminder, first_name, last_name in results:
+            reminder.user_first_name = first_name
+            reminder.user_last_name = last_name
+        return [r for r, _, _ in results]
 
     def get_upcoming_reminders(self, user_id: UUID,
                                limit: int = 5) -> List[ReminderModel]:

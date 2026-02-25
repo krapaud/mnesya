@@ -93,6 +93,10 @@ class ReminderResponse(BaseModel):
         scheduled_at (datetime): Scheduled trigger time
         caregiver_id (UUID): ID of caregiver who created it
         user_id (UUID): ID of user it's for
+        user_first_name (Optional[str]): First name of the user
+            this reminder is for
+        user_last_name (Optional[str]): Last name of the user
+            this reminder is for
         created_at (datetime): Creation timestamp
         updated_at (datetime): Last update timestamp
     """
@@ -102,6 +106,8 @@ class ReminderResponse(BaseModel):
     scheduled_at: datetime
     caregiver_id: UUID
     user_id: UUID
+    user_first_name: Optional[str] = None
+    user_last_name: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 

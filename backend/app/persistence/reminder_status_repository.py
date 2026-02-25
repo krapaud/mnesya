@@ -18,10 +18,6 @@ class ReminderStatusRepository(BaseRepository[ReminderStatusModel]):
     for tracking reminder state history.
     """
     def __init__(self, db: Session):
-        """Initialize the ReminderStatusRepository with ReminderStatusModel and database session."""
-        super().__init__(ReminderStatusModel, db)
-
-    def __init__(self, db: Session):
         """Initialize the ReminderStatusRepository with
         ReminderStatusModel and database session."""
         super().__init__(ReminderStatusModel, db)
