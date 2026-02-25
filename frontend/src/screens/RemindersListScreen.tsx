@@ -1,12 +1,15 @@
 /**
- * Screen showing the full list of reminders with filters.
- * 
+ * Screen showing the full list of reminders for a caregiver.
+ *
+ * Features:
+ * - Filter by profile (shows full name) and by date using `FilterPickerModal`
+ * - Delete a reminder with a confirmation modal before proceeding
+ *
  * @component
  */
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -19,6 +22,8 @@ import { cancelNotifications } from '../utils/notifications';
 import { deleteReminder } from '../services/reminderService';
 import { useCaregiverReminders } from '../hooks';
 import ReminderCard from '../components/ReminderCard';
+import FilterPickerModal from '../components/FilterPickerModal';
+import { ConfirmationModal } from '../components';
 
 type Props = CompositeScreenProps<
     BottomTabScreenProps<CaregiverTabsParamList, 'Reminders'>,
@@ -40,6 +45,7 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     const [selectedDate, setSelectedDate] = useState<string>('');
     const [showProfilePicker, setShowProfilePicker] = useState<boolean>(false);
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+    const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
     // Filter reminders based on selected profile and date
     const getFilteredReminders = () => {
@@ -50,26 +56,61 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
         });
     };
 
-    // Get unique profile names
-    const uniqueProfiles = Array.from(new Set(reminderData?.map(r => r.user_id)));
+    // Get unique profiles as {id, name} objects (deduplicated by user_id)
+    const uniqueProfiles = Array.from(
+        new Map(
+            reminderData?.map(r => [
+                r.user_id,
+                {
+                    id: r.user_id,
+                    name: r.user_first_name && r.user_last_name
+                        ? `${r.user_first_name} ${r.user_last_name}`
+                        : r.user_id,
+                },
+            ]) ?? []
+        ).values()
+    );
+
+    // Get the display name for the currently selected profile
+    const selectedProfileName = uniqueProfiles.find(p => p.id === selectedProfile)?.name;
 
     // Get unique dates
     const uniqueDates = Array.from(new Set(reminderData?.map(r => r.scheduled_at)));
 
-    const handleDeleteReminder = async (reminderId: number) => {
+    const formatDate = (iso: string) =>
+        new Date(iso).toLocaleDateString('fr-FR', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit',
+        });
+
+    /**
+     * Initiates the reminder deletion flow by storing the target ID.
+     * The actual deletion is deferred until the user confirms in the modal.
+     */
+    const handleDeleteReminder = (reminderId: string) => {
+        setPendingDeleteId(reminderId);
+    };
+
+    /**
+     * Executes the deletion after user confirmation:
+     * cancels scheduled notifications, removes the reminder, then reloads the list.
+     */
+    const confirmDeleteReminder = async () => {
+        if (!pendingDeleteId) return;
         try {
-
-            const storageKey = `notification_ids_${reminderId}`;
+            const storageKey = `notification_ids_${pendingDeleteId}`;
             const storedIds = await AsyncStorage.getItem(storageKey);
-
             if (storedIds) {
                 const notificationIds = JSON.parse(storedIds) as string[];
                 await cancelNotifications(notificationIds);
                 await AsyncStorage.removeItem(storageKey);
             }
-            await deleteReminder(String(reminderId));
+            await deleteReminder(pendingDeleteId);
             reload();
-        } catch (_error) {
+        } catch (error) {
+            console.error('[DeleteReminder] Error:', error);
+        } finally {
+            setPendingDeleteId(null);
         }
     };
 
@@ -115,7 +156,7 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                                     }}
                                 >
                                     <Text style={styles.filterDropdownText}>
-                                        {selectedProfile || t('common.pickersText.All Profiles')}
+                                        {selectedProfileName || t('common.pickersText.All Profiles')}
                                     </Text>
                                     <Ionicons name="chevron-down" size={20} color="#666666" />
                                 </TouchableOpacity>
@@ -131,7 +172,7 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                                     }}
                                 >
                                     <Text style={styles.filterDropdownText}>
-                                        {selectedDate || t('common.pickersText.All Dates')}
+                                        {selectedDate ? formatDate(selectedDate) : t('common.pickersText.All Dates')}
                                     </Text>
                                     <Ionicons name="chevron-down" size={20} color="#666666" />
                                 </TouchableOpacity>
@@ -163,62 +204,52 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
 
+                    {/* Reminder delete confirmation */}
+                    <ConfirmationModal
+                        visible={pendingDeleteId !== null}
+                        onClose={() => setPendingDeleteId(null)}
+                        onConfirm={confirmDeleteReminder}
+                        title={t('reminders.deleteModal.title')}
+                        message={t('reminders.deleteModal.message')}
+                        icon="trash-outline"
+                        iconColor="#E53935"
+                        confirmText={t('reminders.deleteModal.confirm')}
+                        confirmColor="#E53935"
+                    />
+
                     {/* Profile Picker Modal */}
-                    {showProfilePicker && (
-                        <View style={styles.pickerContainer}>
-                            <View style={styles.pickerWrapper}>
-                                <Picker
-                                    selectedValue={selectedProfile}
-                                    onValueChange={(itemValue) => setSelectedProfile(itemValue)}
-                                >
-                                    <Picker.Item label={t('common.pickersText.All Profiles')} value="" />
-                                    {uniqueProfiles.map((profile) => (
-                                        <Picker.Item 
-                                            key={profile} 
-                                            label={profile} 
-                                            value={profile} 
-                                        />
-                                    ))}
-                                </Picker>
-                            </View>
-                            <TouchableOpacity
-                                style={[commonStyles.primaryButton, { marginTop: 10 }]}
-                                onPress={() => setShowProfilePicker(false)}
-                            >
-                                <Text style={commonStyles.primaryButtonText}>Validate</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
+                    <FilterPickerModal
+                        visible={showProfilePicker}
+                        title={t('reminders.pickersTitle.Profile')}
+                        items={[
+                            { value: '', label: t('common.pickersText.All Profiles') },
+                            ...uniqueProfiles.map(p => ({ value: p.id, label: p.name })),
+                        ]}
+                        selectedValue={selectedProfile}
+                        onSelect={(value) => {
+                            setSelectedProfile(value);
+                            setShowProfilePicker(false);
+                        }}
+                        onClose={() => setShowProfilePicker(false)}
+                    />
 
                     {/* Date Picker Modal */}
-                    {showDatePicker && (
-                        <View style={styles.pickerContainer}>
-                            <View style={styles.pickerWrapper}>
-                                <Picker
-                                    selectedValue={selectedDate}
-                                    onValueChange={(itemValue) => setSelectedDate(itemValue)}
-                                >
-                                    <Picker.Item label={t('common.pickersText.All Dates')} value="" />
-                                    {uniqueDates.map((date) => (
-                                        <Picker.Item 
-                                            key={date} 
-                                            label={date} 
-                                            value={date} 
-                                        />
-                                    ))}
-                                </Picker>
-                            </View>
-                            <TouchableOpacity
-                                style={[commonStyles.primaryButton, { marginTop: 10 }]}
-                                onPress={() => setShowDatePicker(false)}
-                            >
-                                <Text style={commonStyles.primaryButtonText}>{t('common.buttons.Validate')}</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
+                    <FilterPickerModal
+                        visible={showDatePicker}
+                        title={t('reminders.labels.Date:')}
+                        items={[
+                            { value: '', label: t('common.pickersText.All Dates') },
+                            ...uniqueDates.map(d => ({ value: d, label: formatDate(d) })),
+                        ]}
+                        selectedValue={selectedDate}
+                        onSelect={(value) => {
+                            setSelectedDate(value);
+                            setShowDatePicker(false);
+                        }}
+                        onClose={() => setShowDatePicker(false)}
+                    />
 
                     {/* Reminders list */}
-                    {!showProfilePicker && !showDatePicker && (
                     <ScrollView showsVerticalScrollIndicator={false} style={styles.remindersList}>
                         {(getFilteredReminders?.() ?? []).length === 0 ? (
                             <Text style={commonStyles.emptyMessage}>No reminders yet</Text>
@@ -232,7 +263,6 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                             ))
                         )}
                     </ScrollView>
-                    )}
             </View>
         );
 };
@@ -301,18 +331,6 @@ const styles = StyleSheet.create({
     },
     resetButtonTextDisabled: {
         color: '#CCCCCC',
-    },
-    pickerContainer: {
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        width: '100%',
-        marginTop: 10,
-    },
-    pickerWrapper: {
-        width: '100%',
-        height: 150,
-        overflow: 'hidden',
-        borderRadius: 10,
     },
     remindersList: {
         flex: 1,

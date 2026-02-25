@@ -4,7 +4,7 @@
  * @module UserProfileDetailScreen
  */
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -12,9 +12,14 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { useUserProfile } from '../hooks';
+import { useCaregiverReminders } from '../hooks';
 import { PairingCodeModal, UpdateUserProfileModal, ConfirmationModal } from '../components';
 import { calculateAge } from '../utils/dateUtils';
 import { generatePairingCode } from '../services/pairingService';
+import ReminderCard from '../components/ReminderCard';
+import { deleteReminder } from '../services/reminderService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { cancelNotifications } from '../utils/notifications';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'UserProfileDetails'>;
 
@@ -28,6 +33,10 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
     // Fetch user profile data from the backend
     const { userData, loading, error, reload: _reload, update, remove } = useUserProfile(profileId);
 
+    // Fetch and filter reminders for this profile
+    const { reminderData, reload: reloadReminders } = useCaregiverReminders();
+    const profileReminders = reminderData?.filter(r => r.user_id === profileId) ?? [];
+
     // Pairing code modal state
     const [showPairingModal, setShowPairingModal] = useState(false);
     const [pairingCode, setPairingCode] = useState('');
@@ -38,6 +47,9 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
 
     // Delete modal state
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Reminder delete confirmation state
+    const [pendingDeleteReminderId, setPendingDeleteReminderId] = useState<string | null>(null);
 
     // Menu modal state
     const [showMenu, setShowMenu] = useState(false);
@@ -69,6 +81,37 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
         } catch (_err) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             setShowDeleteModal(false);
+        }
+    };
+
+    /**
+     * Initiates the reminder deletion flow by storing the target ID.
+     * The actual deletion is deferred until the user confirms in the modal.
+     */
+    const handleDeleteReminder = (reminderId: string) => {
+        setPendingDeleteReminderId(reminderId);
+    };
+
+    /**
+     * Executes the deletion after user confirmation:
+     * cancels scheduled notifications, removes the reminder, then reloads the list.
+     */
+    const confirmDeleteReminder = async () => {
+        if (!pendingDeleteReminderId) return;
+        try {
+            const storageKey = `notification_ids_${pendingDeleteReminderId}`;
+            const storedIds = await AsyncStorage.getItem(storageKey);
+            if (storedIds) {
+                const notificationIds = JSON.parse(storedIds) as string[];
+                await cancelNotifications(notificationIds);
+                await AsyncStorage.removeItem(storageKey);
+            }
+            await deleteReminder(pendingDeleteReminderId);
+            reloadReminders();
+        } catch (err) {
+            console.error('[DeleteReminder] Error:', err);
+        } finally {
+            setPendingDeleteReminderId(null);
         }
     };
 
@@ -145,7 +188,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
                 
         {/* Profile content */}
         {!loading && !error && userData && (
-            <View style={styles.scrollContainer}>
+            <ScrollView style={styles.scrollContainer}>
                 {/* Profile information card - displays name and age */}
                 <View style={styles.profileCard}>
                     <View style={styles.profileRow}>
@@ -178,8 +221,18 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
                 
                 {/* Active reminders section - displays filtered reminders for this profile */}
                 <Text style={styles.sectionTitle}>{t('UserProfileDetail.sections.Active Reminders')}</Text>
-                <Text style={commonStyles.emptyMessage}>{t('UserProfileDetail.messages.No active reminders')}</Text>
-            </View>
+                {profileReminders.length === 0 ? (
+                    <Text style={commonStyles.emptyMessage}>{t('UserProfileDetail.messages.No active reminders')}</Text>
+                ) : (
+                    profileReminders.map(reminder => (
+                        <ReminderCard
+                            key={reminder.id}
+                            reminder={reminder}
+                            onDelete={handleDeleteReminder}
+                        />
+                    ))
+                )}
+            </ScrollView>
         )}
 
         {/* Pairing code modal */}
@@ -211,8 +264,21 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
             title={t('UserProfileDetail.modals.delete.title')}
             message={t('UserProfileDetail.modals.delete.message')}
             confirmText={t('UserProfileDetail.buttons.Delete')}
-            icon="warning-outline"
+            icon="trash-outline"
             iconColor="#E53935"
+            confirmColor="#E53935"
+        />
+
+        {/* Reminder delete confirmation */}
+        <ConfirmationModal
+            visible={pendingDeleteReminderId !== null}
+            onClose={() => setPendingDeleteReminderId(null)}
+            onConfirm={confirmDeleteReminder}
+            title={t('reminders.deleteModal.title')}
+            message={t('reminders.deleteModal.message')}
+            icon="trash-outline"
+            iconColor="#E53935"
+            confirmText={t('reminders.deleteModal.confirm')}
             confirmColor="#E53935"
         />
 

@@ -30,7 +30,7 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
     onChange,
     visible,
     onClose,
-    _displayFormat
+    displayFormat: _displayFormat
 }) => {
     const { t } = useTranslation();
     const [selectedHour, setSelectedHour] = useState(value.getHours());
