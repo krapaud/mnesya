@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from sqlalchemy import Column, String, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from app import database
+from app.models.reminder_status_enum import ReminderStatusEnum
 
 
 class ReminderStatusModel(database):
@@ -72,17 +73,23 @@ class ReminderStatusModel(database):
         """Set the status value with validation.
 
         Args:
-            value (str): The status to set
+            value (str): The status to set (must be one of: PENDING, DONE, POSTPONED, UNABLE)
 
         Raises:
-            ValueError: If status is empty, only whitespace, or exceeds 200 characters
+            ValueError: If status is invalid or not in allowed values
 
         Note:
-            Common status values include: 'pending', 'completed', 'missed', 'cancelled'
+            Valid status values: PENDING, DONE, POSTPONED, UNABLE
         """
-        if (not value or len(value) > 200 or len(value.strip()) == 0):
-            raise ValueError("status is required and must be <= 200 chars")
-        self._status = value.strip()
+        if not value or len(value.strip()) == 0:
+            raise ValueError("Status is required")
+        
+        value_upper = value.strip().upper()
+        if not ReminderStatusEnum.is_valid(value_upper):
+            valid_statuses = ", ".join(ReminderStatusEnum.values())
+            raise ValueError(f"Invalid status. Must be one of: {valid_statuses}")
+        
+        self._status = value_upper
 
     @property
     def reminder_id(self) -> uuid.UUID:
