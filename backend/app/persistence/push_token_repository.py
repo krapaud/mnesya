@@ -13,7 +13,7 @@ class PushTokenRepository(BaseRepository):
 
     def __init__(self, db):
         """Initialize repository with PushToken model."""
-        super().__init__(db, PushTokenModel)
+        super().__init__(PushTokenModel, db)
 
     def get_by_token(self, token: str):
         """Get a push token by its token string.

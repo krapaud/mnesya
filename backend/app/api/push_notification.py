@@ -57,7 +57,7 @@ async def register_push_token(
         push_token = PushTokenModel()
         push_token.token = token_data.token
         push_token.user_id = token_data.user_id
-        push_token.caregiver_id = token_data.caregiver_id
+        push_token.caregiver_id = token_data.caregiver_id or UUID(user_id)
         push_token.device_name = token_data.device_name
         
         repo.add(push_token)
@@ -77,14 +77,14 @@ async def register_push_token(
 
 @router.delete("/unregister")
 async def unregister_push_token(
-    token_data: PushTokenDelete,
+    token: str,
     user_id: str = Depends(lambda token=Depends(verify_token): token.get("sub")),
     db: Session = Depends(get_db)
 ):
     """Unregister (delete) a push notification token.
     
     Args:
-        token_data: Token information to delete
+        token: Token information to delete
         user_id: Authenticated user/caregiver ID from JWT
         db: Database session
         
@@ -93,7 +93,7 @@ async def unregister_push_token(
     """
     try:
         repo = PushTokenRepository(db)
-        deleted = repo.delete_by_token(token_data.token)
+        deleted = repo.delete_by_token(token)
         
         if not deleted:
             raise HTTPException(

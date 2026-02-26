@@ -79,7 +79,7 @@ async def generate_code(
         pairing_code.user_id = request.user_id
         pairing_code.caregiver_id = UUID(caregiver_id)
         pairing_code.expires_at = datetime.now(
-            timezone.utc) + timedelta(hours=24)
+            timezone.utc) + timedelta(minutes=5)
 
         pairing_repo.add(pairing_code)
 
