@@ -1,6 +1,7 @@
 """Caregiver Schema module.
 
-This module defines Pydantic schemas for Caregiver entity validation and serialization.
+This module defines Pydantic schemas for Caregiver entity validation
+and serialization.
 Includes comprehensive password validation for security.
 """
 
@@ -20,7 +21,8 @@ class CaregiverCreate(BaseModel):
         first_name (str): Caregiver's first name (1-100 chars)
         last_name (str): Caregiver's last name (1-100 chars)
         email (str): Valid email address (5-255 chars)
-        password (str): Strong password (8-255 chars, must meet security requirements)
+        password (str): Strong password (8-255 chars,
+            must meet security requirements)
     """
     first_name: str = Field(..., min_length=1, max_length=100)
     last_name: str = Field(..., min_length=1, max_length=100)
@@ -128,12 +130,16 @@ class CaregiverUpdate(BaseModel):
         first_name (Optional[str]): Updated first name (1-100 chars)
         last_name (Optional[str]): Updated last name (1-100 chars)
         email (Optional[str]): Updated email address
-        password (Optional[str]): Updated password (must meet security requirements)
+        password (Optional[str]): Updated password
+            (must meet security requirements)
+        current_password (Optional[str]): Current password, required
+            when updating the password
     """
     first_name: Optional[str] = Field(None, min_length=1, max_length=100)
     last_name: Optional[str] = Field(None, min_length=1, max_length=100)
     email: Optional[str] = None
     password: Optional[str] = Field(None, min_length=8, max_length=255)
+    current_password: Optional[str] = Field(None, min_length=8, max_length=255)
 
     @field_validator('first_name', 'last_name')
     def validate_name(cls, value: Optional[str]) -> Optional[str]:

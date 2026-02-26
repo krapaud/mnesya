@@ -50,6 +50,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
 
     // Reminder delete confirmation state
     const [pendingDeleteReminderId, setPendingDeleteReminderId] = useState<string | null>(null);
+    const [deleteReminderError, setDeleteReminderError] = useState(false);
 
     // Menu modal state
     const [showMenu, setShowMenu] = useState(false);
@@ -110,6 +111,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
             reloadReminders();
         } catch (err) {
             console.error('[DeleteReminder] Error:', err);
+            setDeleteReminderError(true);
         } finally {
             setPendingDeleteReminderId(null);
         }
@@ -280,6 +282,19 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
             iconColor="#E53935"
             confirmText={t('reminders.deleteModal.confirm')}
             confirmColor="#E53935"
+        />
+
+        {/* Reminder delete error */}
+        <ConfirmationModal
+            visible={deleteReminderError}
+            onClose={() => setDeleteReminderError(false)}
+            title={t('common.errors.genericErrorTitle')}
+            message={t('common.errors.failedToDeleteReminder')}
+            icon="alert-circle-outline"
+            iconColor="#E53935"
+            confirmText="OK"
+            confirmColor="#4A90E2"
+            showCancelButton={false}
         />
 
         {/* Context menu modal */}
