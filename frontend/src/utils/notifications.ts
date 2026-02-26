@@ -27,7 +27,9 @@ export async function registerForPushNotifications(): Promise<string | undefined
     return undefined;
   }
 
-  return 'granted';
+  const tokenData = await Notifications.getExpoPushTokenAsync();
+  await AsyncStorage.setItem('expo_push_token', tokenData.data);
+  return tokenData.data;
 }
 
 /** Schedules a single notification at the given date. */
@@ -164,6 +166,6 @@ export async function scheduleReminderWithRepetitions(
     `notification_ids_${reminderId}`,
     JSON.stringify(notificationIds)
   );
-
+  
   return notificationIds;
 }

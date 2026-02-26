@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { PlatformDatePicker, PlatformTimePicker, PlatformProfilePicker } from '../components';
+import { PlatformDatePicker, PlatformTimePicker, FilterPickerModal } from '../components';
 import { scheduleReminderWithRepetitions } from '../utils/notifications';
 import { useUserProfiles } from '../hooks';
 import { createReminder } from '../services/reminderService';
@@ -34,7 +34,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
     const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
     const [showProfilePicker, setShowProfilePicker] = useState<boolean>(false);
-    const [selectedProfile, setSelectedProfile] = useState<string | number>('');
+    const [selectedProfile, setSelectedProfile] = useState<string>('');
 
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
 
@@ -45,7 +45,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const [showTitleError, setShowTitleError] = useState<boolean>(false);
     const [showMessageError, setShowMessageError] = useState<boolean>(false);
 
-    const selectedProfileData = userData?.find(p => p.id === selectedProfile);
+    const selectedProfileData = userData?.find(p => p.id.toString() === selectedProfile);
 
     const formatDate = (date: Date): string => {
         const day = date.getDate().toString().padStart(2, '0');
@@ -301,18 +301,20 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                     displayFormat={formatTime}
                 />
                 
-                {/* Cross-platform profile picker component */}
-                <PlatformProfilePicker
-                    profiles={userData?.map(item => ({
-                        id: item.id,
-                        firstName: item.first_name,
-                        lastName: item.last_name,
+                {/* Profile picker modal */}
+                <FilterPickerModal
+                    visible={showProfilePicker}
+                    title={t('common.pickersText.Select a profile')}
+                    items={userData?.map(item => ({
+                        value: item.id.toString(),
+                        label: `${item.first_name} ${item.last_name}`,
                     })) ?? []}
                     selectedValue={selectedProfile}
-                    onValueChange={setSelectedProfile}
-                    visible={showProfilePicker}
+                    onSelect={(value) => {
+                        setSelectedProfile(value);
+                        setShowProfilePicker(false);
+                    }}
                     onClose={() => setShowProfilePicker(false)}
-                    placeholder={t('common.pickersText.Select a profile')}
                 />
                 
                 {/* Buttons section - fixed at bottom */}

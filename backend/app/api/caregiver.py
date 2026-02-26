@@ -8,7 +8,6 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from uuid import UUID
-from typing import List
 from app.services.caregiver_facade import CaregiverFacade
 from app.schemas.caregiver_schema import CaregiverUpdate, CaregiverResponse
 from app.api.authentication import verify_token
@@ -86,6 +85,16 @@ async def update_my_profile(
         if request.email is not None:
             update_data["email"] = request.email
         if request.password is not None:
+            if not request.current_password:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="current_password is required to change password"
+                )
+            if not caregiver.verify_password(request.current_password):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Current password is incorrect"
+                )
             update_data["password"] = request.password
 
         # If no fields to update, return current data
