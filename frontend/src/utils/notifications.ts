@@ -5,8 +5,9 @@
  */
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import i18n from '../i18n';
+import Constants from 'expo-constants';
 
 /** Requests push notification permissions and returns the token. */
 export async function registerForPushNotifications(): Promise<string | undefined> {
@@ -27,7 +28,11 @@ export async function registerForPushNotifications(): Promise<string | undefined
     return undefined;
   }
 
-  return 'granted';
+  const tokenData = await Notifications.getExpoPushTokenAsync({
+    projectId: Constants.expoConfig?.extra?.eas?.projectId
+  });
+  await SecureStore.setItemAsync('expo_push_token', tokenData.data);
+  return tokenData.data;
 }
 
 /** Schedules a single notification at the given date. */
@@ -164,6 +169,6 @@ export async function scheduleReminderWithRepetitions(
     `notification_ids_${reminderId}`,
     JSON.stringify(notificationIds)
   );
-
+  
   return notificationIds;
 }

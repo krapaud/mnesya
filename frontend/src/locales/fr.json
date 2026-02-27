@@ -129,6 +129,9 @@
         "Done": "Effectué",
         "Unable": "Annulé"
     },
+    "messages": {
+        "noReminders": "Aucun rappel"
+    },
     "deleteModal": {
         "title": "Supprimer le rappel",
         "message": "Êtes-vous sûr de vouloir supprimer ce rappel ? Cette action est irréversible.",

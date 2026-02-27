@@ -6,13 +6,23 @@
 import apiClient from './api';
 import { saveToken, deleteToken } from './tokenService';
 import { LoginData, RegisterData, AuthResponse, CaregiverProfile } from '../types/interfaces';
+import * as SecureStore from 'expo-secure-store';
 
 /** Logs in a caregiver and stores the token. */
 export const login = async (credentials: LoginData): Promise<AuthResponse> => {
   const response = await apiClient.post('/api/auth/login', credentials);
   
   await saveToken(response.data.access_token);
-  
+
+  try {
+    const expoPushToken = await SecureStore.getItemAsync('expo_push_token');
+    if (expoPushToken) {
+      await apiClient.post('/api/push-tokens/register', { token: expoPushToken });
+    }
+  } catch {
+    // Non-blocking: push token registration failure should not interrupt login
+  }
+
   return response.data;
 };
 
@@ -23,6 +33,15 @@ export const register = async (data: RegisterData): Promise<void> => {
 
 /** Logs out the current user and removes the stored token. */
 export const logout = async (): Promise<void> => {
+  try {
+    const expoPushToken = await SecureStore.getItemAsync('expo_push_token');
+    if (expoPushToken) {
+      await apiClient.delete('/api/push-tokens/unregister', { data: { token: expoPushToken } });
+    }
+  } catch {
+    // Non-blocking
+  }
+
   await apiClient.post('/api/auth/logout');
   await deleteToken();
 };

@@ -48,6 +48,10 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
     // Delete modal state
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+    // Success modals state
+    const [showUpdateSuccessModal, setShowUpdateSuccessModal] = useState(false);
+    const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
+
     // Reminder delete confirmation state
     const [pendingDeleteReminderId, setPendingDeleteReminderId] = useState<string | null>(null);
     const [deleteReminderError, setDeleteReminderError] = useState(false);
@@ -64,6 +68,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
         try {
             await update(data);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            setShowUpdateSuccessModal(true);
         } catch (err) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             throw err;
@@ -78,7 +83,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
             await remove();
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             setShowDeleteModal(false);
-            navigation.goBack();
+            setShowDeleteSuccessModal(true);
         } catch (_err) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             setShowDeleteModal(false);
@@ -188,6 +193,14 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
             </View>
         )}
                 
+        {/* Profile not found state */}
+        {!loading && !error && !userData && (
+            <View style={commonStyles.errorContainer}>
+                <Ionicons name="alert-circle-outline" size={48} color="#E53935" />
+                <Text style={commonStyles.errorText}>{t('UserProfileDetail.messages.Profile not found')}</Text>
+            </View>
+        )}
+
         {/* Profile content */}
         {!loading && !error && userData && (
             <ScrollView style={styles.scrollContainer}>

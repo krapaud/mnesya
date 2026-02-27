@@ -29,7 +29,11 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     /** Reminder message/description input state */
     const [reminderMessage, setReminderMessage] = useState<string>('');
     /** Selected date and time for the reminder */
-    const [reminderDate, setReminderDate] = useState<Date>(new Date());
+    const [reminderDate, setReminderDate] = useState<Date>(() => {
+        const d = new Date();
+        d.setMinutes(d.getMinutes() + 5, 0, 0);
+        return d;
+    });
 
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
     const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
@@ -138,25 +142,12 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
         setShowConfirmModal(false);
         
         try {
-            const reminder = await createReminder({
+            await createReminder({
                 title: reminderTitle,
                 description: reminderMessage,
                 scheduled_at: reminderDate.toISOString(),
                 user_id: String(selectedProfile),
             })
-            const _notificationIds = await scheduleReminderWithRepetitions(
-                reminderTitle,
-                reminderMessage,
-                reminderDate,
-                {
-                    reminderId: reminder.id,
-                    message: reminderMessage,
-                    profileId: selectedProfile,
-                    profileName: selectedProfileData ? `${selectedProfileData.first_name} ${selectedProfileData.last_name}` : 'Utilisateur',
-                    allNotificationIds: []
-                }
-            );
-
 
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             navigation.navigate('Dashboard');
