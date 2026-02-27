@@ -293,7 +293,11 @@ class CaregiverModel(database):
         Note:
             Silently does nothing if user is not in the list
         """
-        if self._user_ids and user_id in self._user_ids:
+        if self._user_ids is None:
+            return
+        if isinstance(self._user_ids, tuple):
+            self._user_ids = list(self._user_ids)
+        if user_id in self._user_ids:
             self._user_ids.remove(user_id)
 
     def hash_password(self, password: str) -> None:

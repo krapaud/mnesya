@@ -45,10 +45,16 @@ async def register_push_token(
             # Update existing token
             existing.is_active = True
             existing.device_name = token_data.device_name
+            if token_data.locale:
+                existing.locale = token_data.locale
             if token_data.user_id:
+                # User device: only set user_id, clear caregiver_id
                 existing.user_id = token_data.user_id
-            if token_data.caregiver_id:
-                existing.caregiver_id = token_data.caregiver_id
+                existing.caregiver_id = None
+            else:
+                # Caregiver device: only set caregiver_id, clear user_id
+                existing.caregiver_id = UUID(user_id)
+                existing.user_id = None
             db.commit()
             db.refresh(existing)
             return existing
@@ -56,9 +62,17 @@ async def register_push_token(
         # Create new token
         push_token = PushTokenModel()
         push_token.token = token_data.token
-        push_token.user_id = token_data.user_id
-        push_token.caregiver_id = token_data.caregiver_id
         push_token.device_name = token_data.device_name
+        if token_data.locale:
+            push_token.locale = token_data.locale
+        if token_data.user_id:
+            # User device: only set user_id
+            push_token.user_id = token_data.user_id
+            push_token.caregiver_id = None
+        else:
+            # Caregiver device: only set caregiver_id
+            push_token.caregiver_id = UUID(user_id)
+            push_token.user_id = None
         
         repo.add(push_token)
         return push_token

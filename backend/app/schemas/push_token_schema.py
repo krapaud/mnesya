@@ -16,6 +16,7 @@ class PushTokenCreate(BaseModel):
     user_id: Optional[UUID] = Field(None, description="User ID (for elderly user app)")
     caregiver_id: Optional[UUID] = Field(None, description="Caregiver ID (for caregiver app)")
     device_name: Optional[str] = Field(None, description="Device name/description")
+    locale: Optional[str] = Field(None, description="Device locale (e.g. 'fr', 'en')")
 
     @field_validator('token')
     def validate_token(cls, value: str) -> str:

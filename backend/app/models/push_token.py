@@ -30,6 +30,7 @@ class PushTokenModel(database):
     _user_id = Column('user_id', UUID(as_uuid=True), ForeignKey('user.id'), nullable=True)
     _caregiver_id = Column('caregiver_id', UUID(as_uuid=True), ForeignKey('caregiver.id'), nullable=True)
     _device_name = Column('device_name', String(100), nullable=True)
+    _locale = Column('locale', String(10), nullable=True)
     _is_active = Column('is_active', Boolean, default=True, nullable=False)
     _created_at = Column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     _updated_at = Column('updated_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), 
@@ -89,6 +90,16 @@ class PushTokenModel(database):
         if value and len(value) > 100:
             raise ValueError("Device name must be <= 100 characters")
         self._device_name = value.strip() if value else None
+
+    @property
+    def locale(self) -> str:
+        """Get the device locale (e.g. 'fr', 'en')."""
+        return self._locale or 'fr'
+
+    @locale.setter
+    def locale(self, value: str) -> None:
+        """Set the device locale."""
+        self._locale = value.strip()[:10] if value else None
 
     @property
     def is_active(self) -> bool:
