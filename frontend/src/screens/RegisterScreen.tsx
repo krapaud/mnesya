@@ -7,7 +7,7 @@
  * @module RegisterScreen
  */
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { validateEmail, validatePassword, validateName, validatePasswordMatch, cleanText } from '../utils/validation';
 import { useAuth, useFormValidation } from '../hooks';
+import { ConfirmationModal } from '../components';
 
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
@@ -45,6 +46,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     // States
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     //Refs
     const timerPassRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -88,13 +90,9 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
         });
         
         if (success) {
-            // Provide success feedback and navigate to login
+            // Provide success feedback and show success modal
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            Alert.alert(
-                t('register.success.Account created'),
-                t('register.success.Please log in'),
-                [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
-            );
+            setShowSuccessModal(true);
         } else {
             // Handle registration errors (hook already set loading state)
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -145,8 +143,8 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                         value={values.firstname}
                     />
                 </View>
-                <Text style={[styles.errorText, {opacity: showErrors.firstname ? 1 : 0}]}>
-                    {t(errors.firstname) || t('register.errors.This field is required')}
+                <Text style={[styles.feedbackText, (!errors.firstname && values.firstname !== '') ? styles.successFeedback : styles.errorFeedback, {opacity: (showErrors.firstname || (!errors.firstname && values.firstname !== '')) ? 1 : 0}]}>
+                    {(!errors.firstname && values.firstname !== '') ? t('register.success.Valid name') : (t(errors.firstname) || t('register.errors.This field is required'))}
                 </Text>
                 
                 {/* Last name input field */}
@@ -159,8 +157,8 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                         value={values.lastname}
                     />
                 </View>
-                <Text style={[styles.errorText, {opacity: showErrors.lastname ? 1 : 0}]}>
-                    {t(errors.lastname) || t('register.errors.This field is required')}
+                <Text style={[styles.feedbackText, (!errors.lastname && values.lastname !== '') ? styles.successFeedback : styles.errorFeedback, {opacity: (showErrors.lastname || (!errors.lastname && values.lastname !== '')) ? 1 : 0}]}>
+                    {(!errors.lastname && values.lastname !== '') ? t('register.success.Valid name') : (t(errors.lastname) || t('register.errors.This field is required'))}
                 </Text>
                 
                 {/* Email input field */}
@@ -175,8 +173,8 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                         value={values.email}
                     />
                 </View>
-                <Text style={[styles.errorText, {opacity: showErrors.email ? 1 : 0}]}>
-                    {t(errors.email) || t('register.errors.This field is required')}
+                <Text style={[styles.feedbackText, (!errors.email && values.email !== '') ? styles.successFeedback : styles.errorFeedback, {opacity: (showErrors.email || (!errors.email && values.email !== '')) ? 1 : 0}]}>
+                    {(!errors.email && values.email !== '') ? t('register.success.Valid email') : (t(errors.email) || t('register.errors.This field is required'))}
                 </Text>
                 
                 {/* Password input field */}
@@ -193,8 +191,8 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                         <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={22} color="#999999" />
                     </TouchableOpacity>
                 </View>
-                <Text style={[styles.errorText, {opacity: showErrors.password ? 1 : 0}]}>
-                    {t(errors.password) || t('register.errors.This field is required')}
+                <Text style={[styles.feedbackText, (!errors.password && values.password !== '') ? styles.successFeedback : styles.errorFeedback, {opacity: (showErrors.password || (!errors.password && values.password !== '')) ? 1 : 0}]}>
+                    {(!errors.password && values.password !== '') ? t('register.success.Valid password') : (t(errors.password) || t('register.errors.This field is required'))}
                 </Text>
                 
                 {/* Password confirmation input field */}
@@ -211,8 +209,8 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                         <Ionicons name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} size={22} color="#999999" />
                     </TouchableOpacity>
                 </View>
-                <Text style={[styles.errorText, {opacity: showErrors.confirmpassword ? 1 : 0}]}>
-                    {t(errors.confirmpassword) || t('register.errors.This field is required')}
+                <Text style={[styles.feedbackText, (!errors.confirmpassword && values.confirmpassword !== '') ? styles.successFeedback : styles.errorFeedback, {opacity: (showErrors.confirmpassword || (!errors.confirmpassword && values.confirmpassword !== '')) ? 1 : 0}]}>
+                    {(!errors.confirmpassword && values.confirmpassword !== '') ? t('register.success.Passwords match') : (t(errors.confirmpassword) || t('register.errors.This field is required'))}
                 </Text>
             </ScrollView>
                 
@@ -237,6 +235,18 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                     <Text style={styles.alreadyHaveAccountText}>{t('register.buttons.Already have an account? Log in')}</Text>
                 </TouchableOpacity>
             </View>
+
+            <ConfirmationModal
+                visible={showSuccessModal}
+                onClose={() => { setShowSuccessModal(false); navigation.navigate('Login'); }}
+                title={t('register.success.Account created')}
+                message={t('register.success.Please log in')}
+                icon="checkmark-circle-outline"
+                iconColor="#4CAF50"
+                confirmText="OK"
+                confirmColor="#4CAF50"
+                showCancelButton={false}
+            />
         </View>
     );
 };
@@ -277,8 +287,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
     },
-    errorText: {
-        color: '#FF0000',
+    feedbackText: {
         fontSize: 12,
         textAlign: 'right',
         marginTop: -5,
@@ -286,6 +295,12 @@ const styles = StyleSheet.create({
         minHeight: 16,
         lineHeight: 16,
         paddingRight: 10,
+    },
+    errorFeedback: {
+        color: '#FF0000',
+    },
+    successFeedback: {
+        color: '#2E7D32',
     },
 
     // ========== FORM ELEMENTS ==========
