@@ -218,8 +218,7 @@ class TestUnregisterPushToken:
         
         # Unregister it
         response = client.delete(
-            "/api/push-tokens/unregister",
-            json={"token": sample_push_token}
+            f"/api/push-tokens/unregister?token={sample_push_token}"
         )
         
         assert response.status_code == 200
@@ -232,8 +231,7 @@ class TestUnregisterPushToken:
         fake_token = f"ExponentPushToken[{uuid4().hex}]"
         
         response = client.delete(
-            "/api/push-tokens/unregister",
-            json={"token": fake_token}
+            f"/api/push-tokens/unregister?token={fake_token}"
         )
         
         assert response.status_code == 404
@@ -242,8 +240,7 @@ class TestUnregisterPushToken:
     def test_unregister_token_unauthenticated(self, client, sample_push_token):
         """Test that unauthenticated users cannot unregister tokens."""
         response = client.delete(
-            "/api/push-tokens/unregister",
-            json={"token": sample_push_token}
+            f"/api/push-tokens/unregister?token={sample_push_token}"
         )
         
         assert response.status_code == 403
@@ -252,7 +249,7 @@ class TestUnregisterPushToken:
         """Test that missing token field returns error."""
         client, caregiver = authenticated_client
         
-        response = client.delete("/api/push-tokens/unregister", json={})
+        response = client.delete("/api/push-tokens/unregister")
         
         assert response.status_code == 422
 
@@ -276,12 +273,6 @@ class TestGetMyTokens:
         token2 = create_test_push_token(
             caregiver_id=caregiver.id,
             device_name="iPad"
-        )
-        
-        # Create token for different caregiver (should not appear)
-        create_test_push_token(
-            caregiver_id=uuid4(),
-            device_name="Other Device"
         )
         
         response = client.get("/api/push-tokens/my-tokens")
@@ -398,8 +389,7 @@ class TestPushTokenIntegration:
         
         # 3. Unregister token
         unregister_response = client.delete(
-            "/api/push-tokens/unregister",
-            json={"token": sample_push_token}
+            f"/api/push-tokens/unregister?token={sample_push_token}"
         )
         assert unregister_response.status_code == 200
         

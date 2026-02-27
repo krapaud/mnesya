@@ -3,7 +3,7 @@
  *
  * @module DashboardScreen
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -16,6 +16,9 @@ import type { RootStackParamList, CaregiverTabsParamList } from '../types/index'
 import { commonStyles } from '../styles/commonStyles';
 import { useUserProfiles } from '../hooks';
 import { calculateAge } from '../utils/dateUtils';
+import * as SecureStore from 'expo-secure-store';
+import apiClient from '../services/api';
+import i18n from '../i18n';
 
 type Props = CompositeScreenProps<
     BottomTabScreenProps<CaregiverTabsParamList, 'Home'>,
@@ -26,6 +29,25 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
     // Load user profiles from API
     const { userData, loading, error, reload } = useUserProfiles();
+
+    // Register caregiver push token on every app open
+    useEffect(() => {
+        const registerCaregiverToken = async () => {
+            try {
+                const expoPushToken = await SecureStore.getItemAsync('expo_push_token');
+                if (expoPushToken) {
+                    await apiClient.post('/api/push-tokens/register', {
+                        token: expoPushToken,
+                        locale: i18n.language
+                        // No user_id → backend uses JWT to set caregiver_id
+                    });
+                }
+            } catch (err) {
+                console.error('[Dashboard] Failed to register caregiver push token:', err);
+            }
+        };
+        registerCaregiverToken();
+    }, []);
 
     // Reload profiles when screen comes into focus
     useFocusEffect(

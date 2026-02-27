@@ -16,6 +16,9 @@ import { useRefresh } from '../contexts/RefreshContext';
 import { getUserReminders } from '../services/reminderService';
 import { useReminderStatus } from '../hooks';
 import type { CaregiverProfile, ReminderData } from '../types/interfaces';
+import * as SecureStore from 'expo-secure-store';
+import apiClient from '../services/api';
+import i18n from '../i18n';
 
 type Props = NativeStackScreenProps<UserTabsParamList, 'Refresh'>;
 
@@ -97,6 +100,26 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
     const [userReminders, setUserReminders] = useState<ReminderData[]>([]);
     const [_loading, setLoading] = useState(true);
     const loadUserTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Re-register push token on every app open (handles token refresh or reinstall)
+    useEffect(() => {
+        const registerToken = async () => {
+            try {
+                const expoPushToken = await SecureStore.getItemAsync('expo_push_token');
+                const user = await getUserInfo();
+                if (expoPushToken && user?.user_id) {
+                    await apiClient.post('/api/push-tokens/register', {
+                        token: expoPushToken,
+                        user_id: user.user_id,
+                        locale: i18n.language
+                    });
+                }
+            } catch (err) {
+                console.error('[UserHome] Failed to re-register push token:', err);
+            }
+        };
+        registerToken();
+    }, []);
 
     /**
      * Loads user data and filters reminders.
@@ -220,6 +243,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
             >
                 <View style={commonStyles.modalOverlay}>
                     <View style={{ backgroundColor: '#FFFFFF', padding: 20, borderRadius: 10, width: '80%' }}>
+                        <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }}>{t('UserHome.messages.notAvailableTitle')}</Text>
                         <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 20 }}>{t('UserHome.messages.notAvailableMessage')}</Text>
                         <TouchableOpacity 
                             style={{ backgroundColor: '#4A90E2', padding: 18, borderRadius: 5 }}
@@ -244,6 +268,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                     onPress={() => setShowMenu(false)}
                 >
                         <View style={styles.menuContent}>
+                            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333333', paddingHorizontal: 16, paddingVertical: 8 }}>{t('UserProfile.title')}</Text>
                             <TouchableOpacity 
                                 style={styles.menuItem}
                                 onPress={async () => {
