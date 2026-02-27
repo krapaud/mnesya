@@ -19,6 +19,9 @@ import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { verifyPairingCode } from '../services/pairingService';
 import { saveUserInfo, saveToken } from '../services/tokenService';
+import * as SecureStore from 'expo-secure-store';
+import apiClient from '../services/api';
+import i18n from '../i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'UserPairing'>;
 
@@ -61,7 +64,23 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
           last_name: response.user.last_name,
           caregiver_id: response.caregiver_id
         });
-        
+
+        // Register push token for this user device
+        try {
+          const expoPushToken = await SecureStore.getItemAsync('expo_push_token');
+          if (expoPushToken) {
+            await apiClient.post('/api/push-tokens/register', {
+              token: expoPushToken,
+              user_id: response.user_id,
+              locale: i18n.language
+            });
+          } else {
+            console.warn('[UserPairing] No expo_push_token found in SecureStore');
+          }
+        } catch (tokenErr) {
+          console.error('[UserPairing] Failed to register push token:', tokenErr);
+        }
+
         navigation.navigate('UserDashboard');
       } catch (_err) {
         setError(t('UserPairing.error.invalid_code'));
