@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { PlatformDatePicker } from '../components';
+import { PlatformDatePicker, ConfirmationModal } from '../components';
 import { validateName, cleanText } from '../utils/validation';
 import { useFormValidation } from '../hooks';
 import { createProfile } from '../services/profileService';
@@ -29,6 +29,7 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
     const [birthday, setBirthday] = useState<Date>(new Date());
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
     const [isCreating, setIsCreating] = useState<boolean>(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     const formatDate = (date: Date): string => {
         const day = date.getDate().toString().padStart(2, '0');
@@ -67,9 +68,9 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                 birthday: formatDateForAPI(birthday)
             });
 
-            // Success - navigate back to dashboard
+            // Success - show confirmation modal then navigate to dashboard
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            navigation.navigate('Dashboard');
+            setShowSuccessModal(true);
         } catch (_error) {
             // Handle error
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -174,6 +175,18 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                         </TouchableOpacity>
                     )}
                 </View>
+
+                <ConfirmationModal
+                    visible={showSuccessModal}
+                    onClose={() => { setShowSuccessModal(false); navigation.navigate('Dashboard'); }}
+                    title={t('common.messages.profileCreated')}
+                    message=""
+                    icon="checkmark-circle-outline"
+                    iconColor="#4CAF50"
+                    confirmText="OK"
+                    confirmColor="#4CAF50"
+                    showCancelButton={false}
+                />
             </View>
         );
     };

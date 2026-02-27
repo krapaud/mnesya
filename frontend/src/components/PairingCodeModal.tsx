@@ -147,6 +147,14 @@ const PairingCodeModal: React.FC<PairingCodeModalProps> = ({
                         <Text style={styles.expirationLabel}>{t('pairingCode.expiresIn')}</Text>
                         <Text style={styles.expirationTime}>{timeRemaining || '00:00:00'}</Text>
                     </View>
+
+                    {/* Tip */}
+                    <Text style={styles.tipText}>{t('pairingCode.tip')}</Text>
+
+                    {/* Done button */}
+                    <TouchableOpacity style={styles.doneButton} onPress={onClose}>
+                        <Text style={styles.doneButtonText}>{t('pairingCode.buttons.done')}</Text>
+                    </TouchableOpacity>
                 </View>
             </SafeAreaView>
         </Modal>
@@ -263,6 +271,27 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#FF6B6B',
         letterSpacing: 1,
+    },
+    tipText: {
+        fontSize: 13,
+        color: '#999999',
+        textAlign: 'center',
+        marginTop: 15,
+        fontStyle: 'italic',
+    },
+    doneButton: {
+        backgroundColor: '#4A90E2',
+        borderRadius: 12,
+        paddingVertical: 16,
+        paddingHorizontal: 40,
+        marginTop: 20,
+        width: '100%',
+        alignItems: 'center',
+    },
+    doneButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
 

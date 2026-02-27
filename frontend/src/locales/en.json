@@ -131,6 +131,9 @@
         "Done": "Done",
         "Unable": "Unable"
     },
+    "messages": {
+        "noReminders": "No reminders"
+    },
     "deleteModal": {
         "title": "Delete reminder",
         "message": "Are you sure you want to delete this reminder? This action is irreversible.",

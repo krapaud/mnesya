@@ -134,6 +134,11 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
             </TouchableOpacity>
         </View>
 
+            {/* Page title */}
+            <View style={styles.titleSection}>
+                <Text style={styles.title}>{t('caregiverProfile.title')}</Text>
+            </View>
+
             {/* Loading state */}
             {loading && (
                 <View style={styles.loadingContainer}>
