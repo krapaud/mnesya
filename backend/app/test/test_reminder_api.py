@@ -7,11 +7,13 @@ Tests cover:
 - GET /api/reminder/{reminder_id} - Get specific reminder
 - PUT /api/reminder/{reminder_id} - Update reminder
 - DELETE /api/reminder/{reminder_id} - Delete reminder
+- PUT /api/reminder/{reminder_id}/postpone - Postpone reminder
 """
 
 import pytest
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
+from app.api.authentication import create_access_token
 
 
 class TestCreateReminder:
@@ -568,3 +570,114 @@ class TestReminderAuthentication:
         
         # API returns 403 when no authentication is provided
         assert response.status_code in [401, 403]
+
+
+class TestPostponeReminder:
+    """Tests for PUT /api/reminder/{reminder_id}/postpone"""
+
+    def _user_client(self, client, user_id: str):
+        """Create a client authenticated as a specific user by ID."""
+        token = create_access_token({"sub": user_id})
+        client.headers.update({"Authorization": f"Bearer {token}"})
+        return client
+
+    def test_postpone_success(self, client, create_test_caregiver, create_test_user, create_test_reminder):
+        """Test successful postpone of a reminder by its user."""
+        caregiver, _ = create_test_caregiver()
+        user = create_test_user(caregiver_id=caregiver.id)
+        reminder = create_test_reminder(caregiver_id=caregiver.id, user_id=user.id)
+
+        user_client = self._user_client(client, str(user.id))
+        response = user_client.put(
+            f"/api/reminder/{reminder.id}/postpone",
+            json={"delay_minutes": 30}
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["id"] == str(reminder.id)
+
+    def test_postpone_updates_scheduled_at(self, client, create_test_caregiver, create_test_user, create_test_reminder):
+        """Test that postpone correctly shifts scheduled_at by delay_minutes."""
+        caregiver, _ = create_test_caregiver()
+        user = create_test_user(caregiver_id=caregiver.id)
+        original_time = datetime.now(timezone.utc) + timedelta(hours=1)
+        reminder = create_test_reminder(caregiver_id=caregiver.id, user_id=user.id, scheduled_at=original_time)
+
+        user_client = self._user_client(client, str(user.id))
+        response = user_client.put(
+            f"/api/reminder/{reminder.id}/postpone",
+            json={"delay_minutes": 15}
+        )
+
+        assert response.status_code == 200
+        new_scheduled_at = datetime.fromisoformat(response.json()["scheduled_at"])
+        expected = original_time + timedelta(minutes=15)
+        diff = abs((new_scheduled_at - expected).total_seconds())
+        assert diff < 2
+
+    def test_postpone_wrong_user(self, client, create_test_caregiver, create_test_user, create_test_reminder):
+        """Test that a different user cannot postpone the reminder."""
+        caregiver, _ = create_test_caregiver()
+        user = create_test_user(caregiver_id=caregiver.id)
+        other_user = create_test_user()
+        reminder = create_test_reminder(caregiver_id=caregiver.id, user_id=user.id)
+
+        other_client = self._user_client(client, str(other_user.id))
+        response = other_client.put(
+            f"/api/reminder/{reminder.id}/postpone",
+            json={"delay_minutes": 30}
+        )
+
+        assert response.status_code == 403
+
+    def test_postpone_not_found(self, client, create_test_user):
+        """Test postpone on a non-existent reminder returns 404."""
+        user = create_test_user()
+        user_client = self._user_client(client, str(user.id))
+
+        response = user_client.put(
+            f"/api/reminder/{uuid4()}/postpone",
+            json={"delay_minutes": 30}
+        )
+
+        assert response.status_code == 404
+
+    def test_postpone_without_auth(self, client, create_test_caregiver, create_test_user, create_test_reminder):
+        """Test that postpone requires authentication."""
+        caregiver, _ = create_test_caregiver()
+        user = create_test_user(caregiver_id=caregiver.id)
+        reminder = create_test_reminder(caregiver_id=caregiver.id, user_id=user.id)
+
+        response = client.put(
+            f"/api/reminder/{reminder.id}/postpone",
+            json={"delay_minutes": 30}
+        )
+
+        assert response.status_code in [401, 403]
+
+    def test_postpone_invalid_uuid(self, client, create_test_user):
+        """Test postpone with invalid UUID format returns 422."""
+        user = create_test_user()
+        user_client = self._user_client(client, str(user.id))
+
+        response = user_client.put(
+            "/api/reminder/not-a-uuid/postpone",
+            json={"delay_minutes": 30}
+        )
+
+        assert response.status_code == 422
+
+    def test_postpone_missing_delay(self, client, create_test_caregiver, create_test_user, create_test_reminder):
+        """Test postpone without delay_minutes in body returns 422."""
+        caregiver, _ = create_test_caregiver()
+        user = create_test_user(caregiver_id=caregiver.id)
+        reminder = create_test_reminder(caregiver_id=caregiver.id, user_id=user.id)
+
+        user_client = self._user_client(client, str(user.id))
+        response = user_client.put(
+            f"/api/reminder/{reminder.id}/postpone",
+            json={}
+        )
+
+        assert response.status_code == 422

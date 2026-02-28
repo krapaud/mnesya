@@ -124,3 +124,6 @@ class ReminderListResponse(BaseModel):
     """
     reminders: List[ReminderResponse]
     total: int
+
+class ReminderPostpone(BaseModel):
+    delay_minutes: int

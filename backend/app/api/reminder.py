@@ -6,16 +6,19 @@ Caregivers can create, read, update, and delete reminders for their users.
 
 import traceback
 from uuid import UUID
+from datetime import timedelta
 from typing import List
 
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 
 from app.services.reminder_facade import ReminderFacade
+from app.services.reminder_status_facade import ReminderStatusFacade
 from app.schemas.reminder_schema import (
     ReminderResponse,
     ReminderCreate,
     ReminderUpdate,
+    ReminderPostpone
 )
 from app.services.user_facade import UserFacade
 from app.api.authentication import verify_token
@@ -29,6 +32,12 @@ def get_reminder_facade(
 ) -> ReminderFacade:
     """Dependency to create ReminderFacade instance with database session."""
     return ReminderFacade(db)
+
+
+def get_reminder_status_facade(
+    db: Session = Depends(get_db),
+) -> ReminderStatusFacade:
+    return ReminderStatusFacade(db)
 
 
 def get_user_facade(db: Session = Depends(get_db)) -> UserFacade:
@@ -310,6 +319,82 @@ async def update_reminder(
         )
 
 
+@router.put("/{reminder_id}/postpone", response_model=ReminderResponse)
+async def postpone_reminder(
+    reminder_id: UUID,
+    request: ReminderPostpone,
+    user_id: str = Depends(get_caregiver_id),
+    reminder_facade: ReminderFacade = Depends(get_reminder_facade),
+    status_facade: ReminderStatusFacade = Depends(get_reminder_status_facade),
+):
+    """Postpone a reminder.
+
+    Updates the scheduled time of a reminder. Only the authenticated user
+    who owns the reminder can postpone it.
+
+    Args:
+        reminder_id (UUID): Unique identifier of the reminder to postpone
+        request (ReminderPostpone): Postpone data (new scheduled_at)
+        user_id (str): ID of the authenticated user
+        reminder_facade (ReminderFacade): Reminder service facade
+
+    Returns:
+        ReminderResponse: The updated reminder
+
+    Raises:
+        HTTPException: 404 if reminder not found,
+                      403 if caregiver doesn't have access to reminder,
+                      400 for validation errors,
+                      500 if update fails
+    """
+    try:
+        # First verify the reminder exists and caregiver has access
+        reminder = reminder_facade.get_reminder(str(reminder_id))
+
+        if not reminder:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="reminder not found",
+            )
+
+        # Verify that this user owns this reminder
+        if UUID(user_id) != reminder.user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You don't have access to this reminder",
+            )
+
+        # Calculate new scheduled_at
+        new_scheduled_at = reminder.scheduled_at + timedelta(minutes=request.delay_minutes)
+
+        # Perform update
+        updated_reminder = reminder_facade.update_reminder(
+            reminder.id, {"scheduled_at": new_scheduled_at}
+        )
+
+        # Record POSTPONED status
+        status_facade.create_reminder_status({
+            "status": "POSTPONED",
+            "reminder_id": reminder_id
+        })
+
+        return build_reminder_response(updated_reminder)
+
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update reminder: {str(e)}",
+        )
+
+
 @router.delete("/{reminder_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_reminder(
     reminder_id: UUID,
@@ -374,4 +459,3 @@ async def delete_reminder(
 
 # Export for use in other modules
 __all__ = ["router"]
-
