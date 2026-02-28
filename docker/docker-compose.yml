@@ -65,6 +65,25 @@ services:
     stdin_open: true
     tty: true
 
+  # APScheduler Worker — runs background jobs for push notifications
+  worker:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: mnesya-worker
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    depends_on:
+      db:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    volumes:
+      - ../backend:/app
+    networks:
+      - mnesya-network
+    command: python -m worker.scheduler
+
   # pgAdmin - PostgreSQL Administration Panel
   pgadmin:
     image: dpage/pgadmin4:latest
