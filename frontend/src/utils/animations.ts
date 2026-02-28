@@ -40,3 +40,26 @@ export const getBellRotation = (animatedValue: Animated.Value) => ({
         }),
     }],
 });
+
+/** Pulse animation that loops forever (opacity 1 → 0.4 → 1). */
+export const createPulseAnimation = (animatedValue: Animated.Value) => {
+    return Animated.loop(
+        Animated.sequence([
+            Animated.timing(animatedValue, {
+                toValue: 0.4,
+                duration: 800,
+                useNativeDriver: true,
+            }),
+            Animated.timing(animatedValue, {
+                toValue: 1,
+                duration: 800,
+                useNativeDriver: true,
+            }),
+        ])
+    );
+};
+
+/** Returns the opacity style for the pulse animation. */
+export const getPulseScale = (animatedValue: Animated.Value) => ({
+    opacity: animatedValue,
+});
