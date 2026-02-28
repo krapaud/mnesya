@@ -129,7 +129,8 @@ class NotificationService:
         tokens: List[str],
         reminder_title: str,
         reminder_description: str = None,
-        reminder_id: str = None
+        reminder_id: str = None,
+        extra_data: dict = None
     ) -> Dict:
         """Send a reminder notification.
         
@@ -138,6 +139,8 @@ class NotificationService:
             reminder_title (str): The reminder title
             reminder_description (str): Optional reminder description
             reminder_id (str): Optional reminder ID for deep linking
+            extra_data (dict): Optional extra key/value pairs merged into the
+                notification data payload (e.g. isUserNotification, retry offset)
             
         Returns:
             Dict: Results of the notification send
@@ -145,7 +148,7 @@ class NotificationService:
         body = reminder_description or "Vous avez un rappel"
         data = {
             "type": "reminder",
-            "reminder_id": reminder_id
+            "reminder_id": reminder_id, **(extra_data or {})
         } if reminder_id else {"type": "reminder"}
 
         return self.send_notification(

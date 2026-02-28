@@ -20,6 +20,7 @@ class PushTokenModel(database):
         caregiver_id (UUID): ID of the caregiver who owns this token (nullable)
         device_name (str): Optional device name/description
         is_active (bool): Whether this token is currently active
+        locale (str): Store the Device language
         created_at (datetime): When the token was registered
         updated_at (datetime): When the token was last updated
     """
@@ -31,6 +32,7 @@ class PushTokenModel(database):
     _caregiver_id = Column('caregiver_id', UUID(as_uuid=True), ForeignKey('caregiver.id'), nullable=True)
     _device_name = Column('device_name', String(100), nullable=True)
     _is_active = Column('is_active', Boolean, default=True, nullable=False)
+    _locale = Column('locale', String(5), default='fr')
     _created_at = Column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     _updated_at = Column('updated_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), 
                          onupdate=lambda: datetime.now(timezone.utc), nullable=False)
@@ -99,6 +101,10 @@ class PushTokenModel(database):
     def is_active(self, value: bool) -> None:
         """Set whether the token is active."""
         self._is_active = bool(value)
+
+    @property
+    def locale(self) -> str:
+        return self._locale
 
     @property
     def created_at(self) -> datetime:
