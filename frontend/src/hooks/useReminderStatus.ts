@@ -4,13 +4,15 @@
  * @module useReminderStatus
  */
 import { useState, useEffect, useCallback } from "react";
-import { getReminderStatus } from "../services/reminderService";
+import { getReminderStatus, postponeReminder } from "../services/reminderService";
 import type { ReminderStatus } from "../types/interfaces";
+
 
 interface UseReminderStatus {
     reminderStatus: ReminderStatus | null;
     loading: boolean;
     error: string | null;
+    postpone: (delayMinute: number) => Promise<void>;
     reload: () => Promise<void>;
 }
 
@@ -40,10 +42,17 @@ export const useReminderStatus = (
     useEffect(() => {
         loadReminderStatus();
     }, [loadReminderStatus]);
+
+    const postpone = useCallback(async (delayMinutes: number) => {
+        await postponeReminder(reminderId, delayMinutes);
+        await loadReminderStatus();
+    }, [reminderId, loadReminderStatus]);
+
     return {
         reminderStatus,
         loading,
         error,
+        postpone,
         reload: loadReminderStatus,
     };
 };

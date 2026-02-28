@@ -52,3 +52,9 @@ export const updateReminderStatus = async (reminderId: string, data: UpdateRemin
   const response = await apiClient.put(`/api/reminder-status/${reminderId}`, data);
   return response.data;
 };
+
+/** Postpones a reminder by a given number of minutes. */
+export const postponeReminder = async (reminderId: string, delayMinutes: number): Promise<ReminderData> => {
+  const response = await apiClient.put(`/api/reminder/${reminderId}/postpone`, { delay_minutes: delayMinutes });
+  return response.data;
+};
