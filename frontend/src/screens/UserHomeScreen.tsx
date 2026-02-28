@@ -3,7 +3,7 @@
  *
  * @module UserHomeScreen
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     View, Text, StyleSheet, TouchableOpacity,
     Image, ScrollView, Modal, RefreshControl,
@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import type { UserTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { getUserInfo, deleteToken, deleteUserInfo } from '../services/tokenService';
@@ -100,10 +101,21 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const [currentUser, setCurrentUser] = useState<CaregiverProfile | null>(null);
     const [userReminders, setUserReminders] = useState<ReminderData[]>([]);
+    const [focusTrigger, setFocusTrigger] = useState(0);
+
+    /**
+     * Increments focusTrigger each time the screen comes into focus,
+     * which causes loadUserData to re-run via the useEffect below.
+     */
+    useFocusEffect(
+        useCallback(() => {
+            setFocusTrigger(prev => prev + 1);
+        }, [])
+    );
 
     /**
      * Loads user data and reminders.
-     * Re-runs when refreshTrigger changes (triggered by pull-to-refresh).
+     * Re-runs when refreshTrigger changes (pull-to-refresh) or focusTrigger changes (screen focus).
      */
     useEffect(() => {
         const loadUserData = async () => {
@@ -117,7 +129,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
         };
         loadUserData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [refreshTrigger]);
+    }, [refreshTrigger, focusTrigger]);
 
     const isReminderAvailable = (scheduled_at: string): boolean => {
         return new Date(scheduled_at) <= new Date();
@@ -180,7 +192,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                         <UserReminderItem
                             key={reminder.id}
                             reminder={reminder}
-                            reloadTrigger={refreshTrigger}
+                            reloadTrigger={refreshTrigger + focusTrigger}
                             onBellPress={() => {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                                 if (isReminderAvailable(reminder.scheduled_at)) {

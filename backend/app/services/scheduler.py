@@ -106,26 +106,27 @@ def send_caregiver_escalations():
 
         for reminder in reminders:
             token_objects = push_token_repo.get_active_tokens_by_caregiver(reminder.caregiver_id)
-            if not token_objects:
-                continue
-            token_strings = [t.token for t in token_objects]
-            my_locale = token_objects[0].locale if token_objects else "fr"
 
-            if my_locale == "fr":
-                my_title = reminder.title
-                my_body = f"Votre proche n'a pas confirmé : {reminder.title}"
-            else:
-                my_title = reminder.title
-                my_body = f"Your relative did not confirm: {reminder.title}"
+            # Send notification to caregiver only if they have registered tokens
+            if token_objects:
+                token_strings = [t.token for t in token_objects]
+                my_locale = token_objects[0].locale if token_objects else "fr"
 
-            notification_service.send_notification(
-                tokens=token_strings,
-                title=my_title,
-                body=my_body,
-                data={"type": "caregiver_alert", "reminder_id": str(reminder.id)}
-            )
+                if my_locale == "fr":
+                    my_title = reminder.title
+                    my_body = f"Votre proche n'a pas confirmé : {reminder.title}"
+                else:
+                    my_title = reminder.title
+                    my_body = f"Your relative did not confirm: {reminder.title}"
 
-            # Mark reminder as MISSED after caregiver escalation
+                notification_service.send_notification(
+                    tokens=token_strings,
+                    title=my_title,
+                    body=my_body,
+                    data={"type": "caregiver_alert", "reminder_id": str(reminder.id)}
+                )
+
+            # Always mark reminder as MISSED after caregiver escalation delay
             from app.models.reminder_status import ReminderStatusModel
             missed_status = ReminderStatusModel()
             missed_status.status = "MISSED"
