@@ -32,11 +32,22 @@ def generate_pairing_code(length: int = 6) -> str:
     return ''.join(random.choice(chars) for _ in range(length))
 
 
+def get_current_caregiver_id(
+        token_payload: dict = Depends(verify_token)) -> str:
+    """Extract caregiver ID from JWT token payload."""
+    caregiver_id = token_payload.get("sub")
+    if not caregiver_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials"
+        )
+    return caregiver_id
+
+
 @router.post("/generate", response_model=PairingCodeResponse)
 async def generate_code(
     request: PairingCodeCreate,
-    caregiver_id: str = Depends(
-        lambda token=Depends(verify_token): token.get("sub")),
+    caregiver_id: str = Depends(get_current_caregiver_id),
     db: Session = Depends(get_db)
 ):
     """Generate a pairing code for a user."""

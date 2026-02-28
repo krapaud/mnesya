@@ -3,8 +3,11 @@
  *
  * @module UserHomeScreen
  */
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Modal, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+    View, Text, StyleSheet, TouchableOpacity,
+    Image, ScrollView, Modal, RefreshControl,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -88,60 +91,34 @@ const UserReminderItem: React.FC<UserReminderItemProps> = ({ reminder, onBellPre
 
 const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
-    const { refreshTrigger, isRefreshing, setIsRefreshing } = useRefresh();
+    const { refreshTrigger, isRefreshing, setIsRefreshing, triggerRefresh } = useRefresh();
 
     const [showAlert, setShowAlert] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const [currentUser, setCurrentUser] = useState<CaregiverProfile | null>(null);
     const [userReminders, setUserReminders] = useState<ReminderData[]>([]);
-    const [_loading, setLoading] = useState(true);
-    const loadUserTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     /**
-     * Loads user data and filters reminders.
-     * Re-runs when refreshTrigger changes (when user taps refresh button).
-     * Ensures loading indicator displays for minimum 1 second for better UX.
+     * Loads user data and reminders.
+     * Re-runs when refreshTrigger changes (triggered by pull-to-refresh).
      */
     useEffect(() => {
         const loadUserData = async () => {
-            const startTime = Date.now();
-            
             const user = await getUserInfo();
             setCurrentUser(user);
-            
+
             const reminders = await getUserReminders();
             setUserReminders(reminders);
-            
-            // Ensure minimum 1 second display time for loading indicator
-            const elapsedTime = Date.now() - startTime;
-            const remainingTime = Math.max(0, 1000 - elapsedTime);
-            
-            loadUserTimerRef.current = setTimeout(() => {
-                setLoading(false);
-                setIsRefreshing(false);
-            }, remainingTime);
+
+            setIsRefreshing(false);
         };
         loadUserData();
-
-        return () => {
-            if (loadUserTimerRef.current) {
-                clearTimeout(loadUserTimerRef.current);
-            }
-        };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [refreshTrigger]);
 
     const isReminderAvailable = (scheduled_at: string): boolean => {
         return new Date(scheduled_at) <= new Date();
-    };
-
-    /**
-     * Handles user logout by clearing tokens and navigation reset.
-     * Removes stored authentication token and user info, then redirects to Welcome screen.
-     */
-    const _handleLogout = async () => {
-        setShowLogoutConfirm(true);
     };
 
     const handleLogoutConfirm = async () => {
@@ -189,7 +166,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.title}>{t('UserHome.greeting')} {currentUser?.first_name} !</Text>
                 <Text style={styles.subtitle}>{t('UserHome.subtitle')}</Text>
             </View>
-            <ScrollView>
+            <ScrollView refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={triggerRefresh} />}>
                 {/* 
                  * Reminder list with empty state handling
                  * Each reminder displayed as a card with tap feedback for accessibility
@@ -293,15 +270,6 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                 </View>
             </Modal>
 
-            {/* Refresh loading overlay */}
-            {isRefreshing && (
-                <View style={styles.refreshOverlay}>
-                    <View style={styles.refreshIndicator}>
-                        <ActivityIndicator size="large" color="#4A90E2" />
-                        <Text style={styles.refreshText}>{t('common.messages.loading')}</Text>
-                    </View>
-                </View>
-            )}
         </View>
     );
 };
@@ -327,29 +295,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#666666',
         marginBottom: 40,
-    },
-    // Refresh overlay styles
-    refreshOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'transparent',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    refreshIndicator: {
-        backgroundColor: '#FFFFFF',
-        padding: 30,
-        borderRadius: 15,
-        alignItems: 'center',
-        shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    refreshText: {
-        marginTop: 15,
-        fontSize: 16,
-        color: '#666666',
     },
     // Menu styles
     menuOverlay: {

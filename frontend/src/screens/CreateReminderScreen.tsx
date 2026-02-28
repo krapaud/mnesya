@@ -161,8 +161,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             navigation.navigate('Dashboard');
             
-        } catch (error) {
-            console.error('[CreateReminder] Error:', error);
+        } catch {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             // Show error inline on message field
             setMessageError(t('CreateReminder.errors.Error scheduling notification'));

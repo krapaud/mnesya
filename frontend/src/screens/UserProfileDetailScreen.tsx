@@ -56,6 +56,8 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
 
     const [isGeneratingCode, setIsGeneratingCode] = useState(false);
 
+    const [deleteError, setDeleteError] = useState<boolean>(false);
+
     /**
      * Handles profile update.
      */
@@ -108,8 +110,9 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
             }
             await deleteReminder(pendingDeleteReminderId);
             reloadReminders();
-        } catch (err) {
-            console.error('[DeleteReminder] Error:', err);
+        } catch {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            setDeleteError(true);
         } finally {
             setPendingDeleteReminderId(null);
         }
@@ -221,6 +224,13 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
                 
                 {/* Active reminders section - displays filtered reminders for this profile */}
                 <Text style={styles.sectionTitle}>{t('UserProfileDetail.sections.Active Reminders')}</Text>
+                {/* Delete error feedback */}
+                {deleteError && (
+                    <View style={commonStyles.errorContainer}>
+                        <Ionicons name="alert-circle-outline" size={24} color="#E53935" />
+                        <Text style={commonStyles.errorText}>{t('reminders.errors.deleteError')}</Text>
+                    </View>
+                )}
                 {profileReminders.length === 0 ? (
                     <Text style={commonStyles.emptyMessage}>{t('UserProfileDetail.messages.No active reminders')}</Text>
                 ) : (
