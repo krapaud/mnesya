@@ -153,7 +153,7 @@
         "Save Reminder": "Save Reminder"
     },
     "message": {
-        "Be careful not to enter sensitive confidential information.": "Warning: Avoid entering confidential information."
+        "Be careful not to enter sensitive confidential information.": "For security reasons, do not share confidential information in this field."
     },
     "errors": {
         "Please select a profile": "Please select a profile",

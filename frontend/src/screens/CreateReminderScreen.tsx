@@ -3,18 +3,19 @@
  * 
  * @module CreateReminderScreen
  */
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, Modal, ActivityIndicator} from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, Modal, ActivityIndicator, Animated} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { PlatformDatePicker, PlatformTimePicker, PlatformProfilePicker } from '../components';
+import { PlatformDatePicker, PlatformTimePicker, FilterPickerModal } from '../components';
 import { scheduleReminderWithRepetitions } from '../utils/notifications';
 import { useUserProfiles } from '../hooks';
 import { createReminder } from '../services/reminderService';
+import { createPulseAnimation, getPulseScale } from '../utils/animations';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateReminder'>;
 
@@ -34,7 +35,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
     const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
     const [showProfilePicker, setShowProfilePicker] = useState<boolean>(false);
-    const [selectedProfile, setSelectedProfile] = useState<string | number>('');
+    const [selectedProfile, setSelectedProfile] = useState<string>('');
 
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
 
@@ -45,7 +46,12 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const [showTitleError, setShowTitleError] = useState<boolean>(false);
     const [showMessageError, setShowMessageError] = useState<boolean>(false);
 
-    const selectedProfileData = userData?.find(p => p.id === selectedProfile);
+    const selectedProfileData = userData?.find(p => String(p.id) === selectedProfile);
+
+    const pulseAnim = useRef(new Animated.Value(1)).current;
+    useEffect(() => {
+        createPulseAnimation(pulseAnim).start();
+    }, [pulseAnim]);
 
     const formatDate = (date: Date): string => {
         const day = date.getDate().toString().padStart(2, '0');
@@ -251,8 +257,8 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={[styles.errorText, {opacity: showMessageError ? 1 : 0}]}>
                     {messageError || t('CreateReminder.errors.Please enter a message')}
                 </Text>
-                <Text style={[styles.text, { paddingBottom: 10 }]}>
-                    {t('CreateReminder.message.Be careful not to enter sensitive confidential information.')}</Text>
+                <Animated.Text style={[styles.text, getPulseScale(pulseAnim)]}>
+                    {t('CreateReminder.message.Be careful not to enter sensitive confidential information.')}</Animated.Text>
                 <View style={styles.pickerContainer}>
                 <View style={styles.pickerColumn}>
                     <Text style={styles.label}>Date</Text>
@@ -301,17 +307,16 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 />
                 
                 {/* Cross-platform profile picker component */}
-                <PlatformProfilePicker
-                    profiles={userData?.map(item => ({
-                        id: item.id,
-                        firstName: item.first_name,
-                        lastName: item.last_name,
+                <FilterPickerModal
+                    title={t('common.pickersText.Select a profile')}
+                    items={userData?.map(item => ({
+                        value: String(item.id),
+                        label: `${item.first_name} ${item.last_name}`,
                     })) ?? []}
                     selectedValue={selectedProfile}
-                    onValueChange={setSelectedProfile}
+                    onSelect={setSelectedProfile}
                     visible={showProfilePicker}
                     onClose={() => setShowProfilePicker(false)}
-                    placeholder={t('common.pickersText.Select a profile')}
                 />
                 
                 {/* Buttons section - fixed at bottom */}
@@ -411,10 +416,13 @@ const styles = StyleSheet.create({
         marginTop: 0,
     },
     text: {
-        fontSize: 16,
+        fontSize: 13,
         width: '100%',
         justifyContent: 'flex-start',
         color: '#FF0000',
+        marginTop: 0,
+        marginBottom: 4,
+        paddingBottom: 4,
     },
 
     // ========== FORM ELEMENTS ==========
@@ -442,6 +450,7 @@ const styles = StyleSheet.create({
     },
     messageInput: {
         height: 80,
+        marginBottom: 2,
     },
 
     // ========== PICKERS ==========
