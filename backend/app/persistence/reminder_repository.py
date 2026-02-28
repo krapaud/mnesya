@@ -126,8 +126,10 @@ class ReminderRepository(BaseRepository[ReminderModel]):
     def get_reminders_to_escalate(self, delay_minutes: int = 10) -> List[ReminderModel]:
         """Get reminders that should be escalated to the caregiver.
 
-        Returns reminders whose scheduled_at is older than delay_minutes,
-        meaning the user has not responded for at least that long.
+        Returns all reminders older than delay_minutes that have never been
+        resolved (confirmed, done or missed). Using a range instead of a strict
+        window makes the query resilient to worker restarts: any reminder missed
+        during a downtime will be caught on the next run.
 
         Args:
             delay_minutes (int): Minimum age in minutes to trigger escalation. Defaults to 10.
@@ -136,9 +138,8 @@ class ReminderRepository(BaseRepository[ReminderModel]):
             List[ReminderModel]: Reminders past the escalation threshold.
         """
         now = datetime.utcnow()
-        target = now - timedelta(minutes=delay_minutes)
-        start = target - timedelta(seconds=30)
-        end = target + timedelta(seconds=30)
+        escalate_after = now - timedelta(minutes=delay_minutes)
+        escalate_before = now - timedelta(hours=24)  # ignore reminders older than 24h
 
         # Subquery: reminder IDs that have already been confirmed, done or missed
         resolved_ids = (
@@ -146,13 +147,13 @@ class ReminderRepository(BaseRepository[ReminderModel]):
             .filter(ReminderStatusModel._status.in_(["CONFIRMED", "DONE", "MISSED"]))
         )
 
-        # Return reminders in the T-10min window that were never resolved, enriched with user name
+        # Return all unresolved reminders past the escalation threshold (within last 24h)
         results = (
             self.db.query(self.model, UserModel._first_name, UserModel._last_name)
             .join(UserModel, self.model._user_id == UserModel._id)
             .filter(
-                self.model._scheduled_at >= start,
-                self.model._scheduled_at <= end,
+                self.model._scheduled_at <= escalate_after,
+                self.model._scheduled_at >= escalate_before,
                 ~self.model._id.in_(resolved_ids)
             )
             .all()

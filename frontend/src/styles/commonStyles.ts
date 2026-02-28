@@ -141,7 +141,7 @@ export const commonStyles = StyleSheet.create({
         color: '#F44336',
     },
     statusMissed: {
-        color: '#9E9E9E',
+        color: '#E53935',
     },
     reminderDetails: {
         gap: 8,
