@@ -60,7 +60,7 @@ const FilterPickerModal: React.FC<FilterPickerModalProps> = ({
                                     styles.pickerItem,
                                     selectedValue === item.value && styles.pickerItemSelected,
                                 ]}
-                                onPress={() => onSelect(item.value)}
+                                onPress={() => { onSelect(item.value); onClose(); }}
                             >
                                 <Text style={[
                                     styles.pickerItemText,

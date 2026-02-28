@@ -151,7 +151,7 @@
         "Save Reminder": "Sauvegarder le Rappel"
     },
     "message": {
-        "Be careful not to enter sensitive confidential information.": "Attention: Évitez de saisir des informations confidentielles."
+        "Be careful not to enter sensitive confidential information.": "Par mesure de sécurité, ne partagez pas d'informations confidentielles dans ce champ."
     },
     "errors": {
         "Please select a profile": "Veuillez sélectionner un profil",
