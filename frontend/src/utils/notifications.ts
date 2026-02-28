@@ -26,8 +26,9 @@ export async function registerForPushNotifications(): Promise<string | undefined
   if (finalStatus !== 'granted') {
     return undefined;
   }
-
-  return 'granted';
+  const tokenData = await Notifications.getExpoPushTokenAsync();
+  await AsyncStorage.setItem('expo_push_token', tokenData.data);
+  return tokenData.data;
 }
 
 /** Schedules a single notification at the given date. */
