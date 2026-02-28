@@ -61,7 +61,7 @@ const App: React.FC = () => {
             // Navigate to ReminderNotificationScreen with notification data
             if (navigationRef.current && data && !data.isCaregiverAlert) {
                 navigationRef.current.navigate('ReminderNotification', {
-                    reminderId: data.reminderId,
+                    reminderId: data.reminder_id,
                     message: data.message,
                     profileId: data.profileId,
                 });

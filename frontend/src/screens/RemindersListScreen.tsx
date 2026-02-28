@@ -8,7 +8,7 @@
  * @component
  */
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -33,10 +33,29 @@ type Props = CompositeScreenProps<
 const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
     const { reminderData, loading: _loading, error: _error, reload } = useCaregiverReminders();
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [reloadCounter, setReloadCounter] = useState(0);
+
+    const handleRefresh = useCallback(async () => {
+        setIsRefreshing(true);
+        await reload();
+        setReloadCounter(c => c + 1);
+        setIsRefreshing(false);
+    }, [reload]);
+
+    /** Controls the bottom fade indicator — hidden when scrolled to the end. */
+    const [showScrollFade, setShowScrollFade] = useState(true);
+
+    const handleScroll = (event: { nativeEvent: { contentOffset: { y: number }; layoutMeasurement: { height: number }; contentSize: { height: number } } }) => {
+        const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+        const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 10;
+        setShowScrollFade(!isAtBottom);
+    };
 
     useFocusEffect(
         useCallback(() => {
             reload();
+            setReloadCounter(c => c + 1);
         }, [reload])
     );
 
@@ -50,11 +69,13 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
 
     // Filter reminders based on selected profile and date
     const getFilteredReminders = () => {
-        return reminderData?.filter(reminder => {
-            const matchProfile = !selectedProfile || reminder.user_id === selectedProfile;
-            const matchDate = !selectedDate || reminder.scheduled_at === selectedDate;
-            return matchProfile && matchDate;
-        });
+        return reminderData
+            ?.filter(reminder => {
+                const matchProfile = !selectedProfile || reminder.user_id === selectedProfile;
+                const matchDate = !selectedDate || reminder.scheduled_at === selectedDate;
+                return matchProfile && matchDate;
+            })
+            .sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime());
     };
 
     // Get unique profiles as {id, name} objects (deduplicated by user_id)
@@ -260,19 +281,28 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                     )}
 
                     {/* Reminders list */}
-                    <ScrollView showsVerticalScrollIndicator={false} style={styles.remindersList}>
-                        {(getFilteredReminders?.() ?? []).length === 0 ? (
-                            <Text style={commonStyles.emptyMessage}>No reminders yet</Text>
-                        ) : (
-                            (getFilteredReminders?.() ?? []).map((reminder) => (
-                                <ReminderCard
-                                    key={reminder.id}
-                                    reminder={reminder}
-                                    onDelete={handleDeleteReminder}
-                                />
-                            ))
+                    <View style={styles.listWrapper}>
+                        <ScrollView showsVerticalScrollIndicator={false} style={styles.remindersList} refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />} onScroll={handleScroll} scrollEventThrottle={16}>
+                            {(getFilteredReminders?.() ?? []).length === 0 ? (
+                                <Text style={commonStyles.emptyMessage}>No reminders yet</Text>
+                            ) : (
+                                (getFilteredReminders?.() ?? []).map((reminder) => (
+                                    <ReminderCard
+                                        key={reminder.id}
+                                        reminder={reminder}
+                                        onDelete={handleDeleteReminder}
+                                        reloadTrigger={reloadCounter}
+                                    />
+                                ))
+                            )}
+                        </ScrollView>
+                        {/* Bottom fade — signals more content below */}
+                        {showScrollFade && (
+                            <View style={styles.scrollFade} pointerEvents="none">
+                                <Ionicons name="chevron-down" size={24} color="#4A90E2" />
+                            </View>
                         )}
-                    </ScrollView>
+                    </View>
             </View>
         );
 };
@@ -344,6 +374,20 @@ const styles = StyleSheet.create({
     },
     remindersList: {
         flex: 1,
+    },
+    listWrapper: {
+        flex: 1,
+        position: 'relative',
+    },
+    scrollFade: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255,255,255,0.85)',
     },
 });
 

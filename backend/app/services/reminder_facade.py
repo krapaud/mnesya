@@ -111,6 +111,34 @@ class ReminderFacade:
         self.reminder_repo.update(UUID(reminder_id), reminder_data)
         return self.reminder_repo.get(UUID(reminder_id))
 
+    def postpone_reminder(self, reminder_id: str, delay_minutes: int = 5) -> object:
+        """Postpone a reminder by a given number of minutes.
+
+        Updates the reminder's scheduled_at to now + delay_minutes
+        and creates a POSTPONED status entry.
+
+        Args:
+            reminder_id (str): The reminder's unique identifier
+            delay_minutes (int): Number of minutes to postpone. Defaults to 5.
+
+        Returns:
+            ReminderModel: The updated reminder, or None if not found
+        """
+        from datetime import datetime, timedelta
+        reminder = self.reminder_repo.get(UUID(reminder_id))
+        if not reminder:
+            return None
+
+        new_scheduled_at = datetime.utcnow() + timedelta(minutes=delay_minutes)
+        self.reminder_repo.update(UUID(reminder_id), {"scheduled_at": new_scheduled_at})
+
+        postponed_status = ReminderStatusModel()
+        postponed_status.status = ReminderStatusEnum.POSTPONED.value
+        postponed_status.reminder_id = reminder.id
+        self.reminder_status_repo.add(postponed_status)
+
+        return self.reminder_repo.get(UUID(reminder_id))
+
     def delete_reminder(self, reminder_id: str) -> bool:
         """Delete a reminder and its associated statuses.
 

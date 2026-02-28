@@ -37,6 +37,8 @@ interface ConfirmationModalProps {
     confirmColor?: string;
     /** Cancel button text (default: 'Cancel') */
     cancelText?: string;
+    /** Hide the cancel button (default: false) */
+    hideCancelButton?: boolean;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -50,6 +52,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     confirmText,
     confirmColor = '#E53935',
     cancelText,
+    hideCancelButton = false,
 }) => {
     const { t } = useTranslation();
 
@@ -67,14 +70,16 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                     <Text style={styles.modalMessage}>{message}</Text>
                     
                     <View style={styles.modalActions}>
-                        <TouchableOpacity
-                            style={[styles.modalButton, styles.cancelButton]}
-                            onPress={onClose}
-                        >
-                            <Text style={styles.cancelButtonText}>
-                                {cancelText || t('common.buttons.Cancel')}
-                            </Text>
-                        </TouchableOpacity>
+                        {!hideCancelButton && (
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.cancelButton]}
+                                onPress={onClose}
+                            >
+                                <Text style={styles.cancelButtonText}>
+                                    {cancelText || t('common.buttons.Cancel')}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
 
                         <TouchableOpacity
                             style={[styles.modalButton, { backgroundColor: confirmColor }]}

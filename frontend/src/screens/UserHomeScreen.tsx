@@ -28,11 +28,13 @@ const statusColorMap: Record<string, object> = {
     'PENDING': commonStyles.statusPending,
     'POSTPONED': commonStyles.statusPostponed,
     'UNABLE': commonStyles.statusUnable,
+    'MISSED': commonStyles.statusMissed,
 };
 
 interface UserReminderItemProps {
     reminder: ReminderData;
     onBellPress: () => void;
+    reloadTrigger?: number;
 }
 
 /**
@@ -42,15 +44,15 @@ interface UserReminderItemProps {
  * Extracted as a sub-component so that `useReminderStatus` can be called
  * as a proper React hook (hooks cannot be called inside `.map()`).
  */
-const UserReminderItem: React.FC<UserReminderItemProps> = ({ reminder, onBellPress }) => {
+const UserReminderItem: React.FC<UserReminderItemProps> = ({ reminder, onBellPress, reloadTrigger }) => {
     const { t } = useTranslation();
-    const { reminderStatus } = useReminderStatus(reminder.id);
+    const { reminderStatus } = useReminderStatus(reminder.id, undefined, reloadTrigger);
 
     const statusKey = reminderStatus?.status
         ? reminderStatus.status.charAt(0).toUpperCase() + reminderStatus.status.slice(1).toLowerCase()
         : null;
 
-    const isClosed = reminderStatus?.status === 'DONE' || reminderStatus?.status === 'UNABLE';
+    const isClosed = reminderStatus?.status === 'DONE' || reminderStatus?.status === 'UNABLE' || reminderStatus?.status === 'MISSED';
 
     return (
         <View style={commonStyles.reminderCard}>
@@ -178,6 +180,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                         <UserReminderItem
                             key={reminder.id}
                             reminder={reminder}
+                            reloadTrigger={refreshTrigger}
                             onBellPress={() => {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                                 if (isReminderAvailable(reminder.scheduled_at)) {

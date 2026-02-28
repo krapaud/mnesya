@@ -30,6 +30,13 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     // Load user profiles from API
     const { userData, loading, error, reload } = useUserProfiles();
     const isInitialLoading = loading && userData === null;
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    const handleRefresh = useCallback(async () => {
+        setIsRefreshing(true);
+        await reload();
+        setIsRefreshing(false);
+    }, [reload]);
 
     /** Controls the bottom fade indicator — hidden when scrolled to the end. */
     const [showScrollFade, setShowScrollFade] = useState(true);
@@ -88,69 +95,65 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 
                 <Text style={styles.sectionTitle}>{t('dashboard.profilesListTitle')}</Text>
                 
-                {/* Initial loading state — hidden during pull-to-refresh */}
-                {isInitialLoading && (
-                    <View style={commonStyles.loadingContainer}>
-                        <ActivityIndicator size="large" color="#4A90E2" />
-                        <Text style={commonStyles.loadingText}>{t('common.messages.loading')}</Text>
-                    </View>
-                )}
-
-                {/* Error state */}
-                {error && !isInitialLoading && (
-                    <View style={commonStyles.errorContainer}>
-                        <Ionicons name="alert-circle-outline" size={48} color="#E53935" />
-                        <Text style={commonStyles.errorText}>{t(error)}</Text>
-                    </View>
-                )}
-                
                 {/* 
                  * Scrollable list of profile cards
                  * Each card displays user name, age, and a view button to access profile details
+                 * listWrapper is always in the layout to avoid position jumps
                  */}
-                {!isInitialLoading && !error && (
-                    <View style={styles.listWrapper}>
+                <View style={styles.listWrapper}>
+                    {/* Initial loading state — hidden during pull-to-refresh */}
+                    {isInitialLoading ? (
+                        <View style={commonStyles.loadingContainer}>
+                            <ActivityIndicator size="large" color="#4A90E2" />
+                            <Text style={commonStyles.loadingText}>{t('common.messages.loading')}</Text>
+                        </View>
+                    ) : error ? (
+                        <View style={commonStyles.errorContainer}>
+                            <Ionicons name="alert-circle-outline" size={48} color="#E53935" />
+                            <Text style={commonStyles.errorText}>{t(error)}</Text>
+                        </View>
+                    ) : (
                         <ScrollView
                             showsVerticalScrollIndicator={false}
                             style={styles.profilesList}
-                            refreshControl={<RefreshControl refreshing={loading} onRefresh={reload} />}
+                            refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
                             onScroll={handleScroll}
                             scrollEventThrottle={16}
                         >
-                        {!userData || userData.length === 0 ? (
-                            <Text style={styles.emptyMessage}>{t('dashboard.messages.No profiles yet')}</Text>
-                        ) : (
-                            userData.map((profile) => (
-                                <View key={profile.id} style={styles.profileCard}>
-                                    <View style={styles.profileInfo}>
-                                        <View>
-                                            <Text style={styles.textUser}>{profile.first_name + ' ' + profile.last_name}</Text>
-                                            <Text style={styles.textUserInfo}>{calculateAge(profile.birthday)} {t('common.units.years old')}</Text>
+                            {!userData || userData.length === 0 ? (
+                                <Text style={styles.emptyMessage}>{t('dashboard.messages.No profiles yet')}</Text>
+                            ) : (
+                                userData.map((profile) => (
+                                    <View key={profile.id} style={styles.profileCard}>
+                                        <View style={styles.profileInfo}>
+                                            <View>
+                                                <Text style={styles.textUser}>{profile.first_name + ' ' + profile.last_name}</Text>
+                                                <Text style={styles.textUserInfo}>{calculateAge(profile.birthday)} {t('common.units.years old')}</Text>
+                                            </View>
+                                            
+                                            {/* View button with arrow icon */}
+                                            <TouchableOpacity 
+                                                style={styles.viewButton}
+                                                onPress={() => {
+                                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                                    navigation.navigate('UserProfileDetails', { profileId: String(profile.id) });
+                                                }}>
+                                                <Text style={styles.viewButtonText}>{t('dashboard.buttons.View')}</Text>
+                                                <Ionicons name="arrow-forward" size={20} color="#4A90E2" />
+                                            </TouchableOpacity>
                                         </View>
-                                        
-                                        {/* View button with arrow icon */}
-                                        <TouchableOpacity 
-                                            style={styles.viewButton}
-                                            onPress={() => {
-                                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                                navigation.navigate('UserProfileDetails', { profileId: String(profile.id) });
-                                            }}>
-                                            <Text style={styles.viewButtonText}>{t('dashboard.buttons.View')}</Text>
-                                            <Ionicons name="arrow-forward" size={20} color="#4A90E2" />
-                                        </TouchableOpacity>
                                     </View>
-                                </View>
-                            ))
-                        )}
+                                ))
+                            )}
                         </ScrollView>
-                        {/* Bottom fade — signals more content below */}
-                        {showScrollFade && (
-                            <View style={styles.scrollFade} pointerEvents="none">
-                                <Ionicons name="chevron-down" size={24} color="#4A90E2" />
-                            </View>
-                        )}
-                    </View>
-                )}
+                    )}
+                    {/* Bottom fade — signals more content below */}
+                    {!isInitialLoading && !error && showScrollFade && (
+                        <View style={styles.scrollFade} pointerEvents="none">
+                            <Ionicons name="chevron-down" size={24} color="#4A90E2" />
+                        </View>
+                    )}
+                </View>
             </View>
         </View>
     );
