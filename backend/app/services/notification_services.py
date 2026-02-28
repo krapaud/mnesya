@@ -129,7 +129,8 @@ class NotificationService:
         tokens: List[str],
         reminder_title: str,
         reminder_description: str = None,
-        reminder_id: str = None
+        reminder_id: str = None,
+        extra_data: dict = None
     ) -> Dict:
         """Send a reminder notification.
         
@@ -145,7 +146,7 @@ class NotificationService:
         body = reminder_description or "Vous avez un rappel"
         data = {
             "type": "reminder",
-            "reminder_id": reminder_id
+            "reminder_id": reminder_id, **(extra_data or {})
         } if reminder_id else {"type": "reminder"}
 
         return self.send_notification(

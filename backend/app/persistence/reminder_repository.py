@@ -5,11 +5,11 @@ This module provides data access operations specific to Reminder entities.
 
 from typing import List
 from uuid import UUID
-from datetime import datetime
 from sqlalchemy.orm import Session
 from app.models.reminder import ReminderModel
 from app.models.user import UserModel
 from app.persistence.base_repository import BaseRepository
+from datetime import datetime, timedelta
 
 
 class ReminderRepository(BaseRepository[ReminderModel]):
@@ -65,8 +65,7 @@ class ReminderRepository(BaseRepository[ReminderModel]):
             reminder.user_last_name = last_name
         return [r for r, _, _ in results]
 
-    def get_upcoming_reminders(self, user_id: UUID,
-                               limit: int = 5) -> List[ReminderModel]:
+    def get_upcoming_reminders(self, user_id: UUID, limit: int = 5) -> List[ReminderModel]:
         """Get upcoming reminders for a user.
 
         Args:
@@ -81,5 +80,29 @@ class ReminderRepository(BaseRepository[ReminderModel]):
         """
         return self.db.query(self.model).filter(
             self.model._user_id == user_id,
-            self.model._scheduled_at >= datetime.now()  # Only future reminders
+            self.model._scheduled_at >= datetime.now()
         ).order_by(self.model._scheduled_at.asc()).limit(limit).all()
+
+    def get_reminders_due_now(self, window_seconds: int = 60) -> List[ReminderModel]:
+        now = datetime.utcnow()
+        start = now - timedelta(seconds=window_seconds)
+        return self.db.query(self.model).filter(
+            self.model._scheduled_at >= start,
+            self.model._scheduled_at <= now
+        ).all()
+
+    def get_reminders_at_offset(self, offset_minutes: int = 60, statuses: List[str] = None) -> List[ReminderModel]:
+        now = datetime.utcnow()
+        target = now - timedelta(minutes=offset_minutes)
+        start = target - timedelta(seconds=30)
+        end = target + timedelta(seconds=30)
+        return self.db.query(self.model).filter(
+            self.model._scheduled_at >= start,
+            self.model._scheduled_at <= end
+        ).all()
+
+    def get_reminders_to_escalate(self, delay_minutes: int = 10) -> List[ReminderModel]:
+        time_limit = datetime.utcnow() - timedelta(minutes=delay_minutes)
+        return self.db.query(self.model).filter(
+            self.model._scheduled_at <= time_limit
+        ).all()
