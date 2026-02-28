@@ -18,14 +18,13 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { createBellSwingAnimation, getBellRotation } from '../utils/animations';
-import { scheduleReminderNotification } from '../utils/notifications';
-import { getReminderStatus, updateReminderStatus } from '../services/reminderService';
+import { getReminderStatus, postponeReminder, updateReminderStatus } from '../services/reminderService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ReminderNotification'>;
 
 const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
     const { t } = useTranslation();
-    const { reminderId, message, profileId } = route.params;
+    const { reminderId, message } = route.params;
     
     // Build the reminder object from route params
     const reminder = {
@@ -63,20 +62,15 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
 
     const handleReminderAction = async (status: string) => {
         // If postponed, schedule a new notification in 5 minutes
-        if (status === 'Postponed') {
-            try {
-                const postponeDate = new Date(Date.now() + 5 * 60 * 1000); // +5 minutes
-                await scheduleReminderNotification(
-                    reminder.title,
-                    reminder.message,
-                    postponeDate,
-                    { reminderId, profileId, isPostponed: true }
-                );
-            } catch (_error) {
+        try {
+            if (status === 'Postponed') {
+                await postponeReminder(String(reminderId), 5);
+            } else {
+                await updateReminderStatus(String(reminderId), { status: status.toUpperCase() });
             }
+        } catch {
+
         }
-        await updateReminderStatus(String(reminderId), { status: status.toUpperCase() });
-        
         // Navigate back to UserHome
         navigation.goBack();
     };
