@@ -139,6 +139,8 @@ class NotificationService:
             reminder_title (str): The reminder title
             reminder_description (str): Optional reminder description
             reminder_id (str): Optional reminder ID for deep linking
+            extra_data (dict): Optional extra key/value pairs merged into the
+                notification data payload (e.g. isUserNotification, retry offset)
             
         Returns:
             Dict: Results of the notification send

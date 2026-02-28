@@ -1,3 +1,13 @@
+"""Scheduler module for automated push notification delivery.
+
+This module defines background jobs that run every 60 seconds to:
+- Send initial push notifications to users when a reminder is due (T+0)
+- Retry notifications if the user has not responded (T+2, T+5)
+- Escalate to the caregiver if still no response after 10 minutes (T+10)
+
+The scheduler uses APScheduler's BackgroundScheduler with IntervalTrigger.
+Each job opens its own database session to avoid circular import issues.
+"""
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -11,6 +21,11 @@ logger = logging.getLogger(__name__)
 
 
 def send_user_notifications() -> None:
+    """Send initial push notifications for reminders due now (T+0).
+
+    Queries reminders scheduled within the last 60 seconds and sends
+    a push notification to the user's registered devices.
+    """
     from app import SessionLocal
     db: Session = SessionLocal()
     try:
@@ -38,6 +53,13 @@ def send_user_notifications() -> None:
 
 
 def send_user_retry(offset_minutes: int) -> None:
+    """Retry push notification for reminders that have not been confirmed.
+
+    Called at T+2 and T+5 minutes after the original scheduled time.
+
+    Args:
+        offset_minutes (int): Number of minutes after scheduled_at to target (2 or 5).
+    """
     from app import SessionLocal
     db: Session = SessionLocal()
     try:
@@ -65,6 +87,12 @@ def send_user_retry(offset_minutes: int) -> None:
 
 
 def send_caregiver_escalations():
+    """Escalate unconfirmed reminders to the caregiver (T+10).
+
+    Queries reminders that are still pending 10 minutes after their scheduled
+    time and sends a localized alert to the caregiver's registered devices.
+    The notification language is determined by the caregiver's device locale.
+    """
     from app import SessionLocal
     db: Session = SessionLocal()
     try:
@@ -101,6 +129,14 @@ def send_caregiver_escalations():
 
 
 def start_scheduler():
+    """Initialize and start the APScheduler background scheduler.
+
+    Registers 4 jobs, all running every 60 seconds:
+    - send_user_notifications: initial notification at T+0
+    - send_user_retry(2): retry at T+2 minutes
+    - send_user_retry(5): retry at T+5 minutes
+    - send_caregiver_escalations: caregiver alert at T+10 minutes
+    """
     my_scheduler = BackgroundScheduler()
 
     my_scheduler.add_job(
