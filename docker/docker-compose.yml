@@ -65,11 +65,11 @@ services:
     stdin_open: true
     tty: true
 
-  # APScheduler Worker (for reminders)
+  # APScheduler Worker — runs background jobs for push notifications
   worker:
     build:
-      context: ..
-      dockerfile: backend/Dockerfile
+      context: ../backend
+      dockerfile: Dockerfile
     container_name: mnesya-worker
     environment:
       DATABASE_URL: ${DATABASE_URL}

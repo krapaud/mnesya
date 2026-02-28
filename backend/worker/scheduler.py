@@ -165,3 +165,15 @@ def start_scheduler():
 
     my_scheduler.start()
     logger.info("[Scheduler] Started")
+    return my_scheduler
+
+
+if __name__ == "__main__":
+    import time
+    scheduler = start_scheduler()
+    try:
+        while True:
+            time.sleep(60)
+    except (KeyboardInterrupt, SystemExit):
+        scheduler.shutdown()
+        logger.info("[Scheduler] Stopped")
