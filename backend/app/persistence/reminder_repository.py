@@ -7,6 +7,7 @@ from typing import List
 from uuid import UUID
 from sqlalchemy.orm import Session
 from app.models.reminder import ReminderModel
+from app.models.reminder_status import ReminderStatusModel
 from app.models.user import UserModel
 from app.persistence.base_repository import BaseRepository
 from datetime import datetime, timedelta
@@ -134,7 +135,29 @@ class ReminderRepository(BaseRepository[ReminderModel]):
         Returns:
             List[ReminderModel]: Reminders past the escalation threshold.
         """
-        time_limit = datetime.utcnow() - timedelta(minutes=delay_minutes)
-        return self.db.query(self.model).filter(
-            self.model._scheduled_at <= time_limit
-        ).all()
+        now = datetime.utcnow()
+        target = now - timedelta(minutes=delay_minutes)
+        start = target - timedelta(seconds=30)
+        end = target + timedelta(seconds=30)
+
+        # Subquery: reminder IDs that have already been confirmed, done or missed
+        resolved_ids = (
+            self.db.query(ReminderStatusModel._reminder_id)
+            .filter(ReminderStatusModel._status.in_(["CONFIRMED", "DONE", "MISSED"]))
+        )
+
+        # Return reminders in the T-10min window that were never resolved, enriched with user name
+        results = (
+            self.db.query(self.model, UserModel._first_name, UserModel._last_name)
+            .join(UserModel, self.model._user_id == UserModel._id)
+            .filter(
+                self.model._scheduled_at >= start,
+                self.model._scheduled_at <= end,
+                ~self.model._id.in_(resolved_ids)
+            )
+            .all()
+        )
+        for reminder, first_name, last_name in results:
+            reminder.user_first_name = first_name
+            reminder.user_last_name = last_name
+        return [r for r, _, _ in results]

@@ -34,9 +34,11 @@ def send_user_notifications() -> None:
         notification_service = NotificationService()
 
         reminders = reminder_repo.get_reminders_due_now(window_seconds=60)
+        logger.info(f"[Scheduler] send_user_notifications: {len(reminders)} reminders due")
 
         for reminder in reminders:
             tokens = [t.token for t in push_token_repo.get_active_tokens_by_user(reminder.user_id)]
+            logger.info(f"[Scheduler] reminder {reminder.id}: {len(tokens)} user token(s)")
             if not tokens:
                 continue
             notification_service.send_reminder_notification(
@@ -101,6 +103,7 @@ def send_caregiver_escalations():
         notification_service = NotificationService()
 
         reminders = reminder_repo.get_reminders_to_escalate()
+        logger.info(f"[Scheduler] send_caregiver_escalations: {len(reminders)} reminders to escalate")
 
         for reminder in reminders:
             token_objects = push_token_repo.get_active_tokens_by_caregiver(reminder.caregiver_id)
@@ -109,12 +112,13 @@ def send_caregiver_escalations():
             token_strings = [t.token for t in token_objects]
             my_locale = token_objects[0].locale if token_objects else "fr"
 
+            user_name = f"{getattr(reminder, 'user_first_name', '')} {getattr(reminder, 'user_last_name', '')}".strip()
             if my_locale == "fr":
                 my_title = reminder.title
-                my_body = f"Votre proche n'a pas confirmé : {reminder.title}"
+                my_body = f"⚠️ {user_name} n'a pas répondu à : {reminder.title}"
             else:
                 my_title = reminder.title
-                my_body = f"Your relative did not confirm: {reminder.title}"
+                my_body = f"⚠️ {user_name} has not responded to: {reminder.title}"
 
             notification_service.send_notification(
                 tokens=token_strings,
@@ -146,12 +150,6 @@ def start_scheduler():
     )
 
     my_scheduler.add_job(
-        lambda: send_user_retry(2),
-        IntervalTrigger(seconds=60),
-        id="send_user_retry_2min"
-    )
-
-    my_scheduler.add_job(
         lambda: send_user_retry(5),
         IntervalTrigger(seconds=60),
         id="send_user_retry_5min"
@@ -170,6 +168,15 @@ def start_scheduler():
 
 if __name__ == "__main__":
     import time
+    import os
+    import sys
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+        stream=sys.stdout,
+    )
+    from app import init_app
+    init_app(os.environ["DATABASE_URL"])
     scheduler = start_scheduler()
     try:
         while True:

@@ -4,7 +4,7 @@
  * @module authService
  */
 import apiClient from './api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { saveToken, deleteToken } from './tokenService';
 import { LoginData, RegisterData, AuthResponse, CaregiverProfile } from '../types/interfaces';
 
@@ -14,7 +14,7 @@ export const login = async (credentials: LoginData): Promise<AuthResponse> => {
   
   await saveToken(response.data.access_token);
   try {
-    const expoPushToken = await AsyncStorage.getItem('expo_push_token');
+    const expoPushToken = await SecureStore.getItemAsync('expo_push_token');
     if (expoPushToken) {
       await apiClient.post('/api/push-tokens/register', { token: expoPushToken });
     }
@@ -33,7 +33,7 @@ export const register = async (data: RegisterData): Promise<void> => {
 /** Logs out the current user and removes the stored token. */
 export const logout = async (): Promise<void> => {
   try {
-    const expoPushToken = await AsyncStorage.getItem('expo_push_token');
+    const expoPushToken = await SecureStore.getItemAsync('expo_push_token');
     if (expoPushToken) {
       await apiClient.delete('/api/push-tokens/unregister', { data: { token: expoPushToken }});
     }

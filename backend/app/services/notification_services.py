@@ -4,11 +4,9 @@ This module provides functionality for sending push notifications via Expo.
 """
 
 from exponent_server_sdk import (
-    DeviceNotRegisteredError,
     PushClient,
     PushMessage,
     PushServerError,
-    PushTicketError,
 )
 from typing import List, Dict
 import logging

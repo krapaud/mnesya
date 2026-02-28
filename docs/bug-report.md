@@ -1941,6 +1941,161 @@ No issues reported yet
 
 ---
 
+### 2. Worker Silencieux - logging.basicConfig() Manquant
+
+**Date:** 28 February 2026
+**Component:** `backend/worker/scheduler.py`
+**Severity:** Medium - Debugging impossible
+
+#### Problem Description
+
+Le worker APScheduler tournait correctement (les jobs s'exécutaient), mais **aucun log n'apparaissait** dans `docker logs mnesya-worker`. Il était impossible de savoir si les notifications étaient envoyées ou non.
+
+#### Root Cause
+
+Le code utilisait `logger = logging.getLogger(__name__)` et des appels `logger.info(...)`, mais `logging.basicConfig()` n'avait jamais été appelé dans le `__main__`. Sans cette initialisation, Python ignore silencieusement tous les logs.
+
+#### The Fix
+
+```python
+if __name__ == "__main__":
+    import sys
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+        stream=sys.stdout,
+    )
+```
+
+#### What I Learned
+
+`logging.getLogger()` seul ne suffit pas — il faut toujours appeler `logging.basicConfig()` (ou configurer un handler) pour que les logs soient réellement émis.
+
+---
+
+### 3. get_reminders_to_escalate - Fenêtre Temporelle Trop Large
+
+**Date:** 28 February 2026
+**Component:** `backend/app/persistence/reminder_repository.py`
+**Severity:** Critical - Caregiver recevait les notifications au mauvais moment
+
+#### Problem Description
+
+Le caregiver recevait une notification d'escalade **en même temps** que l'utilisateur (T+0), au lieu de T+10min. Tous les anciens rappels (depuis la création de la DB) étaient retournés à chaque cycle.
+
+#### Root Cause
+
+La méthode utilisait un filtre `<=` sans borne inférieure :
+
+```python
+# AVANT — retourne TOUS les rappels avant T-10min
+time_limit = now - timedelta(minutes=delay_minutes)
+return self.db.query(self.model).filter(
+    self.model._scheduled_at <= time_limit
+).all()
+```
+
+#### The Fix
+
+Remplacer par une fenêtre ±30s autour de la cible (même pattern que `get_reminders_at_offset`) :
+
+```python
+now = datetime.utcnow()
+target = now - timedelta(minutes=delay_minutes)
+start = target - timedelta(seconds=30)
+end = target + timedelta(seconds=30)
+return self.db.query(self.model).filter(
+    self.model._scheduled_at >= start,
+    self.model._scheduled_at <= end
+).all()
+```
+
+#### What I Learned
+
+Un filtre `<=` sans borne inférieure sur une date est presque toujours un bug — il faut toujours définir une fenêtre `[start, end]`.
+
+---
+
+### 4. get_reminders_to_escalate - Filtre Statut Manquant
+
+**Date:** 28 February 2026
+**Component:** `backend/app/persistence/reminder_repository.py`
+**Severity:** High - Rappels déjà confirmés re-escaladés
+
+#### Problem Description
+
+Même après le fix de la fenêtre temporelle, des rappels dont l'utilisateur avait déjà répondu (statut CONFIRMED) continuaient à déclencher des escalades caregiver.
+
+#### Root Cause
+
+La requête ne filtrait pas sur le statut — elle retournait tous les rappels dans la fenêtre temporelle, y compris ceux déjà traités.
+
+#### The Fix
+
+Ajouter une sous-requête pour exclure les rappels ayant un statut CONFIRMED, DONE ou MISSED :
+
+```python
+resolved_ids = (
+    self.db.query(ReminderStatusModel._reminder_id)
+    .filter(ReminderStatusModel._status.in_(["CONFIRMED", "DONE", "MISSED"]))
+)
+
+results = (
+    self.db.query(self.model, UserModel._first_name, UserModel._last_name)
+    .join(UserModel, self.model._user_id == UserModel._id)
+    .filter(
+        self.model._scheduled_at >= start,
+        self.model._scheduled_at <= end,
+        ~self.model._id.in_(resolved_ids)
+    )
+    .all()
+)
+```
+
+#### What I Learned
+
+Toujours filtrer sur le statut métier quand on cherche des entités "en attente d'action" — sans ça, les actions déjà traitées remontent indéfiniment.
+
+---
+
+## Frontend Issues
+
+### 11. Double Notification Caregiver - Notifications Locales Redondantes
+
+**Date:** 28 February 2026
+**Component:** `frontend/src/screens/CreateReminderScreen.tsx`, `frontend/src/utils/notifications.ts`
+**Severity:** Critical - Caregiver recevait des notifications en doublon et au mauvais moment
+
+#### Problem Description
+
+Quand le caregiver créait un rappel, il recevait une notification sur **son propre téléphone** en même temps que l'utilisateur (T+0), alors que la logique métier prévoyait une alerte uniquement à T+10min si l'utilisateur ne répondait pas.
+
+#### Root Cause
+
+`CreateReminderScreen.tsx` appelait `scheduleReminderWithRepetitions()` après chaque création de rappel. Cette fonction programmait des **notifications locales** sur l'appareil du caregiver (T+0, T+2, T+5, T+10), en doublon parfait du système backend.
+
+Le backend envoie déjà les push notifications via APScheduler — le frontend n'avait plus aucune raison de scheduler quoi que ce soit localement.
+
+#### The Fix
+
+Suppression de l'import et de l'appel dans `CreateReminderScreen.tsx` :
+
+```typescript
+// SUPPRIMÉ
+import { scheduleReminderWithRepetitions } from '../utils/notifications';
+
+// SUPPRIMÉ
+const _notificationIds = await scheduleReminderWithRepetitions(...);
+```
+
+Le rappel est maintenant simplement créé en base via l'API, et le backend gère entièrement la logique de notifications.
+
+#### What I Learned
+
+Quand le backend prend en charge l'envoi de notifications, il faut supprimer toute logique équivalente côté frontend pour éviter les doublons. Les deux systèmes ne doivent pas coexister.
+
+---
+
 ## Integration Issues
 
 No issues reported yet

@@ -5,6 +5,7 @@
  */
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '../i18n';
 
@@ -26,8 +27,10 @@ export async function registerForPushNotifications(): Promise<string | undefined
   if (finalStatus !== 'granted') {
     return undefined;
   }
-  const tokenData = await Notifications.getExpoPushTokenAsync();
-  await AsyncStorage.setItem('expo_push_token', tokenData.data);
+  const tokenData = await Notifications.getExpoPushTokenAsync({
+    projectId: '9c2be3eb-ff96-4a7a-ab50-20203cdfb5a9',
+  });
+  await SecureStore.setItemAsync('expo_push_token', tokenData.data);
   return tokenData.data;
 }
 

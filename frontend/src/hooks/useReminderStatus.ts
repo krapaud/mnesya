@@ -12,7 +12,7 @@ interface UseReminderStatus {
     reminderStatus: ReminderStatus | null;
     loading: boolean;
     error: string | null;
-    postpone: (delayMinute: number) => Promise<void>;
+    postpone: (delayMinutes: number) => Promise<void>;
     reload: () => Promise<void>;
 }
 
@@ -21,7 +21,7 @@ export const useReminderStatus = (
     onAuthError?: () => void
 ): UseReminderStatus => {
     const [reminderStatus, setReminderStatus] = useState<ReminderStatus | null>(null);
-    const [loading, setLoading] =useState(true);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const loadReminderStatus = useCallback(async () => {
