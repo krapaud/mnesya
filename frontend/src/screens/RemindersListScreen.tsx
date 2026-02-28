@@ -46,6 +46,7 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     const [showProfilePicker, setShowProfilePicker] = useState<boolean>(false);
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
     const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+    const [deleteError, setDeleteError] = useState<boolean>(false);
 
     // Filter reminders based on selected profile and date
     const getFilteredReminders = () => {
@@ -107,8 +108,9 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
             }
             await deleteReminder(pendingDeleteId);
             reload();
-        } catch (error) {
-            console.error('[DeleteReminder] Error:', error);
+        } catch {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            setDeleteError(true);
         } finally {
             setPendingDeleteId(null);
         }
@@ -248,6 +250,14 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                         }}
                         onClose={() => setShowDatePicker(false)}
                     />
+
+                    {/* Delete error feedback */}
+                    {deleteError && (
+                        <View style={commonStyles.errorContainer}>
+                            <Ionicons name="alert-circle-outline" size={24} color="#E53935" />
+                            <Text style={commonStyles.errorText}>{t('reminders.errors.deleteError')}</Text>
+                        </View>
+                    )}
 
                     {/* Reminders list */}
                     <ScrollView showsVerticalScrollIndicator={false} style={styles.remindersList}>

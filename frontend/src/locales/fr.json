@@ -131,6 +131,9 @@
         "title": "Supprimer le rappel",
         "message": "Êtes-vous sûr de vouloir supprimer ce rappel ? Cette action est irréversible.",
         "confirm": "Supprimer"
+    },
+    "errors": {
+        "deleteError": "Une erreur est survenue lors de la suppression du rappel."
     }
   },
   "CreateReminder": {

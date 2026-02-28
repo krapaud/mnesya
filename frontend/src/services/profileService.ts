@@ -4,10 +4,10 @@
  * @module profileService
  */
 import apiClient from './api';
-import { CreateUserProfileData, UserProfileData } from '../types/interfaces';
+import { CreateUserProfileData, UserProfileData, UserWithPairingCodeResponse } from '../types/interfaces';
 
-/** Creates a new user profile. */
-export const createProfile = async (data: CreateUserProfileData): Promise<UserProfileData> => {
+/** Creates a new user profile and returns the user data along with the generated pairing code. */
+export const createProfile = async (data: CreateUserProfileData): Promise<UserWithPairingCodeResponse> => {
   const response = await apiClient.post('/api/users', data);
   return response.data;
 };

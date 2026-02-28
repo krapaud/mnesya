@@ -17,8 +17,12 @@ import * as Haptics from 'expo-haptics';
 interface PairingCodeModalProps {
     /** Controls the visibility of the modal */
     visible: boolean;
-    /** Callback triggered when modal closes */
+    /** Callback triggered when modal closes (Done button) */
     onClose: () => void;
+    /** Callback triggered when back arrow is pressed. Defaults to onClose if not provided */
+    onBack?: () => void;
+    /** Whether to show the back arrow. Defaults to true */
+    showBackButton?: boolean;
     /** The pairing code to display (6 characters) */
     pairingCode: string;
     /** The expiration date of the pairing code */
@@ -30,6 +34,8 @@ interface PairingCodeModalProps {
 const PairingCodeModal: React.FC<PairingCodeModalProps> = ({
     visible,
     onClose,
+    onBack,
+    showBackButton = true,
     pairingCode,
     expiresAt,
     onExpired
@@ -103,9 +109,13 @@ const PairingCodeModal: React.FC<PairingCodeModalProps> = ({
             <SafeAreaView style={styles.container}>
                 {/* Header with back button and logo */}
                 <View style={styles.header}>
-                    <TouchableOpacity onPress={onClose} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color="#4A90E2" />
-                    </TouchableOpacity>
+                    {showBackButton ? (
+                        <TouchableOpacity onPress={onBack ?? onClose} style={styles.backButton}>
+                            <Ionicons name="arrow-back" size={24} color="#4A90E2" />
+                        </TouchableOpacity>
+                    ) : (
+                        <View style={[styles.backButton, { backgroundColor: 'transparent' }]} />
+                    )}
                     <View style={styles.headerCenter}>
                         <Text style={styles.appName}>Mnesya</Text>
                     </View>
@@ -147,6 +157,11 @@ const PairingCodeModal: React.FC<PairingCodeModalProps> = ({
                         <Text style={styles.expirationLabel}>{t('pairingCode.expiresIn')}</Text>
                         <Text style={styles.expirationTime}>{timeRemaining || '00:00:00'}</Text>
                     </View>
+
+                    {/* Done button */}
+                    <TouchableOpacity style={styles.doneButton} onPress={onClose}>
+                        <Text style={styles.doneButtonText}>{t('pairingCode.buttons.done')}</Text>
+                    </TouchableOpacity>
                 </View>
             </SafeAreaView>
         </Modal>
@@ -263,6 +278,19 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#FF6B6B',
         letterSpacing: 1,
+    },
+    doneButton: {
+        backgroundColor: '#4A90E2',
+        borderRadius: 12,
+        padding: 18,
+        width: '100%',
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    doneButtonText: {
+        color: '#FFFFFF',
+        fontSize: 18,
+        fontWeight: '600',
     },
 });
 

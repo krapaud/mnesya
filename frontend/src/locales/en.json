@@ -133,6 +133,9 @@
         "title": "Delete reminder",
         "message": "Are you sure you want to delete this reminder? This action is irreversible.",
         "confirm": "Delete"
+    },
+    "errors": {
+        "deleteError": "An error occurred while deleting the reminder."
     }
   },
   "CreateReminder": {
