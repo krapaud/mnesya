@@ -11,10 +11,11 @@ import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { PlatformDatePicker } from '../components';
+import { PlatformDatePicker, PairingCodeModal } from '../components';
 import { validateName, cleanText } from '../utils/validation';
 import { useFormValidation } from '../hooks';
 import { createProfile } from '../services/profileService';
+import { generatePairingCode } from '../services/pairingService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateProfile'>;
 
@@ -29,6 +30,8 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
     const [birthday, setBirthday] = useState<Date>(new Date());
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
     const [isCreating, setIsCreating] = useState<boolean>(false);
+    const [pairingCode, setPairingCode] = useState<string | null>(null);
+    const [pairingExpiresAt, setPairingExpiresAt] = useState<string | null>(null);
 
     const formatDate = (date: Date): string => {
         const day = date.getDate().toString().padStart(2, '0');
@@ -61,7 +64,7 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
             setIsCreating(true);
             
             // Create profile via API
-            await createProfile({
+            const result = await createProfile({
                 first_name: values.firstname.trim(),
                 last_name: values.lastname.trim(),
                 birthday: formatDateForAPI(birthday)
@@ -69,7 +72,9 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
 
             // Success - navigate back to dashboard
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            navigation.navigate('Dashboard');
+            const pairingData = await generatePairingCode(result.id);
+            setPairingCode(pairingData.code);
+            setPairingExpiresAt(pairingData.expires_at);
         } catch (_error) {
             // Handle error
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -174,6 +179,12 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                         </TouchableOpacity>
                     )}
                 </View>
+                <PairingCodeModal
+                    visible={pairingCode !== null}
+                    pairingCode={pairingCode ?? ''}
+                    expiresAt={pairingExpiresAt}
+                    onClose={() => navigation.navigate('Dashboard')}
+                />
             </View>
         );
     };
