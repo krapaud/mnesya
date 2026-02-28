@@ -121,14 +121,6 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
         return new Date(scheduled_at) <= new Date();
     };
 
-    /**
-     * Handles user logout by clearing tokens and navigation reset.
-     * Removes stored authentication token and user info, then redirects to Welcome screen.
-     */
-    const _handleLogout = async () => {
-        setShowLogoutConfirm(true);
-    };
-
     const handleLogoutConfirm = async () => {
         try {
             await deleteToken();

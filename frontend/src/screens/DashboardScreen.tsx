@@ -3,7 +3,7 @@
  *
  * @module DashboardScreen
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
     View, Text, StyleSheet, TouchableOpacity,
     Image, ScrollView, ActivityIndicator, RefreshControl,
@@ -30,6 +30,15 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     // Load user profiles from API
     const { userData, loading, error, reload } = useUserProfiles();
     const isInitialLoading = loading && userData === null;
+
+    /** Controls the bottom fade indicator — hidden when scrolled to the end. */
+    const [showScrollFade, setShowScrollFade] = useState(true);
+
+    const handleScroll = (event: { nativeEvent: { contentOffset: { y: number }; layoutMeasurement: { height: number }; contentSize: { height: number } } }) => {
+        const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+        const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 10;
+        setShowScrollFade(!isAtBottom);
+    };
 
     // Reload profiles when screen comes into focus
     useFocusEffect(
@@ -100,11 +109,14 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                  * Each card displays user name, age, and a view button to access profile details
                  */}
                 {!isInitialLoading && !error && (
-                    <ScrollView
-                        showsVerticalScrollIndicator={false}
-                        style={styles.profilesList}
-                        refreshControl={<RefreshControl refreshing={loading} onRefresh={reload} />}
-                    >
+                    <View style={styles.listWrapper}>
+                        <ScrollView
+                            showsVerticalScrollIndicator={false}
+                            style={styles.profilesList}
+                            refreshControl={<RefreshControl refreshing={loading} onRefresh={reload} />}
+                            onScroll={handleScroll}
+                            scrollEventThrottle={16}
+                        >
                         {!userData || userData.length === 0 ? (
                             <Text style={styles.emptyMessage}>{t('dashboard.messages.No profiles yet')}</Text>
                         ) : (
@@ -130,7 +142,14 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                                 </View>
                             ))
                         )}
-                    </ScrollView>
+                        </ScrollView>
+                        {/* Bottom fade — signals more content below */}
+                        {showScrollFade && (
+                            <View style={styles.scrollFade} pointerEvents="none">
+                                <Ionicons name="chevron-down" size={24} color="#4A90E2" />
+                            </View>
+                        )}
+                    </View>
                 )}
             </View>
         </View>
@@ -142,13 +161,13 @@ const styles = StyleSheet.create({
     titleSection: {
         width: '100%',
         paddingLeft: 10,
-        marginTop: 30,
+        marginTop: 15,
         marginBottom: 0,
     },
     scrollContainer: {
         flex: 1,
-        marginTop: 40,
-        paddingBottom: 50,
+        marginTop: 15,
+        paddingBottom: 10,
     },
     
     // TYPOGRAPHY
@@ -206,6 +225,20 @@ const styles = StyleSheet.create({
     },
     profilesList: {
         flex: 1,
+    },
+    listWrapper: {
+        flex: 1,
+        position: 'relative',
+    },
+    scrollFade: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255,255,255,0.85)',
     },
 });
 

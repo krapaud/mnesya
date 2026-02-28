@@ -15,7 +15,6 @@ import { PlatformDatePicker, PairingCodeModal } from '../components';
 import { validateName, cleanText } from '../utils/validation';
 import { useFormValidation } from '../hooks';
 import { createProfile } from '../services/profileService';
-import { generatePairingCode } from '../services/pairingService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateProfile'>;
 
@@ -70,13 +69,11 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                 birthday: formatDateForAPI(birthday)
             });
 
-            // Success - navigate back to dashboard
+            // Pairing code is already included in the create profile response
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            const pairingData = await generatePairingCode(result.id);
-            setPairingCode(pairingData.code);
-            setPairingExpiresAt(pairingData.expires_at);
+            setPairingCode(result.pairing_code.code);
+            setPairingExpiresAt(result.pairing_code.expires_at);
         } catch (_error) {
-            // Handle error
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         } finally {
             setIsCreating(false);
@@ -183,7 +180,16 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                     visible={pairingCode !== null}
                     pairingCode={pairingCode ?? ''}
                     expiresAt={pairingExpiresAt}
-                    onClose={() => navigation.navigate('Dashboard')}
+                    showBackButton={false}
+                    onBack={() => {
+                        setPairingCode(null);
+                        setPairingExpiresAt(null);
+                    }}
+                    onClose={() => {
+                        setPairingCode(null);
+                        setPairingExpiresAt(null);
+                        navigation.replace('Dashboard');
+                    }}
                 />
             </View>
         );
