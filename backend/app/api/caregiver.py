@@ -44,7 +44,108 @@ def get_current_caregiver_id(
     return caregiver_id
 
 
-@router.put("/me", response_model=CaregiverResponse)
+@router.put(
+    "/me",
+    response_model=CaregiverResponse,
+    summary="Update caregiver profile",
+    description="""
+    Update the authenticated caregiver's profile information.
+    
+    Supports partial updates - only the fields you provide will be updated.
+    Other fields will remain unchanged.
+    
+    **Authentication required:** Bearer token (caregiver)
+    
+    **Updatable fields:**
+    - First name
+    - Last name
+    - Email address
+    - Password (requires current_password)
+    
+    **Password change:**
+    - Must provide current_password to change password
+    - New password will be securely hashed
+    - Password must meet minimum requirements (8+ characters)
+    
+    **Email change:**
+    - New email must be unique in the system
+    - Returns 409 Conflict if email already exists
+    """,
+    responses={
+        200: {
+            "description": "Caregiver profile updated successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "123e4567-e89b-12d3-a456-426614174000",
+                        "first_name": "John",
+                        "last_name": "Smith",
+                        "email": "john.smith@example.com",
+                        "created_at": "2026-02-27T10:30:00Z"
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Bad request - Validation error or missing current_password",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "missing_current_password": {
+                            "summary": "Missing current password",
+                            "value": {"detail": "current_password is required to change password"}
+                        },
+                        "validation_error": {
+                            "summary": "Validation error",
+                            "value": {"detail": "Invalid email format"}
+                        }
+                    }
+                }
+            }
+        },
+        401: {
+            "description": "Unauthorized - Invalid token or incorrect current password",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "invalid_token": {
+                            "summary": "Invalid authentication token",
+                            "value": {"detail": "Invalid authentication token"}
+                        },
+                        "wrong_password": {
+                            "summary": "Current password is incorrect",
+                            "value": {"detail": "Current password is incorrect"}
+                        }
+                    }
+                }
+            }
+        },
+        404: {
+            "description": "Caregiver profile not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Caregiver profile not found"}
+                }
+            }
+        },
+        409: {
+            "description": "Conflict - Email address already in use",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Email address already in use"}
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Failed to update profile"}
+                }
+            }
+        }
+    }
+)
 async def update_my_profile(
     request: CaregiverUpdate,
     caregiver_id: str = Depends(get_current_caregiver_id),
@@ -146,7 +247,61 @@ async def update_my_profile(
         )
 
 
-@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/me",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete caregiver account",
+    description="""
+    Permanently delete the authenticated caregiver's account.
+    
+    **⚠️ Warning:** This action is irreversible and will:
+    - Delete the caregiver account permanently
+    - Remove all associations with user profiles
+    - Delete all reminders created by this caregiver
+    - Invalidate all JWT tokens
+    
+    **Authentication required:** Bearer token (caregiver)
+    
+    **Before deletion, consider:**
+    - Backing up important data
+    - Transferring user profiles to another caregiver
+    - Informing users of the account closure
+    
+    After successful deletion, the client should:
+    - Clear all local storage
+    - Remove authentication tokens
+    - Redirect to login/welcome screen
+    """,
+    responses={
+        204: {
+            "description": "Caregiver account deleted successfully (no content returned)"
+        },
+        401: {
+            "description": "Unauthorized - Invalid or expired token",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid authentication token"}
+                }
+            }
+        },
+        404: {
+            "description": "Caregiver profile not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Caregiver profile not found"}
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Failed to delete account"}
+                }
+            }
+        }
+    }
+)
 async def delete_my_profile(
     caregiver_id: str = Depends(get_current_caregiver_id),
     caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade)

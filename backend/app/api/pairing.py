@@ -1,4 +1,8 @@
-"""Pairing API module."""
+"""Pairing API module.
+
+This module provides endpoints for generating and verifying pairing codes.
+Pairing codes allow users to connect their devices with their profiles.
+"""
 
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
@@ -27,12 +31,92 @@ router = APIRouter(prefix="/api/pairing", tags=["Pairing"])
 
 
 def generate_pairing_code(length: int = 6) -> str:
-    """Generate a random alphanumeric pairing code."""
+    """Generate a random alphanumeric pairing code.
+    
+    Args:
+        length (int): Length of the code (default: 6)
+        
+    Returns:
+        str: Randomly generated uppercase alphanumeric code
+    """
     chars = string.ascii_uppercase + string.digits
     return ''.join(random.choice(chars) for _ in range(length))
 
 
-@router.post("/generate", response_model=PairingCodeResponse)
+@router.post(
+    "/generate",
+    response_model=PairingCodeResponse,
+    summary="Generate pairing code",
+    description="""
+    Generate a new pairing code for a user profile.
+    
+    Creates a unique alphanumeric pairing code that allows an elderly person
+    to pair their device with their profile. If an active (unexpired and unused)
+    code already exists for this user, it will be returned instead of creating
+    a new one.
+    
+    **Authentication required:** Bearer token (caregiver)
+    
+    **Code characteristics:**
+    - 6 characters (uppercase letters and digits)
+    - Unique across all codes
+    - Valid for 5 minutes
+    - Single use only
+    
+    **Access control:**
+    - Caregiver must be associated with the user
+    - Returns 403 Forbidden if access is denied
+    
+    **Use case:**
+    Caregiver generates code and shares it with the elderly person,
+    who enters it in their app to link their device to their profile.
+    """,
+    responses={
+        200: {
+            "description": "Pairing code generated successfully (or existing active code returned)",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "code": "ABC123",
+                        "expires_at": "2026-02-27T10:35:00Z"
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Bad request - Validation error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid user_id format"}
+                }
+            }
+        },
+        401: {
+            "description": "Unauthorized - Invalid or expired token",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Could not validate credentials"}
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden - No access to this user",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "You don't have access to this user"}
+                }
+            }
+        },
+        404: {
+            "description": "User not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "User not found"}
+                }
+            }
+        }
+    }
+)
 async def generate_code(
     request: PairingCodeCreate,
     caregiver_id: str = Depends(
@@ -94,7 +178,83 @@ async def generate_code(
         )
 
 
-@router.post("/verify", response_model=PairingCodeVerifyResponse)
+@router.post(
+    "/verify",
+    response_model=PairingCodeVerifyResponse,
+    summary="Verify pairing code",
+    description="""
+    Verify a pairing code and authenticate the user.
+    
+    This endpoint is used by the elderly person's app to verify the pairing
+    code provided by their caregiver. Upon successful verification:
+    - The code is marked as used (single use)
+    - User information is returned
+    - A JWT access token is issued for the user
+    
+    **No authentication required** - This is the initial authentication endpoint
+    
+    **Verification checks:**
+    - Code must exist in the system
+    - Code must not be expired (valid for 5 minutes from generation)
+    - Code must not have been used previously
+    
+    **What happens after verification:**
+    1. Code is marked as used and cannot be reused
+    2. User receives an access token for their session
+    3. User's device is now paired with their profile
+    
+    **Token expiration:** 60 minutes
+    
+    **Use case:**
+    Elderly person enters the code from their caregiver into their app,
+    verifies it with this endpoint, and receives authentication to access
+    their profile and reminders.
+    """,
+    responses={
+        200: {
+            "description": "Pairing code verified successfully, user authenticated",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "user_id": "123e4567-e89b-12d3-a456-426614174000",
+                        "user": {
+                            "first_name": "Marie",
+                            "last_name": "Dupont"
+                        },
+                        "caregiver_id": "987e6543-e89b-12d3-a456-426614174000",
+                        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                        "token_type": "bearer",
+                        "expires_in": 3600
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Bad request - Code expired or already used",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Pairing code has expired or been used"}
+                }
+            }
+        },
+        404: {
+            "description": "Pairing code not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid pairing code"}
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Login failed"}
+                }
+            }
+        }
+    }
+)
 async def verify_code(
     request: PairingCodeVerify,
     db: Session = Depends(get_db)
