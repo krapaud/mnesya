@@ -39,17 +39,32 @@ class PushTokenModel(database):
 
     @property
     def id(self):
-        """Get the token record's unique identifier."""
+        """Get the token record's unique identifier.
+        
+        Returns:
+            UUID: The push token record's ID
+        """
         return self._id
 
     @property
     def token(self) -> str:
-        """Get the Expo push token."""
+        """Get the Expo push token.
+        
+        Returns:
+            str: The Expo push notification token
+        """
         return self._token
 
     @token.setter
     def token(self, value: str) -> None:
-        """Set the Expo push token with validation."""
+        """Set the Expo push token with validation.
+        
+        Args:
+            value (str): The Expo push token
+            
+        Raises:
+            ValueError: If token is empty, too long, or has invalid format
+        """
         if not value or len(value.strip()) == 0:
             raise ValueError("Push token is required")
         if len(value) > 255:
@@ -60,52 +75,95 @@ class PushTokenModel(database):
 
     @property
     def user_id(self):
-        """Get the user ID."""
+        """Get the user ID.
+        
+        Returns:
+            UUID: The associated user's ID, or None if caregiver token
+        """
         return self._user_id
 
     @user_id.setter
     def user_id(self, value) -> None:
-        """Set the user ID."""
+        """Set the user ID.
+        
+        Args:
+            value (UUID): The user's unique identifier
+        """
         self._user_id = value
 
     @property
     def caregiver_id(self):
-        """Get the caregiver ID."""
+        """Get the caregiver ID.
+        
+        Returns:
+            UUID: The associated caregiver's ID, or None if user token
+        """
         return self._caregiver_id
 
     @caregiver_id.setter
     def caregiver_id(self, value) -> None:
-        """Set the caregiver ID."""
+        """Set the caregiver ID.
+        
+        Args:
+            value (UUID): The caregiver's unique identifier
+        """
         self._caregiver_id = value
 
     @property
     def device_name(self) -> str:
-        """Get the device name."""
+        """Get the device name.
+        
+        Returns:
+            str: The device name or description, or None if not set
+        """
         return self._device_name
 
     @device_name.setter
     def device_name(self, value: str) -> None:
-        """Set the device name."""
+        """Set the device name.
+        
+        Args:
+            value (str): The device name (max 100 characters)
+            
+        Raises:
+            ValueError: If device name exceeds 100 characters
+        """
         if value and len(value) > 100:
             raise ValueError("Device name must be <= 100 characters")
         self._device_name = value.strip() if value else None
 
     @property
     def is_active(self) -> bool:
-        """Get whether the token is active."""
+        """Get whether the token is active.
+        
+        Returns:
+            bool: True if the token is active and can receive notifications
+        """
         return self._is_active
 
     @is_active.setter
     def is_active(self, value: bool) -> None:
-        """Set whether the token is active."""
+        """Set whether the token is active.
+        
+        Args:
+            value (bool): True to activate, False to deactivate
+        """
         self._is_active = bool(value)
 
     @property
     def created_at(self) -> datetime:
-        """Get the creation timestamp."""
+        """Get the creation timestamp.
+        
+        Returns:
+            datetime: When this token was registered
+        """
         return self._created_at
 
     @property
     def updated_at(self) -> datetime:
-        """Get the last update timestamp."""
+        """Get the last update timestamp.
+        
+        Returns:
+            datetime: When this token was last updated
+        """
         return self._updated_at

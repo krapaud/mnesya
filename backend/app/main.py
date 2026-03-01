@@ -1,3 +1,9 @@
+"""Main application entry point.
+
+This module initializes the FastAPI application, configures the database,
+and registers all API routers. This is the entry point for the Mnesya backend.
+"""
+
 from app import create_app, init_app
 import os
 from app.api import authentication, user, caregiver, pairing, reminder, reminder_status_api, push_notification
@@ -20,4 +26,9 @@ app.include_router(push_notification.router)
 
 @app.get("/")
 async def root():
+    """Root endpoint.
+    
+    Returns:
+        dict: Welcome message
+    """
     return {"message": "Welcome to Mnesya API"}

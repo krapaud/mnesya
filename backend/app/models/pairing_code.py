@@ -51,55 +51,122 @@ class PairingCodeModel(database):
 
     @property
     def id(self):
+        """Get the pairing code's unique identifier.
+        
+        Returns:
+            UUID: The pairing code's ID
+        """
         return self._id
 
     @property
     def code(self) -> str:
+        """Get the pairing code string.
+        
+        Returns:
+            str: The 6-character pairing code
+        """
         return self._code
 
     @code.setter
     def code(self, value: str):
+        """Set the pairing code with validation.
+        
+        Args:
+            value (str): The code to set (must be 6 characters)
+            
+        Raises:
+            ValueError: If code is not exactly 6 characters
+        """
         if not value or len(value) != 6:
             raise ValueError("Code must be exactly 6 characters")
         self._code = value.upper()
 
     @property
     def user_id(self):
+        """Get the associated user ID.
+        
+        Returns:
+            UUID: The user's ID
+        """
         return self._user_id
 
     @user_id.setter
     def user_id(self, value):
+        """Set the associated user ID.
+        
+        Args:
+            value (UUID): The user's unique identifier
+        """
         self._user_id = value
 
     @property
     def caregiver_id(self):
+        """Get the associated caregiver ID.
+        
+        Returns:
+            UUID: The caregiver's ID
+        """
         return self._caregiver_id
 
     @caregiver_id.setter
     def caregiver_id(self, value):
+        """Set the associated caregiver ID.
+        
+        Args:
+            value (UUID): The caregiver's unique identifier
+        """
         self._caregiver_id = value
 
     @property
     def expires_at(self) -> datetime:
+        """Get the expiration timestamp.
+        
+        Returns:
+            datetime: When this pairing code expires
+        """
         return self._expires_at
 
     @expires_at.setter
     def expires_at(self, value: datetime):
+        """Set the expiration timestamp.
+        
+        Args:
+            value (datetime): The expiration datetime
+        """
         self._expires_at = value
 
     @property
     def is_used(self) -> bool:
+        """Get whether the code has been used.
+        
+        Returns:
+            bool: True if code has been used, False otherwise
+        """
         return self._is_used
 
     @is_used.setter
     def is_used(self, value: bool):
+        """Set whether the code has been used.
+        
+        Args:
+            value (bool): True to mark as used, False otherwise
+        """
         self._is_used = value
 
     @property
     def created_at(self) -> datetime:
+        """Get the creation timestamp.
+        
+        Returns:
+            datetime: When this pairing code was created
+        """
         return self._created_at
 
     def is_valid(self) -> bool:
-        """Check if code is valid (not used and not expired)."""
+        """Check if code is valid (not used and not expired).
+        
+        Returns:
+            bool: True if code is still valid, False otherwise
+        """
         return not self.is_used and datetime.now(
             timezone.utc) < self.expires_at
