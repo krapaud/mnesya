@@ -39,7 +39,7 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
   - 8 Caregiver screens: LoginScreen, RegisterScreen, DashboardScreen, CaregiverProfileScreen, CreateProfileScreen, CreateReminderScreen, RemindersListScreen, UserProfileDetailScreen
   - 3 User screens: UserPairingScreen, UserHomeScreen, ReminderNotificationScreen
 - **Internationalization**: Full bilingual support (FR/EN) with i18next
-- **Enhanced Notifications**: 4 automatic repetitions (0, +2, +5, +10 min) + caregiver alerts
+- **Enhanced Notifications**: Backend scheduler with 3 jobs (T+0, T+5, T+10 min) + automatic caregiver alerts
 - **API Integration**: Frontend fully connected to backend (auth, profiles, pairing, reminders, reminder status)
 - **Code Quality**: ESLint v9 configured (0 errors, 0 warnings across all frontend files)
 - **Current status**: Frontend 100% connected, Backend 100% (auth, profiles, pairing, reminders, reminder status all live)
@@ -49,34 +49,34 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 
 ### Authentication (Caregiver)
 
-- Caregiver account creation (email/password) - Fully integrated (frontend + backend)
-- Secure JWT login - Fully integrated (frontend + backend)
-- Token storage and management (tokenService with AsyncStorage)
-- Automatic logout on token expiry
+- ✅ Caregiver account creation (email/password) - Fully integrated (frontend + backend)
+- ✅ Secure JWT login - Fully integrated (frontend + backend)
+- ✅ Token storage and management (tokenService with AsyncStorage)
+- ✅ Automatic logout on token expiry
 
 ### Profile Management (Caregiver)
 
-- User profile creation (first name, last name, date of birth, optional photo) - Fully integrated
-- View and edit all managed profiles - Fully integrated
-- Edit caregiver's own profile - Implemented (CaregiverProfileScreen)
-- Pairing code generation (6 characters, valid 24h) - Fully integrated (frontend + backend)
-- 6-character code input (react-native-confirmation-code-field)
-- Bilingual interface (French/English) with i18next
+- ✅ User profile creation (first name, last name, date of birth, optional photo) - Fully integrated
+- ✅ View and edit all managed profiles - Fully integrated
+- ✅ Edit caregiver's own profile - Implemented (CaregiverProfileScreen)
+- ✅ Pairing code generation (6 characters, valid 24h) - Fully integrated (frontend + backend)
+- ✅ 6-character code input (react-native-confirmation-code-field)
+- ✅ Bilingual interface (French/English) with i18next
 
 ### Reminder Management (Caregiver)
 
-- Simple reminder creation (title, message, date, time) - Fully integrated (frontend + backend)
-- Chronological reminder view with filters (date, profile, status) - Fully integrated
-- Status tracking (Done, Pending, Postponed, Unable) - Fully integrated
-- Tab navigation (Home | Reminders | Profile) - Implemented
+- ✅ Simple reminder creation (title, message, date, time) - Fully integrated (frontend + backend)
+- ✅ Chronological reminder view with filters (date, profile, status) - Fully integrated
+- ✅ Status tracking (Done, Pending, Postponed, Unable) - Fully integrated
+- ✅ Tab navigation (Home | Reminders | Profile) - Implemented
 
 ### User Interface (Elderly Person)
 
-- Pairing via 6-character code - Fully integrated (frontend + backend)
-- Simple home screen with profiles and next reminder - Integrated with real API data
-- Full-screen notification at reminder time - Implemented with Expo Notifications
-- Enhanced notification system:
-  - 4 automatic repetitions (immediate, +2 min, +5 min, +10 min)
+- ✅ Pairing via 6-character code - Fully integrated (frontend + backend)
+- ✅ Simple home screen with profiles and next reminder - Integrated with real API data
+- ✅ Full-screen notification at reminder time - Implemented with Expo Notifications
+  - Enhanced notification system (backend APScheduler + Expo Push):
+  - 3 automatic repetitions (immediate T+0, retry T+5 min, escalation T+10 min)
   - Automatic caregiver alert if no response after 10 minutes
   - Smart notification cancellation when user responds
   - Badge count management on app icon
@@ -84,7 +84,7 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
   - Done (Green, #4CAF50) - Cancels all remaining notifications
   - Remind me later (Orange, #FF9800) - Triggers next repetition
   - Unable (Red, #F44336) - Sends immediate alert to caregiver
-- Bilingual notifications (French/English)
+- ✅ Bilingual notifications (French/English)
 
 ## Architecture
 
@@ -98,23 +98,23 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 
 ### Main Data Flows (Current Implementation)
 
-1. **Caregiver Registration/Login** (done): Frontend → FastAPI (JWT) → PostgreSQL
+1. ✅ **Caregiver Registration/Login**: Frontend → FastAPI (JWT) → PostgreSQL
    - Frontend: Fully integrated with authService + tokenService
    - Backend: `/api/auth/register` and `/api/auth/login` endpoints live
 
-2. **Profile Management** (done): Frontend → FastAPI → PostgreSQL
+2. ✅ **Profile Management**: Frontend → FastAPI → PostgreSQL
    - Frontend: Integrated with real API via profileService
    - Backend: `/api/users` CRUD implemented
 
-3. **User Pairing** (done): Frontend (Code entry) → FastAPI (Validation/expiration) → PostgreSQL
+3. ✅ **User Pairing**: Frontend (Code entry) → FastAPI (Validation/expiration) → PostgreSQL
    - Frontend: Fully integrated with pairingService
    - Backend: `/api/pairing` generate and verify endpoints live
 
-4. **Reminder Management** (done): Caregiver creates/edits/deletes reminders → Frontend → FastAPI → PostgreSQL
+4. ✅ **Reminder Management**: Caregiver creates/edits/deletes reminders → Frontend → FastAPI → PostgreSQL
    - Frontend: Integrated with real API via reminderService
    - Backend: `/api/reminders` full CRUD implemented
 
-5. **Status Update** (done): User responds → Frontend → FastAPI → PostgreSQL + notification cancellation
+5. ✅ **Status Update**: User responds → Frontend → FastAPI → PostgreSQL + notification cancellation
    - Frontend: Integrated with useReminderStatus hook
    - Backend: `/api/reminders/{id}/status` endpoint live
 
@@ -141,30 +141,31 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 - **Database** : PostgreSQL 13+ with psycopg2-binary
 - **ORM** : SQLAlchemy 2.0.23 with Alembic 1.12.1 (2 migrations)
 - **Authentication** : JWT with python-jose — implemented
-- **Async Tasks** : APScheduler 3.10.4 (configured)
-- **Push Notifications** : Expo Push Service (pending)
+- **Async Tasks** : APScheduler 3.10.4 (3 background jobs every 60s)
+  - **Push Notifications** : Expo Push Service (fully integrated)
 - **Current Implementation Status**:
-  - [done] SQLAlchemy Models (Caregiver, User, Reminder, ReminderStatus, PairingCode)
-  - [done] Persistence Repositories (BaseRepository + 5 domain-specific)
-  - [done] Service Facades (caregiver, user, reminder, reminder_status)
-  - [done] Pydantic Schemas (caregiver, user, reminder, reminder_status, authentication, pairing_code)
-  - [done] FastAPI app with health endpoint
-  - [done] JWT Authentication (`/api/auth/register`, `/api/auth/login`)
-  - [done] User profile CRUD (`/api/users`)
-  - [done] Caregiver profile management (`/api/caregivers`)
-  - [done] Pairing code generate + verify (`/api/pairing`)
-  - [done] Alembic migrations configured and applied
-  - [done] Docker Compose full setup (PostgreSQL + Backend + Worker)
-  - [done] pytest test suite (authentication, pairing, user, caregiver)
-  - [done] Reminder API endpoints (`/api/reminders`) — full CRUD
-  - [done] Reminder status update endpoint (`/api/reminders/{id}/status`)
-  - [pending] Expo Push Notification Service integration
+  - ✅ SQLAlchemy Models (Caregiver, User, Reminder, ReminderStatus, PushToken, PairingCode)
+  - ✅ Persistence Repositories (BaseRepository + 6 domain-specific)
+  - ✅ Service Facades (caregiver, user, reminder, reminder_status, notification)
+  - ✅ Pydantic Schemas (caregiver, user, reminder, reminder_status, push_token, authentication, pairing_code)
+  - ✅ FastAPI app with health endpoint
+  - ✅ JWT Authentication (`/api/auth/register`, `/api/auth/login`)
+  - ✅ User profile CRUD (`/api/users`)
+  - ✅ Caregiver profile management (`/api/caregivers`)
+  - ✅ Pairing code generate + verify (`/api/pairing`)
+  - ✅ Alembic migrations configured and applied (3 migrations)
+  - ✅ Docker Compose full setup (PostgreSQL + Backend + Worker)
+  - ✅ pytest test suite (authentication, pairing, user, caregiver, reminder, reminder_status, push_notification)
+  - ✅ Reminder API endpoints (`/api/reminders`) — full CRUD
+  - ✅ Reminder status update endpoint (`/api/reminders/{id}/status`)
+  - ✅ Push token registration (`/api/push-tokens`) — register, unregister, list
+  - ✅ APScheduler Worker — 3 jobs: T+0 user notification, T+5 retry, T+10 caregiver escalation
 
 ### Infrastructure
 
-- **Containerisation** : Docker & Docker Compose (fully configured with PostgreSQL, Backend, Worker services)
-- **CI/CD** : Not yet configured
-- **Environments** : Dev, Staging, Production (to be configured)
+- ✅ **Containerisation** : Docker & Docker Compose (fully configured with PostgreSQL, Backend, Worker services)
+- ⚠️ **CI/CD** : Not yet configured
+- ⚠️ **Environments** : Dev, Staging, Production (to be configured)
 
 ## Installation
 
@@ -257,43 +258,55 @@ mnesya/
 │   │   ├── config.py          # Database and app configuration
 │   │   ├── __init__.py        # App factory and database initialization
 │   │   ├── api/               # Route handlers
-│   │   │   ├── authentication.py  # /api/auth (register, login, JWT)
-│   │   │   ├── caregiver.py       # /api/caregivers (profile management)
-│   │   │   ├── user.py            # /api/users (profile CRUD)
-│   │   │   ├── pairing.py         # /api/pairing (generate + verify)
-│   │   │   └── reminder.py        # /api/reminders (full CRUD + status)
+│   │   │   ├── authentication.py      # /api/auth (register, login, JWT)
+│   │   │   ├── caregiver.py           # /api/caregivers (profile management)
+│   │   │   ├── user.py                # /api/users (profile CRUD)
+│   │   │   ├── pairing.py             # /api/pairing (generate + verify)
+│   │   │   ├── reminder.py            # /api/reminders (full CRUD)
+│   │   │   ├── reminder_status_api.py # /api/reminders/{id}/status
+│   │   │   └── push_notification.py   # /api/push-tokens (register, unregister, list)
 │   │   ├── models/            # SQLAlchemy ORM models
 │   │   │   ├── caregiver.py
 │   │   │   ├── user.py
 │   │   │   ├── reminder.py
-│   │   │   ├── pairing_code.py
-│   │   │   └── reminder_status.py
+│   │   │   ├── reminder_status.py
+│   │   │   ├── reminder_status_enum.py
+│   │   │   ├── push_token.py
+│   │   │   └── pairing_code.py
 │   │   ├── persistence/       # Repository pattern (data access layer)
 │   │   │   ├── base_repository.py
 │   │   │   ├── caregiver_repository.py
 │   │   │   ├── user_repository.py
 │   │   │   ├── pairing_code_repository.py
 │   │   │   ├── reminder_repository.py
-│   │   │   └── reminder_status_repository.py
+│   │   │   ├── reminder_status_repository.py
+│   │   │   └── push_token_repository.py
 │   │   ├── services/          # Business logic (facade pattern)
 │   │   │   ├── caregiver_facade.py
 │   │   │   ├── user_facade.py
 │   │   │   ├── reminder_facade.py
-│   │   │   └── reminder_status_facade.py
+│   │   │   ├── reminder_status_facade.py
+│   │   │   └── notification_services.py  # Expo Push SDK integration
 │   │   ├── schemas/           # Pydantic validation schemas
 │   │   │   ├── authentication_schema.py
 │   │   │   ├── caregiver_schema.py
 │   │   │   ├── user_schema.py
 │   │   │   ├── pairing_code_schema.py
 │   │   │   ├── reminder_schema.py
-│   │   │   └── reminder_status_schema.py
+│   │   │   ├── reminder_status_schema.py
+│   │   │   └── push_token_schema.py
 │   │   └── test/              # pytest test suite
 │   │       ├── test_authentication_api.py
 │   │       ├── test_caregiver_api.py
 │   │       ├── test_pairing_api.py
-│   │       └── test_user_api.py
+│   │       ├── test_user_api.py
+│   │       ├── test_reminder_api.py
+│   │       ├── test_reminder_status_api.py
+│   │       └── test_push_notification_api.py
+│   ├── worker/                # APScheduler background jobs
+│   │   └── scheduler.py       # 3 jobs: T+0 notify, T+5 retry, T+10 escalate
 │   ├── alembic/               # Database migrations
-│   │   └── versions/          # 2 migrations
+│   │   └── versions/          # 3 migrations
 │   ├── alembic.ini
 │   ├── requirements.txt
 │   └── pytest.ini
@@ -425,7 +438,7 @@ mnesya/
 | `/api/pairing/generate` | POST   | Generate 6-char code (24h valid) | Yes (Caregiver) |
 | `/api/pairing/verify`   | POST   | Verify code and receive JWT      | No              |
 
-### Reminders (done)
+### Reminders
 
 | Endpoint                     | Method | Description       | Auth            |
 | ---------------------------- | ------ | ----------------- | --------------- |
@@ -434,6 +447,14 @@ mnesya/
 | `/api/reminders/{id}`        | PUT    | Update a reminder | Yes (Caregiver) |
 | `/api/reminders/{id}`        | DELETE | Delete a reminder | Yes (Caregiver) |
 | `/api/reminders/{id}/status` | PUT    | Update status     | Yes (User)      |
+
+### Push Notifications
+
+| Endpoint                      | Method | Description                | Auth                    |
+| ----------------------------- | ------ | -------------------------- | ----------------------- |
+| `/api/push-tokens/register`   | POST   | Register device push token | Yes (Caregiver or User) |
+| `/api/push-tokens/unregister` | DELETE | Remove device push token   | Yes (Caregiver or User) |
+| `/api/push-tokens/my-tokens`  | GET    | List my registered tokens  | Yes (Caregiver or User) |
 
 ### Request Examples
 
@@ -562,6 +583,9 @@ pytest app/test/ --cov=app
 - `test_caregiver_api.py` — Caregiver profile CRUD
 - `test_pairing_api.py` — Generate and verify pairing codes
 - `test_user_api.py` — User profile CRUD
+- `test_reminder_api.py` — Reminder CRUD endpoints
+- `test_reminder_status_api.py` — Reminder status update endpoint
+- `test_push_notification_api.py` — Push token register, unregister, list
 - **Tool**: pytest + SQLAlchemy test database
 
 ### Frontend (React Native + Jest)
@@ -627,7 +651,7 @@ Acceptance criteria checklist to verify before each Production deployment:
 
 ### CI/CD
 
-Not yet configured — planned for future sprints:
+⚠️ Not yet configured — planned for future sprints:
 
 1. **On PR**: Run automated tests (backend pytest + frontend Jest)
 2. **Staging Deployment**: Auto-deploy `dev` branch if tests pass
@@ -637,14 +661,14 @@ Not yet configured — planned for future sprints:
 
 Features **not included** in v1.0 (postponed post-MVP):
 
-- Recurring reminders (daily, weekly, monthly)
-- Graphical calendar view
-- Statistics and graphs
-- Voice messages in reminders
-- Home screen widget
-- Emergency button
-- Advanced settings (custom notification sounds, vibrations, etc.)
-- Images in reminders
+- ❌ Recurring reminders (daily, weekly, monthly)
+- ❌ Graphical calendar view
+- ❌ Statistics and graphs
+- ❌ Voice messages in reminders
+- ❌ Home screen widget
+- ❌ Emergency button
+- ❌ Advanced settings (custom notification sounds, vibrations, etc.)
+- ❌ Images in reminders
 
 These features are documented in the User Stories (US-020 to US-028) as **WON'T HAVE** for the MVP.
 
