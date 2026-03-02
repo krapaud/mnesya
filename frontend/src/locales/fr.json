@@ -127,7 +127,8 @@
         "Pending": "En attente",
         "Postponed": "Reporté",
         "Done": "Effectué",
-        "Unable": "Annulé"
+        "Unable": "Annulé",
+        "Missed": "Manqué"
     },
     "deleteModal": {
         "title": "Supprimer le rappel",

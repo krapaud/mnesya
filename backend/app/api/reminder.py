@@ -8,7 +8,7 @@ import traceback
 from uuid import UUID
 from typing import List
 
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Body
 from sqlalchemy.orm import Session
 
 from app.services.reminder_facade import ReminderFacade
@@ -665,6 +665,50 @@ async def update_reminder(
         )
 
 
+@router.put("/{reminder_id}/postpone", response_model=ReminderResponse)
+async def postpone_reminder(
+    reminder_id: UUID,
+    delay_minutes: int = Body(default=5, embed=True),
+    reminder_facade: ReminderFacade = Depends(get_reminder_facade),
+):
+    """Postpone a reminder by a given number of minutes.
+
+    Updates the reminder's scheduled_at to now + delay_minutes and
+    creates a POSTPONED status entry. Called by the user from the
+    notification screen.
+
+    Args:
+        reminder_id (UUID): Unique identifier of the reminder to postpone
+        delay_minutes (int): Number of minutes to postpone (default: 5)
+        reminder_facade (ReminderFacade): Reminder service facade
+
+    Returns:
+        ReminderResponse: The updated reminder
+
+    Raises:
+        HTTPException: 404 if reminder not found, 500 if update fails
+    """
+    try:
+        reminder = reminder_facade.postpone_reminder(
+            str(reminder_id), delay_minutes
+        )
+        if not reminder:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Reminder not found",
+            )
+        return build_reminder_response(reminder)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to postpone reminder: {str(e)}",
+        )
+
+
 @router.delete(
     "/{reminder_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -788,4 +832,3 @@ async def delete_reminder(
 
 # Export for use in other modules
 __all__ = ["router"]
-

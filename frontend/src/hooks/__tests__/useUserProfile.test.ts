@@ -87,16 +87,16 @@ describe('useUserProfile', () => {
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
-      let caughtError: Error | null = null;
+      let caughtError: unknown = null;
       await act(async () => {
         try {
           await result.current.update({ first_name: 'X' });
         } catch (e) {
-          caughtError = e as Error;
+          caughtError = e;
         }
       });
 
-      expect(caughtError?.message).toBe('Update failed');
+      expect((caughtError as Error)?.message).toBe('Update failed');
       await waitFor(() => {
         expect(result.current.error).toBe('common.errors.failedToUpdateProfile');
       });
@@ -128,16 +128,16 @@ describe('useUserProfile', () => {
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
-      let caughtError: Error | null = null;
+      let caughtError: unknown = null;
       await act(async () => {
         try {
           await result.current.remove();
         } catch (e) {
-          caughtError = e as Error;
+          caughtError = e;
         }
       });
 
-      expect(caughtError?.message).toBe('Delete failed');
+      expect((caughtError as Error)?.message).toBe('Delete failed');
       await waitFor(() => {
         expect(result.current.error).toBe('common.errors.failedToDeleteProfile');
       });

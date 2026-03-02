@@ -19,6 +19,7 @@ class ReminderStatusEnum(str, Enum):
     DONE = "DONE"
     POSTPONED = "POSTPONED"
     UNABLE = "UNABLE"
+    MISSED = "MISSED"
     
     @classmethod
     def values(cls):

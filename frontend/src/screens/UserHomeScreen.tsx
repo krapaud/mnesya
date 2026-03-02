@@ -3,7 +3,7 @@
  *
  * @module UserHomeScreen
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     View, Text, StyleSheet, TouchableOpacity,
     Image, ScrollView, Modal, RefreshControl,
@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import type { UserTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { getUserInfo, deleteToken, deleteUserInfo } from '../services/tokenService';
@@ -28,11 +29,13 @@ const statusColorMap: Record<string, object> = {
     'PENDING': commonStyles.statusPending,
     'POSTPONED': commonStyles.statusPostponed,
     'UNABLE': commonStyles.statusUnable,
+    'MISSED': commonStyles.statusMissed,
 };
 
 interface UserReminderItemProps {
     reminder: ReminderData;
     onBellPress: () => void;
+    reloadTrigger?: number;
 }
 
 /**
@@ -42,15 +45,15 @@ interface UserReminderItemProps {
  * Extracted as a sub-component so that `useReminderStatus` can be called
  * as a proper React hook (hooks cannot be called inside `.map()`).
  */
-const UserReminderItem: React.FC<UserReminderItemProps> = ({ reminder, onBellPress }) => {
+const UserReminderItem: React.FC<UserReminderItemProps> = ({ reminder, onBellPress, reloadTrigger }) => {
     const { t } = useTranslation();
-    const { reminderStatus } = useReminderStatus(reminder.id);
+    const { reminderStatus } = useReminderStatus(reminder.id, undefined, reloadTrigger);
 
     const statusKey = reminderStatus?.status
         ? reminderStatus.status.charAt(0).toUpperCase() + reminderStatus.status.slice(1).toLowerCase()
         : null;
 
-    const isClosed = reminderStatus?.status === 'DONE' || reminderStatus?.status === 'UNABLE';
+    const isClosed = reminderStatus?.status === 'DONE' || reminderStatus?.status === 'UNABLE' || reminderStatus?.status === 'MISSED';
 
     return (
         <View style={commonStyles.reminderCard}>
@@ -98,10 +101,21 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const [currentUser, setCurrentUser] = useState<CaregiverProfile | null>(null);
     const [userReminders, setUserReminders] = useState<ReminderData[]>([]);
+    const [focusTrigger, setFocusTrigger] = useState(0);
+
+    /**
+     * Increments focusTrigger each time the screen comes into focus,
+     * which causes loadUserData to re-run via the useEffect below.
+     */
+    useFocusEffect(
+        useCallback(() => {
+            setFocusTrigger(prev => prev + 1);
+        }, [])
+    );
 
     /**
      * Loads user data and reminders.
-     * Re-runs when refreshTrigger changes (triggered by pull-to-refresh).
+     * Re-runs when refreshTrigger changes (pull-to-refresh) or focusTrigger changes (screen focus).
      */
     useEffect(() => {
         const loadUserData = async () => {
@@ -115,7 +129,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
         };
         loadUserData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [refreshTrigger]);
+    }, [refreshTrigger, focusTrigger]);
 
     const isReminderAvailable = (scheduled_at: string): boolean => {
         return new Date(scheduled_at) <= new Date();
@@ -178,6 +192,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                         <UserReminderItem
                             key={reminder.id}
                             reminder={reminder}
+                            reloadTrigger={refreshTrigger + focusTrigger}
                             onBellPress={() => {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                                 if (isReminderAvailable(reminder.scheduled_at)) {

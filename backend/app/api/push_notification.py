@@ -97,22 +97,27 @@ router = APIRouter(prefix="/api/push-tokens", tags=["Push Notifications"])
 )
 async def register_push_token(
     token_data: PushTokenCreate,
-    user_id: str = Depends(lambda token=Depends(verify_token): token.get("sub")),
+    token_payload: dict = Depends(verify_token),
     db: Session = Depends(get_db)
 ):
     """Register a new push notification token.
-    
+
+    Detects whether the caller is a caregiver (JWT contains "email") or a user
+    (JWT contains "firstname") and assigns the token to the correct field.
+
     Args:
         token_data: Push token information
-        user_id: Authenticated user/caregiver ID from JWT
+        token_payload: Decoded JWT payload
         db: Database session
-        
+
     Returns:
         PushTokenResponse: The registered token
     """
     try:
         repo = PushTokenRepository(db)
-        
+        caller_id = UUID(token_payload.get("sub"))
+        is_caregiver = "email" in token_payload
+
         # Check if token already exists
         existing = repo.get_by_token(token_data.token)
         if existing:
@@ -121,19 +126,27 @@ async def register_push_token(
             existing.device_name = token_data.device_name
             if token_data.user_id:
                 existing.user_id = token_data.user_id
+            elif not is_caregiver:
+                existing.user_id = caller_id
             if token_data.caregiver_id:
                 existing.caregiver_id = token_data.caregiver_id
+            elif is_caregiver:
+                existing.caregiver_id = caller_id
             db.commit()
             db.refresh(existing)
             return existing
-        
+
         # Create new token
         push_token = PushTokenModel()
         push_token.token = token_data.token
-        push_token.user_id = token_data.user_id
-        push_token.caregiver_id = token_data.caregiver_id or UUID(user_id)
         push_token.device_name = token_data.device_name
-        
+        if is_caregiver:
+            push_token.caregiver_id = token_data.caregiver_id or caller_id
+            push_token.user_id = token_data.user_id
+        else:
+            push_token.user_id = token_data.user_id or caller_id
+            push_token.caregiver_id = token_data.caregiver_id
+
         repo.add(push_token)
         return push_token
         

@@ -3,8 +3,8 @@
  *
  * @module UserProfileDetailScreen
  */
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, ScrollView } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, ScrollView, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -58,6 +58,23 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
     const [isGeneratingCode, setIsGeneratingCode] = useState(false);
 
     const [deleteError, setDeleteError] = useState<boolean>(false);
+
+    const [isRefreshingList, setIsRefreshingList] = useState(false);
+    const [reloadCounter, setReloadCounter] = useState(0);
+    const [showScrollFade, setShowScrollFade] = useState(true);
+
+    const handleRefreshList = useCallback(async () => {
+        setIsRefreshingList(true);
+        await reloadReminders();
+        setReloadCounter(prev => prev + 1);
+        setIsRefreshingList(false);
+    }, [reloadReminders]);
+
+    const handleScroll = (event: { nativeEvent: { contentOffset: { y: number }; layoutMeasurement: { height: number }; contentSize: { height: number } } }) => {
+        const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+        const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 10;
+        setShowScrollFade(!isAtBottom);
+    };
 
     /**
      * Handles profile update.
@@ -192,7 +209,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
                 
         {/* Profile content */}
         {!loading && !error && userData && (
-            <ScrollView style={styles.scrollContainer}>
+            <View style={styles.scrollContainer}>
                 {/* Profile information card - displays name and age */}
                 <View style={styles.profileCard}>
                     <View style={styles.profileRow}>
@@ -223,7 +240,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
                     )}
                 </TouchableOpacity>
                 
-                {/* Active reminders section - displays filtered reminders for this profile */}
+                {/* Active reminders section - title fixed, only list scrollable */}
                 <Text style={styles.sectionTitle}>{t('UserProfileDetail.sections.Active Reminders')}</Text>
                 {/* Delete error feedback */}
                 {deleteError && (
@@ -232,18 +249,40 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
                         <Text style={commonStyles.errorText}>{t('reminders.errors.deleteError')}</Text>
                     </View>
                 )}
-                {profileReminders.length === 0 ? (
-                    <Text style={commonStyles.emptyMessage}>{t('UserProfileDetail.messages.No active reminders')}</Text>
-                ) : (
-                    profileReminders.map(reminder => (
-                        <ReminderCard
-                            key={reminder.id}
-                            reminder={reminder}
-                            onDelete={handleDeleteReminder}
-                        />
-                    ))
-                )}
-            </ScrollView>
+                <View style={styles.listWrapper}>
+                    <ScrollView
+                        style={styles.remindersList}
+                        showsVerticalScrollIndicator={false}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={isRefreshingList}
+                                onRefresh={handleRefreshList}
+                                tintColor="#4A90E2"
+                            />
+                        }
+                        onScroll={handleScroll}
+                        scrollEventThrottle={16}
+                    >
+                        {profileReminders.length === 0 ? (
+                            <Text style={commonStyles.emptyMessage}>{t('UserProfileDetail.messages.No active reminders')}</Text>
+                        ) : (
+                            profileReminders.map(reminder => (
+                                <ReminderCard
+                                    key={reminder.id}
+                                    reminder={reminder}
+                                    onDelete={handleDeleteReminder}
+                                    reloadTrigger={reloadCounter}
+                                />
+                            ))
+                        )}
+                    </ScrollView>
+                    {showScrollFade && (
+                        <View style={styles.scrollFade} pointerEvents="none">
+                            <Ionicons name="chevron-down" size={24} color="#4A90E2" />
+                        </View>
+                    )}
+                </View>
+            </View>
         )}
 
         {/* Pairing code modal */}
@@ -358,7 +397,24 @@ const styles = StyleSheet.create({
     scrollContainer: {
         flex: 1,
         marginTop: 40,
-        paddingBottom: 50,
+        marginBottom: 80,
+    },
+    remindersList: {
+        flex: 1,
+    },
+    listWrapper: {
+        flex: 1,
+        position: 'relative',
+    },
+    scrollFade: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255,255,255,0.85)',
     },
     
     // TYPOGRAPHY

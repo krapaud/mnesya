@@ -4,7 +4,7 @@
  * @module UserTabs
  */
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ActivityIndicator } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -20,7 +20,7 @@ const Tab = createBottomTabNavigator<UserTabsParamList>();
 const UserTabsContent: React.FC = () => {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
-    const { triggerRefresh } = useRefresh();
+    const { triggerRefresh, isRefreshing } = useRefresh();
     
     return (
         <Tab.Navigator
@@ -46,14 +46,16 @@ const UserTabsContent: React.FC = () => {
                         e.preventDefault();
                         // Trigger haptic feedback
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                        // Trigger data refresh
+                        // Show spinner then trigger refresh
                         triggerRefresh();
                     },
                 })}
                 options={{
                     tabBarLabel: t('tabs.Refresh'),
                     tabBarIcon: ({ color, size }) => (
-                        <Ionicons name="refresh" size={size} color={color} />
+                        isRefreshing
+                            ? <ActivityIndicator size={size} color={color} />
+                            : <Ionicons name="refresh" size={size} color={color} />
                     ),
                 }}
             />

@@ -19,6 +19,9 @@ import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { verifyPairingCode } from '../services/pairingService';
 import { saveUserInfo, saveToken } from '../services/tokenService';
+import * as SecureStore from 'expo-secure-store';
+import apiClient from '../services/api';
+import { registerForPushNotifications } from '../utils/notifications';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'UserPairing'>;
 
@@ -50,9 +53,20 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
         setError(null);
         
         const response = await verifyPairingCode(code);
-        
+
         // Save JWT token for authenticated requests
         await saveToken(response.access_token);
+
+        // Register push token now that the user JWT is saved
+        try {
+            const expoPushToken = await registerForPushNotifications()
+                ?? await SecureStore.getItemAsync('expo_push_token');
+            if (expoPushToken) {
+                await apiClient.post('/api/push-tokens/register', { token: expoPushToken });
+            }
+        } catch {
+            // Push token registration failure is non-blocking
+        }
         
         // Save user info for app usage
         await saveUserInfo({

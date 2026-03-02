@@ -7,7 +7,7 @@
  * @module RegisterScreen
  */
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -16,12 +16,14 @@ import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { validateEmail, validatePassword, validateName, validatePasswordMatch, cleanText } from '../utils/validation';
 import { useAuth, useFormValidation } from '../hooks';
+import { ConfirmationModal } from '../components';
 
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
 
 const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     const { register, loading, error: authError } = useAuth();
 
@@ -90,11 +92,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
         if (success) {
             // Provide success feedback and navigate to login
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            Alert.alert(
-                t('register.success.Account created'),
-                t('register.success.Please log in'),
-                [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
-            );
+            setShowSuccessModal(true);
         } else {
             // Handle registration errors (hook already set loading state)
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -110,6 +108,20 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
     return (
         <View style={commonStyles.container}>
+            {/* Success modal after account creation */}
+            <ConfirmationModal
+                visible={showSuccessModal}
+                onClose={() => { setShowSuccessModal(false); navigation.navigate('Login'); }}
+                onConfirm={() => { setShowSuccessModal(false); navigation.navigate('Login'); }}
+                title={t('register.success.Account created')}
+                message={t('register.success.Please log in')}
+                icon="checkmark-circle-outline"
+                iconColor="#4CAF50"
+                confirmText="OK"
+                confirmColor="#4A90E2"
+                hideCancelButton={true}
+            />
+
             {/* Header with back button and logo */}
             <View style={commonStyles.header}>
                 <TouchableOpacity onPress={() => {
