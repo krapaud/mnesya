@@ -9,4 +9,5 @@ export { default as PairingCodeModal } from './PairingCodeModal';
 export { default as UpdateUserProfileModal } from './UpdateUserProfileModal';
 export { default as UpdateCaregiverProfileModal } from './UpdateCaregiverProfileModal';
 export { default as ConfirmationModal } from './ConfirmationModal';
+export { default as ChangePasswordModal } from './ChangePasswordModal';
 export type { FilterPickerItem } from './FilterPickerModal';

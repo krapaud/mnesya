@@ -1,10 +1,21 @@
 /**
  * Screen for creating a reminder for a user profile.
- * 
+ *
  * @module CreateReminderScreen
  */
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, Modal, ActivityIndicator, Animated} from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    TextInput,
+    Image,
+    ScrollView,
+    Modal,
+    ActivityIndicator,
+    Animated,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -20,10 +31,10 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CreateReminder'>;
 
 const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
-    
+
     // Load user profiles from API
     const { userData, loading: loadingProfiles, error: profilesError } = useUserProfiles();
-    
+
     /** Reminder title input state */
     const [reminderTitle, setReminderTitle] = useState<string>('');
     /** Reminder message/description input state */
@@ -45,7 +56,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const [showTitleError, setShowTitleError] = useState<boolean>(false);
     const [showMessageError, setShowMessageError] = useState<boolean>(false);
 
-    const selectedProfileData = userData?.find(p => String(p.id) === selectedProfile);
+    const selectedProfileData = userData?.find((p) => String(p.id) === selectedProfile);
 
     const pulseAnim = useRef(new Animated.Value(1)).current;
     useEffect(() => {
@@ -67,7 +78,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
 
     /**
      * Opens the date picker and closes other pickers.
-     * 
+     *
      * Ensures mutual exclusion between pickers to prevent UI overlap
      * and maintain clean user experience.
      */
@@ -79,7 +90,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
 
     /**
      * Opens the time picker and closes other pickers.
-     * 
+     *
      * Ensures mutual exclusion between pickers to prevent UI overlap
      * and maintain clean user experience.
      */
@@ -141,7 +152,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
      */
     const handleConfirmSave = async () => {
         setShowConfirmModal(false);
-        
+
         try {
             await createReminder({
                 title: reminderTitle,
@@ -152,7 +163,6 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
 
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             navigation.navigate('Dashboard');
-            
         } catch {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             // Show error inline on message field
@@ -173,18 +183,19 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
         <View style={commonStyles.container}>
             {/* Header with back button and logo */}
             <View style={commonStyles.header}>
-                <TouchableOpacity onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    navigation.navigate('Dashboard');
-                }}>
+                <TouchableOpacity
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        navigation.navigate('Dashboard');
+                    }}
+                >
                     <View style={commonStyles.ArrowIconCircle}>
-                        <Ionicons name="arrow-back" size={24} color='#4A90E2'
-                    />
+                        <Ionicons name="arrow-back" size={24} color="#4A90E2" />
                     </View>
                 </TouchableOpacity>
                 <View style={commonStyles.headerCenter}>
-                    <Image 
-                        source={require('../../assets/mnesya-logo.png')} 
+                    <Image
+                        source={require('../../assets/mnesya-logo.png')}
                         style={commonStyles.logo}
                     />
                     <Text style={commonStyles.appName}>Mnesya</Text>
@@ -198,125 +209,155 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
             {/* Content */}
             <ScrollView style={styles.scrollContainer}>
                 <Text style={styles.label}>{t('CreateReminder.fields.For Profile')}</Text>
-                    {profilesError && <Text style={styles.errorText}>{profilesError}</Text>}
-                <TouchableOpacity 
+                {profilesError && <Text style={styles.errorText}>{profilesError}</Text>}
+                <TouchableOpacity
                     style={[styles.input, showProfileError && commonStyles.inputError]}
                     onPress={openProfilePicker}
                 >
                     <View style={styles.profilePicker}>
-                        <Text>{selectedProfileData ? `${selectedProfileData.first_name} ${selectedProfileData.last_name}` : t('common.pickersText.Select a profile')}</Text>
-                        {loadingProfiles ? <ActivityIndicator size='small' color='#999999' /> : <Ionicons name="chevron-down" size={20} color="#999999" />}
+                        <Text>
+                            {selectedProfileData
+                                ? `${selectedProfileData.first_name} ${selectedProfileData.last_name}`
+                                : t('common.pickersText.Select a profile')}
+                        </Text>
+                        {loadingProfiles ? (
+                            <ActivityIndicator size="small" color="#999999" />
+                        ) : (
+                            <Ionicons name="chevron-down" size={20} color="#999999" />
+                        )}
                     </View>
                 </TouchableOpacity>
-                <Text style={[styles.errorText, {opacity: showProfileError ? 1 : 0}]}>
+                <Text style={[styles.errorText, { opacity: showProfileError ? 1 : 0 }]}>
                     {profileError || t('CreateReminder.errors.Please select a profile')}
                 </Text>
                 {!showProfilePicker && (
                     <>
-                    <Text style={styles.label}>{t('CreateReminder.fields.Reminder Title')}</Text>
-                <View style={[styles.input, showTitleError && commonStyles.inputError]}>
-                    <TextInput
-                        placeholder={t('CreateReminder.placeholders.Ex. : Take Medication')}
-                        onChangeText={newText => {
-                            setShowTitleError(false);
-                            setReminderTitle(newText);
-                        }}
-                        defaultValue={reminderTitle}
-                    />
-                </View>
-                <Text style={[styles.errorText, {opacity: showTitleError ? 1 : 0}]}>
-                    {titleError || t('CreateReminder.errors.Please enter a title')}
-                </Text>
-                <Text style={styles.messageLabel}>Message</Text>
-                <View style={[styles.input, styles.messageInput, showMessageError && commonStyles.inputError]}>
-                    <TextInput multiline={true}
-                        numberOfLines={4}
-                        maxLength={120}
-                        placeholder={t('CreateReminder.placeholders.Enter the description about your reminder')}
-                        onChangeText={newText => {
-                            setShowMessageError(false);
-                            setReminderMessage(newText);
-                        }}
-                        defaultValue={reminderMessage}
-                    />
-                </View>
-                <Text style={[styles.errorText, {opacity: showMessageError ? 1 : 0}]}>
-                    {messageError || t('CreateReminder.errors.Please enter a message')}
-                </Text>
-                <Animated.Text style={[styles.text, getPulseScale(pulseAnim)]}>
-                    {t('CreateReminder.message.Be careful not to enter sensitive confidential information.')}</Animated.Text>
-                <View style={styles.pickerContainer}>
-                <View style={styles.pickerColumn}>
-                    <Text style={styles.label}>Date</Text>
-                <TouchableOpacity 
-                    style={styles.pickerButton}
-                    onPress={openDatePicker}
-                >
-                    <View style={styles.pickerRow}>
-                        <Text>{formatDate(reminderDate)}</Text>
-                        <Ionicons name="calendar-outline" size={20} color="#999999" />
-                    </View>
-                </TouchableOpacity>
-                </View>
-                <View style={styles.pickerColumn}>
-                    <Text style={styles.label}>{t('CreateReminder.fields.Time')}</Text>
-                <TouchableOpacity 
-                    style={styles.pickerButton}
-                    onPress={openTimePicker}
-                >
-                    <View style={styles.pickerRow}>
-                        <Text>{formatTime(reminderDate)}</Text>
-                        <Ionicons name="time-outline" size={20} color="#999999" />
-                    </View>
-                </TouchableOpacity>
+                        <Text style={styles.label}>
+                            {t('CreateReminder.fields.Reminder Title')}
+                        </Text>
+                        <View style={[styles.input, showTitleError && commonStyles.inputError]}>
+                            <TextInput
+                                placeholder={t('CreateReminder.placeholders.Ex. : Take Medication')}
+                                onChangeText={(newText) => {
+                                    setShowTitleError(false);
+                                    setReminderTitle(newText);
+                                }}
+                                defaultValue={reminderTitle}
+                            />
                         </View>
-                    </View>
-                        </>
-                    )}
-                </ScrollView>
-                
-                {/* Cross-platform date picker component */}
-                <PlatformDatePicker
-                    value={reminderDate}
-                    onChange={setReminderDate}
-                    visible={showDatePicker}
-                    onClose={() => setShowDatePicker(false)}
-                    displayFormat={formatDate}
-                />
-                {/* Cross-platform time picker component */}
-                <PlatformTimePicker
-                    value={reminderDate}
-                    onChange={setReminderDate}
-                    visible={showTimePicker}
-                    onClose={() => setShowTimePicker(false)}
-                    displayFormat={formatTime}
-                />
-                
-                {/* Cross-platform profile picker component */}
-                <FilterPickerModal
-                    title={t('common.pickersText.Select a profile')}
-                    items={userData?.map(item => ({
+                        <Text style={[styles.errorText, { opacity: showTitleError ? 1 : 0 }]}>
+                            {titleError || t('CreateReminder.errors.Please enter a title')}
+                        </Text>
+                        <Text style={styles.messageLabel}>Message</Text>
+                        <View
+                            style={[
+                                styles.input,
+                                styles.messageInput,
+                                showMessageError && commonStyles.inputError,
+                            ]}
+                        >
+                            <TextInput
+                                multiline={true}
+                                numberOfLines={4}
+                                maxLength={120}
+                                placeholder={t(
+                                    'CreateReminder.placeholders.Enter the description about your reminder'
+                                )}
+                                onChangeText={(newText) => {
+                                    setShowMessageError(false);
+                                    setReminderMessage(newText);
+                                }}
+                                defaultValue={reminderMessage}
+                            />
+                        </View>
+                        <Text style={[styles.errorText, { opacity: showMessageError ? 1 : 0 }]}>
+                            {messageError || t('CreateReminder.errors.Please enter a message')}
+                        </Text>
+                        <Animated.Text style={[styles.text, getPulseScale(pulseAnim)]}>
+                            {t(
+                                'CreateReminder.message.Be careful not to enter sensitive confidential information.'
+                            )}
+                        </Animated.Text>
+                        <View style={styles.pickerContainer}>
+                            <View style={styles.pickerColumn}>
+                                <Text style={styles.label}>Date</Text>
+                                <TouchableOpacity
+                                    style={styles.pickerButton}
+                                    onPress={openDatePicker}
+                                >
+                                    <View style={styles.pickerRow}>
+                                        <Text>{formatDate(reminderDate)}</Text>
+                                        <Ionicons
+                                            name="calendar-outline"
+                                            size={20}
+                                            color="#999999"
+                                        />
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                            <View style={styles.pickerColumn}>
+                                <Text style={styles.label}>{t('CreateReminder.fields.Time')}</Text>
+                                <TouchableOpacity
+                                    style={styles.pickerButton}
+                                    onPress={openTimePicker}
+                                >
+                                    <View style={styles.pickerRow}>
+                                        <Text>{formatTime(reminderDate)}</Text>
+                                        <Ionicons name="time-outline" size={20} color="#999999" />
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </>
+                )}
+            </ScrollView>
+
+            {/* Cross-platform date picker component */}
+            <PlatformDatePicker
+                value={reminderDate}
+                onChange={setReminderDate}
+                visible={showDatePicker}
+                onClose={() => setShowDatePicker(false)}
+                displayFormat={formatDate}
+            />
+            {/* Cross-platform time picker component */}
+            <PlatformTimePicker
+                value={reminderDate}
+                onChange={setReminderDate}
+                visible={showTimePicker}
+                onClose={() => setShowTimePicker(false)}
+                displayFormat={formatTime}
+            />
+
+            {/* Cross-platform profile picker component */}
+            <FilterPickerModal
+                title={t('common.pickersText.Select a profile')}
+                items={
+                    userData?.map((item) => ({
                         value: String(item.id),
                         label: `${item.first_name} ${item.last_name}`,
-                    })) ?? []}
-                    selectedValue={selectedProfile}
-                    onSelect={setSelectedProfile}
-                    visible={showProfilePicker}
-                    onClose={() => setShowProfilePicker(false)}
-                />
-                
-                {/* Buttons section - fixed at bottom */}
-                <View style={styles.buttonsContainer}>
-                    {/* Save button - navigates back to Dashboard after reminder creation */}
-                    {!showDatePicker && !showTimePicker && !showProfilePicker && (
-                    <TouchableOpacity 
+                    })) ?? []
+                }
+                selectedValue={selectedProfile}
+                onSelect={setSelectedProfile}
+                visible={showProfilePicker}
+                onClose={() => setShowProfilePicker(false)}
+            />
+
+            {/* Buttons section - fixed at bottom */}
+            <View style={styles.buttonsContainer}>
+                {/* Save button - navigates back to Dashboard after reminder creation */}
+                {!showDatePicker && !showTimePicker && !showProfilePicker && (
+                    <TouchableOpacity
                         style={commonStyles.primaryButton}
                         onPress={handleSaveReminder}
-                        >
-                        <Text style={commonStyles.primaryButtonText}>{t('CreateReminder.buttons.Save Reminder')}</Text>
+                    >
+                        <Text style={commonStyles.primaryButtonText}>
+                            {t('CreateReminder.buttons.Save Reminder')}
+                        </Text>
                     </TouchableOpacity>
-                    )}
-                </View>
+                )}
+            </View>
 
             {/* Confirmation Modal */}
             <Modal
@@ -336,13 +377,11 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                         <Text style={styles.modalTitle}>{t('CreateReminder.modal.title')}</Text>
 
                         {/* Confirmation message */}
-                        <Text style={styles.modalMessage}>
-                            {t('CreateReminder.modal.message')}
-                        </Text>
+                        <Text style={styles.modalMessage}>{t('CreateReminder.modal.message')}</Text>
 
                         {/* Buttons */}
                         <View style={styles.modalButtons}>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={[styles.modalButton, styles.cancelButton]}
                                 onPress={handleCancelSave}
                             >
@@ -351,7 +390,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                                 </Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={[styles.modalButton, styles.confirmButton]}
                                 onPress={handleConfirmSave}
                             >
@@ -363,7 +402,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                     </View>
                 </View>
             </Modal>
-            </View>
+        </View>
     );
 };
 

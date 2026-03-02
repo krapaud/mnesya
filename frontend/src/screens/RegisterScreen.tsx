@@ -1,23 +1,36 @@
 /**
  * Caregiver account registration screen.
- * 
+ *
  * Registration form with validation for name, email, password fields.
  * Provides real-time feedback and navigation to login after success.
- * 
+ *
  * @module RegisterScreen
  */
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    TextInput,
+    Image,
+    ScrollView,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { validateEmail, validatePassword, validateName, validatePasswordMatch, cleanText } from '../utils/validation';
+import {
+    validateEmail,
+    validatePassword,
+    validateName,
+    validatePasswordMatch,
+    cleanText,
+} from '../utils/validation';
 import { useAuth, useFormValidation } from '../hooks';
 import { ConfirmationModal } from '../components';
-
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
 
@@ -28,21 +41,21 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     const { register, loading, error: authError } = useAuth();
 
     const { values, errors, showErrors, handleChange, validateAll, setError } = useFormValidation({
-        firstname: { 
-            validate: validateName
+        firstname: {
+            validate: validateName,
         },
-        lastname: { 
-            validate: validateName
+        lastname: {
+            validate: validateName,
         },
-        email: { 
-            validate: validateEmail 
+        email: {
+            validate: validateEmail,
         },
-        password: { 
-            validate: validatePassword 
+        password: {
+            validate: validatePassword,
         },
-        confirmpassword: { 
-            validate: (value) => validatePasswordMatch(values.password, value)
-        }
+        confirmpassword: {
+            validate: (value) => validatePasswordMatch(values.password, value),
+        },
     });
     // States
     const [showPassword, setShowPassword] = useState(false);
@@ -57,20 +70,20 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     const timerConfPassRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const handleShowConfirmPassword = () => {
         setShowConfirmPassword(true);
-        timerConfPassRef.current =setTimeout(() => setShowConfirmPassword(false), 1000);
+        timerConfPassRef.current = setTimeout(() => setShowConfirmPassword(false), 1000);
     };
 
     // Cleanup
     useEffect(() => {
-            return () => {
-              if (timerPassRef.current) clearTimeout(timerPassRef.current);
-              if (timerConfPassRef.current) clearTimeout(timerConfPassRef.current);
-            };
-        }, [])
+        return () => {
+            if (timerPassRef.current) clearTimeout(timerPassRef.current);
+            if (timerConfPassRef.current) clearTimeout(timerConfPassRef.current);
+        };
+    }, []);
 
     /**
      * Handles registration form submission.
-     * 
+     *
      * Validates all form fields and navigates to login screen on success.
      * Performs comprehensive validation before submission.
      */
@@ -86,9 +99,9 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             first_name: values.firstname.trim(),
             last_name: values.lastname.trim(),
             email: values.email.trim(),
-            password: values.password
+            password: values.password,
         });
-        
+
         if (success) {
             // Provide success feedback and navigate to login
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -96,7 +109,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
         } else {
             // Handle registration errors (hook already set loading state)
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-            
+
             // If error contains email-related messages, highlight email field
             if (authError?.includes('Email already registered') || authError?.includes('email')) {
                 setError('email', t('register.errors.Please use a different email'));
@@ -111,42 +124,53 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             {/* Success modal after account creation */}
             <ConfirmationModal
                 visible={showSuccessModal}
-                onClose={() => { setShowSuccessModal(false); navigation.navigate('Login'); }}
-                onConfirm={() => { setShowSuccessModal(false); navigation.navigate('Login'); }}
+                onClose={() => {
+                    setShowSuccessModal(false);
+                    navigation.navigate('Login');
+                }}
+                onConfirm={() => {
+                    setShowSuccessModal(false);
+                    navigation.navigate('Login');
+                }}
                 title={t('register.success.Account created')}
                 message={t('register.success.Please log in')}
                 icon="checkmark-circle-outline"
                 iconColor="#4CAF50"
                 confirmText="OK"
                 confirmColor="#4A90E2"
-                hideCancelButton={true}
+                showCancelButton={false}
             />
 
             {/* Header with back button and logo */}
             <View style={commonStyles.header}>
-                <TouchableOpacity onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    navigation.goBack();
-                }}>
+                <TouchableOpacity
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        navigation.goBack();
+                    }}
+                >
                     <View style={commonStyles.ArrowIconCircle}>
-                        <Ionicons name="arrow-back" size={24} color='#4A90E2'
-                    />
+                        <Ionicons name="arrow-back" size={24} color="#4A90E2" />
                     </View>
                 </TouchableOpacity>
                 <View style={commonStyles.headerCenter}>
-                    <Image 
-                        source={require('../../assets/mnesya-logo.png')} 
+                    <Image
+                        source={require('../../assets/mnesya-logo.png')}
                         style={commonStyles.logo}
                     />
                     <Text style={commonStyles.appName}>Mnesya</Text>
                 </View>
                 <View style={commonStyles.headerSpacer} />
             </View>
-            
+
             {/* Scrollable registration form with title */}
-            <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            <ScrollView
+                style={styles.scrollContainer}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+            >
                 <Text style={styles.title}>{t('register.title')}</Text>
-                
+
                 {/* First name input field */}
                 <Text style={styles.firstLabel}>{t('register.fields.First Name')}</Text>
                 <View style={[styles.input, showErrors.firstname && commonStyles.inputError]}>
@@ -157,10 +181,10 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                         value={values.firstname}
                     />
                 </View>
-                <Text style={[styles.errorText, {opacity: showErrors.firstname ? 1 : 0}]}>
+                <Text style={[styles.errorText, { opacity: showErrors.firstname ? 1 : 0 }]}>
                     {t(errors.firstname) || t('register.errors.This field is required')}
                 </Text>
-                
+
                 {/* Last name input field */}
                 <Text style={styles.label}>{t('register.fields.Last Name')}</Text>
                 <View style={[styles.input, showErrors.lastname && commonStyles.inputError]}>
@@ -171,10 +195,10 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                         value={values.lastname}
                     />
                 </View>
-                <Text style={[styles.errorText, {opacity: showErrors.lastname ? 1 : 0}]}>
+                <Text style={[styles.errorText, { opacity: showErrors.lastname ? 1 : 0 }]}>
                     {t(errors.lastname) || t('register.errors.This field is required')}
                 </Text>
-                
+
                 {/* Email input field */}
                 <Text style={styles.label}>{t('common.fields.Email')}</Text>
                 <View style={[styles.input, showErrors.email && commonStyles.inputError]}>
@@ -187,13 +211,19 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                         value={values.email}
                     />
                 </View>
-                <Text style={[styles.errorText, {opacity: showErrors.email ? 1 : 0}]}>
+                <Text style={[styles.errorText, { opacity: showErrors.email ? 1 : 0 }]}>
                     {t(errors.email) || t('register.errors.This field is required')}
                 </Text>
-                
+
                 {/* Password input field */}
                 <Text style={styles.label}>{t('common.fields.Password')}</Text>
-                <View style={[styles.input, styles.inputRow, showErrors.password && commonStyles.inputError]}>
+                <View
+                    style={[
+                        styles.input,
+                        styles.inputRow,
+                        showErrors.password && commonStyles.inputError,
+                    ]}
+                >
                     <TextInput
                         style={styles.inputFlex}
                         placeholder={t('register.placeholders.Enter your Password')}
@@ -202,16 +232,26 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                         value={values.password}
                     />
                     <TouchableOpacity onPress={handleShowPassword}>
-                        <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={22} color="#999999" />
+                        <Ionicons
+                            name="eye-outline"
+                            size={22}
+                            color={showPassword ? '#999999' : '#4A90E2'}
+                        />
                     </TouchableOpacity>
                 </View>
-                <Text style={[styles.errorText, {opacity: showErrors.password ? 1 : 0}]}>
+                <Text style={[styles.errorText, { opacity: showErrors.password ? 1 : 0 }]}>
                     {t(errors.password) || t('register.errors.This field is required')}
                 </Text>
-                
+
                 {/* Password confirmation input field */}
                 <Text style={styles.label}>{t('common.fields.Confirm Password')}</Text>
-                <View style={[styles.input, styles.inputRow, showErrors.confirmpassword && commonStyles.inputError]}>
+                <View
+                    style={[
+                        styles.input,
+                        styles.inputRow,
+                        showErrors.confirmpassword && commonStyles.inputError,
+                    ]}
+                >
                     <TextInput
                         style={styles.inputFlex}
                         placeholder={t('register.placeholders.Confirm your password')}
@@ -220,40 +260,50 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                         value={values.confirmpassword}
                     />
                     <TouchableOpacity onPress={handleShowConfirmPassword}>
-                        <Ionicons name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} size={22} color="#999999" />
+                        <Ionicons
+                            name="eye-outline"
+                            size={22}
+                            color={showConfirmPassword ? '#999999' : '#4A90E2'}
+                        />
                     </TouchableOpacity>
                 </View>
-                <Text style={[styles.errorText, {opacity: showErrors.confirmpassword ? 1 : 0}]}>
+                <Text style={[styles.errorText, { opacity: showErrors.confirmpassword ? 1 : 0 }]}>
                     {t(errors.confirmpassword) || t('register.errors.This field is required')}
                 </Text>
             </ScrollView>
-                
+
             {/* Buttons section - fixed at bottom */}
             <View style={styles.buttonsContainer}>
                 {/* Sign up button - navigates to Login after registration */}
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={[styles.signUpButton, loading && styles.signUpButtonDisabled]}
                     onPress={handleRegister}
                     disabled={loading}
                 >
                     <Text style={commonStyles.primaryButtonText}>
-                        {loading ? t('register.buttons.Signing up...') : t('register.buttons.Sign Up')}
+                        {loading
+                            ? t('register.buttons.Signing up...')
+                            : t('register.buttons.Sign Up')}
                     </Text>
                 </TouchableOpacity>
-                
+
                 {/* Navigation back to login screen */}
-                <TouchableOpacity onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    navigation.navigate('Login');
-                }}>
-                    <Text style={styles.alreadyHaveAccountText}>{t('register.buttons.Already have an account? Log in')}</Text>
+                <TouchableOpacity
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        navigation.navigate('Login');
+                    }}
+                >
+                    <Text style={styles.alreadyHaveAccountText}>
+                        {t('register.buttons.Already have an account? Log in')}
+                    </Text>
                 </TouchableOpacity>
             </View>
         </View>
     );
 };
 
-const styles = StyleSheet.create({  
+const styles = StyleSheet.create({
     // ========== LAYOUT ==========
     scrollContainer: {
         flex: 1,

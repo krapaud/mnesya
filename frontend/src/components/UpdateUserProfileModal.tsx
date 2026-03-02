@@ -1,14 +1,23 @@
 /**
  * Modal component for updating user profile information.
- * 
+ *
  * Provides a form to edit first name, last name, and birthday of a user profile.
  * Includes validation and date picker integration.
- * 
+ *
  * @module UpdateProfileModal
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, ScrollView, ActivityIndicator } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Modal,
+    TextInput,
+    ScrollView,
+    ActivityIndicator,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useFormValidation } from '../hooks';
@@ -74,7 +83,7 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
             setValue('lastname', initialData.last_name);
             setBirthday(new Date(initialData.birthday));
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialData]);
 
     /**
@@ -111,7 +120,9 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
                 <View style={commonStyles.modalOverlay}>
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>{t('UserProfileDetail.modals.update.title')}</Text>
+                            <Text style={styles.modalTitle}>
+                                {t('UserProfileDetail.modals.update.title')}
+                            </Text>
                             <TouchableOpacity onPress={onClose} testID="close-button">
                                 <Ionicons name="close" size={28} color="#666666" />
                             </TouchableOpacity>
@@ -120,15 +131,21 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
                         <ScrollView showsVerticalScrollIndicator={false}>
                             {/* First Name */}
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>{t('CreateProfile.fields.First Name')}</Text>
+                                <Text style={styles.label}>
+                                    {t('CreateProfile.fields.First Name')}
+                                </Text>
                                 <TextInput
                                     style={[
                                         styles.input,
-                                        showErrors.firstname && errors.firstname && styles.inputError
+                                        showErrors.firstname &&
+                                            errors.firstname &&
+                                            styles.inputError,
                                     ]}
                                     value={values.firstname}
                                     onChangeText={handleChange('firstname')}
-                                    placeholder={t('CreateProfile.placeholders.Enter the profile First Name')}
+                                    placeholder={t(
+                                        'CreateProfile.placeholders.Enter the profile First Name'
+                                    )}
                                     autoCapitalize="sentences"
                                 />
                                 {showErrors.firstname && errors.firstname && (
@@ -138,15 +155,19 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
 
                             {/* Last Name */}
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>{t('CreateProfile.fields.Last Name')}</Text>
+                                <Text style={styles.label}>
+                                    {t('CreateProfile.fields.Last Name')}
+                                </Text>
                                 <TextInput
                                     style={[
                                         styles.input,
-                                        showErrors.lastname && errors.lastname && styles.inputError
+                                        showErrors.lastname && errors.lastname && styles.inputError,
                                     ]}
                                     value={values.lastname}
                                     onChangeText={handleChange('lastname')}
-                                    placeholder={t('CreateProfile.placeholders.Enter the profile Last Name')}
+                                    placeholder={t(
+                                        'CreateProfile.placeholders.Enter the profile Last Name'
+                                    )}
                                     autoCapitalize="sentences"
                                 />
                                 {showErrors.lastname && errors.lastname && (
@@ -156,7 +177,9 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
 
                             {/* Birthday */}
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>{t('CreateProfile.fields.Birthday')}</Text>
+                                <Text style={styles.label}>
+                                    {t('CreateProfile.fields.Birthday')}
+                                </Text>
                                 <TouchableOpacity
                                     style={styles.dateButton}
                                     onPress={() => setShowDatePicker(true)}
@@ -175,7 +198,9 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
                                     onPress={onClose}
                                     disabled={isUpdating}
                                 >
-                                    <Text style={styles.cancelButtonText}>{t('common.buttons.Cancel')}</Text>
+                                    <Text style={styles.cancelButtonText}>
+                                        {t('common.buttons.Cancel')}
+                                    </Text>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
@@ -184,9 +209,15 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
                                     disabled={isUpdating}
                                 >
                                     {isUpdating ? (
-                                        <ActivityIndicator size="small" color="#FFFFFF" testID="activity-indicator" />
+                                        <ActivityIndicator
+                                            size="small"
+                                            color="#FFFFFF"
+                                            testID="activity-indicator"
+                                        />
                                     ) : (
-                                        <Text style={styles.saveButtonText}>{t('UserProfileDetail.buttons.Save')}</Text>
+                                        <Text style={styles.saveButtonText}>
+                                            {t('UserProfileDetail.buttons.Save')}
+                                        </Text>
                                     )}
                                 </TouchableOpacity>
                             </View>

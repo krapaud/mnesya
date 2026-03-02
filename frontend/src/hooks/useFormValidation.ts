@@ -44,8 +44,8 @@ export const useFormValidation = (config: FormConfig): UseFormValidationReturn =
     const initialValues: FormValues = {};
     const initialErrors: FormErrors = {};
     const initialShowErrors: ShowErrors = {};
-    
-    Object.keys(config).forEach(fieldName => {
+
+    Object.keys(config).forEach((fieldName) => {
         initialValues[fieldName] = config[fieldName].initialValue || '';
         initialErrors[fieldName] = '';
         initialShowErrors[fieldName] = false;
@@ -55,29 +55,32 @@ export const useFormValidation = (config: FormConfig): UseFormValidationReturn =
     const [errors, setErrors] = useState<FormErrors>(initialErrors);
     const [showErrors, setShowErrors] = useState<ShowErrors>(initialShowErrors);
 
-    const handleChange = useCallback((fieldName: string) => {
-        return (value: string) => {
-            // Update value
-            setValues(prev => ({ ...prev, [fieldName]: value }));
-            
-            // Hide error indicator when user starts typing
-            setShowErrors(prev => ({ ...prev, [fieldName]: false }));
-            
-            // Validate field
-            const fieldConfig = config[fieldName];
-            if (fieldConfig.validate) {
-                const error = fieldConfig.validate(value);
-                setErrors(prev => ({ ...prev, [fieldName]: error || '' }));
-            }
-        };
-    }, [config]);
+    const handleChange = useCallback(
+        (fieldName: string) => {
+            return (value: string) => {
+                // Update value
+                setValues((prev) => ({ ...prev, [fieldName]: value }));
+
+                // Hide error indicator when user starts typing
+                setShowErrors((prev) => ({ ...prev, [fieldName]: false }));
+
+                // Validate field
+                const fieldConfig = config[fieldName];
+                if (fieldConfig.validate) {
+                    const error = fieldConfig.validate(value);
+                    setErrors((prev) => ({ ...prev, [fieldName]: error || '' }));
+                }
+            };
+        },
+        [config]
+    );
 
     const validateAll = useCallback((): boolean => {
         let isValid = true;
         const newErrors: FormErrors = {};
         const newShowErrors: ShowErrors = {};
 
-        Object.keys(config).forEach(fieldName => {
+        Object.keys(config).forEach((fieldName) => {
             const fieldConfig = config[fieldName];
             const value = values[fieldName];
             let error: string | null = null;
@@ -113,23 +116,23 @@ export const useFormValidation = (config: FormConfig): UseFormValidationReturn =
     const resetErrors = useCallback(() => {
         const clearedErrors: FormErrors = {};
         const clearedShowErrors: ShowErrors = {};
-        
-        Object.keys(config).forEach(fieldName => {
+
+        Object.keys(config).forEach((fieldName) => {
             clearedErrors[fieldName] = '';
             clearedShowErrors[fieldName] = false;
         });
-        
+
         setErrors(clearedErrors);
         setShowErrors(clearedShowErrors);
     }, [config]);
 
     const setValue = useCallback((fieldName: string, value: string) => {
-        setValues(prev => ({ ...prev, [fieldName]: value }));
+        setValues((prev) => ({ ...prev, [fieldName]: value }));
     }, []);
 
     const setError = useCallback((fieldName: string, error: string) => {
-        setErrors(prev => ({ ...prev, [fieldName]: error }));
-        setShowErrors(prev => ({ ...prev, [fieldName]: true }));
+        setErrors((prev) => ({ ...prev, [fieldName]: error }));
+        setShowErrors((prev) => ({ ...prev, [fieldName]: true }));
     }, []);
 
     return {
@@ -140,6 +143,6 @@ export const useFormValidation = (config: FormConfig): UseFormValidationReturn =
         validateAll,
         resetErrors,
         setValue,
-        setError
+        setError,
     };
 };

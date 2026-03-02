@@ -4,7 +4,16 @@
  * @module UserProfileDetailScreen
  */
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, ScrollView, RefreshControl } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Image,
+    ActivityIndicator,
+    ScrollView,
+    RefreshControl,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -23,19 +32,18 @@ import { cancelNotifications } from '../utils/notifications';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'UserProfileDetails'>;
 
-
 const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) => {
     const { t } = useTranslation();
-    
+
     // Extract profileId from route params
     const profileId = route.params?.profileId;
-    
+
     // Fetch user profile data from the backend
     const { userData, loading, error, reload: _reload, update, remove } = useUserProfile(profileId);
 
     // Fetch and filter reminders for this profile
     const { reminderData, reload: reloadReminders } = useCaregiverReminders();
-    const profileReminders = reminderData?.filter(r => r.user_id === profileId) ?? [];
+    const profileReminders = reminderData?.filter((r) => r.user_id === profileId) ?? [];
 
     // Pairing code modal state
     const [showPairingModal, setShowPairingModal] = useState(false);
@@ -66,11 +74,17 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
     const handleRefreshList = useCallback(async () => {
         setIsRefreshingList(true);
         await reloadReminders();
-        setReloadCounter(prev => prev + 1);
+        setReloadCounter((prev) => prev + 1);
         setIsRefreshingList(false);
     }, [reloadReminders]);
 
-    const handleScroll = (event: { nativeEvent: { contentOffset: { y: number }; layoutMeasurement: { height: number }; contentSize: { height: number } } }) => {
+    const handleScroll = (event: {
+        nativeEvent: {
+            contentOffset: { y: number };
+            layoutMeasurement: { height: number };
+            contentSize: { height: number };
+        };
+    }) => {
         const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
         const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 10;
         setShowScrollFade(!isAtBottom);
@@ -79,7 +93,11 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
     /**
      * Handles profile update.
      */
-    const handleUpdateProfile = async (data: { first_name: string; last_name: string; birthday: string }) => {
+    const handleUpdateProfile = async (data: {
+        first_name: string;
+        last_name: string;
+        birthday: string;
+    }) => {
         try {
             await update(data);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -158,231 +176,255 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
     };
 
     return (
-	<View style={commonStyles.container}>
-        {/* Header with back button and logo */}
-        <View style={commonStyles.header}>
-            <TouchableOpacity onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                navigation.goBack();
-            }}>
-                <View style={commonStyles.ArrowIconCircle}>
-                    <Ionicons name="arrow-back" size={24} color='#4A90E2'
-                />
-                </View>
-            </TouchableOpacity>
-            <View style={commonStyles.headerCenter}>
-                <Image 
-                    source={require('../../assets/mnesya-logo.png')} 
-                    style={commonStyles.logo}
-                />
-                <Text style={commonStyles.appName}>Mnesya</Text>
-            </View>
-            <TouchableOpacity 
-                onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setShowMenu(true);
-                }}
-                style={styles.menuButton}
-            >
-                <Ionicons name="ellipsis-vertical" size={24} color="#4A90E2" />
-            </TouchableOpacity>
-        </View>
-        {/* Page title */}
-        <View style={styles.titleSection}>
-            <Text style={styles.title}>{t('UserProfileDetail.title')}</Text>
-        </View>
-        {/* Loading state */}
-        {loading && (
-            <View style={commonStyles.loadingContainer}>
-                <ActivityIndicator size="large" color="#4A90E2" />
-                <Text style={commonStyles.loadingText}>{t('common.messages.loading')}</Text>
-            </View>
-        )}
-
-        {/* Error state */}
-        {error && !loading && (
-            <View style={commonStyles.errorContainer}>
-                <Ionicons name="alert-circle-outline" size={48} color="#E53935" />
-                <Text style={commonStyles.errorText}>{t(error)}</Text>
-            </View>
-        )}
-                
-        {/* Profile content */}
-        {!loading && !error && userData && (
-            <View style={styles.scrollContainer}>
-                {/* Profile information card - displays name and age */}
-                <View style={styles.profileCard}>
-                    <View style={styles.profileRow}>
-                        <Text style={styles.profileNameValue}>{userData.first_name} {userData.last_name}</Text>
-                    </View>
-                    <View style={styles.profileRow}>
-                        <Text style={styles.profileDetailValue}>{calculateAge(userData.birthday)} {t('common.units.years old')}</Text>
-                    </View>
-                </View>
-
-                {/* Generate pairing code button - allows creating new pairing code for user */}
-                <TouchableOpacity 
-                    style={commonStyles.primaryButton}
-                    onPress={handleGeneratePairingCode}
-                    disabled={isGeneratingCode}
+        <View style={commonStyles.container}>
+            {/* Header with back button and logo */}
+            <View style={commonStyles.header}>
+                <TouchableOpacity
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        navigation.goBack();
+                    }}
                 >
-                    {isGeneratingCode ? (
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <ActivityIndicator color="#FFFFFF" size="small" />
-                            <Text style={[commonStyles.primaryButtonText, { fontSize: 20, marginLeft: 10 }]}>
-                                {t('common.messages.loading')}
+                    <View style={commonStyles.ArrowIconCircle}>
+                        <Ionicons name="arrow-back" size={24} color="#4A90E2" />
+                    </View>
+                </TouchableOpacity>
+                <View style={commonStyles.headerCenter}>
+                    <Image
+                        source={require('../../assets/mnesya-logo.png')}
+                        style={commonStyles.logo}
+                    />
+                    <Text style={commonStyles.appName}>Mnesya</Text>
+                </View>
+                <TouchableOpacity
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setShowMenu(true);
+                    }}
+                    style={styles.menuButton}
+                >
+                    <Ionicons name="ellipsis-vertical" size={24} color="#4A90E2" />
+                </TouchableOpacity>
+            </View>
+            {/* Page title */}
+            <View style={styles.titleSection}>
+                <Text style={styles.title}>{t('UserProfileDetail.title')}</Text>
+            </View>
+            {/* Loading state */}
+            {loading && (
+                <View style={commonStyles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#4A90E2" />
+                    <Text style={commonStyles.loadingText}>{t('common.messages.loading')}</Text>
+                </View>
+            )}
+
+            {/* Error state */}
+            {error && !loading && (
+                <View style={commonStyles.errorContainer}>
+                    <Ionicons name="alert-circle-outline" size={48} color="#E53935" />
+                    <Text style={commonStyles.errorText}>{t(error)}</Text>
+                </View>
+            )}
+
+            {/* Profile content */}
+            {!loading && !error && userData && (
+                <View style={styles.scrollContainer}>
+                    {/* Profile information card - displays name and age */}
+                    <View style={styles.profileCard}>
+                        <View style={styles.profileRow}>
+                            <Text style={styles.profileNameValue}>
+                                {userData.first_name} {userData.last_name}
                             </Text>
                         </View>
-                    ) : (
-                        <Text style={[commonStyles.primaryButtonText, { fontSize: 20 }]}>
-                            {t('UserProfileDetail.buttons.Generate pairing code')}
-                        </Text>
-                    )}
-                </TouchableOpacity>
-                
-                {/* Active reminders section - title fixed, only list scrollable */}
-                <Text style={styles.sectionTitle}>{t('UserProfileDetail.sections.Active Reminders')}</Text>
-                {/* Delete error feedback */}
-                {deleteError && (
-                    <View style={commonStyles.errorContainer}>
-                        <Ionicons name="alert-circle-outline" size={24} color="#E53935" />
-                        <Text style={commonStyles.errorText}>{t('reminders.errors.deleteError')}</Text>
+                        <View style={styles.profileRow}>
+                            <Text style={styles.profileDetailValue}>
+                                {calculateAge(userData.birthday)} {t('common.units.years old')}
+                            </Text>
+                        </View>
                     </View>
-                )}
-                <View style={styles.listWrapper}>
-                    <ScrollView
-                        style={styles.remindersList}
-                        showsVerticalScrollIndicator={false}
-                        refreshControl={
-                            <RefreshControl
-                                refreshing={isRefreshingList}
-                                onRefresh={handleRefreshList}
-                                tintColor="#4A90E2"
-                            />
-                        }
-                        onScroll={handleScroll}
-                        scrollEventThrottle={16}
+
+                    {/* Generate pairing code button - allows creating new pairing code for user */}
+                    <TouchableOpacity
+                        style={commonStyles.primaryButton}
+                        onPress={handleGeneratePairingCode}
+                        disabled={isGeneratingCode}
                     >
-                        {profileReminders.length === 0 ? (
-                            <Text style={commonStyles.emptyMessage}>{t('UserProfileDetail.messages.No active reminders')}</Text>
+                        {isGeneratingCode ? (
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <ActivityIndicator color="#FFFFFF" size="small" />
+                                <Text
+                                    style={[
+                                        commonStyles.primaryButtonText,
+                                        { fontSize: 20, marginLeft: 10 },
+                                    ]}
+                                >
+                                    {t('common.messages.loading')}
+                                </Text>
+                            </View>
                         ) : (
-                            profileReminders.map(reminder => (
-                                <ReminderCard
-                                    key={reminder.id}
-                                    reminder={reminder}
-                                    onDelete={handleDeleteReminder}
-                                    reloadTrigger={reloadCounter}
-                                />
-                            ))
+                            <Text style={[commonStyles.primaryButtonText, { fontSize: 20 }]}>
+                                {t('UserProfileDetail.buttons.Generate pairing code')}
+                            </Text>
                         )}
-                    </ScrollView>
-                    {showScrollFade && (
-                        <View style={styles.scrollFade} pointerEvents="none">
-                            <Ionicons name="chevron-down" size={24} color="#4A90E2" />
+                    </TouchableOpacity>
+
+                    {/* Active reminders section - title fixed, only list scrollable */}
+                    <Text style={styles.sectionTitle}>
+                        {t('UserProfileDetail.sections.Active Reminders')}
+                    </Text>
+                    {/* Delete error feedback */}
+                    {deleteError && (
+                        <View style={commonStyles.errorContainer}>
+                            <Ionicons name="alert-circle-outline" size={24} color="#E53935" />
+                            <Text style={commonStyles.errorText}>
+                                {t('reminders.errors.deleteError')}
+                            </Text>
                         </View>
                     )}
+                    <View style={styles.listWrapper}>
+                        <ScrollView
+                            style={styles.remindersList}
+                            showsVerticalScrollIndicator={false}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={isRefreshingList}
+                                    onRefresh={handleRefreshList}
+                                    tintColor="#4A90E2"
+                                />
+                            }
+                            onScroll={handleScroll}
+                            scrollEventThrottle={16}
+                        >
+                            {profileReminders.length === 0 ? (
+                                <Text style={commonStyles.emptyMessage}>
+                                    {t('UserProfileDetail.messages.No active reminders')}
+                                </Text>
+                            ) : (
+                                profileReminders.map((reminder) => (
+                                    <ReminderCard
+                                        key={reminder.id}
+                                        reminder={reminder}
+                                        onDelete={handleDeleteReminder}
+                                        reloadTrigger={reloadCounter}
+                                    />
+                                ))
+                            )}
+                        </ScrollView>
+                        {showScrollFade && (
+                            <View style={styles.scrollFade} pointerEvents="none">
+                                <Ionicons name="chevron-down" size={24} color="#4A90E2" />
+                            </View>
+                        )}
+                    </View>
                 </View>
-            </View>
-        )}
+            )}
 
-        {/* Pairing code modal */}
-        <PairingCodeModal
-            visible={showPairingModal}
-            onClose={() => setShowPairingModal(false)}
-            pairingCode={pairingCode}
-            expiresAt={expiresAt}
-            onExpired={handleGeneratePairingCode}
-        />
+            {/* Pairing code modal */}
+            <PairingCodeModal
+                visible={showPairingModal}
+                onClose={() => setShowPairingModal(false)}
+                pairingCode={pairingCode}
+                expiresAt={expiresAt}
+                onExpired={handleGeneratePairingCode}
+            />
 
-        {/* Update Profile Modal */}
-        <UpdateUserProfileModal
-            visible={showUpdateModal}
-            onClose={() => setShowUpdateModal(false)}
-            onSave={handleUpdateProfile}
-            initialData={userData ? {
-                first_name: userData.first_name,
-                last_name: userData.last_name,
-                birthday: userData.birthday,
-            } : null}
-        />
+            {/* Update Profile Modal */}
+            <UpdateUserProfileModal
+                visible={showUpdateModal}
+                onClose={() => setShowUpdateModal(false)}
+                onSave={handleUpdateProfile}
+                initialData={
+                    userData
+                        ? {
+                              first_name: userData.first_name,
+                              last_name: userData.last_name,
+                              birthday: userData.birthday,
+                          }
+                        : null
+                }
+            />
 
-        {/* Delete Confirmation Modal */}
-        <ConfirmationModal
-            visible={showDeleteModal}
-            onClose={() => setShowDeleteModal(false)}
-            onConfirm={handleDeleteProfile}
-            title={t('UserProfileDetail.modals.delete.title')}
-            message={t('UserProfileDetail.modals.delete.message')}
-            confirmText={t('UserProfileDetail.buttons.Delete')}
-            icon="trash-outline"
-            iconColor="#E53935"
-            confirmColor="#E53935"
-        />
+            {/* Delete Confirmation Modal */}
+            <ConfirmationModal
+                visible={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDeleteProfile}
+                title={t('UserProfileDetail.modals.delete.title')}
+                message={t('UserProfileDetail.modals.delete.message')}
+                confirmText={t('UserProfileDetail.buttons.Delete')}
+                icon="trash-outline"
+                iconColor="#E53935"
+                confirmColor="#E53935"
+            />
 
-        {/* Reminder delete confirmation */}
-        <ConfirmationModal
-            visible={pendingDeleteReminderId !== null}
-            onClose={() => setPendingDeleteReminderId(null)}
-            onConfirm={confirmDeleteReminder}
-            title={t('reminders.deleteModal.title')}
-            message={t('reminders.deleteModal.message')}
-            icon="trash-outline"
-            iconColor="#E53935"
-            confirmText={t('reminders.deleteModal.confirm')}
-            confirmColor="#E53935"
-        />
+            {/* Reminder delete confirmation */}
+            <ConfirmationModal
+                visible={pendingDeleteReminderId !== null}
+                onClose={() => setPendingDeleteReminderId(null)}
+                onConfirm={confirmDeleteReminder}
+                title={t('reminders.deleteModal.title')}
+                message={t('reminders.deleteModal.message')}
+                icon="trash-outline"
+                iconColor="#E53935"
+                confirmText={t('reminders.deleteModal.confirm')}
+                confirmColor="#E53935"
+            />
 
-        {/* Reminder delete error */}
-        <ConfirmationModal
-            visible={deleteReminderError}
-            onClose={() => setDeleteReminderError(false)}
-            title={t('common.errors.genericErrorTitle')}
-            message={t('common.errors.failedToDeleteReminder')}
-            icon="alert-circle-outline"
-            iconColor="#E53935"
-            confirmText="OK"
-            confirmColor="#4A90E2"
-            showCancelButton={false}
-        />
+            {/* Reminder delete error */}
+            <ConfirmationModal
+                visible={deleteReminderError}
+                onClose={() => setDeleteReminderError(false)}
+                title={t('common.errors.genericErrorTitle')}
+                message={t('common.errors.failedToDeleteReminder')}
+                icon="alert-circle-outline"
+                iconColor="#E53935"
+                confirmText="OK"
+                confirmColor="#4A90E2"
+                showCancelButton={false}
+            />
 
-        {/* Context menu modal */}
-        {showMenu && (
-            <TouchableOpacity 
-                style={styles.menuOverlay} 
-                activeOpacity={1} 
-                onPress={() => setShowMenu(false)}
-            >
-                <View style={styles.menuContainer}>
-                    <TouchableOpacity 
-                        style={styles.menuItem}
-                        onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            setShowMenu(false);
-                            setShowUpdateModal(true);
-                        }}
-                    >
-                        <Ionicons name="create-outline" size={20} color="#4A90E2" />
-                        <Text style={styles.menuItemText}>{t('UserProfileDetail.buttons.Edit')}</Text>
-                    </TouchableOpacity>
-                    
-                    <View style={styles.menuDivider} />
-                    
-                    <TouchableOpacity 
-                        style={styles.menuItem}
-                        onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            setShowMenu(false);
-                            setShowDeleteModal(true);
-                        }}
-                    >
-                        <Ionicons name="trash-outline" size={20} color="#E53935" />
-                        <Text style={[styles.menuItemText, { color: '#E53935' }]}>{t('UserProfileDetail.buttons.Delete')}</Text>
-                    </TouchableOpacity>
-                </View>
-            </TouchableOpacity>
-        )}
-    </View>
-  );
+            {/* Context menu modal */}
+            {showMenu && (
+                <TouchableOpacity
+                    style={styles.menuOverlay}
+                    activeOpacity={1}
+                    onPress={() => setShowMenu(false)}
+                >
+                    <View style={styles.menuContainer}>
+                        <TouchableOpacity
+                            style={styles.menuItem}
+                            onPress={() => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                setShowMenu(false);
+                                setShowUpdateModal(true);
+                            }}
+                        >
+                            <Ionicons name="create-outline" size={20} color="#4A90E2" />
+                            <Text style={styles.menuItemText}>
+                                {t('UserProfileDetail.buttons.Edit')}
+                            </Text>
+                        </TouchableOpacity>
+
+                        <View style={styles.menuDivider} />
+
+                        <TouchableOpacity
+                            style={styles.menuItem}
+                            onPress={() => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                setShowMenu(false);
+                                setShowDeleteModal(true);
+                            }}
+                        >
+                            <Ionicons name="trash-outline" size={20} color="#E53935" />
+                            <Text style={[styles.menuItemText, { color: '#E53935' }]}>
+                                {t('UserProfileDetail.buttons.Delete')}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            )}
+        </View>
+    );
 };
 
 export default UserProfileDetailScreen;
@@ -416,7 +458,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         backgroundColor: 'rgba(255,255,255,0.85)',
     },
-    
+
     // TYPOGRAPHY
     title: {
         fontSize: 28,
@@ -429,7 +471,7 @@ const styles = StyleSheet.create({
         marginTop: 15,
         marginBottom: 15,
     },
-    
+
     // PROFILE CARD
     profileCard: {
         padding: 20,

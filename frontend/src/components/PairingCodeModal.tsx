@@ -1,6 +1,6 @@
 /**
  * Modal showing a pairing code that the user can copy to share with a caregiver.
- * 
+ *
  * @module PairingCodeModal
  */
 
@@ -38,7 +38,7 @@ const PairingCodeModal: React.FC<PairingCodeModalProps> = ({
     showBackButton = true,
     pairingCode,
     expiresAt,
-    onExpired
+    onExpired,
 }) => {
     const { t } = useTranslation();
     const [timeRemaining, setTimeRemaining] = useState<string>('');
@@ -100,12 +100,7 @@ const PairingCodeModal: React.FC<PairingCodeModalProps> = ({
     }
 
     return (
-        <Modal
-            visible={visible}
-            transparent={false}
-            animationType="slide"
-            onRequestClose={onClose}
-        >
+        <Modal visible={visible} transparent={false} animationType="slide" onRequestClose={onClose}>
             <SafeAreaView style={styles.container}>
                 {/* Header with back button and logo */}
                 <View style={styles.header}>
@@ -133,21 +128,18 @@ const PairingCodeModal: React.FC<PairingCodeModalProps> = ({
                     <Text style={styles.title}>{t('pairingCode.title')}</Text>
 
                     {/* Description */}
-                    <Text style={styles.description}>
-                        {t('pairingCode.description')}
-                    </Text>
+                    <Text style={styles.description}>{t('pairingCode.description')}</Text>
 
                     {/* Pairing code display */}
                     <View style={styles.codeContainer}>
                         <Text style={styles.codeText}>{pairingCode}</Text>
-                        
+
                         {/* Copy button */}
-                        <TouchableOpacity 
-                            style={styles.copyButton}
-                            onPress={handleCopyCode}
-                        >
+                        <TouchableOpacity style={styles.copyButton} onPress={handleCopyCode}>
                             <Ionicons name="copy-outline" size={20} color="#4A90E2" />
-                            <Text style={styles.copyButtonText}>{t('pairingCode.buttons.copyCode')}</Text>
+                            <Text style={styles.copyButtonText}>
+                                {t('pairingCode.buttons.copyCode')}
+                            </Text>
                         </TouchableOpacity>
                     </View>
 

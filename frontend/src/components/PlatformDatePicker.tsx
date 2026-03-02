@@ -1,6 +1,6 @@
 /**
  * Modal calendar picker for selecting a date.
- * 
+ *
  * @module PlatformDatePicker
  */
 
@@ -34,10 +34,12 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     visible,
     onClose,
     displayFormat,
-    allowPastDates = false
+    allowPastDates = false,
 }) => {
     const { t } = useTranslation();
-    const [currentMonth, setCurrentMonth] = useState(new Date(value.getFullYear(), value.getMonth(), 1));
+    const [currentMonth, setCurrentMonth] = useState(
+        new Date(value.getFullYear(), value.getMonth(), 1)
+    );
     const [showYearPicker, setShowYearPicker] = useState(false);
     const [showMonthPicker, setShowMonthPicker] = useState(false);
 
@@ -55,8 +57,18 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     /** Returns the full name of a month from a date. */
     const getMonthName = (date: Date): string => {
         const months = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December',
         ];
         return months[date.getMonth()];
     };
@@ -64,8 +76,18 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     /** Returns the list of all month names. */
     const getMonthNames = (): string[] => {
         return [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December',
         ];
     };
 
@@ -101,25 +123,25 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     const generateCalendarDays = (): (Date | null)[] => {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth();
-        
+
         // First day of month (0 = Sunday, 6 = Saturday)
         const firstDay = new Date(year, month, 1).getDay();
-        
+
         // Number of days in month
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-        
+
         const days: (Date | null)[] = [];
-        
+
         // Add empty cells for days before month starts
         for (let i = 0; i < firstDay; i++) {
             days.push(null);
         }
-        
+
         // Add all days of the month
         for (let day = 1; day <= daysInMonth; day++) {
             days.push(new Date(year, month, day));
         }
-        
+
         return days;
     };
 
@@ -142,7 +164,7 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     const isPastDate = (date: Date): boolean => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         return date < today;
     };
 
@@ -154,12 +176,7 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     return (
-        <Modal
-            visible={visible}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={onClose}
-        >
+        <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
             <View style={commonStyles.modalOverlay}>
                 <View style={styles.modalContent}>
                     {/* Show Year Picker if active */}
@@ -178,14 +195,18 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
                                             key={year}
                                             style={[
                                                 styles.yearItem,
-                                                year === currentMonth.getFullYear() && styles.selectedYearItem
+                                                year === currentMonth.getFullYear() &&
+                                                    styles.selectedYearItem,
                                             ]}
                                             onPress={() => handleYearSelect(year)}
                                         >
-                                            <Text style={[
-                                                styles.yearText,
-                                                year === currentMonth.getFullYear() && styles.selectedYearText
-                                            ]}>
+                                            <Text
+                                                style={[
+                                                    styles.yearText,
+                                                    year === currentMonth.getFullYear() &&
+                                                        styles.selectedYearText,
+                                                ]}
+                                            >
                                                 {year}
                                             </Text>
                                         </TouchableOpacity>
@@ -211,14 +232,18 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
                                             key={index}
                                             style={[
                                                 styles.monthItem,
-                                                index === currentMonth.getMonth() && styles.selectedMonthItem
+                                                index === currentMonth.getMonth() &&
+                                                    styles.selectedMonthItem,
                                             ]}
                                             onPress={() => handleMonthSelect(index)}
                                         >
-                                            <Text style={[
-                                                styles.monthText,
-                                                index === currentMonth.getMonth() && styles.selectedMonthText
-                                            ]}>
+                                            <Text
+                                                style={[
+                                                    styles.monthText,
+                                                    index === currentMonth.getMonth() &&
+                                                        styles.selectedMonthText,
+                                                ]}
+                                            >
                                                 {month.substring(0, 3)}
                                             </Text>
                                         </TouchableOpacity>
@@ -234,21 +259,31 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
                             <Ionicons name="chevron-back" size={24} color="#4A90E2" />
                         </TouchableOpacity>
                         <View style={styles.monthTitleContainer}>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 onPress={() => setShowMonthPicker(true)}
                                 style={styles.monthTitleButton}
                                 activeOpacity={0.7}
                             >
                                 <Text style={styles.monthTitle}>{getMonthName(currentMonth)}</Text>
-                                <Ionicons name="chevron-down" size={16} color="#4A90E2" style={styles.dropdownIcon} />
+                                <Ionicons
+                                    name="chevron-down"
+                                    size={16}
+                                    color="#4A90E2"
+                                    style={styles.dropdownIcon}
+                                />
                             </TouchableOpacity>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 onPress={() => setShowYearPicker(true)}
                                 style={styles.yearTitleButton}
                                 activeOpacity={0.7}
                             >
                                 <Text style={styles.monthTitle}>{currentMonth.getFullYear()}</Text>
-                                <Ionicons name="chevron-down" size={16} color="#4A90E2" style={styles.dropdownIcon} />
+                                <Ionicons
+                                    name="chevron-down"
+                                    size={16}
+                                    color="#4A90E2"
+                                    style={styles.dropdownIcon}
+                                />
                             </TouchableOpacity>
                         </View>
                         <TouchableOpacity onPress={goToNextMonth} style={styles.navButton}>
@@ -284,7 +319,7 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
                                     style={[
                                         styles.dayCell,
                                         todayHighlight && styles.todayCell,
-                                        selectedHighlight && styles.selectedCell
+                                        selectedHighlight && styles.selectedCell,
                                     ]}
                                     onPress={() => {
                                         if (isDisabled) return;
@@ -292,11 +327,13 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
                                     }}
                                     disabled={isDisabled}
                                 >
-                                    <Text style={[
-                                        styles.dayText,
-                                        selectedHighlight && styles.selectedDayText,
-                                        isDisabled && styles.pastDayText,
-                                    ]}>
+                                    <Text
+                                        style={[
+                                            styles.dayText,
+                                            selectedHighlight && styles.selectedDayText,
+                                            isDisabled && styles.pastDayText,
+                                        ]}
+                                    >
                                         {date.getDate()}
                                     </Text>
                                 </TouchableOpacity>
@@ -305,10 +342,7 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
                     </View>
 
                     {/* Close button */}
-                    <TouchableOpacity
-                        style={styles.closeButton}
-                        onPress={onClose}
-                    >
+                    <TouchableOpacity style={styles.closeButton} onPress={onClose}>
                         <Text style={styles.closeButtonText}>{t('common.buttons.Cancel')}</Text>
                     </TouchableOpacity>
                 </View>

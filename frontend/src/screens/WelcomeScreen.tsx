@@ -20,27 +20,24 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
         <View style={commonStyles.container}>
             {/* Header with logo and app name */}
             <View style={[commonStyles.header, { justifyContent: 'flex-start', paddingTop: 40 }]}>
-                <Image 
-                    source={require('../../assets/mnesya-logo.png')} 
-                    style={commonStyles.logo}
-                />
+                <Image source={require('../../assets/mnesya-logo.png')} style={commonStyles.logo} />
                 <Text style={commonStyles.appName}>Mnesya</Text>
             </View>
-            
+
             {/* Welcome title and instructions */}
             <View style={styles.titleSection}>
                 <Text style={styles.title}>{t('welcome.title')}</Text>
                 <Text style={styles.subtitle}>{t('welcome.subtitle')}</Text>
             </View>
-            
-            {/* 
+
+            {/*
              * Profile type selection buttons
              * Two large, clearly labeled buttons for User and Caregiver flows
              * Includes haptic feedback for better user experience
              */}
             <View style={styles.contentContainer}>
                 {/* User profile button - navigates to pairing screen */}
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.userButton}
                     onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -54,7 +51,7 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
                         <Text style={styles.buttonText}>{t('welcome.userButton')}</Text>
                     </View>
                 </TouchableOpacity>
-                
+
                 {/* Caregiver profile button - navigates to login screen */}
                 <TouchableOpacity
                     style={styles.caregiverButton}
@@ -75,8 +72,6 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
     );
 };
 
-
-
 const styles = StyleSheet.create({
     // LAYOUT
     titleSection: {
@@ -90,7 +85,7 @@ const styles = StyleSheet.create({
         paddingBottom: 50,
         marginTop: 40,
     },
-    
+
     // TYPOGRAPHY
     title: {
         fontSize: 28,
@@ -102,7 +97,7 @@ const styles = StyleSheet.create({
         color: '#666666',
         marginBottom: 40,
     },
-    
+
     // BUTTONS
     userButton: {
         backgroundColor: '#4A90E2',
@@ -140,4 +135,3 @@ const styles = StyleSheet.create({
 });
 
 export default WelcomeScreen;
-

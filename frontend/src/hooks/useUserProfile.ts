@@ -16,7 +16,6 @@ interface UseUserProfileResult {
     remove: () => Promise<void>;
 }
 
-
 export const useUserProfile = (
     profileId: string,
     onAuthError?: () => void
@@ -43,24 +42,27 @@ export const useUserProfile = (
         }
     }, [profileId, onAuthError]);
 
-    const updateProfileData = useCallback(async (data: UpdateUserProfileData) => {
-        try {
-            setLoading(true);
-            setError(null);
-            const updatedProfile = await updateProfile(profileId, data);
-            setProfile(updatedProfile);
-        } catch (err) {
-            setError('common.errors.failedToUpdateProfile');
+    const updateProfileData = useCallback(
+        async (data: UpdateUserProfileData) => {
+            try {
+                setLoading(true);
+                setError(null);
+                const updatedProfile = await updateProfile(profileId, data);
+                setProfile(updatedProfile);
+            } catch (err) {
+                setError('common.errors.failedToUpdateProfile');
 
-            // Handle authentication errors
-            if (err instanceof Error && err.message.includes('401')) {
-                onAuthError?.();
+                // Handle authentication errors
+                if (err instanceof Error && err.message.includes('401')) {
+                    onAuthError?.();
+                }
+                throw err;
+            } finally {
+                setLoading(false);
             }
-            throw err;
-        } finally {
-            setLoading(false);
-        }
-    }, [profileId, onAuthError]);
+        },
+        [profileId, onAuthError]
+    );
 
     const removeProfile = useCallback(async () => {
         try {
