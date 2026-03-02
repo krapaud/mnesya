@@ -25,8 +25,10 @@ logger = logging.getLogger(__name__)
 def send_user_notifications() -> None:
     """Send initial push notifications for reminders due now (T+0).
 
-    Queries reminders scheduled within the last 60 seconds and sends
+    Queries reminders scheduled within the last 90 seconds and sends
     a push notification to the user's registered devices.
+    The 90s window provides a 30s buffer against scheduler jitter.
+    Skips reminders already responded to (DONE, POSTPONED, UNABLE, MISSED).
     """
     from app import SessionLocal
 
