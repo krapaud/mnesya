@@ -23,9 +23,9 @@ import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { CaregiverTabsParamList, RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { logout, updateCaregiverProfile } from '../services/authService';
+import { logout, updateCaregiverProfile, changePassword } from '../services/authService';
 import { useCaregiverProfile } from '../hooks';
-import { UpdateCaregiverProfileModal } from '../components';
+import { UpdateCaregiverProfileModal, ChangePasswordModal } from '../components';
 
 type Props = CompositeScreenProps<
     BottomTabScreenProps<CaregiverTabsParamList, 'Profile'>,
@@ -43,13 +43,23 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [showUpdateModal, setShowUpdateModal] = useState(false);
+    const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
 
     /**
-     * Handles password change navigation.
+     * Opens the change password modal.
      */
     const handleChangePassword = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        // TODO: Navigate to password change screen when implemented
+        setShowMenu(false);
+        setShowChangePasswordModal(true);
+    };
+
+    /**
+     * Handles password change form submission.
+     */
+    const handleSavePassword = async (data: { current_password: string; password: string }) => {
+        await changePassword(data);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     };
 
     /**
@@ -322,6 +332,13 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                     }}
                 />
             )}
+
+            {/* Change Password Modal */}
+            <ChangePasswordModal
+                visible={showChangePasswordModal}
+                onClose={() => setShowChangePasswordModal(false)}
+                onSave={handleSavePassword}
+            />
         </View>
     );
 };

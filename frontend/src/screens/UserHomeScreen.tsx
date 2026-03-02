@@ -135,6 +135,21 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
     const [userReminders, setUserReminders] = useState<ReminderData[]>([]);
     const [focusTrigger, setFocusTrigger] = useState(0);
 
+    /** Controls the bottom fade indicator — hidden when scrolled to the end. */
+    const [showScrollFade, setShowScrollFade] = useState(true);
+
+    const handleScroll = (event: {
+        nativeEvent: {
+            contentOffset: { y: number };
+            layoutMeasurement: { height: number };
+            contentSize: { height: number };
+        };
+    }) => {
+        const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+        const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 10;
+        setShowScrollFade(!isAtBottom);
+    };
+
     /**
      * Increments focusTrigger each time the screen comes into focus,
      * which causes loadUserData to re-run via the useEffect below.
@@ -214,41 +229,49 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                 </Text>
                 <Text style={styles.subtitle}>{t('UserHome.subtitle')}</Text>
             </View>
-            <ScrollView
-                refreshControl={
-                    <RefreshControl refreshing={isRefreshing} onRefresh={triggerRefresh} />
-                }
-            >
-                {/*
-                 * Reminder list with empty state handling
-                 * Each reminder displayed as a card with tap feedback for accessibility
-                 */}
-                {userReminders.length === 0 ? (
-                    <Text style={commonStyles.emptyMessage}>
-                        {t('UserHome.messages.noReminders')}
-                    </Text>
-                ) : (
-                    userReminders.map((reminder) => (
-                        <UserReminderItem
-                            key={reminder.id}
-                            reminder={reminder}
-                            reloadTrigger={refreshTrigger + focusTrigger}
-                            onBellPress={() => {
-                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                if (isReminderAvailable(reminder.scheduled_at)) {
-                                    navigation
-                                        .getParent()
-                                        ?.navigate('ReminderNotification', {
+            <View style={styles.listWrapper}>
+                <ScrollView
+                    refreshControl={
+                        <RefreshControl refreshing={isRefreshing} onRefresh={triggerRefresh} />
+                    }
+                    onScroll={handleScroll}
+                    scrollEventThrottle={16}
+                >
+                    {/*
+                     * Reminder list with empty state handling
+                     * Each reminder displayed as a card with tap feedback for accessibility
+                     */}
+                    {userReminders.length === 0 ? (
+                        <Text style={commonStyles.emptyMessage}>
+                            {t('UserHome.messages.noReminders')}
+                        </Text>
+                    ) : (
+                        userReminders.map((reminder) => (
+                            <UserReminderItem
+                                key={reminder.id}
+                                reminder={reminder}
+                                reloadTrigger={refreshTrigger + focusTrigger}
+                                onBellPress={() => {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                    if (isReminderAvailable(reminder.scheduled_at)) {
+                                        navigation.getParent()?.navigate('ReminderNotification', {
                                             reminderId: reminder.id,
                                         });
-                                } else {
-                                    setShowAlert(true);
-                                }
-                            }}
-                        />
-                    ))
+                                    } else {
+                                        setShowAlert(true);
+                                    }
+                                }}
+                            />
+                        ))
+                    )}
+                </ScrollView>
+                {/* Bottom fade — signals more content below */}
+                {showScrollFade && (
+                    <View style={styles.scrollFade} pointerEvents="none">
+                        <Ionicons name="chevron-down" size={24} color="#4A90E2" />
+                    </View>
                 )}
-            </ScrollView>
+            </View>
             <Modal transparent={true} visible={showAlert} animationType="fade">
                 <View style={commonStyles.modalOverlay}>
                     <View
@@ -395,6 +418,20 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#666666',
         marginBottom: 40,
+    },
+    listWrapper: {
+        flex: 1,
+        position: 'relative',
+    },
+    scrollFade: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255,255,255,0.85)',
     },
     // Menu styles
     menuOverlay: {

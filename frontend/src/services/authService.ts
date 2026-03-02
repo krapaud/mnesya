@@ -58,3 +58,11 @@ export const updateCaregiverProfile = async (data: {
     const response = await apiClient.put('/api/auth/me', data);
     return response.data;
 };
+
+/** Changes the caregiver's password. */
+export const changePassword = async (data: {
+    current_password: string;
+    password: string;
+}): Promise<void> => {
+    await apiClient.put('/api/auth/me', data);
+};
