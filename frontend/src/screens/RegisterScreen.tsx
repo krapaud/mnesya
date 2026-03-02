@@ -138,7 +138,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                 iconColor="#4CAF50"
                 confirmText="OK"
                 confirmColor="#4A90E2"
-                hideCancelButton={true}
+                showCancelButton={false}
             />
 
             {/* Header with back button and logo */}
