@@ -6,8 +6,8 @@
  * @module api
  */
 
-export const API_BASE_URL = 'http://192.168.1.233:8000'; // home
-// export const API_BASE_URL = 'http://10.6.2.140:8000';    // office
+// export const API_BASE_URL = 'http://192.168.1.233:8000'; // home
+export const API_BASE_URL = 'http://10.6.0.242:8000';    // office
 // export const API_BASE_URL = 'http://localhost:8000';      // local
 // export const API_BASE_URL = 'https://api.mnesya.app';    // production
 
