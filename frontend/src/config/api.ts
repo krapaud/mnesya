@@ -1,17 +1,22 @@
 /**
  * API base URL configuration.
  *
- * To switch IP in dev, uncomment the desired line and comment the others.
+ * In development with Expo Go, the IP is automatically detected from the
+ * Expo dev server (Constants.expoConfig.hostUri). No manual change needed
+ * when switching networks.
+ *
+ * In production, falls back to the production URL.
  *
  * @module api
  */
 
-// export const API_BASE_URL = 'http://192.168.1.233:8000'; // home
-export const API_BASE_URL = 'http://10.6.0.242:8000';    // office
-// export const API_BASE_URL = 'http://localhost:8000';      // local
-// export const API_BASE_URL = 'https://api.mnesya.app';    // production
+import Constants from 'expo-constants';
 
-// export const API_BASE_URL =
-//   process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000';
+const hostUri = Constants.expoConfig?.hostUri;
+const localIp = hostUri ? hostUri.split(':')[0] : null;
 
-export const BACKUP_API_URL = 'http://192.168.1.233:8000';
+export const API_BASE_URL = localIp
+  ? `http://${localIp}:8000`
+  : 'https://api.mnesya.app'; // production fallback
+
+export const BACKUP_API_URL = 'https://api.mnesya.app';
