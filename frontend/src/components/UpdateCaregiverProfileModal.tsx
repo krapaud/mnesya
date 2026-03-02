@@ -1,14 +1,23 @@
 /**
  * Modal component for updating caregiver profile information.
- * 
+ *
  * Provides a form to edit first name, last name, and email of a caregiver profile.
  * Includes validation for all fields.
- * 
+ *
  * @module UpdateCaregiverProfileModal
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, ScrollView, ActivityIndicator } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Modal,
+    TextInput,
+    ScrollView,
+    ActivityIndicator,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useFormValidation } from '../hooks';
@@ -65,7 +74,7 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
             setValue('lastname', initialData.last_name);
             setValue('email', initialData.email);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialData]);
 
     /**
@@ -102,7 +111,9 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
                 <View style={commonStyles.modalOverlay}>
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>{t('UserProfileDetail.modals.update.title')}</Text>
+                            <Text style={styles.modalTitle}>
+                                {t('UserProfileDetail.modals.update.title')}
+                            </Text>
                             <TouchableOpacity onPress={onClose} testID="close-button">
                                 <Ionicons name="close" size={28} color="#666666" />
                             </TouchableOpacity>
@@ -111,15 +122,21 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
                         <ScrollView showsVerticalScrollIndicator={false}>
                             {/* First Name */}
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>{t('CreateProfile.fields.First Name')}</Text>
+                                <Text style={styles.label}>
+                                    {t('CreateProfile.fields.First Name')}
+                                </Text>
                                 <TextInput
                                     style={[
                                         styles.input,
-                                        showErrors.firstname && errors.firstname && styles.inputError
+                                        showErrors.firstname &&
+                                            errors.firstname &&
+                                            styles.inputError,
                                     ]}
                                     value={values.firstname}
                                     onChangeText={handleChange('firstname')}
-                                    placeholder={t('CreateProfile.placeholders.Enter the profile First Name')}
+                                    placeholder={t(
+                                        'CreateProfile.placeholders.Enter the profile First Name'
+                                    )}
                                     autoCapitalize="words"
                                 />
                                 {showErrors.firstname && errors.firstname && (
@@ -129,15 +146,19 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
 
                             {/* Last Name */}
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>{t('CreateProfile.fields.Last Name')}</Text>
+                                <Text style={styles.label}>
+                                    {t('CreateProfile.fields.Last Name')}
+                                </Text>
                                 <TextInput
                                     style={[
                                         styles.input,
-                                        showErrors.lastname && errors.lastname && styles.inputError
+                                        showErrors.lastname && errors.lastname && styles.inputError,
                                     ]}
                                     value={values.lastname}
                                     onChangeText={handleChange('lastname')}
-                                    placeholder={t('CreateProfile.placeholders.Enter the profile Last Name')}
+                                    placeholder={t(
+                                        'CreateProfile.placeholders.Enter the profile Last Name'
+                                    )}
                                     autoCapitalize="characters"
                                 />
                                 {showErrors.lastname && errors.lastname && (
@@ -151,7 +172,7 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
                                 <TextInput
                                     style={[
                                         styles.input,
-                                        showErrors.email && errors.email && styles.inputError
+                                        showErrors.email && errors.email && styles.inputError,
                                     ]}
                                     value={values.email}
                                     onChangeText={handleChange('email')}
@@ -171,7 +192,9 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
                                     onPress={onClose}
                                     disabled={isUpdating}
                                 >
-                                    <Text style={styles.cancelButtonText}>{t('common.buttons.Cancel')}</Text>
+                                    <Text style={styles.cancelButtonText}>
+                                        {t('common.buttons.Cancel')}
+                                    </Text>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
@@ -180,9 +203,15 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
                                     disabled={isUpdating}
                                 >
                                     {isUpdating ? (
-                                        <ActivityIndicator size="small" color="#FFFFFF" testID="activity-indicator" />
+                                        <ActivityIndicator
+                                            size="small"
+                                            color="#FFFFFF"
+                                            testID="activity-indicator"
+                                        />
                                     ) : (
-                                        <Text style={styles.saveButtonText}>{t('UserProfileDetail.buttons.Save')}</Text>
+                                        <Text style={styles.saveButtonText}>
+                                            {t('UserProfileDetail.buttons.Save')}
+                                        </Text>
                                     )}
                                 </TouchableOpacity>
                             </View>

@@ -14,9 +14,7 @@ interface UseUserProfilesResult {
     reload: () => Promise<void>;
 }
 
-export const useUserProfiles = (
-    onAuthError?: () => void
-): UseUserProfilesResult => {
+export const useUserProfiles = (onAuthError?: () => void): UseUserProfilesResult => {
     const [userData, setUserData] = useState<UserProfileData[] | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

@@ -5,8 +5,14 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    View, Text, StyleSheet, TouchableOpacity,
-    Image, ScrollView, Modal, RefreshControl,
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Image,
+    ScrollView,
+    Modal,
+    RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -25,11 +31,11 @@ type Props = NativeStackScreenProps<UserTabsParamList, 'Refresh'>;
 
 /** Maps reminder status keys to their corresponding style from commonStyles. */
 const statusColorMap: Record<string, object> = {
-    'DONE': commonStyles.statusDone,
-    'PENDING': commonStyles.statusPending,
-    'POSTPONED': commonStyles.statusPostponed,
-    'UNABLE': commonStyles.statusUnable,
-    'MISSED': commonStyles.statusMissed,
+    DONE: commonStyles.statusDone,
+    PENDING: commonStyles.statusPending,
+    POSTPONED: commonStyles.statusPostponed,
+    UNABLE: commonStyles.statusUnable,
+    MISSED: commonStyles.statusMissed,
 };
 
 interface UserReminderItemProps {
@@ -45,15 +51,23 @@ interface UserReminderItemProps {
  * Extracted as a sub-component so that `useReminderStatus` can be called
  * as a proper React hook (hooks cannot be called inside `.map()`).
  */
-const UserReminderItem: React.FC<UserReminderItemProps> = ({ reminder, onBellPress, reloadTrigger }) => {
+const UserReminderItem: React.FC<UserReminderItemProps> = ({
+    reminder,
+    onBellPress,
+    reloadTrigger,
+}) => {
     const { t } = useTranslation();
     const { reminderStatus } = useReminderStatus(reminder.id, undefined, reloadTrigger);
 
     const statusKey = reminderStatus?.status
-        ? reminderStatus.status.charAt(0).toUpperCase() + reminderStatus.status.slice(1).toLowerCase()
+        ? reminderStatus.status.charAt(0).toUpperCase() +
+          reminderStatus.status.slice(1).toLowerCase()
         : null;
 
-    const isClosed = reminderStatus?.status === 'DONE' || reminderStatus?.status === 'UNABLE' || reminderStatus?.status === 'MISSED';
+    const isClosed =
+        reminderStatus?.status === 'DONE' ||
+        reminderStatus?.status === 'UNABLE' ||
+        reminderStatus?.status === 'MISSED';
 
     return (
         <View style={commonStyles.reminderCard}>
@@ -71,19 +85,37 @@ const UserReminderItem: React.FC<UserReminderItemProps> = ({ reminder, onBellPre
                     />
                 </TouchableOpacity>
             </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <View
+                style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-end',
+                }}
+            >
                 <View style={commonStyles.reminderDetails}>
                     <View style={commonStyles.detailRow}>
                         <Ionicons name="calendar-outline" size={16} color="#666666" />
-                        <Text style={commonStyles.detailText}>{new Date(reminder.scheduled_at).toLocaleDateString('fr-FR')}</Text>
+                        <Text style={commonStyles.detailText}>
+                            {new Date(reminder.scheduled_at).toLocaleDateString('fr-FR')}
+                        </Text>
                     </View>
                     <View style={commonStyles.detailRow}>
                         <Ionicons name="time-outline" size={16} color="#666666" />
-                        <Text style={commonStyles.detailText}>{new Date(reminder.scheduled_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</Text>
+                        <Text style={commonStyles.detailText}>
+                            {new Date(reminder.scheduled_at).toLocaleTimeString('fr-FR', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                            })}
+                        </Text>
                     </View>
                 </View>
                 {statusKey && (
-                    <Text style={[commonStyles.statusText, statusColorMap[reminderStatus!.status] ?? commonStyles.statusPending]}>
+                    <Text
+                        style={[
+                            commonStyles.statusText,
+                            statusColorMap[reminderStatus!.status] ?? commonStyles.statusPending,
+                        ]}
+                    >
                         {t(`reminders.status.${statusKey}`)}
                     </Text>
                 )}
@@ -103,13 +135,28 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
     const [userReminders, setUserReminders] = useState<ReminderData[]>([]);
     const [focusTrigger, setFocusTrigger] = useState(0);
 
+    /** Controls the bottom fade indicator — hidden when scrolled to the end. */
+    const [showScrollFade, setShowScrollFade] = useState(true);
+
+    const handleScroll = (event: {
+        nativeEvent: {
+            contentOffset: { y: number };
+            layoutMeasurement: { height: number };
+            contentSize: { height: number };
+        };
+    }) => {
+        const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+        const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 10;
+        setShowScrollFade(!isAtBottom);
+    };
+
     /**
      * Increments focusTrigger each time the screen comes into focus,
      * which causes loadUserData to re-run via the useEffect below.
      */
     useFocusEffect(
         useCallback(() => {
-            setFocusTrigger(prev => prev + 1);
+            setFocusTrigger((prev) => prev + 1);
         }, [])
     );
 
@@ -128,7 +175,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
             setIsRefreshing(false);
         };
         loadUserData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [refreshTrigger, focusTrigger]);
 
     const isReminderAvailable = (scheduled_at: string): boolean => {
@@ -139,14 +186,13 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
         try {
             await deleteToken();
             await deleteUserInfo();
-            
+
             // Reset navigation to Welcome screen
             navigation.getParent()?.reset({
                 index: 0,
                 routes: [{ name: 'Welcome' }],
             });
-        } catch (_error) {
-        }
+        } catch (_error) {}
         setShowLogoutConfirm(false);
     };
 
@@ -156,68 +202,96 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
             <View style={commonStyles.header}>
                 <View style={commonStyles.headerSpacer} />
                 <View style={commonStyles.headerCenter}>
-                    <Image 
-                        source={require('../../assets/mnesya-logo.png')} 
+                    <Image
+                        source={require('../../assets/mnesya-logo.png')}
                         style={commonStyles.logo}
                     />
                     <Text style={commonStyles.appName}>Mnesya</Text>
                 </View>
-                    <TouchableOpacity 
+                <TouchableOpacity
                     style={commonStyles.headerSpacer}
                     onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         setShowMenu(true);
-                    }}>
+                    }}
+                >
                     <Ionicons name="ellipsis-vertical" size={24} color="#333333" />
                 </TouchableOpacity>
             </View>
 
-            {/* 
+            {/*
              * Personalized greeting using the user's first name
              * Helps elderly users feel comfortable with the app
              */}
             <View style={styles.titleSection}>
-                <Text style={styles.title}>{t('UserHome.greeting')} {currentUser?.first_name} !</Text>
+                <Text style={styles.title}>
+                    {t('UserHome.greeting')} {currentUser?.first_name} !
+                </Text>
                 <Text style={styles.subtitle}>{t('UserHome.subtitle')}</Text>
             </View>
-            <ScrollView refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={triggerRefresh} />}>
-                {/* 
-                 * Reminder list with empty state handling
-                 * Each reminder displayed as a card with tap feedback for accessibility
-                 */}
-                {userReminders.length === 0 ? (
-                    <Text style={commonStyles.emptyMessage}>{t('UserHome.messages.noReminders')}</Text>
-                ) : (
-                    userReminders.map((reminder) => (
-                        <UserReminderItem
-                            key={reminder.id}
-                            reminder={reminder}
-                            reloadTrigger={refreshTrigger + focusTrigger}
-                            onBellPress={() => {
-                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                if (isReminderAvailable(reminder.scheduled_at)) {
-                                    navigation.getParent()?.navigate('ReminderNotification', { reminderId: reminder.id });
-                                } else {
-                                    setShowAlert(true);
-                                }
-                            }}
-                        />
-                    ))
+            <View style={styles.listWrapper}>
+                <ScrollView
+                    refreshControl={
+                        <RefreshControl refreshing={isRefreshing} onRefresh={triggerRefresh} />
+                    }
+                    onScroll={handleScroll}
+                    scrollEventThrottle={16}
+                >
+                    {/*
+                     * Reminder list with empty state handling
+                     * Each reminder displayed as a card with tap feedback for accessibility
+                     */}
+                    {userReminders.length === 0 ? (
+                        <Text style={commonStyles.emptyMessage}>
+                            {t('UserHome.messages.noReminders')}
+                        </Text>
+                    ) : (
+                        userReminders.map((reminder) => (
+                            <UserReminderItem
+                                key={reminder.id}
+                                reminder={reminder}
+                                reloadTrigger={refreshTrigger + focusTrigger}
+                                onBellPress={() => {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                    if (isReminderAvailable(reminder.scheduled_at)) {
+                                        navigation.getParent()?.navigate('ReminderNotification', {
+                                            reminderId: reminder.id,
+                                        });
+                                    } else {
+                                        setShowAlert(true);
+                                    }
+                                }}
+                            />
+                        ))
+                    )}
+                </ScrollView>
+                {/* Bottom fade — signals more content below */}
+                {showScrollFade && (
+                    <View style={styles.scrollFade} pointerEvents="none">
+                        <Ionicons name="chevron-down" size={24} color="#4A90E2" />
+                    </View>
                 )}
-            </ScrollView>
-            <Modal
-                transparent={true}
-                visible={showAlert}
-                animationType="fade"
-            >
+            </View>
+            <Modal transparent={true} visible={showAlert} animationType="fade">
                 <View style={commonStyles.modalOverlay}>
-                    <View style={{ backgroundColor: '#FFFFFF', padding: 20, borderRadius: 10, width: '80%' }}>
-                        <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 20 }}>{t('UserHome.messages.notAvailableMessage')}</Text>
-                        <TouchableOpacity 
+                    <View
+                        style={{
+                            backgroundColor: '#FFFFFF',
+                            padding: 20,
+                            borderRadius: 10,
+                            width: '80%',
+                        }}
+                    >
+                        <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 20 }}>
+                            {t('UserHome.messages.notAvailableMessage')}
+                        </Text>
+                        <TouchableOpacity
                             style={{ backgroundColor: '#4A90E2', padding: 18, borderRadius: 5 }}
                             onPress={() => setShowAlert(false)}
                         >
-                            <Text style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 16 }}>{t('UserHome.messages.ok')}</Text>
+                            <Text style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 16 }}>
+                                {t('UserHome.messages.ok')}
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -230,23 +304,25 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                 animationType="fade"
                 onRequestClose={() => setShowMenu(false)}
             >
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.menuOverlay}
                     activeOpacity={1}
                     onPress={() => setShowMenu(false)}
                 >
-                        <View style={styles.menuContent}>
-                            <TouchableOpacity 
-                                style={styles.menuItem}
-                                onPress={async () => {
-                                    setShowMenu(false);
-                                    setShowLogoutConfirm(true);
-                                }}
-                            >
-                                <Ionicons name="log-out-outline" size={24} color="#E74C3C" />
-                                <Text style={styles.menuItemText}>{t('UserProfile.buttons.Logout')}</Text>
-                            </TouchableOpacity>
-                        </View>
+                    <View style={styles.menuContent}>
+                        <TouchableOpacity
+                            style={styles.menuItem}
+                            onPress={async () => {
+                                setShowMenu(false);
+                                setShowLogoutConfirm(true);
+                            }}
+                        >
+                            <Ionicons name="log-out-outline" size={24} color="#E74C3C" />
+                            <Text style={styles.menuItemText}>
+                                {t('UserProfile.buttons.Logout')}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </TouchableOpacity>
             </Modal>
 
@@ -258,22 +334,55 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                 onRequestClose={() => setShowLogoutConfirm(false)}
             >
                 <View style={commonStyles.modalOverlay}>
-                    <View style={{ backgroundColor: '#FFFFFF', padding: 20, borderRadius: 10, width: '80%' }}>
-                        <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }}>
+                    <View
+                        style={{
+                            backgroundColor: '#FFFFFF',
+                            padding: 20,
+                            borderRadius: 10,
+                            width: '80%',
+                        }}
+                    >
+                        <Text
+                            style={{
+                                fontSize: 18,
+                                fontWeight: 'bold',
+                                textAlign: 'center',
+                                marginBottom: 10,
+                            }}
+                        >
                             {t('caregiverProfile.modal.title')}
                         </Text>
-                        <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 20, color: '#666666' }}>
+                        <Text
+                            style={{
+                                fontSize: 16,
+                                textAlign: 'center',
+                                marginBottom: 20,
+                                color: '#666666',
+                            }}
+                        >
                             {t('caregiverProfile.modal.message')}
                         </Text>
-                        <TouchableOpacity 
-                            style={{ backgroundColor: '#E74C3C', padding: 15, borderRadius: 8, marginBottom: 10 }}
+                        <TouchableOpacity
+                            style={{
+                                backgroundColor: '#E74C3C',
+                                padding: 15,
+                                borderRadius: 8,
+                                marginBottom: 10,
+                            }}
                             onPress={handleLogoutConfirm}
                         >
-                            <Text style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 16, fontWeight: 'bold' }}>
+                            <Text
+                                style={{
+                                    color: '#FFFFFF',
+                                    textAlign: 'center',
+                                    fontSize: 16,
+                                    fontWeight: 'bold',
+                                }}
+                            >
                                 {t('caregiverProfile.modal.confirm')}
                             </Text>
                         </TouchableOpacity>
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             style={{ backgroundColor: '#F0F0F0', padding: 15, borderRadius: 8 }}
                             onPress={() => setShowLogoutConfirm(false)}
                         >
@@ -284,7 +393,6 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                     </View>
                 </View>
             </Modal>
-
         </View>
     );
 };
@@ -299,7 +407,7 @@ const styles = StyleSheet.create({
         marginTop: 30,
         marginBottom: 20,
     },
-    
+
     // TYPOGRAPHY
     title: {
         fontSize: 28,
@@ -310,6 +418,20 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#666666',
         marginBottom: 40,
+    },
+    listWrapper: {
+        flex: 1,
+        position: 'relative',
+    },
+    scrollFade: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255,255,255,0.85)',
     },
     // Menu styles
     menuOverlay: {

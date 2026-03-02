@@ -1,6 +1,6 @@
 /**
  * Bottom tabs for the user interface (Home, Profile).
- * 
+ *
  * @module UserTabs
  */
 import React from 'react';
@@ -21,10 +21,10 @@ const UserTabsContent: React.FC = () => {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
     const { triggerRefresh, isRefreshing } = useRefresh();
-    
+
     return (
         <Tab.Navigator
-            id='user-tabs'
+            id="user-tabs"
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: styles.activeTab.color,
@@ -38,8 +38,8 @@ const UserTabsContent: React.FC = () => {
             }}
         >
             {/* Refresh button - Single tab that reloads data */}
-            <Tab.Screen 
-                name="Refresh" 
+            <Tab.Screen
+                name="Refresh"
                 component={UserHomeScreen}
                 listeners={() => ({
                     tabPress: (e) => {
@@ -52,11 +52,12 @@ const UserTabsContent: React.FC = () => {
                 })}
                 options={{
                     tabBarLabel: t('tabs.Refresh'),
-                    tabBarIcon: ({ color, size }) => (
-                        isRefreshing
-                            ? <ActivityIndicator size={size} color={color} />
-                            : <Ionicons name="refresh" size={size} color={color} />
-                    ),
+                    tabBarIcon: ({ color, size }) =>
+                        isRefreshing ? (
+                            <ActivityIndicator size={size} color={color} />
+                        ) : (
+                            <Ionicons name="refresh" size={size} color={color} />
+                        ),
                 }}
             />
         </Tab.Navigator>

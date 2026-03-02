@@ -1,6 +1,6 @@
 /**
  * Modal time picker with scrollable hour and minute columns.
- * 
+ *
  * @module PlatformTimePicker
  */
 
@@ -30,12 +30,12 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
     onChange,
     visible,
     onClose,
-    displayFormat: _displayFormat
+    displayFormat: _displayFormat,
 }) => {
     const { t } = useTranslation();
     const [selectedHour, setSelectedHour] = useState(value.getHours());
     const [selectedMinute, setSelectedMinute] = useState(value.getMinutes());
-    
+
     const hourScrollRef = useRef<ScrollView>(null);
     const minuteScrollRef = useRef<ScrollView>(null);
 
@@ -52,17 +52,23 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
     /**
      * Creates looped arrays for infinite scrolling with unique identifiers.
      */
-    const hours = useMemo(() => 
-        Array(LOOP_COUNT)
-            .fill(null)
-            .flatMap((_, loopIndex) => baseHours.map((h) => ({ value: h, id: `${loopIndex}-${h}` }))),
+    const hours = useMemo(
+        () =>
+            Array(LOOP_COUNT)
+                .fill(null)
+                .flatMap((_, loopIndex) =>
+                    baseHours.map((h) => ({ value: h, id: `${loopIndex}-${h}` }))
+                ),
         [LOOP_COUNT, baseHours]
     );
-    
-    const minutes = useMemo(() => 
-        Array(LOOP_COUNT)
-            .fill(null)
-            .flatMap((_, loopIndex) => baseMinutes.map((m) => ({ value: m, id: `${loopIndex}-${m}` }))),
+
+    const minutes = useMemo(
+        () =>
+            Array(LOOP_COUNT)
+                .fill(null)
+                .flatMap((_, loopIndex) =>
+                    baseMinutes.map((m) => ({ value: m, id: `${loopIndex}-${m}` }))
+                ),
         [LOOP_COUNT, baseMinutes]
     );
 
@@ -80,17 +86,17 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
                 const hourOffset = getMiddleOffset(baseHours.length) + selectedHour;
                 hourScrollRef.current?.scrollTo({
                     y: hourOffset * ITEM_HEIGHT,
-                    animated: false
+                    animated: false,
                 });
-                const minuteIndex = baseMinutes.findIndex(m => m === selectedMinute);
+                const minuteIndex = baseMinutes.findIndex((m) => m === selectedMinute);
                 const minuteOffset = getMiddleOffset(baseMinutes.length) + minuteIndex;
                 minuteScrollRef.current?.scrollTo({
                     y: minuteOffset * ITEM_HEIGHT,
-                    animated: false
-                });  
+                    animated: false,
+                });
             }, 10);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [visible]);
 
     const isToday = (): boolean => {
@@ -101,16 +107,16 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
     const isPastTime = (hour: number, minute: number): boolean => {
         // If not today, all times are valid
         if (!isToday()) return false;
-        
+
         // Get current time
         const now = new Date();
         const currentHour = now.getHours();
         const currentMinute = now.getMinutes();
-        
+
         // Compare: time is past if hour is less, or same hour but minute is less
         if (hour < currentHour) return true;
         if (hour === currentHour && minute < currentMinute) return true;
-        
+
         return false;
     };
 
@@ -145,7 +151,7 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
         const hourIndex = getMiddleOffset(baseHours.length) + selectedHour;
         hourScrollRef.current?.scrollTo({
             y: hourIndex * ITEM_HEIGHT,
-            animated: false
+            animated: false,
         });
     };
 
@@ -153,11 +159,11 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
      * Recenters minute scroll when scrolling ends (for infinite scroll effect).
      */
     const handleMinuteScrollEnd = () => {
-        const minuteIndex = baseMinutes.findIndex(m => m === selectedMinute);
+        const minuteIndex = baseMinutes.findIndex((m) => m === selectedMinute);
         const minuteOffset = getMiddleOffset(baseMinutes.length) + minuteIndex;
         minuteScrollRef.current?.scrollTo({
             y: minuteOffset * ITEM_HEIGHT,
-            animated: false
+            animated: false,
         });
     };
 
@@ -170,7 +176,7 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
         if (isPastTime(selectedHour, selectedMinute)) {
             return; // Do nothing, keep picker open
         }
-        
+
         const newDateTime = new Date(value);
         newDateTime.setHours(selectedHour, selectedMinute, 0, 0);
         onChange(newDateTime);
@@ -185,21 +191,16 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
     const isTimeInPast = isPastTime(selectedHour, selectedMinute);
 
     return (
-        <Modal
-            visible={visible}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={onClose}
-        >
+        <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
             <View style={commonStyles.modalOverlay}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>{t('common.pickersText.Select Time')}</Text>
-                    
+
                     {/* Digital clock picker */}
                     <View style={styles.pickerContainer}>
                         {/* Hours column */}
                         <View style={styles.column}>
-                            <ScrollView 
+                            <ScrollView
                                 ref={hourScrollRef}
                                 showsVerticalScrollIndicator={false}
                                 style={styles.scrollColumn}
@@ -212,15 +213,15 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
                             >
                                 <View style={styles.spacer} />
                                 {hours.map((hour) => (
-                                    <View
-                                        key={hour.id}
-                                        style={styles.timeValue}
-                                    >
-                                        <Text style={[
-                                            styles.timeValueText,
-                                            selectedHour === hour.value && styles.selectedValueText,
-                                            isPastTime(hour.value, 55) && styles.pastTimeText
-                                        ]}>
+                                    <View key={hour.id} style={styles.timeValue}>
+                                        <Text
+                                            style={[
+                                                styles.timeValueText,
+                                                selectedHour === hour.value &&
+                                                    styles.selectedValueText,
+                                                isPastTime(hour.value, 55) && styles.pastTimeText,
+                                            ]}
+                                        >
                                             {hour.value.toString().padStart(2, '0')}
                                         </Text>
                                     </View>
@@ -240,7 +241,7 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
 
                         {/* Minutes column */}
                         <View style={styles.column}>
-                            <ScrollView 
+                            <ScrollView
                                 ref={minuteScrollRef}
                                 showsVerticalScrollIndicator={false}
                                 style={styles.scrollColumn}
@@ -253,15 +254,16 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
                             >
                                 <View style={styles.spacer} />
                                 {minutes.map((minute) => (
-                                    <View
-                                        key={minute.id}
-                                        style={styles.timeValue}
-                                    >
-                                        <Text style={[
-                                            styles.timeValueText,
-                                            selectedMinute === minute.value && styles.selectedValueText,
-                                            isPastTime(selectedHour, minute.value) && styles.pastTimeText
-                                        ]}>
+                                    <View key={minute.id} style={styles.timeValue}>
+                                        <Text
+                                            style={[
+                                                styles.timeValueText,
+                                                selectedMinute === minute.value &&
+                                                    styles.selectedValueText,
+                                                isPastTime(selectedHour, minute.value) &&
+                                                    styles.pastTimeText,
+                                            ]}
+                                        >
                                             {minute.value.toString().padStart(2, '0')}
                                         </Text>
                                     </View>
@@ -279,21 +281,22 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
 
                     {/* Action buttons */}
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity
-                            style={styles.cancelButton}
-                            onPress={onClose}
-                        >
-                            <Text style={styles.cancelButtonText}>{t('common.buttons.Cancel')}</Text>
+                        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+                            <Text style={styles.cancelButtonText}>
+                                {t('common.buttons.Cancel')}
+                            </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[
                                 styles.validateButton,
-                                isTimeInPast && styles.validateButtonDisabled
+                                isTimeInPast && styles.validateButtonDisabled,
                             ]}
                             onPress={handleValidate}
                             disabled={isTimeInPast}
                         >
-                            <Text style={styles.validateButtonText}>{t('common.buttons.Validate')}</Text>
+                            <Text style={styles.validateButtonText}>
+                                {t('common.buttons.Validate')}
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </View>

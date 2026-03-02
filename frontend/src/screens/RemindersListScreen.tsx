@@ -8,7 +8,15 @@
  * @component
  */
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, RefreshControl } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Image,
+    ScrollView,
+    RefreshControl,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -39,14 +47,20 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
         await reload();
-        setReloadCounter(c => c + 1);
+        setReloadCounter((c) => c + 1);
         setIsRefreshing(false);
     }, [reload]);
 
     /** Controls the bottom fade indicator — hidden when scrolled to the end. */
     const [showScrollFade, setShowScrollFade] = useState(true);
 
-    const handleScroll = (event: { nativeEvent: { contentOffset: { y: number }; layoutMeasurement: { height: number }; contentSize: { height: number } } }) => {
+    const handleScroll = (event: {
+        nativeEvent: {
+            contentOffset: { y: number };
+            layoutMeasurement: { height: number };
+            contentSize: { height: number };
+        };
+    }) => {
         const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
         const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 10;
         setShowScrollFade(!isAtBottom);
@@ -55,7 +69,7 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     useFocusEffect(
         useCallback(() => {
             reload();
-            setReloadCounter(c => c + 1);
+            setReloadCounter((c) => c + 1);
         }, [reload])
     );
 
@@ -70,39 +84,51 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     // Filter reminders based on selected profile and date
     const getFilteredReminders = () => {
         return reminderData
-            ?.filter(reminder => {
+            ?.filter((reminder) => {
                 const matchProfile = !selectedProfile || reminder.user_id === selectedProfile;
                 const matchDate = !selectedDate || reminder.scheduled_at === selectedDate;
                 return matchProfile && matchDate;
             })
-            .sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime());
+            .sort(
+                (a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime()
+            );
     };
 
     // Get unique profiles as {id, name} objects (deduplicated by user_id)
     const uniqueProfiles = Array.from(
         new Map(
-            reminderData?.map(r => [
+            reminderData?.map((r) => [
                 r.user_id,
                 {
                     id: r.user_id,
-                    name: r.user_first_name && r.user_last_name
-                        ? `${r.user_first_name} ${r.user_last_name}`
-                        : r.user_id,
+                    name:
+                        r.user_first_name && r.user_last_name
+                            ? `${r.user_first_name} ${r.user_last_name}`
+                            : r.user_id,
                 },
             ]) ?? []
         ).values()
     );
 
     // Get the display name for the currently selected profile
-    const selectedProfileName = uniqueProfiles.find(p => p.id === selectedProfile)?.name;
+    const selectedProfileName = uniqueProfiles.find((p) => p.id === selectedProfile)?.name;
 
-    // Get unique dates
-    const uniqueDates = Array.from(new Set(reminderData?.map(r => r.scheduled_at)));
+    // Get unique dates filtered by selected profile
+    const uniqueDates = Array.from(
+        new Set(
+            reminderData
+                ?.filter((r) => !selectedProfile || r.user_id === selectedProfile)
+                .map((r) => r.scheduled_at)
+        )
+    );
 
     const formatDate = (iso: string) =>
         new Date(iso).toLocaleDateString('fr-FR', {
-            day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
         });
 
     /**
@@ -138,186 +164,203 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     };
 
     return (
-         <View style={commonStyles.container}>
-                    {/* Header with app logo and name */}
-                    <View style={commonStyles.header}>
-                        <View style={commonStyles.headerSpacer} />
-                        <View style={commonStyles.headerCenter}>
-                            <Image 
-                                source={require('../../assets/mnesya-logo.png')} 
-                                style={commonStyles.logo}
-                            />
-                            <Text style={commonStyles.appName}>Mnesya</Text>
-                        </View>
-                        <View style={commonStyles.headerSpacer} />
-                    </View>
-                    {/* Page title */}
-                    <View style={styles.titleSection}>
-                        <Text style={styles.title}>{t('reminders.Title')}</Text>
-                    </View>
-                    
-                    {/* Action button */}
-                    <TouchableOpacity 
-                        style={commonStyles.primaryButton}
-                        onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            navigation.navigate('CreateReminder', {});
-                        }}>
-                        <Text style={commonStyles.primaryButtonText}>{t('reminders.buttons.New Reminder')}</Text>
-                    </TouchableOpacity>
+        <View style={commonStyles.container}>
+            {/* Header with app logo and name */}
+            <View style={commonStyles.header}>
+                <View style={commonStyles.headerSpacer} />
+                <View style={commonStyles.headerCenter}>
+                    <Image
+                        source={require('../../assets/mnesya-logo.png')}
+                        style={commonStyles.logo}
+                    />
+                    <Text style={commonStyles.appName}>Mnesya</Text>
+                </View>
+                <View style={commonStyles.headerSpacer} />
+            </View>
+            {/* Page title */}
+            <View style={styles.titleSection}>
+                <Text style={styles.title}>{t('reminders.Title')}</Text>
+            </View>
 
-                    {/* Filters section */}
-                    <View style={styles.filtersSection}>
-                        <View style={styles.filterRow}>
-                            <View style={styles.filterItem}>
-                                <Text style={styles.filterLabel}>{t('reminders.pickersTitle.Profile')}:</Text>
-                                <TouchableOpacity 
-                                    style={styles.filterDropdown}
-                                    onPress={() => {
-                                        setShowProfilePicker(!showProfilePicker);
-                                        setShowDatePicker(false);
-                                    }}
-                                >
-                                    <Text style={styles.filterDropdownText}>
-                                        {selectedProfileName || t('common.pickersText.All Profiles')}
-                                    </Text>
-                                    <Ionicons name="chevron-down" size={20} color="#666666" />
-                                </TouchableOpacity>
-                            </View>
+            {/* Action button */}
+            <TouchableOpacity
+                style={commonStyles.primaryButton}
+                onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    navigation.navigate('CreateReminder', {});
+                }}
+            >
+                <Text style={commonStyles.primaryButtonText}>
+                    {t('reminders.buttons.New Reminder')}
+                </Text>
+            </TouchableOpacity>
 
-                            <View style={styles.filterItem}>
-                                <Text style={styles.filterLabel}>{t('reminders.labels.Date:')}</Text>
-                                <TouchableOpacity 
-                                    style={styles.filterDropdown}
-                                    onPress={() => {
-                                        setShowDatePicker(!showDatePicker);
-                                        setShowProfilePicker(false);
-                                    }}
-                                >
-                                    <Text style={styles.filterDropdownText}>
-                                        {selectedDate ? formatDate(selectedDate) : t('common.pickersText.All Dates')}
-                                    </Text>
-                                    <Ionicons name="chevron-down" size={20} color="#666666" />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-
-                        {/* Reset filters button */}
-                        <TouchableOpacity 
-                            style={styles.resetButton}
+            {/* Filters section */}
+            <View style={styles.filtersSection}>
+                <View style={styles.filterRow}>
+                    <View style={styles.filterItem}>
+                        <Text style={styles.filterLabel}>
+                            {t('reminders.pickersTitle.Profile')}:
+                        </Text>
+                        <TouchableOpacity
+                            style={styles.filterDropdown}
                             onPress={() => {
-                                if (selectedProfile || selectedDate) {
-                                    setSelectedProfile('');
-                                    setSelectedDate('');
-                                }
+                                setShowProfilePicker(!showProfilePicker);
+                                setShowDatePicker(false);
                             }}
-                            disabled={!selectedProfile && !selectedDate}
                         >
-                            <Ionicons 
-                                name="close-circle" 
-                                size={16} 
-                                color={(selectedProfile || selectedDate) ? "#4A90E2" : "#CCCCCC"} 
-                            />
-                            <Text style={[
-                                styles.resetButtonText,
-                                !(selectedProfile || selectedDate) && styles.resetButtonTextDisabled
-                            ]}>
-                                {t('reminders.buttons.Reset Filters')}
+                            <Text style={styles.filterDropdownText}>
+                                {selectedProfileName || t('common.pickersText.All Profiles')}
                             </Text>
+                            <Ionicons name="chevron-down" size={20} color="#666666" />
                         </TouchableOpacity>
                     </View>
 
-                    {/* Reminder delete confirmation */}
-                    <ConfirmationModal
-                        visible={pendingDeleteId !== null}
-                        onClose={() => setPendingDeleteId(null)}
-                        onConfirm={confirmDeleteReminder}
-                        title={t('reminders.deleteModal.title')}
-                        message={t('reminders.deleteModal.message')}
-                        icon="trash-outline"
-                        iconColor="#E53935"
-                        confirmText={t('reminders.deleteModal.confirm')}
-                        confirmColor="#E53935"
-                    />
-
-                    {/* Reminder delete error */}
-                    <ConfirmationModal
-                        visible={deleteError}
-                        onClose={() => setDeleteError(false)}
-                        title={t('common.errors.genericErrorTitle')}
-                        message={t('common.errors.failedToDeleteReminder')}
-                        icon="alert-circle-outline"
-                        iconColor="#E53935"
-                        confirmText="OK"
-                        confirmColor="#4A90E2"
-                        showCancelButton={false}
-                    />
-
-                    {/* Profile Picker Modal */}
-                    <FilterPickerModal
-                        visible={showProfilePicker}
-                        title={t('reminders.pickersTitle.Profile')}
-                        items={[
-                            { value: '', label: t('common.pickersText.All Profiles') },
-                            ...uniqueProfiles.map(p => ({ value: p.id, label: p.name })),
-                        ]}
-                        selectedValue={selectedProfile}
-                        onSelect={(value) => {
-                            setSelectedProfile(value);
-                            setShowProfilePicker(false);
-                        }}
-                        onClose={() => setShowProfilePicker(false)}
-                    />
-
-                    {/* Date Picker Modal */}
-                    <FilterPickerModal
-                        visible={showDatePicker}
-                        title={t('reminders.labels.Date:')}
-                        items={[
-                            { value: '', label: t('common.pickersText.All Dates') },
-                            ...uniqueDates.map(d => ({ value: d, label: formatDate(d) })),
-                        ]}
-                        selectedValue={selectedDate}
-                        onSelect={(value) => {
-                            setSelectedDate(value);
-                            setShowDatePicker(false);
-                        }}
-                        onClose={() => setShowDatePicker(false)}
-                    />
-
-                    {/* Delete error feedback */}
-                    {deleteError && (
-                        <View style={commonStyles.errorContainer}>
-                            <Ionicons name="alert-circle-outline" size={24} color="#E53935" />
-                            <Text style={commonStyles.errorText}>{t('reminders.errors.deleteError')}</Text>
-                        </View>
-                    )}
-
-                    {/* Reminders list */}
-                    <View style={styles.listWrapper}>
-                        <ScrollView showsVerticalScrollIndicator={false} style={styles.remindersList} refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />} onScroll={handleScroll} scrollEventThrottle={16}>
-                            {(getFilteredReminders?.() ?? []).length === 0 ? (
-                                <Text style={commonStyles.emptyMessage}>No reminders yet</Text>
-                            ) : (
-                                (getFilteredReminders?.() ?? []).map((reminder) => (
-                                    <ReminderCard
-                                        key={reminder.id}
-                                        reminder={reminder}
-                                        onDelete={handleDeleteReminder}
-                                        reloadTrigger={reloadCounter}
-                                    />
-                                ))
-                            )}
-                        </ScrollView>
-                        {/* Bottom fade — signals more content below */}
-                        {showScrollFade && (
-                            <View style={styles.scrollFade} pointerEvents="none">
-                                <Ionicons name="chevron-down" size={24} color="#4A90E2" />
-                            </View>
-                        )}
+                    <View style={styles.filterItem}>
+                        <Text style={styles.filterLabel}>{t('reminders.labels.Date:')}</Text>
+                        <TouchableOpacity
+                            style={styles.filterDropdown}
+                            onPress={() => {
+                                setShowDatePicker(!showDatePicker);
+                                setShowProfilePicker(false);
+                            }}
+                        >
+                            <Text style={styles.filterDropdownText}>
+                                {selectedDate
+                                    ? formatDate(selectedDate)
+                                    : t('common.pickersText.All Dates')}
+                            </Text>
+                            <Ionicons name="chevron-down" size={20} color="#666666" />
+                        </TouchableOpacity>
                     </View>
+                </View>
+
+                {/* Reset filters button */}
+                <TouchableOpacity
+                    style={styles.resetButton}
+                    onPress={() => {
+                        if (selectedProfile || selectedDate) {
+                            setSelectedProfile('');
+                            setSelectedDate('');
+                        }
+                    }}
+                    disabled={!selectedProfile && !selectedDate}
+                >
+                    <Ionicons
+                        name="close-circle"
+                        size={16}
+                        color={selectedProfile || selectedDate ? '#4A90E2' : '#CCCCCC'}
+                    />
+                    <Text
+                        style={[
+                            styles.resetButtonText,
+                            !(selectedProfile || selectedDate) && styles.resetButtonTextDisabled,
+                        ]}
+                    >
+                        {t('reminders.buttons.Reset Filters')}
+                    </Text>
+                </TouchableOpacity>
             </View>
-        );
+
+            {/* Reminder delete confirmation */}
+            <ConfirmationModal
+                visible={pendingDeleteId !== null}
+                onClose={() => setPendingDeleteId(null)}
+                onConfirm={confirmDeleteReminder}
+                title={t('reminders.deleteModal.title')}
+                message={t('reminders.deleteModal.message')}
+                icon="trash-outline"
+                iconColor="#E53935"
+                confirmText={t('reminders.deleteModal.confirm')}
+                confirmColor="#E53935"
+            />
+
+            {/* Reminder delete error */}
+            <ConfirmationModal
+                visible={deleteError}
+                onClose={() => setDeleteError(false)}
+                title={t('common.errors.genericErrorTitle')}
+                message={t('common.errors.failedToDeleteReminder')}
+                icon="alert-circle-outline"
+                iconColor="#E53935"
+                confirmText="OK"
+                confirmColor="#4A90E2"
+                showCancelButton={false}
+            />
+
+            {/* Profile Picker Modal */}
+            <FilterPickerModal
+                visible={showProfilePicker}
+                title={t('reminders.pickersTitle.Profile')}
+                items={[
+                    { value: '', label: t('common.pickersText.All Profiles') },
+                    ...uniqueProfiles.map((p) => ({ value: p.id, label: p.name })),
+                ]}
+                selectedValue={selectedProfile}
+                onSelect={(value) => {
+                    setSelectedProfile(value);
+                    setShowProfilePicker(false);
+                }}
+                onClose={() => setShowProfilePicker(false)}
+            />
+
+            {/* Date Picker Modal */}
+            <FilterPickerModal
+                visible={showDatePicker}
+                title={t('reminders.labels.Date:')}
+                items={[
+                    { value: '', label: t('common.pickersText.All Dates') },
+                    ...uniqueDates.map((d) => ({ value: d, label: formatDate(d) })),
+                ]}
+                selectedValue={selectedDate}
+                onSelect={(value) => {
+                    setSelectedDate(value);
+                    setShowDatePicker(false);
+                }}
+                onClose={() => setShowDatePicker(false)}
+            />
+
+            {/* Delete error feedback */}
+            {deleteError && (
+                <View style={commonStyles.errorContainer}>
+                    <Ionicons name="alert-circle-outline" size={24} color="#E53935" />
+                    <Text style={commonStyles.errorText}>{t('reminders.errors.deleteError')}</Text>
+                </View>
+            )}
+
+            {/* Reminders list */}
+            <View style={styles.listWrapper}>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    style={styles.remindersList}
+                    refreshControl={
+                        <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+                    }
+                    onScroll={handleScroll}
+                    scrollEventThrottle={16}
+                >
+                    {(getFilteredReminders?.() ?? []).length === 0 ? (
+                        <Text style={commonStyles.emptyMessage}>No reminders yet</Text>
+                    ) : (
+                        (getFilteredReminders?.() ?? []).map((reminder) => (
+                            <ReminderCard
+                                key={reminder.id}
+                                reminder={reminder}
+                                onDelete={handleDeleteReminder}
+                                reloadTrigger={reloadCounter}
+                            />
+                        ))
+                    )}
+                </ScrollView>
+                {/* Bottom fade — signals more content below */}
+                {showScrollFade && (
+                    <View style={styles.scrollFade} pointerEvents="none">
+                        <Ionicons name="chevron-down" size={24} color="#4A90E2" />
+                    </View>
+                )}
+            </View>
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
@@ -328,14 +371,14 @@ const styles = StyleSheet.create({
         marginTop: 30,
         marginBottom: 20,
     },
-    
+
     // TYPOGRAPHY
     title: {
         fontSize: 28,
         fontWeight: 'bold',
         marginBottom: 10,
     },
-    
+
     // FILTER COMPONENTS
     filtersSection: {
         marginTop: 10,

@@ -1,6 +1,6 @@
 /**
  * Bottom tabs for the caregiver interface (Home, Reminders, Profile).
- * 
+ *
  * @module CaregiverTabs
  */
 import React from 'react';
@@ -20,10 +20,10 @@ const Tab = createBottomTabNavigator<CaregiverTabsParamList>();
 const CaregiverTabs: React.FC = () => {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
-    
+
     return (
         <Tab.Navigator
-            id='caregiver-tabs'
+            id="caregiver-tabs"
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: styles.activeTab.color,
@@ -37,8 +37,8 @@ const CaregiverTabs: React.FC = () => {
             }}
         >
             {/* Home tab - Dashboard */}
-            <Tab.Screen 
-                name="Home" 
+            <Tab.Screen
+                name="Home"
                 component={DashboardScreen}
                 options={{
                     tabBarLabel: t('tabs.Home'),
@@ -47,10 +47,10 @@ const CaregiverTabs: React.FC = () => {
                     ),
                 }}
             />
-            
+
             {/* Reminders tab - List of all reminders */}
-            <Tab.Screen 
-                name="Reminders" 
+            <Tab.Screen
+                name="Reminders"
                 component={RemindersListScreen}
                 options={{
                     tabBarLabel: t('tabs.Reminders'),
@@ -59,10 +59,10 @@ const CaregiverTabs: React.FC = () => {
                     ),
                 }}
             />
-            
+
             {/* Profile tab */}
-            <Tab.Screen 
-                name="Profile" 
+            <Tab.Screen
+                name="Profile"
                 component={CaregiverProfileScreen}
                 options={{
                     tabBarLabel: t('tabs.Profile'),

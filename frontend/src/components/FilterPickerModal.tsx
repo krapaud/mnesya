@@ -42,12 +42,7 @@ const FilterPickerModal: React.FC<FilterPickerModalProps> = ({
     const { t } = useTranslation();
 
     return (
-        <Modal
-            visible={visible}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={onClose}
-        >
+        <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
             <View style={commonStyles.modalOverlay}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>{title}</Text>
@@ -60,12 +55,18 @@ const FilterPickerModal: React.FC<FilterPickerModalProps> = ({
                                     styles.pickerItem,
                                     selectedValue === item.value && styles.pickerItemSelected,
                                 ]}
-                                onPress={() => { onSelect(item.value); onClose(); }}
+                                onPress={() => {
+                                    onSelect(item.value);
+                                    onClose();
+                                }}
                             >
-                                <Text style={[
-                                    styles.pickerItemText,
-                                    selectedValue === item.value && styles.pickerItemTextSelected,
-                                ]}>
+                                <Text
+                                    style={[
+                                        styles.pickerItemText,
+                                        selectedValue === item.value &&
+                                            styles.pickerItemTextSelected,
+                                    ]}
+                                >
                                     {item.label}
                                 </Text>
                             </TouchableOpacity>

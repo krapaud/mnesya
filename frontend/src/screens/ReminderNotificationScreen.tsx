@@ -18,14 +18,18 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { createBellSwingAnimation, getBellRotation } from '../utils/animations';
-import { getReminderStatus, postponeReminder, updateReminderStatus } from '../services/reminderService';
+import {
+    getReminderStatus,
+    postponeReminder,
+    updateReminderStatus,
+} from '../services/reminderService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ReminderNotification'>;
 
 const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
     const { t } = useTranslation();
     const { reminderId, message } = route.params;
-    
+
     // Build the reminder object from route params
     const reminder = {
         id: reminderId,
@@ -33,7 +37,7 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
         message: message || t('ReminderNotification.defaultMessage'),
         time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
     };
-    
+
     // Animation reference using useRef to persist the animated value across renders
     const bellAnimation = useRef(new Animated.Value(0)).current;
 
@@ -41,7 +45,7 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
     // useEffect with empty dependency array triggers it once on mount
     useEffect(() => {
         createBellSwingAnimation(bellAnimation).start();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // If the reminder is already DONE or UNABLE, go back immediately
@@ -57,7 +61,7 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
             }
         };
         checkStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [reminderId]);
 
     const handleReminderAction = async (status: string) => {
@@ -68,9 +72,7 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
             } else {
                 await updateReminderStatus(String(reminderId), { status: status.toUpperCase() });
             }
-        } catch {
-
-        }
+        } catch {}
         // Navigate back to UserHome
         navigation.goBack();
     };
@@ -79,67 +81,63 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
         <View style={commonStyles.container}>
             {/* Header with app logo and name */}
             <View style={[commonStyles.header, { justifyContent: 'center', paddingTop: 40 }]}>
-                <Image 
-                    source={require('../../assets/mnesya-logo.png')} 
-                    style={commonStyles.logo}
-                />
+                <Image source={require('../../assets/mnesya-logo.png')} style={commonStyles.logo} />
                 <Text style={commonStyles.appName}>Mnesya</Text>
             </View>
 
             {/* Reminder content section */}
             <View style={styles.contentContainer}>
-                {/* 
+                {/*
                  * Animated bell icon with rotation transform from getBellRotation
                  * Creates a swinging effect to catch the user's attention
                  */}
-                <Animated.View style={[
-                    styles.bellContainer,
-                    getBellRotation(bellAnimation),
-                ]}>
+                <Animated.View style={[styles.bellContainer, getBellRotation(bellAnimation)]}>
                     <Ionicons name="notifications-outline" size={80} color="#FFFFFF" />
                 </Animated.View>
                 <Text style={styles.reminderTimeText}>{reminder.time}</Text>
                 <Text style={styles.reminderTitleText}>{reminder.title}</Text>
-                {/* 
+                {/*
                  * Message text with overflow protection
                  * numberOfLines={4} and ellipsizeMode prevent text overflow issues
                  * Ensures the message stays within bounds even with long text
                  */}
-                <Text 
-                    style={styles.reminderMessage}
-                    numberOfLines={4}
-                    ellipsizeMode="tail"
-                >
+                <Text style={styles.reminderMessage} numberOfLines={4} ellipsizeMode="tail">
                     {reminder.message}
                 </Text>
 
                 {/* Three action buttons: Done (green), Remind later (orange), Unable (red) */}
-                <TouchableOpacity 
-                    style={[styles.bgButtonDone, { marginTop: 15}]}
+                <TouchableOpacity
+                    style={[styles.bgButtonDone, { marginTop: 15 }]}
                     onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         handleReminderAction('Done');
                     }}
                 >
-                    <Text style={styles.buttonDoneText}>{t('ReminderNotification.buttons.Done')}</Text>
+                    <Text style={styles.buttonDoneText}>
+                        {t('ReminderNotification.buttons.Done')}
+                    </Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.bgButtonPostpone}
                     onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         handleReminderAction('Postponed');
                     }}
                 >
-                    <Text style={styles.buttonPostponeText}>{t('ReminderNotification.buttons.Remind later')}</Text>
+                    <Text style={styles.buttonPostponeText}>
+                        {t('ReminderNotification.buttons.Remind later')}
+                    </Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.bgButtonUnable}
                     onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         handleReminderAction('Unable');
                     }}
                 >
-                    <Text style={styles.buttonUnableText}>{t('ReminderNotification.buttons.Unable')}</Text>
+                    <Text style={styles.buttonUnableText}>
+                        {t('ReminderNotification.buttons.Unable')}
+                    </Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -154,7 +152,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 40,
     },
-    
+
     // TYPOGRAPHY
     reminderTimeText: {
         fontSize: 50,

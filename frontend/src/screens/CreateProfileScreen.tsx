@@ -1,10 +1,19 @@
 /**
  * Screen for creating a new user profile.
- * 
+ *
  * @module CreateProfileScreen
  */
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, ActivityIndicator } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    TextInput,
+    Image,
+    ScrollView,
+    ActivityIndicator,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +32,7 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
 
     const { values, errors, showErrors, handleChange, validateAll } = useFormValidation({
         firstname: { validate: validateName },
-        lastname: { validate: validateName }
+        lastname: { validate: validateName },
     });
 
     const [birthday, setBirthday] = useState<Date>(new Date());
@@ -48,7 +57,7 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
 
     /**
      * Handles profile creation form submission.
-     * 
+     *
      * Validates form fields, formats data, and calls backend API to create profile.
      * Navigates to dashboard on success.
      */
@@ -61,12 +70,12 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
 
         try {
             setIsCreating(true);
-            
+
             // Create profile via API
             const result = await createProfile({
                 first_name: values.firstname.trim(),
                 last_name: values.lastname.trim(),
-                birthday: formatDateForAPI(birthday)
+                birthday: formatDateForAPI(birthday),
             });
 
             // Pairing code is already included in the create profile response
@@ -79,121 +88,123 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
             setIsCreating(false);
         }
     };
-    
+
     return (
-            <View style={commonStyles.container}>
-                {/* Header with back button and logo */}
-                <View style={commonStyles.header}>
-                    <TouchableOpacity onPress={() => {
+        <View style={commonStyles.container}>
+            {/* Header with back button and logo */}
+            <View style={commonStyles.header}>
+                <TouchableOpacity
+                    onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         navigation.goBack();
-                    }}>
-                        <View style={commonStyles.ArrowIconCircle}>
-                            <Ionicons name="arrow-back" size={24} color='#4A90E2'
-                        />
-                        </View>
-                    </TouchableOpacity>
-                    <View style={commonStyles.headerCenter}>
-                        <Image 
-                            source={require('../../assets/mnesya-logo.png')} 
-                            style={commonStyles.logo}
-                        />
-                        <Text style={commonStyles.appName}>Mnesya</Text>
+                    }}
+                >
+                    <View style={commonStyles.ArrowIconCircle}>
+                        <Ionicons name="arrow-back" size={24} color="#4A90E2" />
                     </View>
-                    <View style={commonStyles.headerSpacer} />
-                </View>
-                
-                {/* Scrollable registration form */}
-                <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-                    <Text style={styles.title}>{t('CreateProfile.title')}</Text>
-                    
-                    {/* First name input field */}
-                    <Text style={styles.firstLabel}>{t('CreateProfile.fields.First Name')}</Text>
-                    <View style={[styles.input, showErrors.firstname && commonStyles.inputError]}>
-                        <TextInput
-                            autoCapitalize="sentences"
-                            autoCorrect={false}
-                            placeholder={t('CreateProfile.placeholders.Enter the profile First Name')}
-                            onChangeText={(text) => handleChange('firstname')(cleanText(text))}
-                            value={values.firstname}
-                        />
-                    </View>
-                    <Text style={[styles.errorText, {opacity: showErrors.firstname ? 1 : 0}]}>
-                        {t(errors.firstname) || t('register.errors.This field is required')}
-                    </Text>
-                    
-                    {/* Last name input field */}
-                    <Text style={styles.label}>{t('CreateProfile.fields.Last Name')}</Text>
-                    <View style={[styles.input, showErrors.lastname && commonStyles.inputError]}>
-                        <TextInput
-                            autoCapitalize="sentences"
-                            autoCorrect={false}
-                            placeholder={t('CreateProfile.placeholders.Enter the profile Last Name')}
-                            onChangeText={(text) => handleChange('lastname')(cleanText(text))}
-                            value={values.lastname}
-                        />
-                    </View>
-                    <Text style={[styles.errorText, {opacity: showErrors.lastname ? 1 : 0}]}>
-                        {t(errors.lastname) || t('register.errors.This field is required')}
-                    </Text>
-                    
-                    {/* Birthday date picker */}
-                    <Text style={styles.label}>{t('CreateProfile.fields.Birthday')}</Text>
-                    <TouchableOpacity 
-                        style={styles.input}
-                        onPress={() => setShowDatePicker(true)}
-                    >
-                        <Text>{formatDate(birthday)}</Text>
-                    </TouchableOpacity>
-                    
-                    {/* Cross-platform date picker component */}
-                    <PlatformDatePicker
-                        value={birthday}
-                        onChange={setBirthday}
-                        visible={showDatePicker}
-                        onClose={() => setShowDatePicker(false)}
-                        displayFormat={formatDate}
-                        allowPastDates={true}
+                </TouchableOpacity>
+                <View style={commonStyles.headerCenter}>
+                    <Image
+                        source={require('../../assets/mnesya-logo.png')}
+                        style={commonStyles.logo}
                     />
-                </ScrollView>
-                
-                {/* Buttons section - fixed at bottom */}
-                <View style={styles.buttonsContainer}>
-                    {/* Create button - creates profile and navigates to Dashboard */}
-                    {!showDatePicker && (
-                        <TouchableOpacity 
-                            style={[commonStyles.primaryButton, isCreating && styles.buttonDisabled]}
-                            onPress={handleCreateProfile}
-                            disabled={isCreating}
-                        >
-                            {isCreating ? (
-                                <ActivityIndicator color="#FFFFFF" />
-                            ) : (
-                                <Text style={commonStyles.primaryButtonText}>
-                                    {t('CreateProfile.buttons.Create profile')}
-                                </Text>
-                            )}
-                        </TouchableOpacity>
-                    )}
+                    <Text style={commonStyles.appName}>Mnesya</Text>
                 </View>
-                <PairingCodeModal
-                    visible={pairingCode !== null}
-                    pairingCode={pairingCode ?? ''}
-                    expiresAt={pairingExpiresAt}
-                    showBackButton={false}
-                    onBack={() => {
-                        setPairingCode(null);
-                        setPairingExpiresAt(null);
-                    }}
-                    onClose={() => {
-                        setPairingCode(null);
-                        setPairingExpiresAt(null);
-                        navigation.replace('Dashboard');
-                    }}
-                />
+                <View style={commonStyles.headerSpacer} />
             </View>
-        );
-    };
+
+            {/* Scrollable registration form */}
+            <ScrollView
+                style={styles.scrollContainer}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+            >
+                <Text style={styles.title}>{t('CreateProfile.title')}</Text>
+
+                {/* First name input field */}
+                <Text style={styles.firstLabel}>{t('CreateProfile.fields.First Name')}</Text>
+                <View style={[styles.input, showErrors.firstname && commonStyles.inputError]}>
+                    <TextInput
+                        autoCapitalize="sentences"
+                        autoCorrect={false}
+                        placeholder={t('CreateProfile.placeholders.Enter the profile First Name')}
+                        onChangeText={(text) => handleChange('firstname')(cleanText(text))}
+                        value={values.firstname}
+                    />
+                </View>
+                <Text style={[styles.errorText, { opacity: showErrors.firstname ? 1 : 0 }]}>
+                    {t(errors.firstname) || t('register.errors.This field is required')}
+                </Text>
+
+                {/* Last name input field */}
+                <Text style={styles.label}>{t('CreateProfile.fields.Last Name')}</Text>
+                <View style={[styles.input, showErrors.lastname && commonStyles.inputError]}>
+                    <TextInput
+                        autoCapitalize="sentences"
+                        autoCorrect={false}
+                        placeholder={t('CreateProfile.placeholders.Enter the profile Last Name')}
+                        onChangeText={(text) => handleChange('lastname')(cleanText(text))}
+                        value={values.lastname}
+                    />
+                </View>
+                <Text style={[styles.errorText, { opacity: showErrors.lastname ? 1 : 0 }]}>
+                    {t(errors.lastname) || t('register.errors.This field is required')}
+                </Text>
+
+                {/* Birthday date picker */}
+                <Text style={styles.label}>{t('CreateProfile.fields.Birthday')}</Text>
+                <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
+                    <Text>{formatDate(birthday)}</Text>
+                </TouchableOpacity>
+
+                {/* Cross-platform date picker component */}
+                <PlatformDatePicker
+                    value={birthday}
+                    onChange={setBirthday}
+                    visible={showDatePicker}
+                    onClose={() => setShowDatePicker(false)}
+                    displayFormat={formatDate}
+                    allowPastDates={true}
+                />
+            </ScrollView>
+
+            {/* Buttons section - fixed at bottom */}
+            <View style={styles.buttonsContainer}>
+                {/* Create button - creates profile and navigates to Dashboard */}
+                {!showDatePicker && (
+                    <TouchableOpacity
+                        style={[commonStyles.primaryButton, isCreating && styles.buttonDisabled]}
+                        onPress={handleCreateProfile}
+                        disabled={isCreating}
+                    >
+                        {isCreating ? (
+                            <ActivityIndicator color="#FFFFFF" />
+                        ) : (
+                            <Text style={commonStyles.primaryButtonText}>
+                                {t('CreateProfile.buttons.Create profile')}
+                            </Text>
+                        )}
+                    </TouchableOpacity>
+                )}
+            </View>
+            <PairingCodeModal
+                visible={pairingCode !== null}
+                pairingCode={pairingCode ?? ''}
+                expiresAt={pairingExpiresAt}
+                showBackButton={false}
+                onBack={() => {
+                    setPairingCode(null);
+                    setPairingExpiresAt(null);
+                }}
+                onClose={() => {
+                    setPairingCode(null);
+                    setPairingExpiresAt(null);
+                    navigation.replace('Dashboard');
+                }}
+            />
+        </View>
+    );
+};
 
 const styles = StyleSheet.create({
     // ========== LAYOUT ==========

@@ -1,6 +1,6 @@
 /**
  * Styles shared across multiple screens.
- * 
+ *
  * @module commonStyles
  */
 import { StyleSheet } from 'react-native';

@@ -1,6 +1,6 @@
 /**
  * Login screen for caregiver accounts.
- * 
+ *
  * @module LoginScreen
  */
 import React, { useState, useRef, useEffect } from 'react';
@@ -18,24 +18,24 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
-    
+
     /** Authentication hook for login operations */
     const { login, loading } = useAuth();
-    
+
     /** Form validation hook managing all field states and validation logic */
     const { values, errors, showErrors, handleChange, validateAll, setError } = useFormValidation({
-        email: { 
-            validate: validateEmail 
+        email: {
+            validate: validateEmail,
         },
-        password: { 
-            validate: () => null  // No complex validation for password on login
-        }
+        password: {
+            validate: () => null, // No complex validation for password on login
+        },
     });
     const [showPassword, setShowPassword] = useState(false);
 
     /**
      * Handles login form submission.
-     * 
+     *
      * Validates fields and calls backend API for authentication.
      */
     const handleLogin = async () => {
@@ -48,9 +48,9 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         // Call login function from hook
         const success = await login({
             email: values.email.trim(),
-            password: values.password
+            password: values.password,
         });
-        
+
         if (success) {
             // Success - navigate to dashboard
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -58,7 +58,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         } else {
             // Handle login errors (hook already set loading state)
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-            
+
             // Show error on both fields (invalid credentials)
             setError('email', 'login.errors.invalidCredentials');
             setError('password', 'login.errors.invalidCredentials');
@@ -74,38 +74,39 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
     useEffect(() => {
         return () => {
-          if (timerShowPassRef.current) clearTimeout(timerShowPassRef.current);
+            if (timerShowPassRef.current) clearTimeout(timerShowPassRef.current);
         };
-    }, [])
+    }, []);
 
     return (
         <View style={commonStyles.container}>
             {/* Header with back button and logo */}
             <View style={commonStyles.header}>
-                <TouchableOpacity onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    navigation.goBack();
-                }}>
+                <TouchableOpacity
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        navigation.goBack();
+                    }}
+                >
                     <View style={commonStyles.ArrowIconCircle}>
-                        <Ionicons name="arrow-back" size={24} color='#4A90E2'
-                    />
+                        <Ionicons name="arrow-back" size={24} color="#4A90E2" />
                     </View>
                 </TouchableOpacity>
                 <View style={commonStyles.headerCenter}>
-                    <Image 
-                        source={require('../../assets/mnesya-logo.png')} 
+                    <Image
+                        source={require('../../assets/mnesya-logo.png')}
                         style={commonStyles.logo}
                     />
                     <Text style={commonStyles.appName}>Mnesya</Text>
                 </View>
                 <View style={commonStyles.headerSpacer} />
             </View>
-            
+
             {/* Title section */}
             <View style={styles.titleContainer}>
                 <Text style={styles.title}>{t('login.title')}</Text>
             </View>
-            
+
             {/* Login form */}
             <View style={styles.formContainer}>
                 {/* Email input field */}
@@ -113,19 +114,27 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                 <View style={[styles.input, showErrors.email && commonStyles.inputError]}>
                     <TextInput
                         autoCapitalize="none"
+                        autoComplete="email"
+                        textContentType="emailAddress"
                         autoCorrect={false}
                         placeholder={t('register.placeholders.Enter your Email')}
                         onChangeText={handleChange('email')}
                         value={values.email}
                     />
                 </View>
-                <Text style={[styles.errorText, {opacity: showErrors.email ? 1 : 0}]}>
+                <Text style={[styles.errorText, { opacity: showErrors.email ? 1 : 0 }]}>
                     {t(errors.email) || t('register.errors.This field is required')}
                 </Text>
-                
+
                 {/* Password input field */}
                 <Text style={styles.passwordLabel}>{t('common.fields.Password')}</Text>
-                <View style={[styles.input, styles.inputRow, showErrors.password && commonStyles.inputError]}>
+                <View
+                    style={[
+                        styles.input,
+                        styles.inputRow,
+                        showErrors.password && commonStyles.inputError,
+                    ]}
+                >
                     <TextInput
                         style={styles.inputFlex}
                         placeholder={t('register.placeholders.Enter your Password')}
@@ -134,22 +143,26 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                         value={values.password}
                     />
                     <TouchableOpacity onPress={handleShowPassword}>
-                        <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={22} color="#999999" />
+                        <Ionicons
+                            name="eye-outline"
+                            size={22}
+                            color={showPassword ? '#999999' : '#4A90E2'}
+                        />
                     </TouchableOpacity>
                 </View>
-                <Text style={[styles.errorText, {opacity: showErrors.password ? 1 : 0}]}>
+                <Text style={[styles.errorText, { opacity: showErrors.password ? 1 : 0 }]}>
                     {t(errors.password) || t('register.errors.This field is required')}
                 </Text>
-                
+
                 {/* Password recovery link */}
                 <TouchableOpacity onPress={() => {}}>
                     <Text style={styles.lostPasswordText}>{t('login.buttons.lostPassword')}</Text>
                 </TouchableOpacity>
             </View>
-            
+
             {/* Buttons section - fixed at bottom */}
             <View style={styles.buttonsContainer}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={[commonStyles.primaryButton, loading && styles.buttonDisabled]}
                     onPress={handleLogin}
                     disabled={loading}
@@ -158,11 +171,13 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                         {loading ? t('login.buttons.Logging in...') : t('login.buttons.submit')}
                     </Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    navigation.navigate('Register');
-                }}>
+
+                <TouchableOpacity
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        navigation.navigate('Register');
+                    }}
+                >
                     <Text style={styles.createAccountText}>{t('login.buttons.createAccount')}</Text>
                 </TouchableOpacity>
             </View>
