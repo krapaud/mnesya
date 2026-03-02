@@ -14,8 +14,6 @@ from app.schemas.pairing_code_schema import (
     PairingCodeVerifyResponse
 )
 
-from app.schemas.authentication_schema import TokenResponse
-
 from app.persistence.pairing_code_repository import PairingCodeRepository
 from app.persistence.user_repository import UserRepository
 from app.api.authentication import verify_token, create_access_token
