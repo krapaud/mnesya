@@ -7,6 +7,8 @@ Mobile reminder application for elderly people and their caregivers.
 - [About](#about)
 - [Features](#features)
 - [Architecture](#architecture)
+- [Application Diagram](#application-diagram)
+- [Database Schema](#database-schema)
 - [Technologies](#technologies)
 - [Installation](#installation)
 - [Project Structure](#project-structure)
@@ -30,7 +32,7 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 - Maximum 3 buttons per screen
 - Linear journey without complex navigation
 
-### MVP Scope - Current Implementation (Feb 25, 2026)
+### MVP Scope - Current Implementation (Mar 2, 2026)
 
 - **12 screens implemented**:
   - 1 Shared screen: WelcomeScreen
@@ -41,7 +43,7 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 - **API Integration**: Frontend fully connected to backend (auth, profiles, pairing, reminders, reminder status)
 - **Code Quality**: ESLint v9 configured (0 errors, 0 warnings across all frontend files)
 - **Current status**: Frontend 100% connected, Backend 100% (auth, profiles, pairing, reminders, reminder status all live)
-- **Detailed User Stories**: See [Technical Documentation _ Mnesya.pdf](docs/Technical%20Documentation%20_%20Mnesya.pdf) (MoSCoW method, US-001 to US-027)
+- **Detailed User Stories**: See [Technical Documentation \_ Mnesya.pdf](docs/Technical%20Documentation%20_%20Mnesya.pdf) (MoSCoW method, US-001 to US-027)
 
 ## Features
 
@@ -63,9 +65,9 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 
 ### Reminder Management (Caregiver)
 
-- Simple reminder creation (title, message, date, time) - UI complete, backend in progress
-- Chronological reminder view with filters (date, profile, status) - UI complete
-- Status tracking (Done, Pending, Postponed, Unable) - UI complete
+- Simple reminder creation (title, message, date, time) - Fully integrated (frontend + backend)
+- Chronological reminder view with filters (date, profile, status) - Fully integrated
+- Status tracking (Done, Pending, Postponed, Unable) - Fully integrated
 - Tab navigation (Home | Reminders | Profile) - Implemented
 
 ### User Interface (Elderly Person)
@@ -86,32 +88,13 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 
 ## Architecture
 
-### Components
+### Application Diagram
 
-```text
-┌─────────────────────┐         ┌─────────────────────┐
-│  Frontend Mobile    │         │  Frontend Mobile    │
-│   (Caregiver)       │         │  (User)             │
-│  React Native +     │         │  React Native +     │
-│  Expo Notifications │         │  Expo Notifications │
-└──────────┬──────────┘         └──────────┬──────────┘
-           │                               │
-           └───────────┬───────────────────┘
-                       │
-                       ▼
-              ┌────────────────┐
-              │   Backend API  │ Auth, Profiles, Pairing [done]
-              │  Python/FastAPI│ Reminders [in progress]  
-              └────────┬───────┘
-                       │
-          ┌────────────┼────────────┐
-          ▼            ▼            ▼
-    ┌──────────┐  ┌──────────┐  ┌──────────┐
-    │PostgreSQL│  │APScheduler│ │Expo Push │
-    │ Database │  │  Worker   │  │  Service │
-    │  [done]  │  │ [config]  │  │[pending] │
-    └──────────┘  └──────────┘  └──────────┘
-```
+![Application Architecture](docs/App-Diagram-Structure.png)
+
+### Database Schema
+
+![Database Schema](docs/ER-Diagram-Database.png)
 
 ### Main Data Flows (Current Implementation)
 
@@ -185,7 +168,7 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 
 ## Installation
 
-### Current Status (Feb 25, 2026)
+### Current Status (Mar 2, 2026)
 
 **Frontend**: Fully operational — connected to real backend (auth, profiles, pairing, reminders, reminder status)  
 **Backend**: Fully operational — all MVP endpoints live  
@@ -319,11 +302,12 @@ mnesya/
 │   │   ├── App.tsx            # Root component with i18n + context
 │   │   ├── i18n.ts            # i18next configuration (FR/EN)
 │   │   ├── components/        # Reusable UI components
+│   │   │   ├── ChangePasswordModal.tsx
 │   │   │   ├── ConfirmationModal.tsx
+│   │   │   ├── FilterPickerModal.tsx
 │   │   │   ├── PairingCodeModal.tsx
 │   │   │   ├── PlatformDatePicker.tsx
 │   │   │   ├── PlatformTimePicker.tsx
-│   │   │   ├── PlatformProfilePicker.tsx
 │   │   │   ├── ReminderCard.tsx
 │   │   │   ├── UpdateUserProfileModal.tsx
 │   │   │   └── UpdateCaregiverProfileModal.tsx
@@ -359,7 +343,7 @@ mnesya/
 │   │   │   ├── UserHomeScreen.tsx
 │   │   │   └── ReminderNotificationScreen.tsx
 │   │   ├── services/          # API service layer
-│   │   │   ├── api.ts              # Base API URL configuration
+│   │   │   ├── api.ts              # Axios client with JWT interceptors
 │   │   │   ├── authService.ts      # register, login (JWT)
 │   │   │   ├── tokenService.ts     # JWT storage + retrieval
 │   │   │   ├── profileService.ts   # Profile CRUD
@@ -371,9 +355,13 @@ mnesya/
 │   │   │   ├── index.ts
 │   │   │   ├── interfaces.ts
 │   │   │   └── declaration.d.ts
+│   │   ├── config/
+│   │   │   └── api.ts              # Base API URL (auto-detects local IP in dev)
 │   │   ├── utils/
-│   │   │   ├── animations.ts       # Bell swing animation
-│   │   │   └── notifications.ts    # Expo Notifications setup
+│   │   │   ├── animations.ts       # Bell swing + pulse animations
+│   │   │   ├── dateUtils.ts        # Age calculation from birthday
+│   │   │   ├── notifications.ts    # Expo Notifications setup + repetitions
+│   │   │   └── validation.ts       # Form field validation functions
 │   │   └── data/
 │   │       └── fakeData.ts         # Mock data for local testing
 │   ├── assets/
@@ -407,45 +395,45 @@ mnesya/
 
 ### Authentication
 
-| Endpoint              | Method | Description             | Auth |
-|-----------------------|--------|-------------------------|------|
-| `/api/auth/register`  | POST   | Caregiver registration  | No   |
-| `/api/auth/login`     | POST   | Login (returns JWT)     | No   |
-| `/api/auth/me`        | GET    | Get current caregiver   | Yes  |
+| Endpoint             | Method | Description            | Auth |
+| -------------------- | ------ | ---------------------- | ---- |
+| `/api/auth/register` | POST   | Caregiver registration | No   |
+| `/api/auth/login`    | POST   | Login (returns JWT)    | No   |
+| `/api/auth/me`       | GET    | Get current caregiver  | Yes  |
 
 ### Caregiver Profile
 
-| Endpoint                   | Method | Description                 | Auth             |
-|----------------------------|--------|-----------------------------|------------------|
-| `/api/caregivers/{id}`     | GET    | Get caregiver profile       | Yes (Caregiver)  |
-| `/api/caregivers/{id}`     | PUT    | Update caregiver profile    | Yes (Caregiver)  |
+| Endpoint               | Method | Description              | Auth            |
+| ---------------------- | ------ | ------------------------ | --------------- |
+| `/api/caregivers/{id}` | GET    | Get caregiver profile    | Yes (Caregiver) |
+| `/api/caregivers/{id}` | PUT    | Update caregiver profile | Yes (Caregiver) |
 
 ### User Profiles (Elderly)
 
-| Endpoint              | Method | Description                  | Auth             |
-|-----------------------|--------|------------------------------|------------------|
-| `/api/users`          | POST   | Create a user profile        | Yes (Caregiver)  |
-| `/api/users`          | GET    | List all profiles            | Yes (Caregiver)  |
-| `/api/users/{id}`     | GET    | Get a profile                | Yes (Caregiver)  |
-| `/api/users/{id}`     | PUT    | Update a profile             | Yes (Caregiver)  |
-| `/api/users/{id}`     | DELETE | Delete a profile             | Yes (Caregiver)  |
+| Endpoint          | Method | Description           | Auth            |
+| ----------------- | ------ | --------------------- | --------------- |
+| `/api/users`      | POST   | Create a user profile | Yes (Caregiver) |
+| `/api/users`      | GET    | List all profiles     | Yes (Caregiver) |
+| `/api/users/{id}` | GET    | Get a profile         | Yes (Caregiver) |
+| `/api/users/{id}` | PUT    | Update a profile      | Yes (Caregiver) |
+| `/api/users/{id}` | DELETE | Delete a profile      | Yes (Caregiver) |
 
 ### Pairing
 
-| Endpoint                      | Method | Description                      | Auth             |
-|-------------------------------|--------|----------------------------------|------------------|
-| `/api/pairing/generate`       | POST   | Generate 6-char code (24h valid) | Yes (Caregiver)  |
-| `/api/pairing/verify`         | POST   | Verify code and receive JWT      | No               |
+| Endpoint                | Method | Description                      | Auth            |
+| ----------------------- | ------ | -------------------------------- | --------------- |
+| `/api/pairing/generate` | POST   | Generate 6-char code (24h valid) | Yes (Caregiver) |
+| `/api/pairing/verify`   | POST   | Verify code and receive JWT      | No              |
 
 ### Reminders (done)
 
-| Endpoint                     | Method | Description            | Auth            |
-|------------------------------|--------|------------------------|-----------------|
-| `/api/reminders`             | POST   | Create a reminder      | Yes (Caregiver) |
-| `/api/reminders`             | GET    | List reminders         | Yes (Caregiver) |
-| `/api/reminders/{id}`        | PUT    | Update a reminder      | Yes (Caregiver) |
-| `/api/reminders/{id}`        | DELETE | Delete a reminder      | Yes (Caregiver) |
-| `/api/reminders/{id}/status` | PUT    | Update status          | Yes (User)      |
+| Endpoint                     | Method | Description       | Auth            |
+| ---------------------------- | ------ | ----------------- | --------------- |
+| `/api/reminders`             | POST   | Create a reminder | Yes (Caregiver) |
+| `/api/reminders`             | GET    | List reminders    | Yes (Caregiver) |
+| `/api/reminders/{id}`        | PUT    | Update a reminder | Yes (Caregiver) |
+| `/api/reminders/{id}`        | DELETE | Delete a reminder | Yes (Caregiver) |
+| `/api/reminders/{id}/status` | PUT    | Update status     | Yes (User)      |
 
 ### Request Examples
 
