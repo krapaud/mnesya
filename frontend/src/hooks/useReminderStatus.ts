@@ -12,16 +12,17 @@ interface UseReminderStatus {
     reminderStatus: ReminderStatus | null;
     loading: boolean;
     error: string | null;
-    postpone: (delayMinute: number) => Promise<void>;
+    postpone: (delayMinutes: number) => Promise<void>;
     reload: () => Promise<void>;
 }
 
 export const useReminderStatus = (
     reminderId: string,
-    onAuthError?: () => void
+    onAuthError?: () => void,
+    reloadTrigger?: number,
 ): UseReminderStatus => {
     const [reminderStatus, setReminderStatus] = useState<ReminderStatus | null>(null);
-    const [loading, setLoading] =useState(true);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const loadReminderStatus = useCallback(async () => {
@@ -41,7 +42,7 @@ export const useReminderStatus = (
     }, [reminderId, onAuthError]);
     useEffect(() => {
         loadReminderStatus();
-    }, [loadReminderStatus]);
+    }, [loadReminderStatus, reloadTrigger]);
 
     const postpone = useCallback(async (delayMinutes: number) => {
         await postponeReminder(reminderId, delayMinutes);

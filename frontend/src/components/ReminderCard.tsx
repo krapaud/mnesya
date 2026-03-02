@@ -14,11 +14,12 @@ import type { ReminderData } from '../types/interfaces';
 interface ReminderCardProps {
   reminder: ReminderData;
   onDelete: (id: string) => void;
+  reloadTrigger?: number;
 }
 
-const ReminderCard: React.FC<ReminderCardProps> = ({ reminder, onDelete }) => {
+const ReminderCard: React.FC<ReminderCardProps> = ({ reminder, onDelete, reloadTrigger }) => {
   const { t } = useTranslation();
-  const { reminderStatus } = useReminderStatus(reminder.id);
+  const { reminderStatus } = useReminderStatus(reminder.id, undefined, reloadTrigger);
 
   return (
     <View style={commonStyles.reminderCard}>
@@ -57,6 +58,7 @@ const ReminderCard: React.FC<ReminderCardProps> = ({ reminder, onDelete }) => {
             'PENDING': commonStyles.statusPending,
             'POSTPONED': commonStyles.statusPostponed,
             'UNABLE': commonStyles.statusUnable,
+            'MISSED': commonStyles.statusMissed,
           }[reminderStatus.status] ?? commonStyles.statusPending]}>
             {t(`reminders.status.${reminderStatus.status.charAt(0).toUpperCase() + reminderStatus.status.slice(1).toLowerCase()}`)}
           </Text>

@@ -129,7 +129,8 @@
         "Pending": "Pending",
         "Postponed": "Postponed",
         "Done": "Done",
-        "Unable": "Unable"
+        "Unable": "Unable",
+        "Missed": "Missed"
     },
     "deleteModal": {
         "title": "Delete reminder",

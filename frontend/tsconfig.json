@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "commonjs",
     "lib": [
       "ES2020"
     ],
@@ -11,7 +10,7 @@
     "isolatedModules": true,
     "strict": true,
     "noImplicitAny": false,
-    "moduleResolution": "Bundler",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,

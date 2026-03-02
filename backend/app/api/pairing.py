@@ -18,14 +18,12 @@ from app.schemas.pairing_code_schema import (
     PairingCodeVerifyResponse
 )
 
-from app.schemas.authentication_schema import TokenResponse
-
 from app.persistence.pairing_code_repository import PairingCodeRepository
 from app.persistence.user_repository import UserRepository
 from app.api.authentication import verify_token, create_access_token
 from app import get_db
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_DAYS = 365
 
 router = APIRouter(prefix="/api/pairing", tags=["Pairing"])
 
@@ -163,7 +161,7 @@ async def generate_code(
 
         # Generate new code
         code = generate_pairing_code()
-        while pairing_repo.find_by_code(code):  # Ensure uniqueness
+        while pairing_repo.find_by_code(code):
             code = generate_pairing_code()
 
         # Create pairing code
@@ -295,7 +293,7 @@ async def verify_code(
         user = user_repo.get(pairing_code.user_id)
 
         # Generate JWT token for the user
-        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token_expires = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
         access_token = create_access_token(
             data={
                 "sub": str(user.id),
@@ -313,7 +311,7 @@ async def verify_code(
             caregiver_id=pairing_code.caregiver_id,
             access_token=access_token,
             token_type="bearer",
-            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            expires_in=ACCESS_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
         )
 
     except HTTPException:

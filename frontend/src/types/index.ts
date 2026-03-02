@@ -14,7 +14,7 @@ export type RootStackParamList = {
     UserProfileDetails: { profileId: string};
     UserDashboard: undefined;
     ReminderNotification: { 
-        reminderId: number;
+        reminderId: string;
         message?: string;
         profileId?: string | number;
     };

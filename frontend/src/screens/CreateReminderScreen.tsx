@@ -12,7 +12,6 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { PlatformDatePicker, PlatformTimePicker, FilterPickerModal } from '../components';
-import { scheduleReminderWithRepetitions } from '../utils/notifications';
 import { useUserProfiles } from '../hooks';
 import { createReminder } from '../services/reminderService';
 import { createPulseAnimation, getPulseScale } from '../utils/animations';
@@ -144,25 +143,12 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
         setShowConfirmModal(false);
         
         try {
-            const reminder = await createReminder({
+            await createReminder({
                 title: reminderTitle,
                 description: reminderMessage,
                 scheduled_at: reminderDate.toISOString(),
                 user_id: String(selectedProfile),
-            })
-            const _notificationIds = await scheduleReminderWithRepetitions(
-                reminderTitle,
-                reminderMessage,
-                reminderDate,
-                {
-                    reminderId: reminder.id,
-                    message: reminderMessage,
-                    profileId: selectedProfile,
-                    profileName: selectedProfileData ? `${selectedProfileData.first_name} ${selectedProfileData.last_name}` : 'Utilisateur',
-                    allNotificationIds: []
-                }
-            );
-
+            });
 
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             navigation.navigate('Dashboard');
