@@ -36,7 +36,7 @@ def send_user_notifications() -> None:
         push_token_repo = PushTokenRepository(db)
         notification_service = NotificationService()
 
-        reminders = reminder_repo.get_reminders_due_now(window_seconds=60)
+        reminders = reminder_repo.get_reminders_due_now(window_seconds=90)
         logger.info(
             f"[Scheduler] send_user_notifications: {len(reminders)} reminders due"
         )
