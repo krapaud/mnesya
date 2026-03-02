@@ -1,6 +1,6 @@
 /**
  * Navigation type definitions for the app.
- * 
+ *
  * @module types
  */
 export type RootStackParamList = {
@@ -11,21 +11,21 @@ export type RootStackParamList = {
     UserPairing: undefined;
     Dashboard: undefined;
     CreateReminder: { profileId?: string };
-    UserProfileDetails: { profileId: string};
+    UserProfileDetails: { profileId: string };
     UserDashboard: undefined;
-    ReminderNotification: { 
+    ReminderNotification: {
         reminderId: string;
         message?: string;
         profileId?: string | number;
     };
-}
+};
 
 export type CaregiverTabsParamList = {
     Home: undefined;
     Reminders: undefined;
     Profile: undefined;
-}
+};
 
 export type UserTabsParamList = {
     Refresh: undefined;
-}
+};

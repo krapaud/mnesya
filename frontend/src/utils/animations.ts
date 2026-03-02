@@ -1,6 +1,6 @@
 /**
  * Reusable animation helpers.
- * 
+ *
  * @module animations
  */
 import { Animated } from 'react-native';
@@ -33,12 +33,14 @@ export const createBellSwingAnimation = (animatedValue: Animated.Value) => {
 
 /** Returns the rotation transform style for the bell animation. */
 export const getBellRotation = (animatedValue: Animated.Value) => ({
-    transform: [{
-        rotate: animatedValue.interpolate({
-            inputRange: [-1, 1], // Input range from animation sequence
-            outputRange: ['-15deg', '15deg'], // Corresponding rotation angles
-        }),
-    }],
+    transform: [
+        {
+            rotate: animatedValue.interpolate({
+                inputRange: [-1, 1], // Input range from animation sequence
+                outputRange: ['-15deg', '15deg'], // Corresponding rotation angles
+            }),
+        },
+    ],
 });
 
 /** Pulse animation that loops forever (opacity 1 → 0.4 → 1). */

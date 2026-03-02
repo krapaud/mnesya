@@ -5,8 +5,14 @@
  */
 import React, { useCallback, useState } from 'react';
 import {
-    View, Text, StyleSheet, TouchableOpacity,
-    Image, ScrollView, ActivityIndicator, RefreshControl,
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Image,
+    ScrollView,
+    ActivityIndicator,
+    RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -41,7 +47,13 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     /** Controls the bottom fade indicator — hidden when scrolled to the end. */
     const [showScrollFade, setShowScrollFade] = useState(true);
 
-    const handleScroll = (event: { nativeEvent: { contentOffset: { y: number }; layoutMeasurement: { height: number }; contentSize: { height: number } } }) => {
+    const handleScroll = (event: {
+        nativeEvent: {
+            contentOffset: { y: number };
+            layoutMeasurement: { height: number };
+            contentSize: { height: number };
+        };
+    }) => {
         const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
         const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 10;
         setShowScrollFade(!isAtBottom);
@@ -60,8 +72,8 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             <View style={commonStyles.header}>
                 <View style={commonStyles.headerSpacer} />
                 <View style={commonStyles.headerCenter}>
-                    <Image 
-                        source={require('../../assets/mnesya-logo.png')} 
+                    <Image
+                        source={require('../../assets/mnesya-logo.png')}
                         style={commonStyles.logo}
                     />
                     <Text style={commonStyles.appName}>Mnesya</Text>
@@ -76,26 +88,32 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
             <View style={styles.scrollContainer}>
                 {/* Action buttons */}
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={commonStyles.primaryButton}
                     onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         navigation.navigate('CreateProfile');
-                        }}>
-                    <Text style={[commonStyles.primaryButtonText, { fontSize: 20 }]}>{t('dashboard.buttons.New profile')}</Text>
+                    }}
+                >
+                    <Text style={[commonStyles.primaryButtonText, { fontSize: 20 }]}>
+                        {t('dashboard.buttons.New profile')}
+                    </Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={commonStyles.primaryButton}
                     onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         navigation.navigate('CreateReminder', {});
-                    }}>
-                    <Text style={[commonStyles.primaryButtonText, { fontSize: 20 }]}>{t('common.buttons.New reminder')}</Text>
+                    }}
+                >
+                    <Text style={[commonStyles.primaryButtonText, { fontSize: 20 }]}>
+                        {t('common.buttons.New reminder')}
+                    </Text>
                 </TouchableOpacity>
-                
+
                 <Text style={styles.sectionTitle}>{t('dashboard.profilesListTitle')}</Text>
-                
-                {/* 
+
+                {/*
                  * Scrollable list of profile cards
                  * Each card displays user name, age, and a view button to access profile details
                  * listWrapper is always in the layout to avoid position jumps
@@ -105,7 +123,9 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                     {isInitialLoading ? (
                         <View style={commonStyles.loadingContainer}>
                             <ActivityIndicator size="large" color="#4A90E2" />
-                            <Text style={commonStyles.loadingText}>{t('common.messages.loading')}</Text>
+                            <Text style={commonStyles.loadingText}>
+                                {t('common.messages.loading')}
+                            </Text>
                         </View>
                     ) : error ? (
                         <View style={commonStyles.errorContainer}>
@@ -116,30 +136,53 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                         <ScrollView
                             showsVerticalScrollIndicator={false}
                             style={styles.profilesList}
-                            refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={isRefreshing}
+                                    onRefresh={handleRefresh}
+                                />
+                            }
                             onScroll={handleScroll}
                             scrollEventThrottle={16}
                         >
                             {!userData || userData.length === 0 ? (
-                                <Text style={styles.emptyMessage}>{t('dashboard.messages.No profiles yet')}</Text>
+                                <Text style={styles.emptyMessage}>
+                                    {t('dashboard.messages.No profiles yet')}
+                                </Text>
                             ) : (
                                 userData.map((profile) => (
                                     <View key={profile.id} style={styles.profileCard}>
                                         <View style={styles.profileInfo}>
                                             <View>
-                                                <Text style={styles.textUser}>{profile.first_name + ' ' + profile.last_name}</Text>
-                                                <Text style={styles.textUserInfo}>{calculateAge(profile.birthday)} {t('common.units.years old')}</Text>
+                                                <Text style={styles.textUser}>
+                                                    {profile.first_name + ' ' + profile.last_name}
+                                                </Text>
+                                                <Text style={styles.textUserInfo}>
+                                                    {calculateAge(profile.birthday)}{' '}
+                                                    {t('common.units.years old')}
+                                                </Text>
                                             </View>
-                                            
+
                                             {/* View button with arrow icon */}
-                                            <TouchableOpacity 
+                                            <TouchableOpacity
                                                 style={styles.viewButton}
                                                 onPress={() => {
-                                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                                    navigation.navigate('UserProfileDetails', { profileId: String(profile.id) });
-                                                }}>
-                                                <Text style={styles.viewButtonText}>{t('dashboard.buttons.View')}</Text>
-                                                <Ionicons name="arrow-forward" size={20} color="#4A90E2" />
+                                                    Haptics.impactAsync(
+                                                        Haptics.ImpactFeedbackStyle.Light
+                                                    );
+                                                    navigation.navigate('UserProfileDetails', {
+                                                        profileId: String(profile.id),
+                                                    });
+                                                }}
+                                            >
+                                                <Text style={styles.viewButtonText}>
+                                                    {t('dashboard.buttons.View')}
+                                                </Text>
+                                                <Ionicons
+                                                    name="arrow-forward"
+                                                    size={20}
+                                                    color="#4A90E2"
+                                                />
                                             </TouchableOpacity>
                                         </View>
                                     </View>
@@ -172,7 +215,7 @@ const styles = StyleSheet.create({
         marginTop: 15,
         paddingBottom: 10,
     },
-    
+
     // TYPOGRAPHY
     title: {
         fontSize: 28,
@@ -184,7 +227,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
         fontWeight: 'bold',
     },
-    
+
     // PROFILE CARDS
     textUser: {
         fontSize: 18,

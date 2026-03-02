@@ -1,9 +1,9 @@
 /**
  * Generic confirmation modal component.
- * 
+ *
  * Displays a confirmation dialog with customizable title, message, icon, and buttons.
  * Useful for delete confirmations, logout confirmations, etc.
- * 
+ *
  * @module ConfirmationModal
  */
 
@@ -57,18 +57,13 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     const { t } = useTranslation();
 
     return (
-        <Modal
-            visible={visible}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={onClose}
-        >
+        <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={onClose}>
             <View style={commonStyles.modalOverlay}>
                 <View style={styles.modalContent}>
                     <Ionicons name={icon} size={60} color={iconColor} />
                     <Text style={styles.modalTitle}>{title}</Text>
                     <Text style={styles.modalMessage}>{message}</Text>
-                    
+
                     <View style={styles.modalActions}>
                         {showCancelButton && (
                             <TouchableOpacity

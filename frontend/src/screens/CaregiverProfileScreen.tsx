@@ -1,11 +1,20 @@
 /**
  * Screen showing the caregiver's profile info and settings.
- * 
+ *
  * @module CaregiverProfileScreen
  */
 
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Modal, ActivityIndicator } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Image,
+    ScrollView,
+    Modal,
+    ActivityIndicator,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -59,7 +68,7 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
     const handleConfirmLogout = async () => {
         setShowLogoutModal(false);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        
+
         try {
             await logout();
             navigation.navigate('Welcome');
@@ -80,10 +89,14 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
 
     /**
      * Handles profile update.
-     * 
+     *
      * Sends updated profile data to backend and refreshes caregiver data on success.
      */
-    const handleUpdateProfile = async (data: { first_name: string; last_name: string; email: string }) => {
+    const handleUpdateProfile = async (data: {
+        first_name: string;
+        last_name: string;
+        email: string;
+    }) => {
         try {
             await updateCaregiverProfile(data);
             await reload(); // Refresh profile data
@@ -106,33 +119,34 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
     return (
         <View style={commonStyles.container}>
             {/* Header with back button and logo */}
-        <View style={commonStyles.header}>
-            <TouchableOpacity onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                navigation.goBack();
-            }}>
-                <View style={commonStyles.ArrowIconCircle}>
-                    <Ionicons name="arrow-back" size={24} color='#4A90E2'
-                />
+            <View style={commonStyles.header}>
+                <TouchableOpacity
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        navigation.goBack();
+                    }}
+                >
+                    <View style={commonStyles.ArrowIconCircle}>
+                        <Ionicons name="arrow-back" size={24} color="#4A90E2" />
+                    </View>
+                </TouchableOpacity>
+                <View style={commonStyles.headerCenter}>
+                    <Image
+                        source={require('../../assets/mnesya-logo.png')}
+                        style={commonStyles.logo}
+                    />
+                    <Text style={commonStyles.appName}>Mnesya</Text>
                 </View>
-            </TouchableOpacity>
-            <View style={commonStyles.headerCenter}>
-                <Image 
-                    source={require('../../assets/mnesya-logo.png')} 
-                    style={commonStyles.logo}
-                />
-                <Text style={commonStyles.appName}>Mnesya</Text>
+                <TouchableOpacity
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setShowMenu(true);
+                    }}
+                    style={styles.menuButton}
+                >
+                    <Ionicons name="ellipsis-vertical" size={24} color="#4A90E2" />
+                </TouchableOpacity>
             </View>
-            <TouchableOpacity 
-                onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setShowMenu(true);
-                }}
-                style={styles.menuButton}
-            >
-                <Ionicons name="ellipsis-vertical" size={24} color="#4A90E2" />
-            </TouchableOpacity>
-        </View>
 
             {/* Loading state */}
             {loading && (
@@ -148,72 +162,82 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                     <Ionicons name="alert-circle-outline" size={48} color="#E53935" />
                     <Text style={styles.errorText}>{t(error)}</Text>
                     <TouchableOpacity style={styles.retryButton} onPress={reload}>
-                        <Text style={styles.retryButtonText}>{t('caregiverProfile.buttons.retry')}</Text>
+                        <Text style={styles.retryButtonText}>
+                            {t('caregiverProfile.buttons.retry')}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             )}
 
             {/* Content - only shown when data is loaded */}
             {!loading && !error && caregiverData && (
-            <ScrollView style={styles.scrollContainer}>
-                {/* Profile Information Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>{t('caregiverProfile.sections.accountInfo')}</Text>
-                    
-                    {/* Name */}
-                    <View style={styles.infoRow}>
-                        <Ionicons name="person-outline" size={24} color="#666666" />
-                        <View style={styles.infoContent}>
-                            <Text style={styles.infoLabel}>{t('caregiverProfile.fields.name')}</Text>
-                            <Text style={styles.infoValue}>
-                                {caregiverData.first_name} {caregiverData.last_name}
-                            </Text>
+                <ScrollView style={styles.scrollContainer}>
+                    {/* Profile Information Section */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>
+                            {t('caregiverProfile.sections.accountInfo')}
+                        </Text>
+
+                        {/* Name */}
+                        <View style={styles.infoRow}>
+                            <Ionicons name="person-outline" size={24} color="#666666" />
+                            <View style={styles.infoContent}>
+                                <Text style={styles.infoLabel}>
+                                    {t('caregiverProfile.fields.name')}
+                                </Text>
+                                <Text style={styles.infoValue}>
+                                    {caregiverData.first_name} {caregiverData.last_name}
+                                </Text>
+                            </View>
+                        </View>
+
+                        {/* Email */}
+                        <View style={styles.infoRow}>
+                            <Ionicons name="mail-outline" size={24} color="#666666" />
+                            <View style={styles.infoContent}>
+                                <Text style={styles.infoLabel}>
+                                    {t('caregiverProfile.fields.email')}
+                                </Text>
+                                <Text style={styles.infoValue}>{caregiverData.email}</Text>
+                            </View>
                         </View>
                     </View>
 
-                    {/* Email */}
-                    <View style={styles.infoRow}>
-                        <Ionicons name="mail-outline" size={24} color="#666666" />
-                        <View style={styles.infoContent}>
-                            <Text style={styles.infoLabel}>{t('caregiverProfile.fields.email')}</Text>
-                            <Text style={styles.infoValue}>{caregiverData.email}</Text>
-                        </View>
+                    {/* Actions Section */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>
+                            {t('caregiverProfile.sections.actions')}
+                        </Text>
+
+                        {/* Change Password Button */}
+                        <TouchableOpacity
+                            style={styles.actionButton}
+                            onPress={handleChangePassword}
+                        >
+                            <View style={styles.actionButtonContent}>
+                                <Ionicons name="key-outline" size={24} color="#4A90E2" />
+                                <Text style={styles.actionButtonText}>
+                                    {t('caregiverProfile.buttons.changePassword')}
+                                </Text>
+                            </View>
+                            <Ionicons name="chevron-forward" size={24} color="#999999" />
+                        </TouchableOpacity>
+
+                        {/* Logout Button */}
+                        <TouchableOpacity
+                            style={[styles.actionButton, styles.logoutButton]}
+                            onPress={handleLogout}
+                        >
+                            <View style={styles.actionButtonContent}>
+                                <Ionicons name="log-out-outline" size={24} color="#E53935" />
+                                <Text style={[styles.actionButtonText, styles.logoutText]}>
+                                    {t('caregiverProfile.buttons.logout')}
+                                </Text>
+                            </View>
+                            <Ionicons name="chevron-forward" size={24} color="#999999" />
+                        </TouchableOpacity>
                     </View>
-                </View>
-
-                {/* Actions Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>{t('caregiverProfile.sections.actions')}</Text>
-                    
-                    {/* Change Password Button */}
-                    <TouchableOpacity 
-                        style={styles.actionButton}
-                        onPress={handleChangePassword}
-                    >
-                        <View style={styles.actionButtonContent}>
-                            <Ionicons name="key-outline" size={24} color="#4A90E2" />
-                            <Text style={styles.actionButtonText}>
-                                {t('caregiverProfile.buttons.changePassword')}
-                            </Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={24} color="#999999" />
-                    </TouchableOpacity>
-
-                    {/* Logout Button */}
-                    <TouchableOpacity 
-                        style={[styles.actionButton, styles.logoutButton]}
-                        onPress={handleLogout}
-                    >
-                        <View style={styles.actionButtonContent}>
-                            <Ionicons name="log-out-outline" size={24} color="#E53935" />
-                            <Text style={[styles.actionButtonText, styles.logoutText]}>
-                                {t('caregiverProfile.buttons.logout')}
-                            </Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={24} color="#999999" />
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
+                </ScrollView>
             )}
 
             {/* Logout Confirmation Modal */}
@@ -240,7 +264,7 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
 
                         {/* Buttons */}
                         <View style={styles.modalButtons}>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={[styles.modalButton, styles.cancelButton]}
                                 onPress={handleCancelLogout}
                             >
@@ -249,7 +273,7 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                                 </Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={[styles.modalButton, styles.confirmButton]}
                                 onPress={handleConfirmLogout}
                             >
@@ -270,16 +294,13 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                     animationType="fade"
                     onRequestClose={() => setShowMenu(false)}
                 >
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={styles.menuOverlay}
                         activeOpacity={1}
                         onPress={() => setShowMenu(false)}
                     >
                         <View style={styles.menuContainer}>
-                            <TouchableOpacity 
-                                style={styles.menuItem}
-                                onPress={handleEditProfile}
-                            >
+                            <TouchableOpacity style={styles.menuItem} onPress={handleEditProfile}>
                                 <Ionicons name="create-outline" size={20} color="#4A90E2" />
                                 <Text style={styles.menuItemText}>{t('common.buttons.Edit')}</Text>
                             </TouchableOpacity>
@@ -317,14 +338,14 @@ const styles = StyleSheet.create({
         width: '100%',
         paddingBottom: 10,
     },
-    
+
     // TYPOGRAPHY
     title: {
         fontSize: 28,
         fontWeight: 'bold',
         marginBottom: 10,
     },
-    
+
     // SECTIONS
     section: {
         marginBottom: 30,
