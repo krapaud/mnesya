@@ -8,7 +8,7 @@
  * @component
  */
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -32,7 +32,7 @@ type Props = CompositeScreenProps<
 
 const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
-    const { reminderData, loading: _loading, error: _error, reload } = useCaregiverReminders();
+    const { reminderData, loading, error, reload } = useCaregiverReminders();
 
     useFocusEffect(
         useCallback(() => {
@@ -219,6 +219,19 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                         confirmColor="#E53935"
                     />
 
+                    {/* Reminder delete error */}
+                    <ConfirmationModal
+                        visible={deleteError}
+                        onClose={() => setDeleteError(false)}
+                        title={t('common.errors.genericErrorTitle')}
+                        message={t('common.errors.failedToDeleteReminder')}
+                        icon="alert-circle-outline"
+                        iconColor="#E53935"
+                        confirmText="OK"
+                        confirmColor="#4A90E2"
+                        showCancelButton={false}
+                    />
+
                     {/* Profile Picker Modal */}
                     <FilterPickerModal
                         visible={showProfilePicker}
@@ -260,9 +273,21 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                     )}
 
                     {/* Reminders list */}
+                    {loading && (
+                        <View style={commonStyles.loadingContainer}>
+                            <ActivityIndicator size="large" color="#4A90E2" />
+                            <Text style={commonStyles.loadingText}>{t('common.messages.loading')}</Text>
+                        </View>
+                    )}
+                    {error && !loading && (
+                        <View style={commonStyles.errorContainer}>
+                            <Ionicons name="alert-circle-outline" size={48} color="#E53935" />
+                            <Text style={commonStyles.errorText}>{t(error)}</Text>
+                        </View>
+                    )}
                     <ScrollView showsVerticalScrollIndicator={false} style={styles.remindersList}>
-                        {(getFilteredReminders?.() ?? []).length === 0 ? (
-                            <Text style={commonStyles.emptyMessage}>No reminders yet</Text>
+                        {!loading && !error && (getFilteredReminders?.() ?? []).length === 0 ? (
+                            <Text style={commonStyles.emptyMessage}>{t('reminders.messages.noReminders')}</Text>
                         ) : (
                             (getFilteredReminders?.() ?? []).map((reminder) => (
                                 <ReminderCard

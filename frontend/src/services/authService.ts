@@ -7,6 +7,7 @@ import apiClient from './api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { saveToken, deleteToken } from './tokenService';
 import { LoginData, RegisterData, AuthResponse, CaregiverProfile } from '../types/interfaces';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /** Logs in a caregiver and stores the token. */
 export const login = async (credentials: LoginData): Promise<AuthResponse> => {
