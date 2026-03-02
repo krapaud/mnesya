@@ -233,9 +233,9 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                     />
                     <TouchableOpacity onPress={handleShowPassword}>
                         <Ionicons
-                            name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                            name="eye-outline"
                             size={22}
-                            color="#999999"
+                            color={showPassword ? '#999999' : '#4A90E2'}
                         />
                     </TouchableOpacity>
                 </View>
@@ -261,9 +261,9 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                     />
                     <TouchableOpacity onPress={handleShowConfirmPassword}>
                         <Ionicons
-                            name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                            name="eye-outline"
                             size={22}
-                            color="#999999"
+                            color={showConfirmPassword ? '#999999' : '#4A90E2'}
                         />
                     </TouchableOpacity>
                 </View>

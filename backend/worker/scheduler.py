@@ -8,6 +8,7 @@ This module defines background jobs that run every 60 seconds to:
 The scheduler uses APScheduler's BackgroundScheduler with IntervalTrigger.
 Each job opens its own database session to avoid circular import issues.
 """
+
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -28,6 +29,7 @@ def send_user_notifications() -> None:
     a push notification to the user's registered devices.
     """
     from app import SessionLocal
+
     db: Session = SessionLocal()
     try:
         reminder_repo = ReminderRepository(db)
@@ -35,11 +37,18 @@ def send_user_notifications() -> None:
         notification_service = NotificationService()
 
         reminders = reminder_repo.get_reminders_due_now(window_seconds=60)
-        logger.info(f"[Scheduler] send_user_notifications: {len(reminders)} reminders due")
+        logger.info(
+            f"[Scheduler] send_user_notifications: {len(reminders)} reminders due"
+        )
 
         for reminder in reminders:
-            tokens = [t.token for t in push_token_repo.get_active_tokens_by_user(reminder.user_id)]
-            logger.info(f"[Scheduler] reminder {reminder.id}: {len(tokens)} user token(s)")
+            tokens = [
+                t.token
+                for t in push_token_repo.get_active_tokens_by_user(reminder.user_id)
+            ]
+            logger.info(
+                f"[Scheduler] reminder {reminder.id}: {len(tokens)} user token(s)"
+            )
             if not tokens:
                 continue
             notification_service.send_reminder_notification(
@@ -47,7 +56,7 @@ def send_user_notifications() -> None:
                 reminder_title=reminder.title,
                 reminder_description=reminder.description,
                 reminder_id=str(reminder.id),
-                extra_data={"isUserNotification": True}
+                extra_data={"isUserNotification": True},
             )
     except Exception as e:
         logger.error(f"[Scheduler] Error in send_user_notifications: {e}")
@@ -64,6 +73,7 @@ def send_user_retry(offset_minutes: int) -> None:
         offset_minutes (int): Number of minutes after scheduled_at to target.
     """
     from app import SessionLocal
+
     db: Session = SessionLocal()
     try:
         reminder_repo = ReminderRepository(db)
@@ -73,7 +83,10 @@ def send_user_retry(offset_minutes: int) -> None:
         reminders = reminder_repo.get_reminders_at_offset(offset_minutes=offset_minutes)
 
         for reminder in reminders:
-            tokens = [t.token for t in push_token_repo.get_active_tokens_by_user(reminder.user_id)]
+            tokens = [
+                t.token
+                for t in push_token_repo.get_active_tokens_by_user(reminder.user_id)
+            ]
             if not tokens:
                 continue
             notification_service.send_reminder_notification(
@@ -81,7 +94,7 @@ def send_user_retry(offset_minutes: int) -> None:
                 reminder_title=reminder.title,
                 reminder_description=reminder.description,
                 reminder_id=str(reminder.id),
-                extra_data={"isUserNotification": True, "retry": offset_minutes}
+                extra_data={"isUserNotification": True, "retry": offset_minutes},
             )
     except Exception as e:
         logger.error(f"[Scheduler] Error in send_user_retry: {e}")
@@ -97,6 +110,7 @@ def send_caregiver_escalations():
     The notification language is determined by the caregiver's device locale.
     """
     from app import SessionLocal
+
     db: Session = SessionLocal()
     try:
         reminder_repo = ReminderRepository(db)
@@ -105,10 +119,14 @@ def send_caregiver_escalations():
         notification_service = NotificationService()
 
         reminders = reminder_repo.get_reminders_to_escalate()
-        logger.info(f"[Scheduler] send_caregiver_escalations: {len(reminders)} reminders to escalate")
+        logger.info(
+            f"[Scheduler] send_caregiver_escalations: {len(reminders)} reminders to escalate"
+        )
 
         for reminder in reminders:
-            token_objects = push_token_repo.get_active_tokens_by_caregiver(reminder.caregiver_id)
+            token_objects = push_token_repo.get_active_tokens_by_caregiver(
+                reminder.caregiver_id
+            )
 
             # Send notification to caregiver only if they have registered tokens
             if token_objects:
@@ -117,30 +135,36 @@ def send_caregiver_escalations():
 
                 user_name = f"{getattr(reminder, 'user_first_name', '')} {getattr(reminder, 'user_last_name', '')}".strip()
                 if my_locale == "fr":
-                    my_title = reminder.title
-                    my_body = f"⚠️ {user_name} n'a pas répondu à : {reminder.title}"
+                    my_title = "⚠️ Alerte Mnesya"
+                    my_body = f"{user_name} n'a pas répondu à : {reminder.title}"
                 else:
-                    my_title = reminder.title
-                    my_body = f"⚠️ {user_name} has not responded to: {reminder.title}"
+                    my_title = "⚠️ Mnesya Alert"
+                    my_body = f"{user_name} has not responded to: {reminder.title}"
 
                 notification_service.send_notification(
                     tokens=token_strings,
                     title=my_title,
                     body=my_body,
-                    data={"type": "caregiver_alert", "reminder_id": str(reminder.id)}
+                    data={"type": "caregiver_alert", "reminder_id": str(reminder.id)},
                 )
 
             # Always mark reminder as MISSED, even if no caregiver token exists
             from app.models.reminder_status import ReminderStatusModel
+
             missed_status = ReminderStatusModel()
             missed_status.status = "MISSED"
             missed_status.reminder_id = reminder.id
-            logger.info(f"[Scheduler] Creating MISSED status for reminder {reminder.id}")
+            logger.info(
+                f"[Scheduler] Creating MISSED status for reminder {reminder.id}"
+            )
             result = reminder_status_repo.add(missed_status)
             logger.info(f"[Scheduler] MISSED status created: {result.id}")
     except Exception as e:
         import traceback
-        logger.error(f"[Scheduler] Error in send_caregiver_escalations: {e}\n{traceback.format_exc()}")
+
+        logger.error(
+            f"[Scheduler] Error in send_caregiver_escalations: {e}\n{traceback.format_exc()}"
+        )
     finally:
         db.close()
 
@@ -158,19 +182,19 @@ def start_scheduler():
     my_scheduler.add_job(
         send_user_notifications,
         IntervalTrigger(seconds=60),
-        id="send_user_notifications"
+        id="send_user_notifications",
     )
 
     my_scheduler.add_job(
         lambda: send_user_retry(5),
         IntervalTrigger(seconds=60),
-        id="send_user_retry_5min"
+        id="send_user_retry_5min",
     )
 
     my_scheduler.add_job(
         send_caregiver_escalations,
         IntervalTrigger(seconds=60),
-        id="send_caregiver_escalations"
+        id="send_caregiver_escalations",
     )
 
     my_scheduler.start()
@@ -182,12 +206,14 @@ if __name__ == "__main__":
     import time
     import os
     import sys
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
         stream=sys.stdout,
     )
     from app import init_app
+
     init_app(os.environ["DATABASE_URL"])
     scheduler = start_scheduler()
     try:
