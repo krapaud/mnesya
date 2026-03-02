@@ -1,3 +1,9 @@
+"""Alembic environment configuration.
+
+This module configures Alembic for database migrations.
+It supports both offline and online migration modes.
+"""
+
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config

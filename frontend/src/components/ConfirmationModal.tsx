@@ -22,7 +22,7 @@ interface ConfirmationModalProps {
     /** Callback to close the modal */
     onClose: () => void;
     /** Callback when confirm button is pressed */
-    onConfirm: () => void;
+    onConfirm?: () => void;
     /** Modal title */
     title: string;
     /** Modal message */
@@ -37,6 +37,8 @@ interface ConfirmationModalProps {
     confirmColor?: string;
     /** Cancel button text (default: 'Cancel') */
     cancelText?: string;
+    /** Whether to show the cancel button (default: true). Set to false for info/error modals with a single OK button. */
+    showCancelButton?: boolean;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -50,6 +52,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     confirmText,
     confirmColor = '#E53935',
     cancelText,
+    showCancelButton = true,
 }) => {
     const { t } = useTranslation();
 
@@ -67,18 +70,20 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                     <Text style={styles.modalMessage}>{message}</Text>
                     
                     <View style={styles.modalActions}>
-                        <TouchableOpacity
-                            style={[styles.modalButton, styles.cancelButton]}
-                            onPress={onClose}
-                        >
-                            <Text style={styles.cancelButtonText}>
-                                {cancelText || t('common.buttons.Cancel')}
-                            </Text>
-                        </TouchableOpacity>
+                        {showCancelButton && (
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.cancelButton]}
+                                onPress={onClose}
+                            >
+                                <Text style={styles.cancelButtonText}>
+                                    {cancelText || t('common.buttons.Cancel')}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
 
                         <TouchableOpacity
                             style={[styles.modalButton, { backgroundColor: confirmColor }]}
-                            onPress={onConfirm}
+                            onPress={onConfirm ?? onClose}
                         >
                             <Text style={styles.confirmButtonText}>
                                 {confirmText || t('common.buttons.Confirm')}
