@@ -7,6 +7,8 @@ Mobile reminder application for elderly people and their caregivers.
 - [About](#about)
 - [Features](#features)
 - [Architecture](#architecture)
+- [Application Diagram](#application-diagram)
+- [Database Schema](#database-schema)
 - [Technologies](#technologies)
 - [Installation](#installation)
 - [Project Structure](#project-structure)
@@ -86,32 +88,13 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 
 ## Architecture
 
-### Components
+### Application Diagram
 
-```text
-┌─────────────────────┐         ┌─────────────────────┐
-│  Frontend Mobile    │         │  Frontend Mobile    │
-│   (Caregiver)       │         │  (User)             │
-│  React Native +     │         │  React Native +     │
-│  Expo Notifications │         │  Expo Notifications │
-└──────────┬──────────┘         └──────────┬──────────┘
-           │                               │
-           └───────────┬───────────────────┘
-                       │
-                       ▼
-              ┌────────────────┐
-              │   Backend API  │ Auth, Profiles, Pairing [done]
-              │  Python/FastAPI│ Reminders [done]
-              └────────┬───────┘
-                       │
-          ┌────────────┼────────────┐
-          ▼            ▼            ▼
-    ┌──────────┐  ┌──────────┐  ┌──────────┐
-    │PostgreSQL│  │APScheduler│ │Expo Push │
-    │ Database │  │  Worker   │  │  Service │
-    │  [done]  │  │ [config]  │  │[pending] │
-    └──────────┘  └──────────┘  └──────────┘
-```
+![Application Architecture](docs/App-Diagram-Structure.png)
+
+### Database Schema
+
+![Database Schema](docs/ER-Diagram-Database.png)
 
 ### Main Data Flows (Current Implementation)
 
