@@ -19,12 +19,12 @@ class ReminderRepository(BaseRepository[ReminderModel]):
     Extends BaseRepository with reminder-specific query methods
     for filtering and ordering reminders by various criteria.
     """
+
     def __init__(self, db: Session):
         """Initialize the ReminderRepository with ReminderModel and database session."""
         super().__init__(ReminderModel, db)
 
-    def get_reminders_by_caregiver(
-            self, caregiver_id: UUID) -> List[ReminderModel]:
+    def get_reminders_by_caregiver(self, caregiver_id: UUID) -> List[ReminderModel]:
         """Get all reminders created by a specific caregiver, enriched with user name.
 
         Args:
@@ -66,7 +66,9 @@ class ReminderRepository(BaseRepository[ReminderModel]):
             reminder.user_last_name = last_name
         return [r for r, _, _ in results]
 
-    def get_upcoming_reminders(self, user_id: UUID, limit: int = 5) -> List[ReminderModel]:
+    def get_upcoming_reminders(
+        self, user_id: UUID, limit: int = 5
+    ) -> List[ReminderModel]:
         """Get upcoming reminders for a user.
 
         Args:
@@ -79,55 +81,88 @@ class ReminderRepository(BaseRepository[ReminderModel]):
         Note:
             Only returns reminders scheduled for current time or later
         """
-        return self.db.query(self.model).filter(
-            self.model._user_id == user_id,
-            self.model._scheduled_at >= datetime.now()
-        ).order_by(self.model._scheduled_at.asc()).limit(limit).all()
+        return (
+            self.db.query(self.model)
+            .filter(
+                self.model._user_id == user_id,
+                self.model._scheduled_at >= datetime.now(),
+            )
+            .order_by(self.model._scheduled_at.asc())
+            .limit(limit)
+            .all()
+        )
 
     def get_reminders_due_now(self, window_seconds: int = 60) -> List[ReminderModel]:
         """Get reminders that are due within the current time window.
+
+        Excludes reminders already responded to by the user (DONE, POSTPONED, UNABLE)
+        to avoid sending duplicate notifications across consecutive job runs.
 
         Args:
             window_seconds (int): Size of the time window in seconds. Defaults to 60.
 
         Returns:
             List[ReminderModel]: Reminders whose scheduled_at falls between
-            (now - window_seconds) and now.
+            (now - window_seconds) and now, with no terminal status yet.
         """
         now = datetime.utcnow()
         start = now - timedelta(seconds=window_seconds)
-        return self.db.query(self.model).filter(
-            self.model._scheduled_at >= start,
-            self.model._scheduled_at <= now
-        ).all()
 
-    def get_reminders_at_offset(self, offset_minutes: int = 60, statuses: List[str] = None) -> List[ReminderModel]:
+        resolved_ids = self.db.query(ReminderStatusModel._reminder_id).filter(
+            ReminderStatusModel._status.in_(["DONE", "POSTPONED", "UNABLE", "MISSED"])
+        )
+
+        return (
+            self.db.query(self.model)
+            .filter(
+                self.model._scheduled_at >= start,
+                self.model._scheduled_at <= now,
+                ~self.model._id.in_(resolved_ids),
+            )
+            .all()
+        )
+
+    def get_reminders_at_offset(
+        self, offset_minutes: int = 60, statuses: List[str] = None
+    ) -> List[ReminderModel]:
         """Get reminders scheduled exactly offset_minutes ago (±30 seconds).
 
         Used for retry logic: finds reminders whose scheduled_at was
-        approximately offset_minutes ago, regardless of their current status.
+        approximately offset_minutes ago and have not yet been responded to.
+        Excludes reminders with a terminal status (DONE, POSTPONED, UNABLE, MISSED)
+        to avoid re-notifying users who already responded.
 
         Args:
             offset_minutes (int): Target offset in minutes from now. Defaults to 60.
             statuses (List[str]): Unused — kept for API compatibility.
 
         Returns:
-            List[ReminderModel]: Reminders within the ±30s window around the target time.
+            List[ReminderModel]: Unresolved reminders within the ±30s window around the target time.
         """
         now = datetime.utcnow()
         target = now - timedelta(minutes=offset_minutes)
         start = target - timedelta(seconds=30)
         end = target + timedelta(seconds=30)
-        return self.db.query(self.model).filter(
-            self.model._scheduled_at >= start,
-            self.model._scheduled_at <= end
-        ).all()
+
+        resolved_ids = self.db.query(ReminderStatusModel._reminder_id).filter(
+            ReminderStatusModel._status.in_(["DONE", "POSTPONED", "UNABLE", "MISSED"])
+        )
+
+        return (
+            self.db.query(self.model)
+            .filter(
+                self.model._scheduled_at >= start,
+                self.model._scheduled_at <= end,
+                ~self.model._id.in_(resolved_ids),
+            )
+            .all()
+        )
 
     def get_reminders_to_escalate(self, delay_minutes: int = 10) -> List[ReminderModel]:
         """Get reminders that should be escalated to the caregiver.
 
         Returns all reminders older than delay_minutes that have never been
-        resolved (confirmed, done or missed). Using a range instead of a strict
+        resolved (DONE, POSTPONED, UNABLE or MISSED). Using a range instead of a strict
         window makes the query resilient to worker restarts: any reminder missed
         during a downtime will be caught on the next run.
 
@@ -141,10 +176,9 @@ class ReminderRepository(BaseRepository[ReminderModel]):
         escalate_after = now - timedelta(minutes=delay_minutes)
         escalate_before = now - timedelta(hours=24)  # ignore reminders older than 24h
 
-        # Subquery: reminder IDs that have already been confirmed, done or missed
-        resolved_ids = (
-            self.db.query(ReminderStatusModel._reminder_id)
-            .filter(ReminderStatusModel._status.in_(["CONFIRMED", "DONE", "MISSED"]))
+        # Subquery: reminder IDs that have already been responded to or missed
+        resolved_ids = self.db.query(ReminderStatusModel._reminder_id).filter(
+            ReminderStatusModel._status.in_(["DONE", "POSTPONED", "UNABLE", "MISSED"])
         )
 
         # Return all unresolved reminders past the escalation threshold (within last 24h)
@@ -154,7 +188,7 @@ class ReminderRepository(BaseRepository[ReminderModel]):
             .filter(
                 self.model._scheduled_at <= escalate_after,
                 self.model._scheduled_at >= escalate_before,
-                ~self.model._id.in_(resolved_ids)
+                ~self.model._id.in_(resolved_ids),
             )
             .all()
         )
