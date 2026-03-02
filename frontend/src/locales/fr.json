@@ -27,7 +27,9 @@
         "failedToUpdateProfile": "Échec de la mise à jour du profil",
         "failedToDeleteProfile": "Échec de la suppression du profil",
         "failedToLoadReminders": "Échec du chargement des rappels",
-        "failedToLoadRemindersStatus": "Échec du chargement du statut des rappels"
+        "failedToLoadRemindersStatus": "Échec du chargement du statut des rappels",
+        "failedToDeleteReminder": "Impossible de supprimer le rappel. Veuillez réessayer.",
+        "genericErrorTitle": "Une erreur est survenue"
     },
     "pickersText": {
         "All Profiles": "Tous",

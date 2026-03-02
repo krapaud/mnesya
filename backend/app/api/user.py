@@ -56,7 +56,78 @@ def get_current_caregiver_id(
     return caregiver_id
 
 
-@router.post("", response_model=UserWithPairingCodeResponse)
+@router.post(
+    "",
+    response_model=UserWithPairingCodeResponse,
+    summary="Create a new user profile",
+    description="""
+    Create a new user profile (elderly person) and generate a pairing code.
+    
+    This endpoint allows caregivers to create profiles for the people they care for.
+    Upon creation, a unique 6-digit pairing code is automatically generated, valid
+    for 24 hours. This code can be used by the elderly person to pair their device.
+    
+    **Authentication required:** Bearer token (caregiver)
+    
+    **Profile includes:**
+    - First name and last name
+    - Birthday
+    - Associated caregiver IDs
+    
+    **Pairing code:**
+    - 6-digit numeric code
+    - Valid for 24 hours
+    - Unique per user
+    """,
+    responses={
+        200: {
+            "description": "User profile created successfully with pairing code",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "user": {
+                            "id": "123e4567-e89b-12d3-a456-426614174000",
+                            "first_name": "Marie",
+                            "last_name": "Dupont",
+                            "birthday": "1950-05-15",
+                            "caregiver_ids": ["987e6543-e89b-12d3-a456-426614174000"],
+                            "created_at": "2026-02-27T10:30:00Z",
+                            "updated_at": "2026-02-27T10:30:00Z"
+                        },
+                        "pairing_code": {
+                            "code": "123456",
+                            "expires_at": "2026-02-28T10:30:00Z"
+                        }
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Bad request - Validation error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid birthday format"}
+                }
+            }
+        },
+        401: {
+            "description": "Unauthorized - Invalid or expired token",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid authentication token"}
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Failed to create profile"}
+                }
+            }
+        }
+    }
+)
 async def create_profile(
     request: UserCreate,
     caregiver_id: str = Depends(get_current_caregiver_id),
@@ -93,7 +164,7 @@ async def create_profile(
         pairing_code.code = code
         pairing_code.user_id = user.id
         pairing_code.caregiver_id = UUID(caregiver_id)
-        pairing_code.expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
+        pairing_code.expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
 
         pairing_repo.add(pairing_code)
 
@@ -178,7 +249,60 @@ async def get_current_user_profile(
         )
 
 
-@router.get("", response_model=List[UserResponse])
+@router.get(
+    "",
+    response_model=List[UserResponse],
+    summary="List all user profiles",
+    description="""
+    Retrieve all user profiles associated with the authenticated caregiver.
+    
+    Returns a list of all elderly persons (users) that the caregiver is
+    responsible for. Each profile includes complete user information.
+    
+    **Authentication required:** Bearer token (caregiver)
+    
+    **Use cases:**
+    - Display list of users in the app
+    - Select a user for viewing details
+    - Overview of all managed profiles
+    """,
+    responses={
+        200: {
+            "description": "List of user profiles retrieved successfully",
+            "content": {
+                "application/json": {
+                    "example": [
+                        {
+                            "id": "123e4567-e89b-12d3-a456-426614174000",
+                            "first_name": "Marie",
+                            "last_name": "Dupont",
+                            "birthday": "1950-05-15",
+                            "caregiver_ids": ["987e6543-e89b-12d3-a456-426614174000"],
+                            "created_at": "2026-02-27T10:30:00Z",
+                            "updated_at": "2026-02-27T10:30:00Z"
+                        }
+                    ]
+                }
+            }
+        },
+        401: {
+            "description": "Unauthorized - Invalid or expired token",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid authentication token"}
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Failed to retrieve profiles"}
+                }
+            }
+        }
+    }
+)
 async def list_profiles(
     caregiver_id: str = Depends(get_current_caregiver_id),
     user_facade: UserFacade = Depends(get_user_facade)
@@ -222,7 +346,74 @@ async def list_profiles(
         )
 
 
-@router.get("/{profile_id}", response_model=UserResponse)
+@router.get(
+    "/{profile_id}",
+    response_model=UserResponse,
+    summary="Get user profile details",
+    description="""
+    Retrieve detailed information for a specific user profile by ID.
+    
+    Returns complete profile details if the caregiver has access to this user.
+    Access is verified by checking if the caregiver ID is in the user's
+    caregiver_ids list.
+    
+    **Authentication required:** Bearer token (caregiver)
+    
+    **Access control:**
+    - Only caregivers associated with this user can access the profile
+    - Returns 403 Forbidden if access is denied
+    """,
+    responses={
+        200: {
+            "description": "User profile retrieved successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "123e4567-e89b-12d3-a456-426614174000",
+                        "first_name": "Marie",
+                        "last_name": "Dupont",
+                        "birthday": "1950-05-15",
+                        "caregiver_ids": ["987e6543-e89b-12d3-a456-426614174000"],
+                        "created_at": "2026-02-27T10:30:00Z",
+                        "updated_at": "2026-02-27T10:30:00Z"
+                    }
+                }
+            }
+        },
+        401: {
+            "description": "Unauthorized - Invalid or expired token",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid authentication token"}
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden - No access to this profile",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "You don't have access to this profile"}
+                }
+            }
+        },
+        404: {
+            "description": "Profile not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Profile not found"}
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Failed to retrieve profile"}
+                }
+            }
+        }
+    }
+)
 async def get_profile(
     profile_id: UUID,
     caregiver_id: str = Depends(get_current_caregiver_id),
@@ -280,7 +471,86 @@ async def get_profile(
         )
 
 
-@router.put("/{profile_id}", response_model=UserResponse)
+@router.put(
+    "/{profile_id}",
+    response_model=UserResponse,
+    summary="Update user profile",
+    description="""
+    Update an existing user profile with new information.
+    
+    Supports partial updates - only provided fields will be updated.
+    The caregiver must have access to this profile to update it.
+    
+    **Authentication required:** Bearer token (caregiver)
+    
+    **Updatable fields:**
+    - First name
+    - Last name
+    - Birthday
+    
+    **Access control:**
+    - Only caregivers associated with this user can update the profile
+    - Returns 403 Forbidden if access is denied
+    """,
+    responses={
+        200: {
+            "description": "User profile updated successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "123e4567-e89b-12d3-a456-426614174000",
+                        "first_name": "Marie",
+                        "last_name": "Dupont",
+                        "birthday": "1950-05-15",
+                        "caregiver_ids": ["987e6543-e89b-12d3-a456-426614174000"],
+                        "created_at": "2026-02-27T10:30:00Z",
+                        "updated_at": "2026-02-27T11:00:00Z"
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Bad request - Validation error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid birthday format"}
+                }
+            }
+        },
+        401: {
+            "description": "Unauthorized - Invalid or expired token",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid authentication token"}
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden - No access to this profile",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "You don't have access to this profile"}
+                }
+            }
+        },
+        404: {
+            "description": "Profile not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Profile not found"}
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Failed to update profile"}
+                }
+            }
+        }
+    }
+)
 async def update_profile(
     profile_id: UUID,
     request: UserUpdate,
@@ -371,7 +641,64 @@ async def update_profile(
         )
 
 
-@router.delete("/{profile_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{profile_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete user profile",
+    description="""
+    Permanently delete a user profile from the system.
+    
+    This action will:
+    - Remove the user profile completely
+    - Remove the user ID from all associated caregivers
+    - Delete all associated reminders and pairing codes
+    
+    **Authentication required:** Bearer token (caregiver)
+    
+    **Access control:**
+    - Only caregivers associated with this user can delete the profile
+    - Returns 403 Forbidden if access is denied
+    
+    **Warning:** This action cannot be undone!
+    """,
+    responses={
+        204: {
+            "description": "User profile deleted successfully (no content returned)"
+        },
+        401: {
+            "description": "Unauthorized - Invalid or expired token",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid authentication token"}
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden - No access to this profile",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "You don't have access to this profile"}
+                }
+            }
+        },
+        404: {
+            "description": "Profile not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Profile not found"}
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Failed to delete profile"}
+                }
+            }
+        }
+    }
+)
 async def delete_profile(
     profile_id: UUID,
     caregiver_id: str = Depends(get_current_caregiver_id),

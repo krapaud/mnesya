@@ -59,7 +59,68 @@ def build_reminder_response(reminder) -> ReminderResponse:
     )
 
 
-@router.get("/caregiver", response_model=List[ReminderResponse])
+@router.get(
+    "/caregiver",
+    response_model=List[ReminderResponse],
+    summary="Get all reminders by caregiver",
+    description="""
+    Retrieve all reminders created by the authenticated caregiver.
+    
+    Returns a list of all reminders that the caregiver has created for their
+    users. This includes reminders for all users associated with the caregiver.
+    
+    **Authentication required:** Bearer token (caregiver)
+    
+    **Response includes:**
+    - Reminder details (title, description, scheduled time)
+    - Associated user information (first name, last name)
+    - Creation and update timestamps
+    
+    **Use cases:**
+    - Display all reminders in the caregiver's dashboard
+    - Filter and search across all managed reminders
+    - Overview of upcoming reminders for all users
+    """,
+    responses={
+        200: {
+            "description": "List of reminders retrieved successfully",
+            "content": {
+                "application/json": {
+                    "example": [
+                        {
+                            "id": "123e4567-e89b-12d3-a456-426614174000",
+                            "title": "Take medication",
+                            "description": "Take blood pressure medication with water",
+                            "scheduled_at": "2026-02-27T14:00:00Z",
+                            "caregiver_id": "987e6543-e89b-12d3-a456-426614174000",
+                            "user_id": "456e7890-e89b-12d3-a456-426614174000",
+                            "user_first_name": "Marie",
+                            "user_last_name": "Dupont",
+                            "created_at": "2026-02-27T10:30:00Z",
+                            "updated_at": "2026-02-27T10:30:00Z"
+                        }
+                    ]
+                }
+            }
+        },
+        401: {
+            "description": "Unauthorized - Invalid or expired token",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Could not validate credentials"}
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Failed to retrieve reminders"}
+                }
+            }
+        }
+    }
+)
 async def get_all_reminder_by_caregiver(
     caregiver_id: str = Depends(get_caregiver_id),
     reminder_facade: ReminderFacade = Depends(get_reminder_facade),
@@ -94,7 +155,72 @@ async def get_all_reminder_by_caregiver(
         )
 
 
-@router.get("/user", response_model=List[ReminderResponse])
+@router.get(
+    "/user",
+    response_model=List[ReminderResponse],
+    summary="Get all reminders for user",
+    description="""
+    Retrieve all reminders assigned to the authenticated user.
+    
+    Returns a list of all reminders that have been created for the currently
+    authenticated user (elderly person). This endpoint is typically used by
+    the user's mobile app to display their personal reminders.
+    
+    **Authentication required:** Bearer token (user)
+    
+    **Note:** The user_id is extracted from the JWT token, so users can only
+    see their own reminders.
+    
+    **Response includes:**
+    - Reminder details (title, description, scheduled time)
+    - Caregiver information
+    - Creation and update timestamps
+    
+    **Use cases:**
+    - Display reminders in the user's app
+    - Show upcoming reminders on the home screen
+    - List of all assigned tasks/reminders
+    """,
+    responses={
+        200: {
+            "description": "List of user reminders retrieved successfully",
+            "content": {
+                "application/json": {
+                    "example": [
+                        {
+                            "id": "123e4567-e89b-12d3-a456-426614174000",
+                            "title": "Take medication",
+                            "description": "Take blood pressure medication with water",
+                            "scheduled_at": "2026-02-27T14:00:00Z",
+                            "caregiver_id": "987e6543-e89b-12d3-a456-426614174000",
+                            "user_id": "456e7890-e89b-12d3-a456-426614174000",
+                            "user_first_name": "Marie",
+                            "user_last_name": "Dupont",
+                            "created_at": "2026-02-27T10:30:00Z",
+                            "updated_at": "2026-02-27T10:30:00Z"
+                        }
+                    ]
+                }
+            }
+        },
+        401: {
+            "description": "Unauthorized - Invalid or expired token",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Could not validate credentials"}
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Failed to retrieve reminders"}
+                }
+            }
+        }
+    }
+)
 async def get_all_reminder_by_user(
     user_id: str = Depends(get_caregiver_id),
     reminder_facade: ReminderFacade = Depends(get_reminder_facade),
@@ -127,7 +253,69 @@ async def get_all_reminder_by_user(
         )
 
 
-@router.get("/{reminder_id}", response_model=ReminderResponse)
+@router.get(
+    "/{reminder_id}",
+    response_model=ReminderResponse,
+    summary="Get reminder details",
+    description="""
+    Retrieve detailed information for a specific reminder by ID.
+    
+    Returns complete details for a single reminder including title, description,
+    scheduled time, and associated user information.
+    
+    **Authentication required:** Bearer token (caregiver or user)
+    
+    **Use cases:**
+    - View detailed reminder information
+    - Edit reminder (get current values)
+    - Display reminder details in a modal/drawer
+    """,
+    responses={
+        200: {
+            "description": "Reminder details retrieved successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "123e4567-e89b-12d3-a456-426614174000",
+                        "title": "Take medication",
+                        "description": "Take blood pressure medication with water",
+                        "scheduled_at": "2026-02-27T14:00:00Z",
+                        "caregiver_id": "987e6543-e89b-12d3-a456-426614174000",
+                        "user_id": "456e7890-e89b-12d3-a456-426614174000",
+                        "user_first_name": "Marie",
+                        "user_last_name": "Dupont",
+                        "created_at": "2026-02-27T10:30:00Z",
+                        "updated_at": "2026-02-27T10:30:00Z"
+                    }
+                }
+            }
+        },
+        401: {
+            "description": "Unauthorized - Invalid or expired token",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Could not validate credentials"}
+                }
+            }
+        },
+        404: {
+            "description": "Reminder not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "reminder not found"}
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Failed to retrieve reminder"}
+                }
+            }
+        }
+    }
+)
 async def get_reminder(
     reminder_id: UUID,
     reminder_facade: ReminderFacade = Depends(get_reminder_facade),
@@ -167,7 +355,87 @@ async def get_reminder(
         )
 
 
-@router.post("", response_model=ReminderResponse)
+@router.post(
+    "",
+    response_model=ReminderResponse,
+    summary="Create a new reminder",
+    description="""
+    Create a new reminder for a user.
+    
+    Creates a reminder that will be assigned to a specific user. The authenticated
+    caregiver must have access to the user to create reminders for them.
+    
+    **Authentication required:** Bearer token (caregiver)
+    
+    **Required fields:**
+    - title: Short descriptive title
+    - description: Detailed description of the reminder
+    - scheduled_at: When the reminder should trigger (ISO 8601 datetime)
+    - user_id: UUID of the user to assign the reminder to
+    
+    **Access control:**
+    - Caregiver must be associated with the user
+    - Returns 403 Forbidden if access is denied
+    
+    **Use cases:**
+    - Create medication reminders
+    - Schedule appointments
+    - Set up daily task reminders
+    """,
+    responses={
+        200: {
+            "description": "Reminder created successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "123e4567-e89b-12d3-a456-426614174000",
+                        "title": "Take medication",
+                        "description": "Take blood pressure medication with water",
+                        "scheduled_at": "2026-02-27T14:00:00Z",
+                        "caregiver_id": "987e6543-e89b-12d3-a456-426614174000",
+                        "user_id": "456e7890-e89b-12d3-a456-426614174000",
+                        "user_first_name": "Marie",
+                        "user_last_name": "Dupont",
+                        "created_at": "2026-02-27T10:30:00Z",
+                        "updated_at": "2026-02-27T10:30:00Z"
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Bad request - Validation error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid scheduled_at format"}
+                }
+            }
+        },
+        401: {
+            "description": "Unauthorized - Invalid or expired token",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Could not validate credentials"}
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden - No access to this user",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "You don't have access to this user"}
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Failed to create reminder"}
+                }
+            }
+        }
+    }
+)
 async def create_reminder(
     request: ReminderCreate,
     caregiver_id: str = Depends(get_caregiver_id),
@@ -230,7 +498,94 @@ async def create_reminder(
         )
 
 
-@router.put("/{reminder_id}", response_model=ReminderResponse)
+@router.put(
+    "/{reminder_id}",
+    response_model=ReminderResponse,
+    summary="Update reminder",
+    description="""
+    Update an existing reminder's details.
+    
+    Allows the caregiver who created the reminder to update its details.
+    Supports partial updates - only the fields you provide will be updated.
+    
+    **Authentication required:** Bearer token (caregiver)
+    
+    **Updatable fields:**
+    - title: Reminder title
+    - description: Detailed description
+    - scheduled_at: Scheduled time
+    
+    **Access control:**
+    - Only the caregiver who created the reminder can update it
+    - Returns 403 Forbidden if access is denied
+    
+    **Use cases:**
+    - Reschedule a reminder
+    - Update reminder description
+    - Modify reminder title
+    """,
+    responses={
+        200: {
+            "description": "Reminder updated successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "123e4567-e89b-12d3-a456-426614174000",
+                        "title": "Take medication",
+                        "description": "Take blood pressure medication with food",
+                        "scheduled_at": "2026-02-27T15:00:00Z",
+                        "caregiver_id": "987e6543-e89b-12d3-a456-426614174000",
+                        "user_id": "456e7890-e89b-12d3-a456-426614174000",
+                        "user_first_name": "Marie",
+                        "user_last_name": "Dupont",
+                        "created_at": "2026-02-27T10:30:00Z",
+                        "updated_at": "2026-02-27T11:00:00Z"
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Bad request - Validation error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid scheduled_at format"}
+                }
+            }
+        },
+        401: {
+            "description": "Unauthorized - Invalid or expired token",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Could not validate credentials"}
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden - No access to this reminder",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "You don't have access to this reminder"}
+                }
+            }
+        },
+        404: {
+            "description": "Reminder not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Reminder not found"}
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Failed to update reminder"}
+                }
+            }
+        }
+    }
+)
 async def update_reminder(
     reminder_id: UUID,
     request: ReminderUpdate,
@@ -354,7 +709,66 @@ async def postpone_reminder(
         )
 
 
-@router.delete("/{reminder_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{reminder_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete reminder",
+    description="""
+    Permanently delete a reminder from the system.
+    
+    Only the caregiver who created the reminder can delete it.
+    
+    **Authentication required:** Bearer token (caregiver)
+    
+    **Access control:**
+    - Only the caregiver who created the reminder can delete it
+    - Returns 403 Forbidden if access is denied
+    
+    **Warning:** This action cannot be undone!
+    
+    **What gets deleted:**
+    - The reminder itself
+    - Associated reminder status records
+    - Any pending notifications for this reminder
+    """,
+    responses={
+        204: {
+            "description": "Reminder deleted successfully (no content returned)"
+        },
+        401: {
+            "description": "Unauthorized - Invalid or expired token",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Could not validate credentials"}
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden - No access to this reminder",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "You don't have access to this reminder"}
+                }
+            }
+        },
+        404: {
+            "description": "Reminder not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "reminder not found"}
+                }
+            }
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Failed to delete reminder"}
+                }
+            }
+        }
+    }
+)
 async def delete_reminder(
     reminder_id: UUID,
     caregiver_id: str = Depends(get_caregiver_id),

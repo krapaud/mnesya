@@ -240,6 +240,19 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                         confirmColor="#E53935"
                     />
 
+                    {/* Reminder delete error */}
+                    <ConfirmationModal
+                        visible={deleteError}
+                        onClose={() => setDeleteError(false)}
+                        title={t('common.errors.genericErrorTitle')}
+                        message={t('common.errors.failedToDeleteReminder')}
+                        icon="alert-circle-outline"
+                        iconColor="#E53935"
+                        confirmText="OK"
+                        confirmColor="#4A90E2"
+                        showCancelButton={false}
+                    />
+
                     {/* Profile Picker Modal */}
                     <FilterPickerModal
                         visible={showProfilePicker}
