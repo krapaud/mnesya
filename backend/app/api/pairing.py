@@ -16,6 +16,7 @@ from app.schemas.pairing_code_schema import (
     PairingCodeResponse,
     PairingCodeVerify,
     PairingCodeVerifyResponse,
+    UserTokenRefreshResponse,
 )
 
 from app.persistence.pairing_code_repository import PairingCodeRepository
@@ -291,3 +292,58 @@ async def verify_code(request: PairingCodeVerify, db: Session = Depends(get_db))
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Login failed: {str(e)}",
         )
+
+
+@router.post(
+    "/refresh",
+    response_model=UserTokenRefreshResponse,
+    summary="Silently refresh user token",
+    description="""
+    Renew the user's JWT token before it expires.
+
+    The user must present their current **valid** Bearer token.
+    The endpoint extracts the identity from the token (no database lookup needed)
+    and issues a fresh 90-day token with the same `sub`, `firstname` and `lastname`.
+
+    **Intended for:**
+    - Background refresh triggered by the mobile app when < 7 days remain
+    - Ensures elderly users are never unexpectedly logged out
+
+    **Returns:**
+    - New 90-day access token
+    """,
+    responses={
+        200: {"description": "Token successfully refreshed"},
+        401: {"description": "Token is invalid or already expired"},
+    },
+)
+async def refresh_user_token(
+    token_payload: dict = Depends(verify_token),
+) -> UserTokenRefreshResponse:
+    """Silently renew the user's JWT token.
+
+    Accepts a still-valid user Bearer token, returns a fresh 90-day token
+    with the same identity. No database write is required.
+    """
+    user_id = token_payload.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    access_token = create_access_token(
+        data={
+            "sub": user_id,
+            "firstname": token_payload.get("firstname", ""),
+            "lastname": token_payload.get("lastname", ""),
+        },
+        expires_delta=timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS),
+    )
+
+    return UserTokenRefreshResponse(
+        access_token=access_token,
+        token_type="bearer",
+        expires_in=ACCESS_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+    )
