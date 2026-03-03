@@ -31,9 +31,9 @@ export const commonStyles = StyleSheet.create({
         width: 30,
     },
     logo: {
-        width: 50,
-        height: 50,
-        marginRight: 0,
+        width: 40,
+        height: 40,
+        marginRight: 5,
         paddingLeft: 0,
     },
     appName: {
