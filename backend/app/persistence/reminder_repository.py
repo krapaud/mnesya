@@ -66,32 +66,6 @@ class ReminderRepository(BaseRepository[ReminderModel]):
             reminder.user_last_name = last_name
         return [r for r, _, _ in results]
 
-    def get_upcoming_reminders(
-        self, user_id: UUID, limit: int = 5
-    ) -> List[ReminderModel]:
-        """Get upcoming reminders for a user.
-
-        Args:
-            user_id (UUID): The user's unique identifier
-            limit (int): Maximum number of reminders to return (default: 5)
-
-        Returns:
-            List[ReminderModel]: List of future reminders ordered by scheduled time (soonest first)
-
-        Note:
-            Only returns reminders scheduled for current time or later
-        """
-        return (
-            self.db.query(self.model)
-            .filter(
-                self.model._user_id == user_id,
-                self.model._scheduled_at >= datetime.now(timezone.utc),
-            )
-            .order_by(self.model._scheduled_at.asc())
-            .limit(limit)
-            .all()
-        )
-
     def get_reminders_due_now(self, window_seconds: int = 60) -> List[ReminderModel]:
         """Get reminders that are due within the current time window.
 
