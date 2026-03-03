@@ -116,6 +116,13 @@ export interface UserInfo {
     last_name: string;
 }
 
+/** Response returned by the silent token refresh endpoint. */
+export interface UserTokenRefreshResponse {
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+}
+
 /** Payload for creating a new reminder. */
 export interface CreateReminder {
     title: string;
