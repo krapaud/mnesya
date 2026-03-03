@@ -1,7 +1,11 @@
 # Security Audit Report — Mnesya
 
 **Date :** 3 mars 2026  
-**Branch :** `dev`  
+**Branches couvertes :**
+- `fix/security-bugfixes-and-tests` → mergé dans `dev` (#30)
+- `feat/user-token-refresh` → mergé dans `dev` (#31)
+- `feat/back/slow-api` → en attente de merge
+
 **Auditeur :** GitHub Copilot (analyse statique + revue de code)
 
 ---
@@ -82,12 +86,13 @@
 
 ---
 
-### 🟡 MED-1 — Rate limiting absent sur les endpoints d'authentification _(corrigé dans `feat/back/slow-api`)_
+### 🟡 MED-1 — Rate limiting absent sur les endpoints d'authentification _(corrigé dans `feat/back/slow-api`, merge en attente)_
 
 **Fichiers :** `backend/app/api/authentication.py`, `backend/app/limiter.py` (nouveau)  
 **Avant :** Aucune protection bruteforce sur `/api/auth/login` et `/api/auth/register`.  
 **Après :** `slowapi==0.1.9` ajouté — `3/minute` sur `register`, `5/minute` sur `login`.  
 **Détails d'implémentation :**
+
 - `app/limiter.py` — instance `Limiter` isolée pour éviter l'import circulaire
 - Mode test (`TESTING=true`) utilise une clé UUID par requête → aucune limite en CI
 - `request: Request` ajouté comme premier paramètre (requis par slowapi)
@@ -107,13 +112,40 @@ async def login(request: Request, body: LoginRequest, ...):
 
 ---
 
+### 🟡 MED-3 — Absence de refresh proactif du token utilisateur _(corrigé dans `feat/user-token-refresh`)_
+
+**Fichiers :** `frontend/src/services/api.ts`, `backend/app/api/pairing.py`, `frontend/src/services/pairingService.ts`  
+**Avant :** Le token utilisateur (JWT 90 jours) n'était jamais renouvelé sans un re-pairing complet. Un token expirant en cours d'utilisation bloquait l'app sans message explicite.  
+**Après :**
+- Endpoint `POST /api/pairing/refresh` ajouté en backend — vérifie le JWT entrant et émet un nouveau token 90 jours
+- Intercepteur Axios proactif : si le token expire dans < 7 jours, il appelle `/api/pairing/refresh` automatiquement avant chaque requête
+- Helper `decodeJwtPayload()` décode le token localement (sans appel réseau) pour comparer la date d'expiration
+
+```typescript
+// frontend/src/services/api.ts
+axiosInstance.interceptors.request.use(async (config) => {
+  const payload = decodeJwtPayload(userToken);
+  const sevenDays = 7 * 24 * 3600;
+  if (payload.exp - Date.now() / 1000 < sevenDays) {
+    const refreshed = await refreshUserToken(userToken);
+    // stocke et utilise le nouveau token
+  }
+  return config;
+});
+```
+
+---
+
 ## Vulnérabilités résiduelles (à traiter prochainement)
 
-### 🟡 MED-2 — Refresh token non implémenté (token JWT sans révocation)
+### 🟡 MED-2 — Pas de révocation du JWT caregiver (token sans blacklist)
 
 **Fichier :** `backend/app/api/authentication.py`  
-**Description :** Pas de token blacklist. Un logout côté client ne révoque pas le JWT côté serveur. Si un token est compromis avant expiration, il reste valide.  
-**Recommandation :** Implémenter une blacklist en Redis ou une table DB, ou au minimum réduire la durée du token (actuellement 60 min — acceptable).
+**Description :** Un logout côté client ne révoque pas le JWT caregiver côté serveur. Si un token est compromis avant expiration (60 min), il reste valide.
+
+> **Note :** Le token utilisateur (JWT 90 jours via pairing) dispose maintenant d'un refresh proactif — voir MED-3 corrigé. Le problème résiduel concerne uniquement le token caregiver.
+
+**Recommandation :** Implémenter une blacklist en Redis ou une table DB pour les tokens caregiver invalidés lors du logout. La durée de 60 min limite l'exposition en cas de compromission.
 
 ---
 
@@ -129,6 +161,8 @@ async def login(request: Request, body: LoginRequest, ...):
 | Variables sensibles dans `.env` (non commités)               | ✅     |
 | Docs API protégées par Basic Auth                            | ✅     |
 | Pas d'exposition du mot de passe hashé dans les réponses API | ✅     |
+| Refresh proactif du token utilisateur (intercepteur Axios)    | ✅     |
+| Endpoint `/api/pairing/refresh` vérifie la signature JWT avant émission | ✅     |
 
 ---
 
