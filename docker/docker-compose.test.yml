@@ -34,6 +34,7 @@ services:
       SECRET_KEY: test_secret_key_for_ci_only_do_not_use_in_production
       DOCS_USERNAME: admin
       DOCS_PASSWORD: testpassword
+      TESTING: "true"
     depends_on:
       db_test:
         condition: service_healthy

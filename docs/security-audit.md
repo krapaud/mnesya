@@ -12,7 +12,7 @@
 | ---------------- | ----- | ---------------- |
 | 🔴 Critique      | 3     | 0                |
 | 🟠 Haute         | 4     | 0                |
-| 🟡 Moyenne       | 5     | 2                |
+| 🟡 Moyenne       | 5     | 1                |
 | 🟢 Faible / Info | 3     | 3                |
 
 ---
@@ -82,27 +82,32 @@
 
 ---
 
-## Vulnérabilités résiduelles (à traiter prochainement)
+### 🟡 MED-1 — Rate limiting absent sur les endpoints d'authentification _(corrigé dans `feat/back/slow-api`)_
 
-### 🟡 MED-1 — Rate limiting absent sur les endpoints d'authentification
-
-**Fichiers :** `backend/app/api/authentication.py`  
-**Description :** Les endpoints `/api/auth/login` et `/api/auth/register` n'ont pas de protection contre les attaques bruteforce.  
-**Recommandation :** Ajouter `slowapi` (rate limiter pour FastAPI)
+**Fichiers :** `backend/app/api/authentication.py`, `backend/app/limiter.py` (nouveau)  
+**Avant :** Aucune protection bruteforce sur `/api/auth/login` et `/api/auth/register`.  
+**Après :** `slowapi==0.1.9` ajouté — `3/minute` sur `register`, `5/minute` sur `login`.  
+**Détails d'implémentation :**
+- `app/limiter.py` — instance `Limiter` isolée pour éviter l'import circulaire
+- Mode test (`TESTING=true`) utilise une clé UUID par requête → aucune limite en CI
+- `request: Request` ajouté comme premier paramètre (requis par slowapi)
+- Paramètre body renommé `body: RegisterRequest / body: LoginRequest` pour éviter la collision
 
 ```python
-# Exemple d'ajout
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-limiter = Limiter(key_func=get_remote_address)
+@router.post("/register")
+@limiter.limit("3/minute")
+async def register(request: Request, body: RegisterRequest, ...):
+    ...
 
 @router.post("/login")
 @limiter.limit("5/minute")
-async def login(request: Request, ...):
+async def login(request: Request, body: LoginRequest, ...):
     ...
 ```
 
 ---
+
+## Vulnérabilités résiduelles (à traiter prochainement)
 
 ### 🟡 MED-2 — Refresh token non implémenté (token JWT sans révocation)
 

@@ -146,6 +146,15 @@ class AuthTasks(TaskSet, AuthMixin):
                 name="/api/auth/login",
             )
 
+    @task(2)
+    def refresh_caregiver_token(self):
+        """Caregiver token refresh — validates /api/auth/refresh throughput."""
+        self.client.post(
+            "/api/auth/refresh",
+            headers=self.auth_headers(),
+            name="/api/auth/refresh",
+        )
+
 
 class ReminderTasks(TaskSet, AuthMixin):
     """Reminder CRUD load — most business-critical path."""
@@ -281,6 +290,41 @@ class PairingTasks(TaskSet, AuthMixin):
             json={"user_id": self.user_id},
             headers=self.auth_headers(),
             name="/api/pairing/generate",
+        )
+
+    @task(1)
+    def verify_and_refresh_user_token(self):
+        """Full pairing flow: generate → verify → refresh user token."""
+        if not self.user_id:
+            return
+        # Generate a pairing code
+        gen = self.client.post(
+            "/api/pairing/generate",
+            json={"user_id": self.user_id},
+            headers=self.auth_headers(),
+            name="/api/pairing/generate",
+        )
+        if gen.status_code != 200:
+            return
+        code = gen.json().get("code")
+        if not code:
+            return
+        # Verify the code to get a user JWT
+        verify = self.client.post(
+            "/api/pairing/verify",
+            json={"code": code},
+            name="/api/pairing/verify",
+        )
+        if verify.status_code != 200:
+            return
+        user_token = verify.json().get("access_token")
+        if not user_token:
+            return
+        # Refresh the user JWT
+        self.client.post(
+            "/api/pairing/refresh",
+            headers={"Authorization": f"Bearer {user_token}"},
+            name="/api/pairing/refresh",
         )
 
 
