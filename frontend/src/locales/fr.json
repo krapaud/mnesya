@@ -80,6 +80,7 @@
             "Invalid email": "Format d'email invalide",
             "Password must be at least 8 characters": "Le mot de passe doit contenir au moins 8 caractères",
             "Password must be at most 20 characters": "Le mot de passe doit contenir au maximum 20 caractères",
+            "Password must be at most 72 characters": "Le mot de passe doit contenir au maximum 72 caractères",
             "Password must contain at least one digit": "Le mot de passe doit contenir au moins un chiffre",
             "Password must contain at least one uppercase letter": "Le mot de passe doit contenir au moins une majuscule",
             "Password must contain at least one lowercase letter": "Le mot de passe doit contenir au moins une minuscule",

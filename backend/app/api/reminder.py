@@ -52,8 +52,8 @@ def build_reminder_response(reminder) -> ReminderResponse:
         scheduled_at=reminder.scheduled_at,
         caregiver_id=reminder.caregiver_id,
         user_id=reminder.user_id,
-        user_first_name=getattr(reminder, 'user_first_name', None),
-        user_last_name=getattr(reminder, 'user_last_name', None),
+        user_first_name=getattr(reminder, "user_first_name", None),
+        user_last_name=getattr(reminder, "user_last_name", None),
         created_at=reminder.created_at,
         updated_at=reminder.updated_at,
     )
@@ -97,11 +97,11 @@ def build_reminder_response(reminder) -> ReminderResponse:
                             "user_first_name": "Marie",
                             "user_last_name": "Dupont",
                             "created_at": "2026-02-27T10:30:00Z",
-                            "updated_at": "2026-02-27T10:30:00Z"
+                            "updated_at": "2026-02-27T10:30:00Z",
                         }
                     ]
                 }
-            }
+            },
         },
         401: {
             "description": "Unauthorized - Invalid or expired token",
@@ -109,7 +109,7 @@ def build_reminder_response(reminder) -> ReminderResponse:
                 "application/json": {
                     "example": {"detail": "Could not validate credentials"}
                 }
-            }
+            },
         },
         500: {
             "description": "Internal server error",
@@ -117,9 +117,9 @@ def build_reminder_response(reminder) -> ReminderResponse:
                 "application/json": {
                     "example": {"detail": "Failed to retrieve reminders"}
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def get_all_reminder_by_caregiver(
     caregiver_id: str = Depends(get_caregiver_id),
@@ -142,9 +142,7 @@ async def get_all_reminder_by_caregiver(
         HTTPException: If retrieval fails with 500 status code
     """
     try:
-        reminders = reminder_facade.get_reminder_by_caregiver(
-            UUID(caregiver_id)
-        )
+        reminders = reminder_facade.get_reminder_by_caregiver(UUID(caregiver_id))
         return [build_reminder_response(r) for r in reminders]
 
     except Exception as e:
@@ -197,11 +195,11 @@ async def get_all_reminder_by_caregiver(
                             "user_first_name": "Marie",
                             "user_last_name": "Dupont",
                             "created_at": "2026-02-27T10:30:00Z",
-                            "updated_at": "2026-02-27T10:30:00Z"
+                            "updated_at": "2026-02-27T10:30:00Z",
                         }
                     ]
                 }
-            }
+            },
         },
         401: {
             "description": "Unauthorized - Invalid or expired token",
@@ -209,7 +207,7 @@ async def get_all_reminder_by_caregiver(
                 "application/json": {
                     "example": {"detail": "Could not validate credentials"}
                 }
-            }
+            },
         },
         500: {
             "description": "Internal server error",
@@ -217,9 +215,9 @@ async def get_all_reminder_by_caregiver(
                 "application/json": {
                     "example": {"detail": "Failed to retrieve reminders"}
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def get_all_reminder_by_user(
     user_id: str = Depends(get_caregiver_id),
@@ -285,10 +283,10 @@ async def get_all_reminder_by_user(
                         "user_first_name": "Marie",
                         "user_last_name": "Dupont",
                         "created_at": "2026-02-27T10:30:00Z",
-                        "updated_at": "2026-02-27T10:30:00Z"
+                        "updated_at": "2026-02-27T10:30:00Z",
                     }
                 }
-            }
+            },
         },
         401: {
             "description": "Unauthorized - Invalid or expired token",
@@ -296,15 +294,13 @@ async def get_all_reminder_by_user(
                 "application/json": {
                     "example": {"detail": "Could not validate credentials"}
                 }
-            }
+            },
         },
         404: {
             "description": "Reminder not found",
             "content": {
-                "application/json": {
-                    "example": {"detail": "reminder not found"}
-                }
-            }
+                "application/json": {"example": {"detail": "reminder not found"}}
+            },
         },
         500: {
             "description": "Internal server error",
@@ -312,9 +308,9 @@ async def get_all_reminder_by_user(
                 "application/json": {
                     "example": {"detail": "Failed to retrieve reminder"}
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def get_reminder(
     reminder_id: UUID,
@@ -397,10 +393,10 @@ async def get_reminder(
                         "user_first_name": "Marie",
                         "user_last_name": "Dupont",
                         "created_at": "2026-02-27T10:30:00Z",
-                        "updated_at": "2026-02-27T10:30:00Z"
+                        "updated_at": "2026-02-27T10:30:00Z",
                     }
                 }
-            }
+            },
         },
         400: {
             "description": "Bad request - Validation error",
@@ -408,7 +404,7 @@ async def get_reminder(
                 "application/json": {
                     "example": {"detail": "Invalid scheduled_at format"}
                 }
-            }
+            },
         },
         401: {
             "description": "Unauthorized - Invalid or expired token",
@@ -416,7 +412,7 @@ async def get_reminder(
                 "application/json": {
                     "example": {"detail": "Could not validate credentials"}
                 }
-            }
+            },
         },
         403: {
             "description": "Forbidden - No access to this user",
@@ -424,17 +420,15 @@ async def get_reminder(
                 "application/json": {
                     "example": {"detail": "You don't have access to this user"}
                 }
-            }
+            },
         },
         500: {
             "description": "Internal server error",
             "content": {
-                "application/json": {
-                    "example": {"detail": "Failed to create reminder"}
-                }
-            }
-        }
-    }
+                "application/json": {"example": {"detail": "Failed to create reminder"}}
+            },
+        },
+    },
 )
 async def create_reminder(
     request: ReminderCreate,
@@ -539,10 +533,10 @@ async def create_reminder(
                         "user_first_name": "Marie",
                         "user_last_name": "Dupont",
                         "created_at": "2026-02-27T10:30:00Z",
-                        "updated_at": "2026-02-27T11:00:00Z"
+                        "updated_at": "2026-02-27T11:00:00Z",
                     }
                 }
-            }
+            },
         },
         400: {
             "description": "Bad request - Validation error",
@@ -550,7 +544,7 @@ async def create_reminder(
                 "application/json": {
                     "example": {"detail": "Invalid scheduled_at format"}
                 }
-            }
+            },
         },
         401: {
             "description": "Unauthorized - Invalid or expired token",
@@ -558,7 +552,7 @@ async def create_reminder(
                 "application/json": {
                     "example": {"detail": "Could not validate credentials"}
                 }
-            }
+            },
         },
         403: {
             "description": "Forbidden - No access to this reminder",
@@ -566,25 +560,21 @@ async def create_reminder(
                 "application/json": {
                     "example": {"detail": "You don't have access to this reminder"}
                 }
-            }
+            },
         },
         404: {
             "description": "Reminder not found",
             "content": {
-                "application/json": {
-                    "example": {"detail": "Reminder not found"}
-                }
-            }
+                "application/json": {"example": {"detail": "Reminder not found"}}
+            },
         },
         500: {
             "description": "Internal server error",
             "content": {
-                "application/json": {
-                    "example": {"detail": "Failed to update reminder"}
-                }
-            }
-        }
-    }
+                "application/json": {"example": {"detail": "Failed to update reminder"}}
+            },
+        },
+    },
 )
 async def update_reminder(
     reminder_id: UUID,
@@ -644,9 +634,9 @@ async def update_reminder(
         if not update_data:
             return build_reminder_response(reminder)
 
-        # Perform update
+        # Perform update — pass as str to avoid UUID(uuid_obj) crash in facade
         updated_reminder = reminder_facade.update_reminder(
-            reminder.id, update_data
+            str(reminder.id), update_data
         )
         return build_reminder_response(updated_reminder)
 
@@ -689,9 +679,7 @@ async def postpone_reminder(
         HTTPException: 404 if reminder not found, 500 if update fails
     """
     try:
-        reminder = reminder_facade.postpone_reminder(
-            str(reminder_id), delay_minutes
-        )
+        reminder = reminder_facade.postpone_reminder(str(reminder_id), delay_minutes)
         if not reminder:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -732,16 +720,14 @@ async def postpone_reminder(
     - Any pending notifications for this reminder
     """,
     responses={
-        204: {
-            "description": "Reminder deleted successfully (no content returned)"
-        },
+        204: {"description": "Reminder deleted successfully (no content returned)"},
         401: {
             "description": "Unauthorized - Invalid or expired token",
             "content": {
                 "application/json": {
                     "example": {"detail": "Could not validate credentials"}
                 }
-            }
+            },
         },
         403: {
             "description": "Forbidden - No access to this reminder",
@@ -749,25 +735,21 @@ async def postpone_reminder(
                 "application/json": {
                     "example": {"detail": "You don't have access to this reminder"}
                 }
-            }
+            },
         },
         404: {
             "description": "Reminder not found",
             "content": {
-                "application/json": {
-                    "example": {"detail": "reminder not found"}
-                }
-            }
+                "application/json": {"example": {"detail": "reminder not found"}}
+            },
         },
         500: {
             "description": "Internal server error",
             "content": {
-                "application/json": {
-                    "example": {"detail": "Failed to delete reminder"}
-                }
-            }
-        }
-    }
+                "application/json": {"example": {"detail": "Failed to delete reminder"}}
+            },
+        },
+    },
 )
 async def delete_reminder(
     reminder_id: UUID,

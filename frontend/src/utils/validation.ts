@@ -32,12 +32,12 @@ export const validateEmail = (email: string): string | null => {
 export const validatePassword = (password: string): string | null => {
     const trimmedPassword = password.trim();
 
-    // Check length constraints (8-20 characters)
+    // Check length constraints (8-72 characters — matches bcrypt server limit)
     if (trimmedPassword.length < 8) {
         return 'register.errors.Password must be at least 8 characters';
     }
-    if (trimmedPassword.length > 20) {
-        return 'register.errors.Password must be at most 20 characters';
+    if (trimmedPassword.length > 72) {
+        return 'register.errors.Password must be at most 72 characters';
     }
 
     // Check for at least one digit
@@ -56,7 +56,7 @@ export const validatePassword = (password: string): string | null => {
     }
 
     // Check for at least one special character
-    if (!/[$@#%*!~&]/.test(trimmedPassword)) {
+    if (!/[$@#%*!~&^()\-_+=\[\]{}|;:,.<>?/\\]/.test(trimmedPassword)) {
         return 'register.errors.Password must contain at least one special character';
     }
 
