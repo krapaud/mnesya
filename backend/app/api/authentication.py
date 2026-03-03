@@ -4,19 +4,20 @@ This module provides JWT-based authentication endpoints for caregivers.
 Includes login, registration, and token management.
 """
 
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from sqlalchemy.orm import Session
 import os
+from app.limiter import limiter
 
 from app.schemas.authentication_schema import (
     LoginRequest,
     RegisterRequest,
     TokenResponse,
-    CaregiverProfile
+    CaregiverProfile,
 )
 from app.services.caregiver_facade import CaregiverFacade
 from app.schemas.caregiver_schema import CaregiverResponse
@@ -40,8 +41,7 @@ def get_caregiver_facade(db: Session = Depends(get_db)) -> CaregiverFacade:
     return CaregiverFacade(db)
 
 
-def create_access_token(
-        data: dict, expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Create a JWT access token.
 
     Args:
@@ -55,16 +55,16 @@ def create_access_token(
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + \
-            timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+        )
 
     to_encode.update({"exp": expire, "iat": datetime.now(timezone.utc)})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
-def verify_token(
-        credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
     """Verify and decode JWT token.
 
     Args:
@@ -128,10 +128,10 @@ def verify_token(
                         "first_name": "John",
                         "last_name": "Doe",
                         "email": "john.doe@example.com",
-                        "created_at": "2026-02-27T10:30:00Z"
+                        "created_at": "2026-02-27T10:30:00Z",
                     }
                 }
-            }
+            },
         },
         400: {
             "description": "Bad request - Validation error or email already exists",
@@ -140,15 +140,15 @@ def verify_token(
                     "examples": {
                         "email_exists": {
                             "summary": "Email already registered",
-                            "value": {"detail": "Email already registered"}
+                            "value": {"detail": "Email already registered"},
                         },
                         "validation_error": {
                             "summary": "Validation error",
-                            "value": {"detail": "Invalid email format"}
-                        }
+                            "value": {"detail": "Invalid email format"},
+                        },
                     }
                 }
-            }
+            },
         },
         500: {
             "description": "Internal server error",
@@ -156,13 +156,15 @@ def verify_token(
                 "application/json": {
                     "example": {"detail": "Failed to create caregiver"}
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
+@limiter.limit("3/minute")
 async def register(
-    request: RegisterRequest,
-    caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade)
+    request: Request,
+    body: RegisterRequest,
+    caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade),
 ):
     """Register a new caregiver account.
 
@@ -178,20 +180,19 @@ async def register(
     """
     try:
         # Check if email already exists
-        existing_caregiver = caregiver_facade.get_caregiver_by_email(
-            request.email)
+        existing_caregiver = caregiver_facade.get_caregiver_by_email(body.email)
         if existing_caregiver:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered"
+                detail="Email already registered",
             )
 
         # Create new caregiver
         caregiver_data = {
-            "first_name": request.first_name,
-            "last_name": request.last_name,
-            "email": request.email,
-            "password": request.password
+            "first_name": body.first_name,
+            "last_name": body.last_name,
+            "email": body.email,
+            "password": body.password,
         }
 
         caregiver = caregiver_facade.create_caregiver(caregiver_data)
@@ -201,22 +202,20 @@ async def register(
             first_name=caregiver.first_name,
             last_name=caregiver.last_name,
             email=caregiver.email,
-            created_at=caregiver.created_at
+            created_at=caregiver.created_at,
         )
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except HTTPException:
         raise
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create caregiver: {str(e) or type(e).__name__}"
+            detail=f"Failed to create caregiver: {str(e) or type(e).__name__}",
         )
 
 
@@ -249,34 +248,28 @@ async def register(
                     "example": {
                         "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
                         "token_type": "bearer",
-                        "expires_in": 3600
+                        "expires_in": 3600,
                     }
                 }
-            }
+            },
         },
         401: {
             "description": "Authentication failed - Invalid credentials",
             "content": {
-                "application/json": {
-                    "example": {
-                        "detail": "Invalid email or password"
-                    }
-                }
-            }
+                "application/json": {"example": {"detail": "Invalid email or password"}}
+            },
         },
         500: {
             "description": "Internal server error",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "Login failed"}
-                }
-            }
-        }
-    }
+            "content": {"application/json": {"example": {"detail": "Login failed"}}},
+        },
+    },
 )
+@limiter.limit("5/minute")
 async def login(
-    request: LoginRequest,
-    caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade)
+    request: Request,
+    body: LoginRequest,
+    caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade),
 ):
     """Authenticate caregiver and return JWT token.
 
@@ -292,7 +285,7 @@ async def login(
     """
     try:
         # Find caregiver by email
-        caregiver = caregiver_facade.get_caregiver_by_email(request.email)
+        caregiver = caregiver_facade.get_caregiver_by_email(body.email)
 
         if not caregiver:
             raise HTTPException(
@@ -302,7 +295,7 @@ async def login(
             )
 
         # Verify password
-        if not caregiver.verify_password(request.password):
+        if not caregiver.verify_password(body.password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password",
@@ -313,13 +306,13 @@ async def login(
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
             data={"sub": str(caregiver.id), "email": caregiver.email},
-            expires_delta=access_token_expires
+            expires_delta=access_token_expires,
         )
 
         return TokenResponse(
             access_token=access_token,
             token_type="bearer",
-            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         )
 
     except HTTPException:
@@ -327,7 +320,7 @@ async def login(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Login failed: {str(e)}"
+            detail=f"Login failed: {str(e)}",
         )
 
 
@@ -358,10 +351,10 @@ async def login(
                         "first_name": "John",
                         "last_name": "Doe",
                         "email": "john.doe@example.com",
-                        "created_at": "2026-02-27T10:30:00Z"
+                        "created_at": "2026-02-27T10:30:00Z",
                     }
                 }
-            }
+            },
         },
         401: {
             "description": "Unauthorized - Invalid or expired token",
@@ -369,29 +362,25 @@ async def login(
                 "application/json": {
                     "example": {"detail": "Could not validate credentials"}
                 }
-            }
+            },
         },
         404: {
             "description": "Caregiver not found",
             "content": {
-                "application/json": {
-                    "example": {"detail": "Caregiver not found"}
-                }
-            }
+                "application/json": {"example": {"detail": "Caregiver not found"}}
+            },
         },
         500: {
             "description": "Internal server error",
             "content": {
-                "application/json": {
-                    "example": {"detail": "Failed to get profile"}
-                }
-            }
-        }
-    }
+                "application/json": {"example": {"detail": "Failed to get profile"}}
+            },
+        },
+    },
 )
 async def get_current_user(
     token_payload: dict = Depends(verify_token),
-    caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade)
+    caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade),
 ):
     """Get current authenticated caregiver profile.
 
@@ -411,8 +400,7 @@ async def get_current_user(
 
         if not caregiver:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Caregiver not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Caregiver not found"
             )
 
         return CaregiverProfile(
@@ -420,7 +408,7 @@ async def get_current_user(
             first_name=caregiver.first_name,
             last_name=caregiver.last_name,
             email=caregiver.email,
-            created_at=caregiver.created_at
+            created_at=caregiver.created_at,
         )
 
     except HTTPException:
@@ -428,7 +416,7 @@ async def get_current_user(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get profile: {str(e)}"
+            detail=f"Failed to get profile: {str(e)}",
         )
 
 
@@ -457,10 +445,8 @@ async def get_current_user(
         200: {
             "description": "Logout successful",
             "content": {
-                "application/json": {
-                    "example": {"message": "Successfully logged out"}
-                }
-            }
+                "application/json": {"example": {"message": "Successfully logged out"}}
+            },
         },
         401: {
             "description": "Unauthorized - Invalid or expired token",
@@ -468,9 +454,9 @@ async def get_current_user(
                 "application/json": {
                     "example": {"detail": "Could not validate credentials"}
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def logout(token_payload: dict = Depends(verify_token)):
     """Logout current user (client should discard token).
@@ -516,10 +502,10 @@ async def logout(token_payload: dict = Depends(verify_token)):
                     "example": {
                         "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
                         "token_type": "bearer",
-                        "expires_in": 3600
+                        "expires_in": 3600,
                     }
                 }
-            }
+            },
         },
         401: {
             "description": "Unauthorized - Invalid or expired token",
@@ -527,17 +513,15 @@ async def logout(token_payload: dict = Depends(verify_token)):
                 "application/json": {
                     "example": {"detail": "Could not validate credentials"}
                 }
-            }
+            },
         },
         500: {
             "description": "Internal server error",
             "content": {
-                "application/json": {
-                    "example": {"detail": "Token refresh failed"}
-                }
-            }
-        }
-    }
+                "application/json": {"example": {"detail": "Token refresh failed"}}
+            },
+        },
+    },
 )
 async def refresh_token(token_payload: dict = Depends(verify_token)):
     """Refresh JWT access token.
@@ -556,19 +540,19 @@ async def refresh_token(token_payload: dict = Depends(verify_token)):
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
             data={"sub": caregiver_id, "email": email},
-            expires_delta=access_token_expires
+            expires_delta=access_token_expires,
         )
 
         return TokenResponse(
             access_token=access_token,
             token_type="bearer",
-            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         )
 
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Token refresh failed: {str(e)}"
+            detail=f"Token refresh failed: {str(e)}",
         )
 
 
