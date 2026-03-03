@@ -25,6 +25,12 @@ interface PlatformTimePickerProps {
     displayFormat?: (time: Date) => string;
 }
 
+/** Snaps a minute value to the nearest multiple of 5 (0, 5, 10, ..., 55). */
+const snapToNearestMinute = (minute: number): number => {
+    const snapped = Math.round(minute / 5) * 5;
+    return snapped >= 60 ? 55 : snapped;
+};
+
 const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
     value,
     onChange,
@@ -34,7 +40,7 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
 }) => {
     const { t } = useTranslation();
     const [selectedHour, setSelectedHour] = useState(value.getHours());
-    const [selectedMinute, setSelectedMinute] = useState(value.getMinutes());
+    const [selectedMinute, setSelectedMinute] = useState(snapToNearestMinute(value.getMinutes()));
 
     const hourScrollRef = useRef<ScrollView>(null);
     const minuteScrollRef = useRef<ScrollView>(null);
@@ -82,13 +88,18 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
      */
     useEffect(() => {
         if (visible) {
+            // Sync state with the incoming value each time the picker opens
+            const syncedHour = value.getHours();
+            const syncedMinute = snapToNearestMinute(value.getMinutes());
+            setSelectedHour(syncedHour);
+            setSelectedMinute(syncedMinute);
             setTimeout(() => {
-                const hourOffset = getMiddleOffset(baseHours.length) + selectedHour;
+                const hourOffset = getMiddleOffset(baseHours.length) + syncedHour;
                 hourScrollRef.current?.scrollTo({
                     y: hourOffset * ITEM_HEIGHT,
                     animated: false,
                 });
-                const minuteIndex = baseMinutes.findIndex((m) => m === selectedMinute);
+                const minuteIndex = baseMinutes.findIndex((m) => m === syncedMinute);
                 const minuteOffset = getMiddleOffset(baseMinutes.length) + minuteIndex;
                 minuteScrollRef.current?.scrollTo({
                     y: minuteOffset * ITEM_HEIGHT,
