@@ -6,7 +6,19 @@ and registers all API routers. This is the entry point for the Mnesya backend.
 
 from app import create_app, init_app
 import os
-from app.api import authentication, user, caregiver, pairing, reminder, reminder_status_api, push_notification
+from app.api import (
+    authentication,
+    user,
+    caregiver,
+    pairing,
+    reminder,
+    reminder_status_api,
+    push_notification,
+)
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from app.limiter import limiter
+
 
 # Initialize database
 database_url = os.environ["DATABASE_URL"]
@@ -24,11 +36,15 @@ app.include_router(reminder.router)
 app.include_router(reminder_status_api.router)
 app.include_router(push_notification.router)
 
+# Register rate limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 
 @app.get("/")
 async def root():
     """Root endpoint.
-    
+
     Returns:
         dict: Welcome message
     """

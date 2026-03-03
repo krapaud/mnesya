@@ -1,141 +1,182 @@
 # Security Audit Report — Mnesya
 
-**Date :** 3 mars 2026  
-**Branch :** `dev`  
-**Auditeur :** GitHub Copilot (analyse statique + revue de code)
+**Date :** March 3, 2026  
+**Branches covered :**
+
+- `fix/security-bugfixes-and-tests` → merged into `dev` (#30)
+- `feat/user-token-refresh` → merged into `dev` (#31)
+- `feat/back/slow-api` → pending merge
+
+**Auditor :** GitHub Copilot (static analysis + code review)
 
 ---
 
-## Résumé exécutif
+## Executive Summary
 
-| Criticité        | Avant | Après correction |
-| ---------------- | ----- | ---------------- |
-| 🔴 Critique      | 3     | 0                |
-| 🟠 Haute         | 4     | 0                |
-| 🟡 Moyenne       | 5     | 2                |
-| 🟢 Faible / Info | 3     | 3                |
-
----
-
-## Vulnérabilités corrigées dans cette session
-
-### 🔴 CRIT-1 — Pairing code généré avec `random` (non cryptographique)
-
-**Fichier :** `backend/app/api/pairing.py`  
-**Avant :** `random.choice(chars)` — prédictible si la seed PRNG est connue  
-**Après :** `secrets.choice(chars)` — module cryptographiquement sûr  
-**Impact :** Un attaquant pouvant observer le timing ou des codes précédents aurait pu prédire les prochains codes et accéder à un profil utilisateur sans autorisation.
+| Severity      | Before | After fix |
+| ------------- | ------ | --------- |
+| 🔴 Critical   | 3      | 0         |
+| 🟠 High       | 4      | 0         |
+| 🟡 Medium     | 5      | 1         |
+| 🟢 Low / Info | 3      | 3         |
 
 ---
 
-### 🔴 CRIT-2 — Token de pairing valide 365 jours
+## Vulnerabilities fixed in this session
 
-**Fichier :** `backend/app/api/pairing.py`  
-**Avant :** `ACCESS_TOKEN_EXPIRE_DAYS = 365`  
-**Après :** `ACCESS_TOKEN_EXPIRE_DAYS = 90`  
-**Impact :** Un token compromis restait valide un an. Un utilisateur malveillant ayant intercepté un lien pouvait piloter l'application pendant 365 jours.
+### 🔴 CRIT-1 — Pairing code generated with `random` (non-cryptographic)
 
----
-
-### 🔴 CRIT-3 — Longueur maximale du mot de passe trop restrictive (20 caractères)
-
-**Fichiers :** `backend/app/models/caregiver.py`, `frontend/src/utils/validation.ts`  
-**Avant :** max 20 chars  
-**Après :** max 72 chars (limite effective de bcrypt)  
-**Impact :** Les utilisateurs ne pouvaient pas utiliser de mots de passe robustes. Cette limitation contraint les attaques bruteforce côté client.
+**File :** `backend/app/api/pairing.py`  
+**Before :** `random.choice(chars)` — predictable if the PRNG seed is known  
+**After :** `secrets.choice(chars)` — cryptographically secure module  
+**Impact :** An attacker able to observe timing or previous codes could have predicted upcoming codes and accessed a user profile without authorization.
 
 ---
 
-### 🟠 HIGH-1 — `datetime.utcnow()` (déprecated, timezone-naive)
+### 🔴 CRIT-2 — Pairing token valid for 365 days
 
-**Fichiers** : `reminder_facade.py`, `reminder_repository.py` (4 occurrences)  
-**Avant :** `datetime.utcnow()` & `datetime.now()`  
-**Après :** `datetime.now(timezone.utc)`  
-**Impact :** En production, des comparaisons de dates «naïves» vs «aware» pouvaient lever des `TypeError` ou produire des silences erronés sur les rappels planifiés (rappels jamais envoyés / rappels envoyés en dehors de la fenêtre).
-
----
-
-### 🟠 HIGH-2 — Ensemble de caractères spéciaux trop restreint
-
-**Fichier :** `backend/app/models/caregiver.py`  
-**Avant :** `['$', '@', '#', '%', '*', '!', '~', '&']` (8 caractères)  
-**Après :** `set('$@#%*!~&^()-_+=[]{}|;:,.<>?/\\')` — 30+ caractères  
-**Impact :** Les gestionnaires de mots de passe génèrent des mots de passe avec `-`, `_`, `+`, etc. Le refus de ces caractères poussait les utilisateurs à choisir des mots de passe moins robustes.
+**File :** `backend/app/api/pairing.py`  
+**Before :** `ACCESS_TOKEN_EXPIRE_DAYS = 365`  
+**After :** `ACCESS_TOKEN_EXPIRE_DAYS = 90`  
+**Impact :** A compromised token remained valid for a full year. A malicious user who intercepted a pairing link could control the application for 365 days.
 
 ---
 
-### 🟠 HIGH-3 — Incohérence de validation frontend/backend
+### 🔴 CRIT-3 — Maximum password length too restrictive (20 characters)
 
-**Fichier :** `frontend/src/utils/validation.ts`  
-**Avant :** max 20 chars, caractères spéciaux restreints à `[$@#%*!~&]`  
-**Après :** synchronisé avec le backend (max 72 chars, jeu étendu)  
-**Impact :** Des mots de passe acceptés par le backend étaient refusés par l'UI (et vice-versa), provoquant des bugs de connexion impossibles à diagnostiquer.
-
----
-
-### 🟠 HIGH-4 — Double import dans `conftest.py`
-
-**Fichier :** `backend/app/test/conftest.py`  
-**Avant :** imports dupliqués avant et après `sys.path.insert`  
-**Après :** imports factorisés, ordonnés correctement  
-**Impact :** Masquait des erreurs d'import silencieux en shadowing les premières définitions. Pouvait causer des références stale dans les tests.
+**Files :** `backend/app/models/caregiver.py`, `frontend/src/utils/validation.ts`  
+**Before :** max 20 chars  
+**After :** max 72 chars (effective bcrypt limit)  
+**Impact :** Users could not set strong passwords. This restriction made client-side brute-force attacks easier.
 
 ---
 
-## Vulnérabilités résiduelles (à traiter prochainement)
+### 🟠 HIGH-1 — `datetime.utcnow()` (deprecated, timezone-naive)
 
-### 🟡 MED-1 — Rate limiting absent sur les endpoints d'authentification
+**Files** : `reminder_facade.py`, `reminder_repository.py` (4 occurrences)  
+**Before :** `datetime.utcnow()` & `datetime.now()`  
+**After :** `datetime.now(timezone.utc)`  
+**Impact :** In production, comparisons between naive and aware datetime objects could raise `TypeError` or silently misfire scheduled reminders (reminders never sent or sent outside the intended window).
 
-**Fichiers :** `backend/app/api/authentication.py`  
-**Description :** Les endpoints `/api/auth/login` et `/api/auth/register` n'ont pas de protection contre les attaques bruteforce.  
-**Recommandation :** Ajouter `slowapi` (rate limiter pour FastAPI)
+---
+
+### 🟠 HIGH-2 — Special character set too restrictive
+
+**File :** `backend/app/models/caregiver.py`  
+**Before :** `['$', '@', '#', '%', '*', '!', '~', '&']` (8 characters)  
+**After :** `set('$@#%*!~&^()-_+=[]{}|;:,.<>?/\\')` — 30+ characters  
+**Impact :** Password managers generate passwords containing `-`, `_`, `+`, etc. Rejecting these characters pushed users toward weaker passwords.
+
+---
+
+### 🟠 HIGH-3 — Frontend/backend validation mismatch
+
+**File :** `frontend/src/utils/validation.ts`  
+**Before :** max 20 chars, special characters restricted to `[$@#%*!~&]`  
+**After :** synchronised with the backend (max 72 chars, extended set)  
+**Impact :** Passwords accepted by the backend were rejected by the UI (and vice-versa), causing login failures that were impossible to diagnose.
+
+---
+
+### 🟠 HIGH-4 — Duplicate imports in `conftest.py`
+
+**File :** `backend/app/test/conftest.py`  
+**Before :** imports duplicated before and after `sys.path.insert`  
+**After :** imports deduplicated and correctly ordered  
+**Impact :** Silently shadowed import errors, potentially causing stale references in tests.
+
+---
+
+### 🟡 MED-1 — No rate limiting on authentication endpoints _(fixed in `feat/back/slow-api`, pending merge)_
+
+**Files :** `backend/app/api/authentication.py`, `backend/app/limiter.py` (new)  
+**Before :** No brute-force protection on `/api/auth/login` and `/api/auth/register`.  
+**After :** `slowapi==0.1.9` added — `3/minute` on `register`, `5/minute` on `login`.  
+**Implementation details :**
+
+- `app/limiter.py` — isolated `Limiter` instance to avoid circular import
+- Test mode (`TESTING=true`) uses a UUID key per request → no rate limiting in CI
+- `request: Request` added as the first parameter (required by slowapi)
+- Body parameter renamed to `body: RegisterRequest / body: LoginRequest` to avoid name collision
 
 ```python
-# Exemple d'ajout
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-limiter = Limiter(key_func=get_remote_address)
+@router.post("/register")
+@limiter.limit("3/minute")
+async def register(request: Request, body: RegisterRequest, ...):
+    ...
 
 @router.post("/login")
 @limiter.limit("5/minute")
-async def login(request: Request, ...):
+async def login(request: Request, body: LoginRequest, ...):
     ...
 ```
 
 ---
 
-### 🟡 MED-2 — Refresh token non implémenté (token JWT sans révocation)
+### 🟡 MED-3 — No proactive refresh of the user token _(fixed in `feat/user-token-refresh`)_
 
-**Fichier :** `backend/app/api/authentication.py`  
-**Description :** Pas de token blacklist. Un logout côté client ne révoque pas le JWT côté serveur. Si un token est compromis avant expiration, il reste valide.  
-**Recommandation :** Implémenter une blacklist en Redis ou une table DB, ou au minimum réduire la durée du token (actuellement 60 min — acceptable).
+**Files :** `frontend/src/services/api.ts`, `backend/app/api/pairing.py`, `frontend/src/services/pairingService.ts`  
+**Before :** The user token (90-day JWT) was never renewed without a full re-pairing. A token expiring mid-session would block the app with no explicit error message.  
+**After :**
+
+- `POST /api/pairing/refresh` endpoint added on the backend — verifies the incoming JWT and issues a new 90-day token
+- Proactive Axios interceptor: if the token expires in < 7 days, it calls `/api/pairing/refresh` automatically before each request
+- `decodeJwtPayload()` helper decodes the token locally (no network call) to compare the expiry date
+
+```typescript
+// frontend/src/services/api.ts
+axiosInstance.interceptors.request.use(async (config) => {
+  const payload = decodeJwtPayload(userToken);
+  const sevenDays = 7 * 24 * 3600;
+  if (payload.exp - Date.now() / 1000 < sevenDays) {
+    const refreshed = await refreshUserToken(userToken);
+    // store and use the new token
+  }
+  return config;
+});
+```
+
+---
+
+## Remaining vulnerabilities (to be addressed)
+
+### 🟡 MED-2 — No caregiver JWT revocation (no token blacklist)
+
+**File :** `backend/app/api/authentication.py`  
+**Description :** A client-side logout does not revoke the caregiver JWT server-side. If a token is compromised before expiry (60 min), it remains valid.
+
+> **Note :** The user token (90-day JWT via pairing) now has proactive refresh — see MED-3 fixed above. The remaining issue concerns caregiver tokens only.
+
+**Recommendation :** Implement a blacklist in Redis or a DB table for caregiver tokens invalidated on logout. The 60-min lifetime limits exposure in case of compromise.
 
 ---
 
 ## Bon état de sécurité (éléments positifs)
 
-| Élément                                                      | Statut |
-| ------------------------------------------------------------ | ------ |
-| Mots de passe hachés avec bcrypt                             | ✅     |
-| JWT signé HS256 avec `SECRET_KEY` env                        | ✅     |
-| Vérification d'ownership caregiver→user                      | ✅     |
-| Vérification d'ownership caregiver→reminder                  | ✅     |
-| Validation email côté modèle (SQLAlchemy)                    | ✅     |
-| Variables sensibles dans `.env` (non commités)               | ✅     |
-| Docs API protégées par Basic Auth                            | ✅     |
-| Pas d'exposition du mot de passe hashé dans les réponses API | ✅     |
+| Élément                                                                 | Statut |
+| ----------------------------------------------------------------------- | ------ |
+| Mots de passe hachés avec bcrypt                                        | ✅     |
+| JWT signé HS256 avec `SECRET_KEY` env                                   | ✅     |
+| Vérification d'ownership caregiver→user                                 | ✅     |
+| Vérification d'ownership caregiver→reminder                             | ✅     |
+| Validation email côté modèle (SQLAlchemy)                               | ✅     |
+| Variables sensibles dans `.env` (non commités)                          | ✅     |
+| Docs API protégées par Basic Auth                                       | ✅     |
+| Pas d'exposition du mot de passe hashé dans les réponses API            | ✅     |
+| Refresh proactif du token utilisateur (intercepteur Axios)              | ✅     |
+| Endpoint `/api/pairing/refresh` vérifie la signature JWT avant émission | ✅     |
 
 ---
 
-## Couverture de code (post-correction)
+## Code coverage (post-fix)
 
-| Module                         | Couverture |
-| ------------------------------ | ---------- |
-| `app/api/authentication.py`    | 86%        |
-| `app/api/pairing.py`           | 93%        |
-| `app/api/reminder.py`          | 72%        |
-| `app/api/push_notification.py` | 79%        |
-| `app/models/caregiver.py`      | 82%        |
-| **TOTAL**                      | **65%**    |
+| Module                         | Coverage |
+| ------------------------------ | -------- |
+| `app/api/authentication.py`    | 86%      |
+| `app/api/pairing.py`           | 93%      |
+| `app/api/reminder.py`          | 72%      |
+| `app/api/push_notification.py` | 79%      |
+| `app/models/caregiver.py`      | 82%      |
+| **TOTAL**                      | **65%**  |
 
-**Objectif recommandé :** ≥ 80% sur les modules business-critiques.
+**Recommended target :** ≥ 80% on business-critical modules.
