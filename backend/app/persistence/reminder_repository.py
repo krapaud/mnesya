@@ -10,7 +10,7 @@ from app.models.reminder import ReminderModel
 from app.models.reminder_status import ReminderStatusModel
 from app.models.user import UserModel
 from app.persistence.base_repository import BaseRepository
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 class ReminderRepository(BaseRepository[ReminderModel]):
@@ -85,7 +85,7 @@ class ReminderRepository(BaseRepository[ReminderModel]):
             self.db.query(self.model)
             .filter(
                 self.model._user_id == user_id,
-                self.model._scheduled_at >= datetime.now(),
+                self.model._scheduled_at >= datetime.now(timezone.utc),
             )
             .order_by(self.model._scheduled_at.asc())
             .limit(limit)
@@ -108,7 +108,7 @@ class ReminderRepository(BaseRepository[ReminderModel]):
             List[ReminderModel]: Reminders whose scheduled_at falls between
             (now - window_seconds) and now, with no terminal status yet.
         """
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         start = now - timedelta(seconds=window_seconds)
 
         # POSTPONED is intentionally excluded from this list: a postponed reminder
@@ -145,7 +145,7 @@ class ReminderRepository(BaseRepository[ReminderModel]):
         Returns:
             List[ReminderModel]: Unresolved reminders within the ±30s window around the target time.
         """
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         target = now - timedelta(minutes=offset_minutes)
         start = target - timedelta(seconds=30)
         end = target + timedelta(seconds=30)
@@ -178,7 +178,7 @@ class ReminderRepository(BaseRepository[ReminderModel]):
         Returns:
             List[ReminderModel]: Reminders past the escalation threshold.
         """
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         escalate_after = now - timedelta(minutes=delay_minutes)
         escalate_before = now - timedelta(hours=24)  # ignore reminders older than 24h
 

@@ -30,38 +30,27 @@ class CaregiverModel(database):
         created_at (datetime): Timestamp of caregiver creation
         updated_at (datetime): Timestamp of last update
     """
-    __tablename__ = 'caregiver'
-    _id = Column(
-        'id',
-        UUID(
-            as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4)
-    _first_name = Column('first_name', String(100), nullable=False)
-    _last_name = Column('last_name', String(100), nullable=False)
-    _email = Column(
-        'email',
-        String(255),
-        unique=True,
-        nullable=False,
-        index=True)
-    _password = Column('password', String(255), nullable=False)
+
+    __tablename__ = "caregiver"
+    _id = Column("id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    _first_name = Column("first_name", String(100), nullable=False)
+    _last_name = Column("last_name", String(100), nullable=False)
+    _email = Column("email", String(255), unique=True, nullable=False, index=True)
+    _password = Column("password", String(255), nullable=False)
     _user_ids = Column(
-        'user_ids',
-        ARRAY(
-            UUID(
-                as_uuid=True),
-            ForeignKey('user.id')),
-        default=list)
+        "user_ids", ARRAY(UUID(as_uuid=True), ForeignKey("user.id")), default=list
+    )
     _created_at = Column(
-        DateTime(
-            timezone=True), default=lambda: datetime.now(
-            timezone.utc), nullable=False)
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
     _updated_at = Column(
-        DateTime(
-            timezone=True), default=lambda: datetime.now(
-            timezone.utc), onupdate=lambda: datetime.now(
-                timezone.utc), nullable=False)
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
 
     # ==================== Getter Setter ====================
 
@@ -94,7 +83,7 @@ class CaregiverModel(database):
             ValueError: If name is empty, only whitespace, or exceeds
                 100 characters
         """
-        if (not value or len(value) > 100 or len(value.strip()) == 0):
+        if not value or len(value) > 100 or len(value.strip()) == 0:
             raise ValueError("First name is required and must be <= 100 chars")
         self._first_name = value.strip()
 
@@ -118,7 +107,7 @@ class CaregiverModel(database):
             ValueError: If name is empty, only whitespace, or exceeds
                 100 characters
         """
-        if (not value or len(value) > 100 or len(value.strip()) == 0):
+        if not value or len(value) > 100 or len(value.strip()) == 0:
             raise ValueError("last name is required and must be <= 100 chars")
         self._last_name = value.strip()
 
@@ -160,11 +149,11 @@ class CaregiverModel(database):
         """Set the caregiver's password with strict security validation.
 
         Password must meet the following requirements:
-        - Length: 8-20 characters
+        - Length: 8-72 characters
         - At least one digit (0-9)
         - At least one uppercase letter (A-Z)
         - At least one lowercase letter (a-z)
-        - At least one special character ($@#%*!~&)
+        - At least one special character
 
         Args:
             value (str): The password to set (plaintext will be validated
@@ -181,17 +170,17 @@ class CaregiverModel(database):
         value = value.strip()
 
         # If it's already a bcrypt hash, store it directly
-        if value.startswith('$2a$') or value.startswith('$2b$'):
+        if value.startswith("$2a$") or value.startswith("$2b$"):
             self._password = value
             return
 
-        SpecialSym = ['$', '@', '#', '%', '*', '!', '~', '&']
+        SpecialSym = set("$@#%*!~&^()-_+=[]{}|;:,.<>?/\\")
 
-        # Length validation
+        # Length validation (72 is bcrypt's effective max)
         if len(value) < 8:
-            raise ValueError('Length should be at least 8')
-        if len(value) > 20:
-            raise ValueError('Length should not be greater than 20')
+            raise ValueError("Length should be at least 8")
+        if len(value) > 72:
+            raise ValueError("Length should not be greater than 72")
 
         # Check for required character types
         has_digit = has_upper = has_lower = has_sym = False
@@ -208,16 +197,13 @@ class CaregiverModel(database):
 
         # Validate all requirements are met
         if not has_digit:
-            raise ValueError('Password should have at least one numeral')
+            raise ValueError("Password should have at least one numeral")
         if not has_upper:
-            raise ValueError(
-                'Password should have at least one uppercase letter')
+            raise ValueError("Password should have at least one uppercase letter")
         if not has_lower:
-            raise ValueError(
-                'Password should have at least one lowercase letter')
+            raise ValueError("Password should have at least one lowercase letter")
         if not has_sym:
-            raise ValueError(
-                'Password should have at least one of the symbols $@#%*!~&')
+            raise ValueError("Password should have at least one special character")
 
         # Hash the plaintext password before storing
         self._password = bcrypt.hash(value)
@@ -233,8 +219,11 @@ class CaregiverModel(database):
         # columns)
         if self._user_ids is None:
             return []
-        return list(self._user_ids) if isinstance(
-            self._user_ids, tuple) else self._user_ids
+        return (
+            list(self._user_ids)
+            if isinstance(self._user_ids, tuple)
+            else self._user_ids
+        )
 
     @user_ids.setter
     def user_ids(self, value: list) -> None:
