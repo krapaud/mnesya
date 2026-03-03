@@ -21,14 +21,8 @@ const REFRESH_THRESHOLD_SECONDS = 7 * 24 * 60 * 60;
  */
 function decodeJwtPayload(token: string): { exp?: number; sub?: string } | null {
     try {
-        const base64url = token.split('.')[1];
-        if (!base64url) return null;
-        // base64url → base64 with padding
-        const base64 = base64url
-            .replace(/-/g, '+')
-            .replace(/_/g, '/')
-            .padEnd(base64url.length + ((4 - (base64url.length % 4)) % 4), '=');
-        return JSON.parse(atob(base64));
+        const b64 = (token.split('.')[1] ?? '').replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(atob(b64 + '='.repeat((4 - (b64.length % 4)) % 4)));
     } catch {
         return null;
     }
