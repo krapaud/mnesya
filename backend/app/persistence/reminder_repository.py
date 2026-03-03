@@ -95,8 +95,11 @@ class ReminderRepository(BaseRepository[ReminderModel]):
     def get_reminders_due_now(self, window_seconds: int = 60) -> List[ReminderModel]:
         """Get reminders that are due within the current time window.
 
-        Excludes reminders already responded to by the user (DONE, POSTPONED, UNABLE)
-        to avoid sending duplicate notifications across consecutive job runs.
+        Excludes reminders with a terminal status (DONE, UNABLE, MISSED) to avoid
+        re-sending notifications after the user has responded definitively.
+
+        POSTPONED is intentionally NOT excluded: postponing a reminder moves its
+        scheduled_at forward, so it must fire again at the new scheduled time.
 
         Args:
             window_seconds (int): Size of the time window in seconds. Defaults to 60.
@@ -108,8 +111,11 @@ class ReminderRepository(BaseRepository[ReminderModel]):
         now = datetime.utcnow()
         start = now - timedelta(seconds=window_seconds)
 
+        # POSTPONED is intentionally excluded from this list: a postponed reminder
+        # has its scheduled_at moved forward and must fire again at the new time.
+        # Only truly terminal statuses (DONE, UNABLE, MISSED) prevent re-firing.
         resolved_ids = self.db.query(ReminderStatusModel._reminder_id).filter(
-            ReminderStatusModel._status.in_(["DONE", "POSTPONED", "UNABLE", "MISSED"])
+            ReminderStatusModel._status.in_(["DONE", "UNABLE", "MISSED"])
         )
 
         return (

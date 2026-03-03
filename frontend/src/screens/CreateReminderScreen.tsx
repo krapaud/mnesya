@@ -39,8 +39,14 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const [reminderTitle, setReminderTitle] = useState<string>('');
     /** Reminder message/description input state */
     const [reminderMessage, setReminderMessage] = useState<string>('');
-    /** Selected date and time for the reminder */
-    const [reminderDate, setReminderDate] = useState<Date>(new Date());
+    /** Selected date and time for the reminder — defaults to now + 5 min, snapped to nearest 5-minute slot */
+    const [reminderDate, setReminderDate] = useState<Date>(() => {
+        const d = new Date();
+        const totalMinutes = d.getHours() * 60 + d.getMinutes() + 5;
+        const snapped = Math.round(totalMinutes / 5) * 5;
+        d.setHours(Math.floor(snapped / 60) % 24, snapped % 60, 0, 0);
+        return d;
+    });
 
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
     const [showTimePicker, setShowTimePicker] = useState<boolean>(false);

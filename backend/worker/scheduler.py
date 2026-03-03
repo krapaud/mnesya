@@ -11,7 +11,7 @@ Each job opens its own database session to avoid circular import issues.
 
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.triggers.cron import CronTrigger
 from sqlalchemy.orm import Session
 
 from app.persistence.reminder_repository import ReminderRepository
@@ -183,19 +183,19 @@ def start_scheduler():
 
     my_scheduler.add_job(
         send_user_notifications,
-        IntervalTrigger(seconds=60),
+        CronTrigger(minute="*", second=0),
         id="send_user_notifications",
     )
 
     my_scheduler.add_job(
         lambda: send_user_retry(5),
-        IntervalTrigger(seconds=60),
+        CronTrigger(minute="*", second=0),
         id="send_user_retry_5min",
     )
 
     my_scheduler.add_job(
         send_caregiver_escalations,
-        IntervalTrigger(seconds=60),
+        CronTrigger(minute="*", second=0),
         id="send_caregiver_escalations",
     )
 
