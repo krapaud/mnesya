@@ -25,6 +25,7 @@ class ReminderFacade:
         reminder_status_repo (ReminderStatusRepository): Repository for
             status data access
     """
+
     def __init__(self, db: Session):
         """Initialize the facade with reminder and status repositories."""
         self.reminder_repo = ReminderRepository(db)
@@ -124,12 +125,13 @@ class ReminderFacade:
         Returns:
             ReminderModel: The updated reminder, or None if not found
         """
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
+
         reminder = self.reminder_repo.get(UUID(reminder_id))
         if not reminder:
             return None
 
-        new_scheduled_at = datetime.utcnow() + timedelta(minutes=delay_minutes)
+        new_scheduled_at = datetime.now(timezone.utc) + timedelta(minutes=delay_minutes)
         self.reminder_repo.update(UUID(reminder_id), {"scheduled_at": new_scheduled_at})
 
         postponed_status = ReminderStatusModel()
@@ -154,9 +156,7 @@ class ReminderFacade:
         reminder = self.reminder_repo.get(UUID(reminder_id))
         if reminder:
             # Delete associated statuses first to avoid FK constraint violation
-            statuses = self.reminder_status_repo.get_statuses_by_reminder(
-                reminder.id
-            )
+            statuses = self.reminder_status_repo.get_statuses_by_reminder(reminder.id)
             for status in statuses:
                 self.reminder_status_repo.delete(status.id)
             self.reminder_repo.delete(UUID(reminder_id))

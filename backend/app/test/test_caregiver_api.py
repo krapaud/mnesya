@@ -15,9 +15,7 @@ class TestUpdateCaregiverProfile:
         """Test updating caregiver first name."""
         client, caregiver = authenticated_client
 
-        response = client.put("/api/caregivers/me", json={
-            "first_name": "Updated"
-        })
+        response = client.put("/api/caregivers/me", json={"first_name": "Updated"})
 
         assert response.status_code == 200
         data = response.json()
@@ -30,9 +28,7 @@ class TestUpdateCaregiverProfile:
         """Test updating caregiver last name."""
         client, caregiver = authenticated_client
 
-        response = client.put("/api/caregivers/me", json={
-            "last_name": "NewLastName"
-        })
+        response = client.put("/api/caregivers/me", json={"last_name": "NewLastName"})
 
         assert response.status_code == 200
         data = response.json()
@@ -45,9 +41,7 @@ class TestUpdateCaregiverProfile:
         client, _ = authenticated_client
 
         new_email = f"newemail.{pytest.__version__}@example.com"
-        response = client.put("/api/caregivers/me", json={
-            "email": new_email
-        })
+        response = client.put("/api/caregivers/me", json={"email": new_email})
 
         assert response.status_code == 200
         data = response.json()
@@ -59,17 +53,17 @@ class TestUpdateCaregiverProfile:
         client, caregiver = authenticated_client
 
         new_password = "NewSecurePass123!"
-        response = client.put("/api/caregivers/me", json={
-            "password": new_password
-        })
+        response = client.put(
+            "/api/caregivers/me",
+            json={"password": new_password, "current_password": "TestPass123!"},
+        )
 
         assert response.status_code == 200
 
         # Verify can login with new password
-        response = client.post("/api/auth/login", json={
-            "email": caregiver.email,
-            "password": new_password
-        })
+        response = client.post(
+            "/api/auth/login", json={"email": caregiver.email, "password": new_password}
+        )
 
         assert response.status_code == 200
 
@@ -77,11 +71,14 @@ class TestUpdateCaregiverProfile:
         """Test updating multiple fields at once."""
         client, _ = authenticated_client
 
-        response = client.put("/api/caregivers/me", json={
-            "first_name": "MultiUpdate",
-            "last_name": "Test",
-            "email": f"multiupdate.{pytest.__version__}@example.com"
-        })
+        response = client.put(
+            "/api/caregivers/me",
+            json={
+                "first_name": "MultiUpdate",
+                "last_name": "Test",
+                "email": f"multiupdate.{pytest.__version__}@example.com",
+            },
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -94,9 +91,7 @@ class TestUpdateCaregiverProfile:
         """Test update with invalid email format fails."""
         client, _ = authenticated_client
 
-        response = client.put("/api/caregivers/me", json={
-            "email": "not-a-valid-email"
-        })
+        response = client.put("/api/caregivers/me", json={"email": "not-a-valid-email"})
 
         assert response.status_code in [400, 422]
 
@@ -104,9 +99,7 @@ class TestUpdateCaregiverProfile:
         """Test update with weak password fails."""
         client, _ = authenticated_client
 
-        response = client.put("/api/caregivers/me", json={
-            "password": "weak"
-        })
+        response = client.put("/api/caregivers/me", json={"password": "weak"})
 
         assert response.status_code in [400, 422]
 
@@ -114,9 +107,7 @@ class TestUpdateCaregiverProfile:
         """Test update with empty first name fails."""
         client, _ = authenticated_client
 
-        response = client.put("/api/caregivers/me", json={
-            "first_name": ""
-        })
+        response = client.put("/api/caregivers/me", json={"first_name": ""})
 
         assert response.status_code in [400, 422]
 
@@ -124,9 +115,7 @@ class TestUpdateCaregiverProfile:
         """Test update with empty last name fails."""
         client, _ = authenticated_client
 
-        response = client.put("/api/caregivers/me", json={
-            "last_name": ""
-        })
+        response = client.put("/api/caregivers/me", json={"last_name": ""})
 
         assert response.status_code in [400, 422]
 
@@ -146,21 +135,20 @@ class TestUpdateCaregiverProfile:
 
     def test_update_without_authentication(self, client):
         """Test update without authentication fails."""
-        response = client.put("/api/caregivers/me", json={
-            "first_name": "ShouldFail"
-        })
+        response = client.put("/api/caregivers/me", json={"first_name": "ShouldFail"})
 
         assert response.status_code == 403
 
     def test_update_with_duplicate_email(
-            self, authenticated_client, create_test_caregiver):
+        self, authenticated_client, create_test_caregiver
+    ):
         """Test update with email that already exists fails."""
         client, _ = authenticated_client
         other_caregiver, _ = create_test_caregiver()
 
-        response = client.put("/api/caregivers/me", json={
-            "email": other_caregiver.email
-        })
+        response = client.put(
+            "/api/caregivers/me", json={"email": other_caregiver.email}
+        )
 
         assert response.status_code in [400, 409]  # Bad request or conflict
 
@@ -178,9 +166,12 @@ class TestDeleteCaregiverProfile:
 
         # Verify caregiver is deleted
         from app.models.caregiver import CaregiverModel
-        deleted_caregiver = db_session.query(CaregiverModel).filter(
-            CaregiverModel._id == caregiver.id
-        ).first()
+
+        deleted_caregiver = (
+            db_session.query(CaregiverModel)
+            .filter(CaregiverModel._id == caregiver.id)
+            .first()
+        )
 
         assert deleted_caregiver is None
 
@@ -198,8 +189,7 @@ class TestDeleteCaregiverProfile:
 
         assert response.status_code == 401
 
-    def test_delete_profile_cannot_use_after_deletion(
-            self, authenticated_client):
+    def test_delete_profile_cannot_use_after_deletion(self, authenticated_client):
         """Test that token is invalid after profile deletion."""
         client, caregiver = authenticated_client
 

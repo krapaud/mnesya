@@ -1,0 +1,51 @@
+# Docker Compose configuration — regression test suite
+# Usage: docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from tests
+
+services:
+  # PostgreSQL test database (isolated from production DB)
+  db_test:
+    image: postgres:13-alpine
+    container_name: mnesya-db-test
+    environment:
+      POSTGRES_USER: mnesya_user
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: mnesya_test_db
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data # In-memory storage — db is destroyed on stop
+    networks:
+      - mnesya-test-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mnesya_user -d mnesya_test_db"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+
+  # Backend test runner
+  tests:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: mnesya-tests
+    environment:
+      DATABASE_URL: postgresql://mnesya_user:changeme@db_test:5432/mnesya_test_db
+      TEST_DATABASE_URL: postgresql://mnesya_user:changeme@db_test:5432/mnesya_test_db
+      SECRET_KEY: test_secret_key_for_ci_only_do_not_use_in_production
+      DOCS_USERNAME: admin
+      DOCS_PASSWORD: testpassword
+    depends_on:
+      db_test:
+        condition: service_healthy
+    networks:
+      - mnesya-test-network
+    command: >
+      sh -c "
+        python -m pytest app/test/ -v --tb=short --cov=app --cov-report=term-missing
+      "
+    volumes:
+      - ../backend:/app
+
+networks:
+  mnesya-test-network:
+    driver: bridge
