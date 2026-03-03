@@ -113,6 +113,7 @@ This document tracks confirmed bugs, limitations, and planned improvements. See 
 **Description:** The frontend Dockerfile uses npm packages that include native binaries. On Apple Silicon (M1/M2/M3) machines, `docker compose up frontend` may fail with architecture-related errors.
 
 **Workaround:** Run the frontend locally without Docker:
+
 ```bash
 cd frontend
 npm install && npm run ios
@@ -151,6 +152,7 @@ npm install && npm run ios
 Open an issue on GitHub: [https://github.com/krapaud/mnesya/issues](https://github.com/krapaud/mnesya/issues)
 
 Include:
+
 - Steps to reproduce
 - Expected behaviour
 - Actual behaviour
