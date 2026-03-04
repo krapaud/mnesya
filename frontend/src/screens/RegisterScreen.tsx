@@ -31,7 +31,7 @@ import {
     cleanText,
 } from '../utils/validation';
 import { useAuth, useFormValidation } from '../hooks';
-import { ConfirmationModal } from '../components';
+import { ConfirmationModal, RateLimitModal } from '../components';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
 
@@ -39,6 +39,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showRateLimitModal, setShowRateLimitModal] = useState(false);
 
     const { register, loading, error: authError } = useAuth();
 
@@ -112,8 +113,13 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             // Handle registration errors (hook already set loading state)
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
-            // If error contains email-related messages, highlight email field
-            if (authError?.includes('Email already registered') || authError?.includes('email')) {
+            if (authError === 'TOO_MANY_REQUESTS') {
+                setShowRateLimitModal(true);
+            } else if (
+                authError?.includes('Email already registered') ||
+                authError?.includes('email')
+            ) {
+                // If error contains email-related messages, highlight email field
                 setError('email', t('register.errors.Please use a different email'));
             } else if (authError) {
                 setError('email', authError);
@@ -123,6 +129,12 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
     return (
         <View style={commonStyles.container}>
+            {/* Rate limit modal */}
+            <RateLimitModal
+                visible={showRateLimitModal}
+                onClose={() => setShowRateLimitModal(false)}
+            />
+
             {/* Success modal after account creation */}
             <ConfirmationModal
                 visible={showSuccessModal}

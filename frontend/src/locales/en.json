@@ -29,7 +29,9 @@
             "failedToLoadReminders": "Failed to load reminders",
             "failedToLoadRemindersStatus": "Failed to load reminder status",
             "failedToDeleteReminder": "Unable to delete the reminder. Please try again.",
-            "genericErrorTitle": "An error occurred"
+            "genericErrorTitle": "An error occurred",
+            "rateLimitTitle": "Too many attempts",
+            "rateLimitMessage": "You have made too many attempts. Please wait a minute before trying again."
         },
         "pickersText": {
             "All Profiles": "All",

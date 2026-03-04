@@ -14,6 +14,7 @@ import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { validateEmail } from '../utils/validation';
 import { useAuth, useFormValidation } from '../hooks';
+import { RateLimitModal } from '../components';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -22,7 +23,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     const insets = useSafeAreaInsets();
 
     /** Authentication hook for login operations */
-    const { login, loading } = useAuth();
+    const { login, loading, error: authError } = useAuth();
 
     /** Form validation hook managing all field states and validation logic */
     const { values, errors, showErrors, handleChange, validateAll, setError } = useFormValidation({
@@ -34,6 +35,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         },
     });
     const [showPassword, setShowPassword] = useState(false);
+    const [showRateLimitModal, setShowRateLimitModal] = useState(false);
 
     /**
      * Handles login form submission.
@@ -61,9 +63,13 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             // Handle login errors (hook already set loading state)
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
-            // Show error on both fields (invalid credentials)
-            setError('email', 'login.errors.invalidCredentials');
-            setError('password', 'login.errors.invalidCredentials');
+            if (authError === 'TOO_MANY_REQUESTS') {
+                setShowRateLimitModal(true);
+            } else {
+                // Generic invalid credentials
+                setError('email', 'login.errors.invalidCredentials');
+                setError('password', 'login.errors.invalidCredentials');
+            }
         }
     };
 
@@ -82,6 +88,12 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
     return (
         <View style={commonStyles.container}>
+            {/* Rate limit modal */}
+            <RateLimitModal
+                visible={showRateLimitModal}
+                onClose={() => setShowRateLimitModal(false)}
+            />
+
             {/* Header with back button and logo */}
             <View style={commonStyles.header}>
                 <TouchableOpacity

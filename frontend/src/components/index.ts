@@ -11,5 +11,6 @@ export { default as UpdateCaregiverProfileModal } from './UpdateCaregiverProfile
 export { default as ConfirmationModal } from './ConfirmationModal';
 export { default as ChangePasswordModal } from './ChangePasswordModal';
 export { default as MenuModal } from './MenuModal';
+export { default as RateLimitModal } from './RateLimitModal';
 export type { MenuAction } from './MenuModal';
 export type { FilterPickerItem } from './FilterPickerModal';
