@@ -34,41 +34,6 @@ export async function registerForPushNotifications(): Promise<string | undefined
     return tokenData.data;
 }
 
-/** Schedules a single notification at the given date. */
-export async function scheduleReminderNotification(
-    title: string,
-    body: string,
-    triggerDate: Date,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any
-): Promise<string> {
-    if (!Device.isDevice) {
-        throw new Error('Must use physical device for notifications');
-    }
-
-    // Check permissions
-    const { status } = await Notifications.getPermissionsAsync();
-    if (status !== 'granted') {
-        throw new Error('Notification permissions not granted');
-    }
-
-    // Schedule the notification
-    const notificationId = await Notifications.scheduleNotificationAsync({
-        content: {
-            title,
-            body,
-            sound: true,
-            data,
-        },
-        trigger: {
-            type: Notifications.SchedulableTriggerInputTypes.DATE,
-            date: triggerDate,
-        },
-    });
-
-    return notificationId;
-}
-
 /** Cancels multiple notifications by their IDs. */
 export async function cancelNotifications(notificationIds: string[]): Promise<void> {
     for (const id of notificationIds) {

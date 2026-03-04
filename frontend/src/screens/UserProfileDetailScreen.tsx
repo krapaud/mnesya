@@ -3,7 +3,7 @@
  *
  * @module UserProfileDetailScreen
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
     View,
     Text,
@@ -70,6 +70,12 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
     const [isRefreshingList, setIsRefreshingList] = useState(false);
     const [reloadCounter, setReloadCounter] = useState(0);
     const [showScrollFade, setShowScrollFade] = useState(true);
+    const [isScrollable, setIsScrollable] = useState(false);
+    const scrollContainerHeight = useRef(0);
+
+    const handleContentSizeChange = (_: number, contentHeight: number) => {
+        setIsScrollable(contentHeight > scrollContainerHeight.current);
+    };
 
     const handleRefreshList = useCallback(async () => {
         setIsRefreshingList(true);
@@ -294,6 +300,10 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
                             }
                             onScroll={handleScroll}
                             scrollEventThrottle={16}
+                            onLayout={(e) => {
+                                scrollContainerHeight.current = e.nativeEvent.layout.height;
+                            }}
+                            onContentSizeChange={handleContentSizeChange}
                         >
                             {profileReminders.length === 0 ? (
                                 <Text style={commonStyles.emptyMessage}>
@@ -310,7 +320,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
                                 ))
                             )}
                         </ScrollView>
-                        {showScrollFade && (
+                        {showScrollFade && isScrollable && (
                             <View style={styles.scrollFade} pointerEvents="none">
                                 <Ionicons name="chevron-down" size={24} color="#4A90E2" />
                             </View>
@@ -434,7 +444,7 @@ const styles = StyleSheet.create({
     titleSection: {
         width: '100%',
         paddingLeft: 10,
-        marginTop: 30,
+        marginTop: 20,
     },
     scrollContainer: {
         flex: 1,

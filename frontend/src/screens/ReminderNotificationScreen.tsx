@@ -7,7 +7,7 @@
  * On mount, checks the current reminder status:
  * if already DONE or UNABLE, navigates back immediately to prevent duplicate actions.
  *
- * @component
+ * @module ReminderNotificationScreen
  */
 import React, { useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';
@@ -80,9 +80,16 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
     return (
         <View style={commonStyles.container}>
             {/* Header with app logo and name */}
-            <View style={[commonStyles.header, { justifyContent: 'center', paddingTop: 40 }]}>
-                <Image source={require('../../assets/mnesya-logo.png')} style={commonStyles.logo} />
-                <Text style={commonStyles.appName}>Mnesya</Text>
+            <View style={commonStyles.header}>
+                <View style={commonStyles.headerSpacer} />
+                <View style={commonStyles.headerCenter}>
+                    <Image
+                        source={require('../../assets/mnesya-logo.png')}
+                        style={commonStyles.logo}
+                    />
+                    <Text style={commonStyles.appName}>Mnesya</Text>
+                </View>
+                <View style={commonStyles.headerSpacer} />
             </View>
 
             {/* Reminder content section */}

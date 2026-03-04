@@ -70,7 +70,11 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                                 style={[styles.modalButton, styles.cancelButton]}
                                 onPress={onClose}
                             >
-                                <Text style={styles.cancelButtonText}>
+                                <Text
+                                    style={styles.cancelButtonText}
+                                    numberOfLines={1}
+                                    adjustsFontSizeToFit
+                                >
                                     {cancelText || t('common.buttons.Cancel')}
                                 </Text>
                             </TouchableOpacity>
@@ -80,7 +84,11 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                             style={[styles.modalButton, { backgroundColor: confirmColor }]}
                             onPress={onConfirm ?? onClose}
                         >
-                            <Text style={styles.confirmButtonText}>
+                            <Text
+                                style={styles.confirmButtonText}
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
+                            >
                                 {confirmText || t('common.buttons.Confirm')}
                             </Text>
                         </TouchableOpacity>
@@ -113,13 +121,14 @@ const styles = StyleSheet.create({
         marginBottom: 25,
     },
     modalActions: {
-        flexDirection: 'row',
+        flexDirection: 'column-reverse',
         width: '100%',
         gap: 10,
     },
     modalButton: {
-        flex: 1,
-        padding: 15,
+        width: '100%',
+        paddingVertical: 15,
+        paddingHorizontal: 8,
         borderRadius: 10,
         alignItems: 'center',
     },

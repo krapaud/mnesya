@@ -12,17 +12,22 @@ import {
     TextInput,
     Image,
     ScrollView,
-    Modal,
     ActivityIndicator,
     Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { PlatformDatePicker, PlatformTimePicker, FilterPickerModal } from '../components';
+import {
+    PlatformDatePicker,
+    PlatformTimePicker,
+    FilterPickerModal,
+    ConfirmationModal,
+} from '../components';
 import { useUserProfiles } from '../hooks';
 import { createReminder } from '../services/reminderService';
 import { createPulseAnimation, getPulseScale } from '../utils/animations';
@@ -31,6 +36,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CreateReminder'>;
 
 const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
+    const insets = useSafeAreaInsets();
 
     // Load user profiles from API
     const { userData, loading: loadingProfiles, error: profilesError } = useUserProfiles();
@@ -351,7 +357,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
             />
 
             {/* Buttons section - fixed at bottom */}
-            <View style={styles.buttonsContainer}>
+            <View style={[styles.buttonsContainer, { paddingBottom: insets.bottom + 20 }]}>
                 {/* Save button - navigates back to Dashboard after reminder creation */}
                 {!showDatePicker && !showTimePicker && !showProfilePicker && (
                     <TouchableOpacity
@@ -366,48 +372,17 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
             </View>
 
             {/* Confirmation Modal */}
-            <Modal
+            <ConfirmationModal
                 visible={showConfirmModal}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={handleCancelSave}
-            >
-                <View style={commonStyles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        {/* Confirmation icon */}
-                        <View style={styles.confirmIconContainer}>
-                            <Ionicons name="notifications-outline" size={48} color="#4A90E2" />
-                        </View>
-
-                        {/* Title */}
-                        <Text style={styles.modalTitle}>{t('CreateReminder.modal.title')}</Text>
-
-                        {/* Confirmation message */}
-                        <Text style={styles.modalMessage}>{t('CreateReminder.modal.message')}</Text>
-
-                        {/* Buttons */}
-                        <View style={styles.modalButtons}>
-                            <TouchableOpacity
-                                style={[styles.modalButton, styles.cancelButton]}
-                                onPress={handleCancelSave}
-                            >
-                                <Text style={styles.cancelButtonText}>
-                                    {t('CreateReminder.modal.cancel')}
-                                </Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={[styles.modalButton, styles.confirmButton]}
-                                onPress={handleConfirmSave}
-                            >
-                                <Text style={styles.confirmButtonText}>
-                                    {t('CreateReminder.modal.confirm')}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
+                title={t('CreateReminder.modal.title')}
+                message={t('CreateReminder.modal.message')}
+                confirmText={t('CreateReminder.modal.confirm')}
+                cancelText={t('CreateReminder.modal.cancel')}
+                onConfirm={handleConfirmSave}
+                onClose={handleCancelSave}
+                icon="notifications-outline"
+                iconColor="#4A90E2"
+            />
         </View>
     );
 };
@@ -417,16 +392,14 @@ const styles = StyleSheet.create({
     titleSection: {
         width: '100%',
         paddingLeft: 10,
-        marginTop: 30,
+        marginTop: 20,
         marginBottom: 20,
     },
     scrollContainer: {
         width: '100%',
         paddingBottom: 10,
     },
-    buttonsContainer: {
-        paddingBottom: 40,
-    },
+    buttonsContainer: {},
 
     // ========== TYPOGRAPHY ==========
     title: {
@@ -504,67 +477,6 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         marginBottom: 15,
         width: '100%',
-    },
-
-    // ========== MODAL ==========
-    modalContent: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 15,
-        padding: 25,
-        width: '85%',
-        alignItems: 'center',
-    },
-    confirmIconContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: '#E3F2FD',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 20,
-    },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#333333',
-        marginBottom: 15,
-        textAlign: 'center',
-    },
-    modalMessage: {
-        fontSize: 16,
-        color: '#666666',
-        textAlign: 'center',
-        lineHeight: 24,
-        marginBottom: 25,
-    },
-    modalButtons: {
-        flexDirection: 'row',
-        gap: 10,
-        width: '100%',
-    },
-    modalButton: {
-        flex: 1,
-        paddingVertical: 20,
-        paddingHorizontal: 20,
-        borderRadius: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    cancelButton: {
-        backgroundColor: '#E0E0E0',
-    },
-    cancelButtonText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#333333',
-    },
-    confirmButton: {
-        backgroundColor: '#4A90E2',
-    },
-    confirmButtonText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#FFFFFF',
     },
 });
 

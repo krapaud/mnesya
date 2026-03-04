@@ -17,6 +17,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
@@ -29,6 +30,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CreateProfile'>;
 
 const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
+    const insets = useSafeAreaInsets();
 
     const { values, errors, showErrors, handleChange, validateAll } = useFormValidation({
         firstname: { validate: validateName },
@@ -169,7 +171,7 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
             </ScrollView>
 
             {/* Buttons section - fixed at bottom */}
-            <View style={styles.buttonsContainer}>
+            <View style={[styles.buttonsContainer, { paddingBottom: insets.bottom + 20 }]}>
                 {/* Create button - creates profile and navigates to Dashboard */}
                 {!showDatePicker && (
                     <TouchableOpacity
@@ -212,11 +214,9 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
-        paddingTop: 40,
+        paddingTop: 20,
     },
-    buttonsContainer: {
-        paddingBottom: 40,
-    },
+    buttonsContainer: {},
 
     // ========== TYPOGRAPHY ==========
     title: {

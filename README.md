@@ -318,6 +318,7 @@ mnesya/
 │   │   │   ├── ChangePasswordModal.tsx
 │   │   │   ├── ConfirmationModal.tsx
 │   │   │   ├── FilterPickerModal.tsx
+│   │   │   ├── MenuModal.tsx
 │   │   │   ├── PairingCodeModal.tsx
 │   │   │   ├── PlatformDatePicker.tsx
 │   │   │   ├── PlatformTimePicker.tsx
@@ -383,7 +384,9 @@ mnesya/
 │   ├── babel.config.js
 │   ├── jest.config.js
 │   ├── jest.setup.js
-│   ├── tsconfig.json   ├── eslint.config.js│   ├── index.tsx
+│   ├── tsconfig.json
+│   ├── eslint.config.js
+│   ├── index.tsx
 │   └── package.json
 ├── docker/                    # Docker configuration
 │   ├── docker-compose.yml     # PostgreSQL + Backend + Worker services

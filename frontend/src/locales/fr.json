@@ -29,7 +29,9 @@
             "failedToLoadReminders": "Échec du chargement des rappels",
             "failedToLoadRemindersStatus": "Échec du chargement du statut des rappels",
             "failedToDeleteReminder": "Impossible de supprimer le rappel. Veuillez réessayer.",
-            "genericErrorTitle": "Une erreur est survenue"
+            "genericErrorTitle": "Une erreur est survenue",
+            "rateLimitTitle": "Trop de tentatives",
+            "rateLimitMessage": "Vous avez effectué trop de tentatives. Veuillez patienter une minute avant de réessayer."
         },
         "pickersText": {
             "All Profiles": "Tous",

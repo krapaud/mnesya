@@ -4,25 +4,6 @@
  * @module interfaces
  */
 
-/** Profile model for elderly users managed by a caregiver. */
-export interface ProfileItem {
-    id: number;
-    firstName: string;
-    lastName: string;
-    age: number;
-}
-
-/** Reminder model including status and assignment to a user profile. */
-export interface ReminderItem {
-    id: number;
-    title: string;
-    message: string;
-    date: string;
-    time: string;
-    status: 'Done' | 'Pending' | 'Postponed' | 'Unable';
-    profileName: string;
-}
-
 /** Credentials payload for the login endpoint. */
 export interface LoginData {
     email: string;
