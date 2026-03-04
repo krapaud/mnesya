@@ -175,7 +175,6 @@ const ActivityLogModal: React.FC<ActivityLogModalProps> = ({
                 <View style={styles.modalContent}>
                     {/* Header */}
                     <View style={styles.header}>
-                        <Ionicons name="notifications-outline" size={26} color="#4A90E2" />
                         <Text style={styles.modalTitle}>{t('dashboard.activityLog.title')}</Text>
                     </View>
                     <Text style={styles.subtitle}>{t('dashboard.activityLog.subtitle')}</Text>
