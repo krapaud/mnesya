@@ -19,6 +19,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
@@ -36,6 +37,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
 
 const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
+    const insets = useSafeAreaInsets();
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     const { register, loading, error: authError } = useAuth();
@@ -273,7 +275,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             </ScrollView>
 
             {/* Buttons section - fixed at bottom */}
-            <View style={styles.buttonsContainer}>
+            <View style={[styles.buttonsContainer, { paddingBottom: insets.bottom + 20 }]}>
                 {/* Sign up button - navigates to Login after registration */}
                 <TouchableOpacity
                     style={[styles.signUpButton, loading && styles.signUpButtonDisabled]}
@@ -311,27 +313,25 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingTop: 20,
     },
-    buttonsContainer: {
-        paddingBottom: 40,
-    },
+    buttonsContainer: {},
 
     // ========== TYPOGRAPHY ==========
     title: {
         fontSize: 28,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 5,
     },
     firstLabel: {
         fontSize: 18,
         fontWeight: '500',
         marginBottom: 10,
-        marginTop: 15,
+        marginTop: 5,
     },
     label: {
         fontSize: 18,
         fontWeight: '500',
         marginBottom: 5,
-        marginTop: 0,
+        marginTop: 6,
     },
     alreadyHaveAccountText: {
         color: '#4A90E2',
@@ -344,9 +344,9 @@ const styles = StyleSheet.create({
         fontSize: 12,
         textAlign: 'right',
         marginTop: -5,
-        marginBottom: 5,
-        minHeight: 16,
-        lineHeight: 16,
+        marginBottom: 0,
+        minHeight: 14,
+        lineHeight: 14,
         paddingRight: 10,
     },
 

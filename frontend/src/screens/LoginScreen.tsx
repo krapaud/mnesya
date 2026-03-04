@@ -8,6 +8,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image } from 'reac
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
@@ -18,6 +19,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
+    const insets = useSafeAreaInsets();
 
     /** Authentication hook for login operations */
     const { login, loading } = useAuth();
@@ -161,7 +163,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             </View>
 
             {/* Buttons section - fixed at bottom */}
-            <View style={styles.buttonsContainer}>
+            <View style={[styles.buttonsContainer, { paddingBottom: insets.bottom + 20 }]}>
                 <TouchableOpacity
                     style={[commonStyles.primaryButton, loading && styles.buttonDisabled]}
                     onPress={handleLogin}
@@ -190,7 +192,7 @@ const styles = StyleSheet.create({
     titleContainer: {
         justifyContent: 'center',
         paddingHorizontal: 10,
-        paddingTop: 30,
+        paddingTop: 20,
     },
     formContainer: {
         flex: 1,
@@ -198,9 +200,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 0,
         paddingTop: 10,
     },
-    buttonsContainer: {
-        paddingBottom: 40,
-    },
+    buttonsContainer: {},
 
     // ========== TYPOGRAPHY ==========
     title: {

@@ -80,9 +80,16 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
     return (
         <View style={commonStyles.container}>
             {/* Header with app logo and name */}
-            <View style={[commonStyles.header, { justifyContent: 'center', paddingTop: 40 }]}>
-                <Image source={require('../../assets/mnesya-logo.png')} style={commonStyles.logo} />
-                <Text style={commonStyles.appName}>Mnesya</Text>
+            <View style={commonStyles.header}>
+                <View style={commonStyles.headerSpacer} />
+                <View style={commonStyles.headerCenter}>
+                    <Image
+                        source={require('../../assets/mnesya-logo.png')}
+                        style={commonStyles.logo}
+                    />
+                    <Text style={commonStyles.appName}>Mnesya</Text>
+                </View>
+                <View style={commonStyles.headerSpacer} />
             </View>
 
             {/* Reminder content section */}

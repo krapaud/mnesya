@@ -19,6 +19,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
@@ -31,6 +32,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CreateReminder'>;
 
 const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
+    const insets = useSafeAreaInsets();
 
     // Load user profiles from API
     const { userData, loading: loadingProfiles, error: profilesError } = useUserProfiles();
@@ -351,7 +353,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
             />
 
             {/* Buttons section - fixed at bottom */}
-            <View style={styles.buttonsContainer}>
+            <View style={[styles.buttonsContainer, { paddingBottom: insets.bottom + 20 }]}>
                 {/* Save button - navigates back to Dashboard after reminder creation */}
                 {!showDatePicker && !showTimePicker && !showProfilePicker && (
                     <TouchableOpacity
@@ -417,16 +419,14 @@ const styles = StyleSheet.create({
     titleSection: {
         width: '100%',
         paddingLeft: 10,
-        marginTop: 30,
+        marginTop: 20,
         marginBottom: 20,
     },
     scrollContainer: {
         width: '100%',
         paddingBottom: 10,
     },
-    buttonsContainer: {
-        paddingBottom: 40,
-    },
+    buttonsContainer: {},
 
     // ========== TYPOGRAPHY ==========
     title: {

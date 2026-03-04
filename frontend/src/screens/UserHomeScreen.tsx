@@ -3,7 +3,7 @@
  *
  * @module UserHomeScreen
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     View,
     Text,
@@ -11,7 +11,6 @@ import {
     TouchableOpacity,
     Image,
     ScrollView,
-    Modal,
     RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,6 +24,7 @@ import { getUserInfo, deleteToken, deleteUserInfo } from '../services/tokenServi
 import { useRefresh } from '../contexts/RefreshContext';
 import { getUserReminders } from '../services/reminderService';
 import { useReminderStatus } from '../hooks';
+import { ConfirmationModal, MenuModal } from '../components';
 import type { CaregiverProfile, ReminderData } from '../types/interfaces';
 
 type Props = NativeStackScreenProps<UserTabsParamList, 'Refresh'>;
@@ -137,6 +137,12 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
 
     /** Controls the bottom fade indicator — hidden when scrolled to the end. */
     const [showScrollFade, setShowScrollFade] = useState(true);
+    const [isScrollable, setIsScrollable] = useState(false);
+    const scrollContainerHeight = useRef(0);
+
+    const handleContentSizeChange = (_: number, contentHeight: number) => {
+        setIsScrollable(contentHeight > scrollContainerHeight.current);
+    };
 
     const handleScroll = (event: {
         nativeEvent: {
@@ -209,7 +215,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                     <Text style={commonStyles.appName}>Mnesya</Text>
                 </View>
                 <TouchableOpacity
-                    style={commonStyles.headerSpacer}
+                    style={styles.menuButton}
                     onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         setShowMenu(true);
@@ -236,6 +242,10 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                     }
                     onScroll={handleScroll}
                     scrollEventThrottle={16}
+                    onLayout={(e) => {
+                        scrollContainerHeight.current = e.nativeEvent.layout.height;
+                    }}
+                    onContentSizeChange={handleContentSizeChange}
                 >
                     {/*
                      * Reminder list with empty state handling
@@ -266,133 +276,51 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
                     )}
                 </ScrollView>
                 {/* Bottom fade — signals more content below */}
-                {showScrollFade && (
+                {showScrollFade && isScrollable && (
                     <View style={styles.scrollFade} pointerEvents="none">
                         <Ionicons name="chevron-down" size={24} color="#4A90E2" />
                     </View>
                 )}
             </View>
-            <Modal transparent={true} visible={showAlert} animationType="fade">
-                <View style={commonStyles.modalOverlay}>
-                    <View
-                        style={{
-                            backgroundColor: '#FFFFFF',
-                            padding: 20,
-                            borderRadius: 10,
-                            width: '80%',
-                        }}
-                    >
-                        <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 20 }}>
-                            {t('UserHome.messages.notAvailableMessage')}
-                        </Text>
-                        <TouchableOpacity
-                            style={{ backgroundColor: '#4A90E2', padding: 18, borderRadius: 5 }}
-                            onPress={() => setShowAlert(false)}
-                        >
-                            <Text style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 16 }}>
-                                {t('UserHome.messages.ok')}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
+            {/* Info Alert Modal */}
+            <ConfirmationModal
+                visible={showAlert}
+                onClose={() => setShowAlert(false)}
+                title={t('UserHome.messages.notAvailableMessage')}
+                message=""
+                icon="information-circle-outline"
+                iconColor="#4A90E2"
+                confirmText={t('UserHome.messages.ok')}
+                confirmColor="#4A90E2"
+                showCancelButton={false}
+            />
 
             {/* Menu Modal */}
-            <Modal
-                transparent={true}
+            <MenuModal
                 visible={showMenu}
-                animationType="fade"
-                onRequestClose={() => setShowMenu(false)}
-            >
-                <TouchableOpacity
-                    style={styles.menuOverlay}
-                    activeOpacity={1}
-                    onPress={() => setShowMenu(false)}
-                >
-                    <View style={styles.menuContent}>
-                        <TouchableOpacity
-                            style={styles.menuItem}
-                            onPress={async () => {
-                                setShowMenu(false);
-                                setShowLogoutConfirm(true);
-                            }}
-                        >
-                            <Ionicons name="log-out-outline" size={24} color="#E74C3C" />
-                            <Text style={styles.menuItemText}>
-                                {t('UserProfile.buttons.Logout')}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </TouchableOpacity>
-            </Modal>
+                onClose={() => setShowMenu(false)}
+                actions={[
+                    {
+                        label: t('UserProfile.buttons.Logout'),
+                        icon: 'log-out-outline',
+                        color: '#E74C3C',
+                        onPress: () => setShowLogoutConfirm(true),
+                    },
+                ]}
+            />
 
             {/* Logout Confirm Modal */}
-            <Modal
-                transparent={true}
+            <ConfirmationModal
                 visible={showLogoutConfirm}
-                animationType="fade"
-                onRequestClose={() => setShowLogoutConfirm(false)}
-            >
-                <View style={commonStyles.modalOverlay}>
-                    <View
-                        style={{
-                            backgroundColor: '#FFFFFF',
-                            padding: 20,
-                            borderRadius: 10,
-                            width: '80%',
-                        }}
-                    >
-                        <Text
-                            style={{
-                                fontSize: 18,
-                                fontWeight: 'bold',
-                                textAlign: 'center',
-                                marginBottom: 10,
-                            }}
-                        >
-                            {t('caregiverProfile.modal.title')}
-                        </Text>
-                        <Text
-                            style={{
-                                fontSize: 16,
-                                textAlign: 'center',
-                                marginBottom: 20,
-                                color: '#666666',
-                            }}
-                        >
-                            {t('caregiverProfile.modal.message')}
-                        </Text>
-                        <TouchableOpacity
-                            style={{
-                                backgroundColor: '#E74C3C',
-                                padding: 15,
-                                borderRadius: 8,
-                                marginBottom: 10,
-                            }}
-                            onPress={handleLogoutConfirm}
-                        >
-                            <Text
-                                style={{
-                                    color: '#FFFFFF',
-                                    textAlign: 'center',
-                                    fontSize: 16,
-                                    fontWeight: 'bold',
-                                }}
-                            >
-                                {t('caregiverProfile.modal.confirm')}
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={{ backgroundColor: '#F0F0F0', padding: 15, borderRadius: 8 }}
-                            onPress={() => setShowLogoutConfirm(false)}
-                        >
-                            <Text style={{ color: '#333333', textAlign: 'center', fontSize: 16 }}>
-                                {t('caregiverProfile.modal.cancel')}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
+                onClose={() => setShowLogoutConfirm(false)}
+                onConfirm={handleLogoutConfirm}
+                title={t('caregiverProfile.modal.title')}
+                message={t('caregiverProfile.modal.message')}
+                icon="log-out-outline"
+                iconColor="#E53935"
+                confirmText={t('caregiverProfile.modal.confirm')}
+                cancelText={t('caregiverProfile.modal.cancel')}
+            />
         </View>
     );
 };
@@ -404,7 +332,7 @@ const styles = StyleSheet.create({
     titleSection: {
         width: '100%',
         paddingLeft: 10,
-        marginTop: 30,
+        marginTop: 20,
         marginBottom: 20,
     },
 
@@ -434,33 +362,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255,255,255,0.85)',
     },
     // Menu styles
-    menuOverlay: {
-        flex: 1,
-        backgroundColor: 'transparent',
-        justifyContent: 'flex-start',
-        alignItems: 'flex-end',
-        paddingTop: 110,
-        paddingRight: 20,
-    },
-    menuContent: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 10,
-        shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-        minWidth: 200,
-    },
-    menuItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 15,
-        gap: 10,
-    },
-    menuItemText: {
-        fontSize: 16,
-        color: '#E74C3C',
-        fontWeight: '500',
+    menuButton: {
+        padding: 8,
     },
 });

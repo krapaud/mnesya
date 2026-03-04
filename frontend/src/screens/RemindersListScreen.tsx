@@ -7,7 +7,7 @@
  *
  * @component
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import {
     View,
     Text,
@@ -53,6 +53,12 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
 
     /** Controls the bottom fade indicator — hidden when scrolled to the end. */
     const [showScrollFade, setShowScrollFade] = useState(true);
+    const [isScrollable, setIsScrollable] = useState(false);
+    const scrollContainerHeight = useRef(0);
+
+    const handleContentSizeChange = (_: number, contentHeight: number) => {
+        setIsScrollable(contentHeight > scrollContainerHeight.current);
+    };
 
     const handleScroll = (event: {
         nativeEvent: {
@@ -338,6 +344,10 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                     }
                     onScroll={handleScroll}
                     scrollEventThrottle={16}
+                    onLayout={(e) => {
+                        scrollContainerHeight.current = e.nativeEvent.layout.height;
+                    }}
+                    onContentSizeChange={handleContentSizeChange}
                 >
                     {(getFilteredReminders?.() ?? []).length === 0 ? (
                         <Text style={commonStyles.emptyMessage}>No reminders yet</Text>
@@ -353,7 +363,7 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
                     )}
                 </ScrollView>
                 {/* Bottom fade — signals more content below */}
-                {showScrollFade && (
+                {showScrollFade && isScrollable && (
                     <View style={styles.scrollFade} pointerEvents="none">
                         <Ionicons name="chevron-down" size={24} color="#4A90E2" />
                     </View>
@@ -368,7 +378,7 @@ const styles = StyleSheet.create({
     titleSection: {
         width: '100%',
         paddingLeft: 10,
-        marginTop: 30,
+        marginTop: 20,
         marginBottom: 20,
     },
 

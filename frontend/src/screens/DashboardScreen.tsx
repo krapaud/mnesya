@@ -3,7 +3,7 @@
  *
  * @module DashboardScreen
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import {
     View,
     Text,
@@ -46,6 +46,12 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
     /** Controls the bottom fade indicator — hidden when scrolled to the end. */
     const [showScrollFade, setShowScrollFade] = useState(true);
+    const [isScrollable, setIsScrollable] = useState(false);
+    const scrollContainerHeight = useRef(0);
+
+    const handleContentSizeChange = (_: number, contentHeight: number) => {
+        setIsScrollable(contentHeight > scrollContainerHeight.current);
+    };
 
     const handleScroll = (event: {
         nativeEvent: {
@@ -144,6 +150,10 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                             }
                             onScroll={handleScroll}
                             scrollEventThrottle={16}
+                            onLayout={(e) => {
+                                scrollContainerHeight.current = e.nativeEvent.layout.height;
+                            }}
+                            onContentSizeChange={handleContentSizeChange}
                         >
                             {!userData || userData.length === 0 ? (
                                 <Text style={styles.emptyMessage}>
@@ -191,7 +201,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                         </ScrollView>
                     )}
                     {/* Bottom fade — signals more content below */}
-                    {!isInitialLoading && !error && showScrollFade && (
+                    {!isInitialLoading && !error && showScrollFade && isScrollable && (
                         <View style={styles.scrollFade} pointerEvents="none">
                             <Ionicons name="chevron-down" size={24} color="#4A90E2" />
                         </View>
@@ -207,12 +217,12 @@ const styles = StyleSheet.create({
     titleSection: {
         width: '100%',
         paddingLeft: 10,
-        marginTop: 15,
-        marginBottom: 0,
+        marginTop: 20,
+        marginBottom: 20,
     },
     scrollContainer: {
         flex: 1,
-        marginTop: 15,
+        marginTop: 0,
         paddingBottom: 10,
     },
 
@@ -220,7 +230,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 28,
         fontWeight: 'bold',
-        marginBottom: 1,
+        marginBottom: 10,
     },
     sectionTitle: {
         fontSize: 20,

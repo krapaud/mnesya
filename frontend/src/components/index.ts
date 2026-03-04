@@ -10,4 +10,6 @@ export { default as UpdateUserProfileModal } from './UpdateUserProfileModal';
 export { default as UpdateCaregiverProfileModal } from './UpdateCaregiverProfileModal';
 export { default as ConfirmationModal } from './ConfirmationModal';
 export { default as ChangePasswordModal } from './ChangePasswordModal';
+export { default as MenuModal } from './MenuModal';
+export type { MenuAction } from './MenuModal';
 export type { FilterPickerItem } from './FilterPickerModal';
