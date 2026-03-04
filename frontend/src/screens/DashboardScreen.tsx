@@ -23,7 +23,8 @@ import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList, CaregiverTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { useUserProfiles } from '../hooks';
+import { useUserProfiles, useActivityLog } from '../hooks';
+import { ActivityLogModal } from '../components';
 import { calculateAge } from '../utils/dateUtils';
 
 type Props = CompositeScreenProps<
@@ -37,6 +38,15 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     const { userData, loading, error, reload } = useUserProfiles();
     const isInitialLoading = loading && userData === null;
     const [isRefreshing, setIsRefreshing] = useState(false);
+
+    // Activity log
+    const [showActivityLog, setShowActivityLog] = useState(false);
+    const {
+        entries: activityEntries,
+        loading: activityLoading,
+        error: activityError,
+        reload: reloadActivity,
+    } = useActivityLog();
 
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
@@ -84,7 +94,16 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                     />
                     <Text style={commonStyles.appName}>Mnesya</Text>
                 </View>
-                <View style={commonStyles.headerSpacer} />
+                <TouchableOpacity
+                    style={styles.bellButton}
+                    onPress={() => {
+                        reloadActivity();
+                        setShowActivityLog(true);
+                    }}
+                    accessibilityLabel={t('dashboard.activityLog.title')}
+                >
+                    <Ionicons name="notifications-outline" size={26} color="#333333" />
+                </TouchableOpacity>
             </View>
 
             {/* Page title */}
@@ -208,6 +227,15 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                     )}
                 </View>
             </View>
+
+            {/* Activity log modal */}
+            <ActivityLogModal
+                visible={showActivityLog}
+                onClose={() => setShowActivityLog(false)}
+                entries={activityEntries}
+                loading={activityLoading}
+                error={activityError}
+            />
         </View>
     );
 };
@@ -295,6 +323,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'rgba(255,255,255,0.85)',
+    },
+    bellButton: {
+        width: 44,
+        height: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });
 
