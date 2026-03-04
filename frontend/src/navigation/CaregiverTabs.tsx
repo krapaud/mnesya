@@ -29,8 +29,8 @@ const CaregiverTabs: React.FC = () => {
                 tabBarActiveTintColor: styles.activeTab.color,
                 tabBarInactiveTintColor: styles.inactiveTab.color,
                 tabBarStyle: {
-                    height: 70 + insets.bottom,
-                    paddingBottom: insets.bottom + 10,
+                    height: 40 + insets.bottom,
+                    paddingBottom: 6 + insets.bottom,
                     paddingTop: 5,
                 },
                 tabBarLabelStyle: styles.tabBarLabel,
@@ -81,11 +81,6 @@ const styles = StyleSheet.create({
     },
     inactiveTab: {
         color: '#999999',
-    },
-    tabBar: {
-        height: 70,
-        paddingBottom: 10,
-        paddingTop: 5,
     },
     tabBarLabel: {
         fontSize: 12,

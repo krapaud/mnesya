@@ -12,7 +12,6 @@ import {
     TouchableOpacity,
     Image,
     ScrollView,
-    Modal,
     ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,7 +24,12 @@ import type { CaregiverTabsParamList, RootStackParamList } from '../types/index'
 import { commonStyles } from '../styles/commonStyles';
 import { logout, updateCaregiverProfile, changePassword } from '../services/authService';
 import { useCaregiverProfile } from '../hooks';
-import { UpdateCaregiverProfileModal, ChangePasswordModal } from '../components';
+import {
+    UpdateCaregiverProfileModal,
+    ChangePasswordModal,
+    ConfirmationModal,
+    MenuModal,
+} from '../components';
 
 type Props = CompositeScreenProps<
     BottomTabScreenProps<CaregiverTabsParamList, 'Profile'>,
@@ -158,6 +162,11 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
 
+            {/* Page title */}
+            <View style={styles.titleSection}>
+                <Text style={styles.title}>{t('caregiverProfile.title')}</Text>
+            </View>
+
             {/* Loading state */}
             {loading && (
                 <View style={styles.loadingContainer}>
@@ -251,73 +260,32 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
             )}
 
             {/* Logout Confirmation Modal */}
-            <Modal
+            <ConfirmationModal
                 visible={showLogoutModal}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={handleCancelLogout}
-            >
-                <View style={commonStyles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        {/* Warning icon */}
-                        <View style={styles.warningIconContainer}>
-                            <Ionicons name="log-out-outline" size={48} color="#E53935" />
-                        </View>
-
-                        {/* Title */}
-                        <Text style={styles.modalTitle}>{t('caregiverProfile.modal.title')}</Text>
-
-                        {/* Warning message */}
-                        <Text style={styles.modalMessage}>
-                            {t('caregiverProfile.modal.message')}
-                        </Text>
-
-                        {/* Buttons */}
-                        <View style={styles.modalButtons}>
-                            <TouchableOpacity
-                                style={[styles.modalButton, styles.cancelButton]}
-                                onPress={handleCancelLogout}
-                            >
-                                <Text style={styles.cancelButtonText}>
-                                    {t('caregiverProfile.modal.cancel')}
-                                </Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={[styles.modalButton, styles.confirmButton]}
-                                onPress={handleConfirmLogout}
-                            >
-                                <Text style={styles.confirmButtonText}>
-                                    {t('caregiverProfile.modal.confirm')}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
+                onClose={handleCancelLogout}
+                onConfirm={handleConfirmLogout}
+                title={t('caregiverProfile.modal.title')}
+                message={t('caregiverProfile.modal.message')}
+                icon="log-out-outline"
+                iconColor="#E53935"
+                confirmText={t('caregiverProfile.modal.confirm')}
+                cancelText={t('caregiverProfile.modal.cancel')}
+            />
 
             {/* Context Menu Overlay */}
-            {showMenu && (
-                <Modal
-                    visible={showMenu}
-                    transparent={true}
-                    animationType="fade"
-                    onRequestClose={() => setShowMenu(false)}
-                >
-                    <TouchableOpacity
-                        style={styles.menuOverlay}
-                        activeOpacity={1}
-                        onPress={() => setShowMenu(false)}
-                    >
-                        <View style={styles.menuContainer}>
-                            <TouchableOpacity style={styles.menuItem} onPress={handleEditProfile}>
-                                <Ionicons name="create-outline" size={20} color="#4A90E2" />
-                                <Text style={styles.menuItemText}>{t('common.buttons.Edit')}</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </TouchableOpacity>
-                </Modal>
-            )}
+            <MenuModal
+                visible={showMenu}
+                onClose={() => setShowMenu(false)}
+                actions={[
+                    {
+                        label: t('common.buttons.Edit'),
+                        icon: 'create-outline',
+                        color: '#4A90E2',
+                        onPress: handleEditProfile,
+                    },
+                ]}
+                topOffset={105}
+            />
 
             {/* Update Profile Modal */}
             {caregiverData && (
@@ -348,7 +316,7 @@ const styles = StyleSheet.create({
     titleSection: {
         width: '100%',
         paddingLeft: 10,
-        marginTop: 30,
+        marginTop: 20,
         marginBottom: 20,
     },
     scrollContainer: {
@@ -423,65 +391,6 @@ const styles = StyleSheet.create({
     logoutText: {
         color: '#E53935',
     },
-    modalContent: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 15,
-        padding: 25,
-        width: '85%',
-        alignItems: 'center',
-    },
-    warningIconContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: '#FFF5F5',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 20,
-    },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#333333',
-        marginBottom: 15,
-        textAlign: 'center',
-    },
-    modalMessage: {
-        fontSize: 16,
-        color: '#666666',
-        textAlign: 'center',
-        lineHeight: 24,
-        marginBottom: 25,
-    },
-    modalButtons: {
-        flexDirection: 'row',
-        gap: 10,
-        width: '100%',
-    },
-    modalButton: {
-        flex: 1,
-        paddingVertical: 20,
-        paddingHorizontal: 20,
-        borderRadius: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    cancelButton: {
-        backgroundColor: '#E0E0E0',
-    },
-    cancelButtonText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#333333',
-    },
-    confirmButton: {
-        backgroundColor: '#E53935',
-    },
-    confirmButtonText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#FFFFFF',
-    },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -521,36 +430,6 @@ const styles = StyleSheet.create({
     // MENU STYLES
     menuButton: {
         padding: 8,
-    },
-    menuOverlay: {
-        flex: 1,
-        backgroundColor: 'transparent',
-        justifyContent: 'flex-start',
-        alignItems: 'flex-end',
-        paddingTop: 105,
-        paddingRight: 15,
-    },
-    menuContainer: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 10,
-        paddingVertical: 5,
-        minWidth: 150,
-        shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    menuItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 12,
-        paddingHorizontal: 15,
-        gap: 10,
-    },
-    menuItemText: {
-        fontSize: 16,
-        color: '#333333',
     },
 });
 

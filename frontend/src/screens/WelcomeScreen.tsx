@@ -11,17 +11,26 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 
 const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
+    const insets = useSafeAreaInsets();
     return (
         <View style={commonStyles.container}>
             {/* Header with logo and app name */}
-            <View style={[commonStyles.header, { justifyContent: 'flex-start', paddingTop: 40 }]}>
-                <Image source={require('../../assets/mnesya-logo.png')} style={commonStyles.logo} />
-                <Text style={commonStyles.appName}>Mnesya</Text>
+            <View style={commonStyles.header}>
+                <View style={commonStyles.headerSpacer} />
+                <View style={commonStyles.headerCenter}>
+                    <Image
+                        source={require('../../assets/mnesya-logo.png')}
+                        style={commonStyles.logo}
+                    />
+                    <Text style={commonStyles.appName}>Mnesya</Text>
+                </View>
+                <View style={commonStyles.headerSpacer} />
             </View>
 
             {/* Welcome title and instructions */}
@@ -35,7 +44,7 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
              * Two large, clearly labeled buttons for User and Caregiver flows
              * Includes haptic feedback for better user experience
              */}
-            <View style={styles.contentContainer}>
+            <View style={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}>
                 {/* User profile button - navigates to pairing screen */}
                 <TouchableOpacity
                     style={styles.userButton}
@@ -77,12 +86,11 @@ const styles = StyleSheet.create({
     titleSection: {
         width: '100%',
         paddingLeft: 10,
-        marginTop: 30,
+        marginTop: 20,
         marginBottom: 20,
     },
     contentContainer: {
         width: '100%',
-        paddingBottom: 50,
         marginTop: 40,
     },
 

@@ -114,7 +114,7 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
                         <Ionicons name="arrow-back" size={24} color="#4A90E2" />
                     </View>
                 </TouchableOpacity>
-                <View style={[commonStyles.headerCenter, { gap: 10 }]}>
+                <View style={commonStyles.headerCenter}>
                     <Image
                         source={require('../../assets/mnesya-logo.png')}
                         style={commonStyles.logo}
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     titleSection: {
         width: '100%',
         paddingLeft: 10,
-        marginTop: 30,
+        marginTop: 20,
         marginBottom: 20,
     },
     codeContainer: {

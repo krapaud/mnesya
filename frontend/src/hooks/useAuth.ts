@@ -36,11 +36,19 @@ export const useAuth = (): UseAuthResult => {
             return true;
         } catch (err: unknown) {
             // Try to get the error from the server response
-            const error = err as { response?: { data?: { detail?: string } }; message?: string };
-            const errorMessage =
-                error.response?.data?.detail || error.message || 'Login failed. Please try again.';
-
-            setError(errorMessage);
+            const error = err as {
+                response?: { status?: number; data?: { detail?: string } };
+                message?: string;
+            };
+            if (error.response?.status === 429) {
+                setError('TOO_MANY_REQUESTS');
+            } else {
+                const errorMessage =
+                    error.response?.data?.detail ||
+                    error.message ||
+                    'Login failed. Please try again.';
+                setError(errorMessage);
+            }
             return false;
         } finally {
             setLoading(false);
@@ -57,13 +65,19 @@ export const useAuth = (): UseAuthResult => {
             return true;
         } catch (err: unknown) {
             // Try to get the error from the server response
-            const error = err as { response?: { data?: { detail?: string } }; message?: string };
-            const errorMessage =
-                error.response?.data?.detail ||
-                error.message ||
-                'Registration failed. Please try again.';
-
-            setError(errorMessage);
+            const error = err as {
+                response?: { status?: number; data?: { detail?: string } };
+                message?: string;
+            };
+            if (error.response?.status === 429) {
+                setError('TOO_MANY_REQUESTS');
+            } else {
+                const errorMessage =
+                    error.response?.data?.detail ||
+                    error.message ||
+                    'Registration failed. Please try again.';
+                setError(errorMessage);
+            }
             return false;
         } finally {
             setLoading(false);
