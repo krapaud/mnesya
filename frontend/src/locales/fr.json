@@ -39,7 +39,24 @@
             "All Profiles": "Tous",
             "All Dates": "Toutes",
             "Select a profile": "Sélectionner un Profil",
-            "Select Time": "Sélectionner une Heure"
+            "Select Time": "Sélectionner une Heure",
+            "selectYear": "Sélectionner une année",
+            "selectMonth": "Sélectionner un mois",
+            "months": [
+                "Janvier",
+                "Février",
+                "Mars",
+                "Avril",
+                "Mai",
+                "Juin",
+                "Juillet",
+                "Août",
+                "Septembre",
+                "Octobre",
+                "Novembre",
+                "Décembre"
+            ],
+            "weekDays": ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
         }
     },
     "welcome": {

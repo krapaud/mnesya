@@ -37,7 +37,7 @@ const STATUS_CONFIG: Record<
     },
     POSTPONED: {
         icon: 'time-outline',
-        color: '#FF9800',
+        color: '#2196F3',
         labelKey: 'dashboard.activityLog.statusPostponed',
     },
     UNABLE: {
@@ -47,7 +47,7 @@ const STATUS_CONFIG: Record<
     },
     MISSED: {
         icon: 'alert-circle-outline',
-        color: '#9E9E9E',
+        color: '#E53935',
         labelKey: 'dashboard.activityLog.statusMissed',
     },
 };
@@ -55,18 +55,16 @@ const STATUS_CONFIG: Record<
 // ─── Helper ─────────────────────────────────────────────────────────────────
 
 /**
- * Formats an ISO date string to a human-readable short date + time.
- * e.g. "04 mar. 2026, 10:30"
+ * Formats an ISO date string to "dd/mm/yyyy hh:mm" — locale-independent.
  */
 const formatDate = (iso: string): string => {
     const d = new Date(iso);
-    return d.toLocaleString(undefined, {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
 };
 
 // ─── Sub-component: single log entry ────────────────────────────────────────
@@ -135,7 +133,7 @@ const ActivityLogModal: React.FC<ActivityLogModalProps> = ({
         if (loading) {
             return (
                 <View style={styles.centeredState}>
-                    <ActivityIndicator size="large" color="#6200EE" />
+                    <ActivityIndicator size="large" color="#4A90E2" />
                 </View>
             );
         }
@@ -177,7 +175,7 @@ const ActivityLogModal: React.FC<ActivityLogModalProps> = ({
                 <View style={styles.modalContent}>
                     {/* Header */}
                     <View style={styles.header}>
-                        <Ionicons name="notifications-outline" size={26} color="#6200EE" />
+                        <Ionicons name="notifications-outline" size={26} color="#4A90E2" />
                         <Text style={styles.modalTitle}>{t('dashboard.activityLog.title')}</Text>
                     </View>
                     <Text style={styles.subtitle}>{t('dashboard.activityLog.subtitle')}</Text>
@@ -279,7 +277,7 @@ const styles = StyleSheet.create({
     },
     closeButton: {
         marginTop: 20,
-        backgroundColor: '#6200EE',
+        backgroundColor: '#4A90E2',
         borderRadius: 10,
         paddingVertical: 12,
         paddingHorizontal: 40,

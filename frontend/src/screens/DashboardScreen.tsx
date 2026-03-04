@@ -3,7 +3,7 @@
  *
  * @module DashboardScreen
  */
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import {
     View,
     Text,
@@ -41,12 +41,22 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
     // Activity log
     const [showActivityLog, setShowActivityLog] = useState(false);
+    const [hasUnread, setHasUnread] = useState(false);
+    // Tracks how many entries the user has already seen (set when modal opens)
+    const readCount = useRef(0);
     const {
         entries: activityEntries,
         loading: activityLoading,
         error: activityError,
         reload: reloadActivity,
     } = useActivityLog();
+
+    // Show badge only when new entries appeared since the modal was last opened
+    useEffect(() => {
+        if (activityEntries && activityEntries.length > readCount.current) {
+            setHasUnread(true);
+        }
+    }, [activityEntries]);
 
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
@@ -75,11 +85,12 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         setShowScrollFade(!isAtBottom);
     };
 
-    // Reload profiles when screen comes into focus
+    // Reload profiles and activity log when screen comes into focus
     useFocusEffect(
         useCallback(() => {
             reload();
-        }, [reload])
+            reloadActivity();
+        }, [reload, reloadActivity])
     );
 
     return (
@@ -97,12 +108,18 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 <TouchableOpacity
                     style={styles.bellButton}
                     onPress={() => {
-                        reloadActivity();
+                        readCount.current = activityEntries?.length ?? 0;
+                        setHasUnread(false);
                         setShowActivityLog(true);
                     }}
                     accessibilityLabel={t('dashboard.activityLog.title')}
                 >
-                    <Ionicons name="notifications-outline" size={26} color="#333333" />
+                    <Ionicons
+                        name={hasUnread ? 'notifications' : 'notifications-outline'}
+                        size={26}
+                        color={hasUnread ? '#4A90E2' : '#333333'}
+                    />
+                    {hasUnread && <View style={styles.bellBadge} />}
                 </TouchableOpacity>
             </View>
 
@@ -329,6 +346,17 @@ const styles = StyleSheet.create({
         height: 44,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    bellBadge: {
+        position: 'absolute',
+        top: 6,
+        right: 6,
+        width: 9,
+        height: 9,
+        borderRadius: 5,
+        backgroundColor: '#E53935',
+        borderWidth: 1.5,
+        borderColor: '#FFFFFF',
     },
 });
 

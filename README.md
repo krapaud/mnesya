@@ -32,17 +32,19 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 - Maximum 3 buttons per screen
 - Linear journey without complex navigation
 
-### MVP Scope - Current Implementation (Mar 2, 2026)
+### MVP Scope - Current Implementation (Mar 4, 2026)
 
 - **12 screens implemented**:
   - 1 Shared screen: WelcomeScreen
   - 8 Caregiver screens: LoginScreen, RegisterScreen, DashboardScreen, CaregiverProfileScreen, CreateProfileScreen, CreateReminderScreen, RemindersListScreen, UserProfileDetailScreen
   - 3 User screens: UserPairingScreen, UserHomeScreen, ReminderNotificationScreen
-- **Internationalization**: Full bilingual support (FR/EN) with i18next
+- **Internationalization**: Full bilingual support (FR/EN) with i18next (months, week days, all pickers fully translated)
 - **Enhanced Notifications**: Backend scheduler with 3 jobs (T+0, T+5, T+10 min) + automatic caregiver alerts
-- **API Integration**: Frontend fully connected to backend (auth, profiles, pairing, reminders, reminder status)
+- **Activity Log**: Caregiver dashboard bell icon showing the last 48 h of user interactions (DONE/POSTPONED/UNABLE/MISSED) with unread badge
+- **Rate Limiting**: Register (3/min) and Login (5/min) with user-facing modal on HTTP 429
+- **API Integration**: Frontend fully connected to backend (auth, profiles, pairing, reminders, reminder status, activity log)
 - **Code Quality**: ESLint v9 configured (0 errors, 0 warnings across all frontend files)
-- **Current status**: Frontend 100% connected, Backend 100% (auth, profiles, pairing, reminders, reminder status all live)
+- **Current status**: Frontend 100% connected, Backend 100% (auth, profiles, pairing, reminders, reminder status, activity log all live)
 - **Detailed User Stories**: See [Technical Documentation \_ Mnesya.pdf](docs/Technical%20Documentation%20_%20Mnesya.pdf) (MoSCoW method, US-001 to US-027)
 
 ## Features
@@ -69,6 +71,8 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 - ✅ Chronological reminder view with filters (date, profile, status) - Fully integrated
 - ✅ Status tracking (Done, Pending, Postponed, Unable) - Fully integrated
 - ✅ Tab navigation (Home | Reminders | Profile) - Implemented
+- ✅ **Activity log**: Bell icon in caregiver dashboard header — displays the last 48 h of user interactions (DONE / POSTPONED / UNABLE / MISSED), with a red unread badge when new entries are detected and auto-reload on screen focus
+- ✅ **Rate limiting feedback**: HTTP 429 from Register (3/min) or Login (5/min) triggers a dedicated `RateLimitModal` instead of a generic error
 
 ### User Interface (Elderly Person)
 
@@ -116,7 +120,11 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 
 5. ✅ **Status Update**: User responds → Frontend → FastAPI → PostgreSQL + notification cancellation
    - Frontend: Integrated with useReminderStatus hook
-   - Backend: `/api/reminders/{id}/status` endpoint live
+   - Backend: `/api/reminder-status/{id}` endpoint live
+
+6. ✅ **Activity Log**: Caregiver opens dashboard bell → Frontend → FastAPI → PostgreSQL (JOIN reminder_status + reminder + user)
+   - Frontend: `useActivityLog` hook + `ActivityLogModal` component, unread badge logic
+   - Backend: `GET /api/reminder-status/caregiver/recent` — 48 h window, DONE/POSTPONED/UNABLE/MISSED only
 
 ## Technologies
 
@@ -157,9 +165,11 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
   - ✅ Docker Compose full setup (PostgreSQL + Backend + Worker)
   - ✅ pytest test suite (authentication, pairing, user, caregiver, reminder, reminder_status, push_notification)
   - ✅ Reminder API endpoints (`/api/reminders`) — full CRUD
-  - ✅ Reminder status update endpoint (`/api/reminders/{id}/status`)
+  - ✅ Reminder status update endpoint (`/api/reminder-status/{id}`)
   - ✅ Push token registration (`/api/push-tokens`) — register, unregister, list
   - ✅ APScheduler Worker — 3 jobs: T+0 user notification, T+5 retry, T+10 caregiver escalation
+  - ✅ Rate limiting — Register: 3/min, Login: 5/min (SlowAPI)
+  - ✅ Activity log endpoint (`GET /api/reminder-status/caregiver/recent`) — last 48 h, DONE/POSTPONED/UNABLE/MISSED
 
 ### Infrastructure
 
@@ -171,7 +181,7 @@ Mnesya is a mobile reminder application designed to help elderly people (Users) 
 
 ### Current Status (Mar 2, 2026)
 
-**Frontend**: Fully operational — connected to real backend (auth, profiles, pairing, reminders, reminder status)  
+**Frontend**: Fully operational — connected to real backend (auth, profiles, pairing, reminders, reminder status, activity log)  
 **Backend**: Fully operational — all MVP endpoints live  
 **Docker**: Fully configured with PostgreSQL, Backend, and Worker services
 
@@ -315,20 +325,23 @@ mnesya/
 │   │   ├── App.tsx            # Root component with i18n + context
 │   │   ├── i18n.ts            # i18next configuration (FR/EN)
 │   │   ├── components/        # Reusable UI components
+│   │   │   ├── ActivityLogModal.tsx        # Caregiver activity log (last 48 h)
 │   │   │   ├── ChangePasswordModal.tsx
 │   │   │   ├── ConfirmationModal.tsx
 │   │   │   ├── FilterPickerModal.tsx
 │   │   │   ├── MenuModal.tsx
 │   │   │   ├── PairingCodeModal.tsx
-│   │   │   ├── PlatformDatePicker.tsx
+│   │   │   ├── PlatformDatePicker.tsx      # Fully translated calendar picker
 │   │   │   ├── PlatformTimePicker.tsx
+│   │   │   ├── RateLimitModal.tsx          # HTTP 429 user feedback modal
 │   │   │   ├── ReminderCard.tsx
 │   │   │   ├── UpdateUserProfileModal.tsx
 │   │   │   └── UpdateCaregiverProfileModal.tsx
 │   │   ├── contexts/          # React contexts
 │   │   │   └── RefreshContext.tsx  # Global refresh trigger
 │   │   ├── hooks/             # Custom React hooks
-│   │   │   ├── useAuth.ts          # Auth state (login/logout/register)
+│   │   │   ├── useActivityLog.ts           # Activity log fetch + unread logic
+│   │   │   ├── useAuth.ts                  # Auth state (login/logout/register, rate-limit detection)
 │   │   │   ├── useFormValidation.ts        # Form validation logic
 │   │   │   ├── useCaregiverProfile.ts
 │   │   │   ├── useUserProfile.ts
@@ -443,13 +456,24 @@ mnesya/
 
 ### Reminders
 
-| Endpoint                     | Method | Description       | Auth            |
-| ---------------------------- | ------ | ----------------- | --------------- |
-| `/api/reminders`             | POST   | Create a reminder | Yes (Caregiver) |
-| `/api/reminders`             | GET    | List reminders    | Yes (Caregiver) |
-| `/api/reminders/{id}`        | PUT    | Update a reminder | Yes (Caregiver) |
-| `/api/reminders/{id}`        | DELETE | Delete a reminder | Yes (Caregiver) |
-| `/api/reminders/{id}/status` | PUT    | Update status     | Yes (User)      |
+| Endpoint                      | Method | Description              | Auth            |
+| ----------------------------- | ------ | ------------------------ | --------------- |
+| `/api/reminder`               | POST   | Create a reminder        | Yes (Caregiver) |
+| `/api/reminder/caregiver`     | GET    | List caregiver reminders | Yes (Caregiver) |
+| `/api/reminder/user`          | GET    | List user reminders      | Yes (User)      |
+| `/api/reminder/{id}`          | PUT    | Update a reminder        | Yes (Caregiver) |
+| `/api/reminder/{id}`          | DELETE | Delete a reminder        | Yes (Caregiver) |
+| `/api/reminder/{id}/postpone` | PUT    | Postpone a reminder      | Yes (User)      |
+
+### Reminder Status
+
+| Endpoint                                | Method | Description                           | Auth            |
+| --------------------------------------- | ------ | ------------------------------------- | --------------- |
+| `/api/reminder-status/{id}/current`     | GET    | Get current status of a reminder      | Yes             |
+| `/api/reminder-status/{id}/history`     | GET    | Get full status history of a reminder | Yes             |
+| `/api/reminder-status/{id}`             | PUT    | Update status (Done/Postponed/Unable) | Yes (User)      |
+| `/api/reminder-status/caregiver/recent` | GET    | Activity log — last 48 h interactions | Yes (Caregiver) |
+| `/api/reminder-status/valid-statuses`   | GET    | List all valid status values          | Yes             |
 
 ### Push Notifications
 
