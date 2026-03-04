@@ -4,6 +4,7 @@
             "New reminder": "New Reminder",
             "Validate": "Validate",
             "Cancel": "Cancel",
+            "Close": "Close",
             "Edit": "Edit",
             "Confirm": "Confirm"
         },
@@ -115,6 +116,15 @@
         },
         "messages": {
             "No profiles yet": "No profiles yet"
+        },
+        "activityLog": {
+            "title": "Recent activity",
+            "subtitle": "Interactions from the last 48 hours",
+            "empty": "No recent activity",
+            "statusDone": "Done",
+            "statusPostponed": "Postponed",
+            "statusUnable": "Unable",
+            "statusMissed": "Missed"
         }
     },
     "reminders": {

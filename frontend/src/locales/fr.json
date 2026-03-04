@@ -4,6 +4,7 @@
             "New reminder": "Nouveau Rappel",
             "Validate": "Valider",
             "Cancel": "Annuler",
+            "Close": "Fermer",
             "Edit": "Modifier",
             "Confirm": "Confirmer"
         },
@@ -115,6 +116,15 @@
         },
         "messages": {
             "No profiles yet": "Aucun profil pour le moment"
+        },
+        "activityLog": {
+            "title": "Activité récente",
+            "subtitle": "Interactions des 48 dernières heures",
+            "empty": "Aucune activité récente",
+            "statusDone": "Effectué",
+            "statusPostponed": "Reporté",
+            "statusUnable": "Annulé",
+            "statusMissed": "Manqué"
         }
     },
     "reminders": {
