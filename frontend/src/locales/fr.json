@@ -28,6 +28,7 @@
             "failedToDeleteProfile": "Échec de la suppression du profil",
             "failedToLoadReminders": "Échec du chargement des rappels",
             "failedToLoadRemindersStatus": "Échec du chargement du statut des rappels",
+            "failedToLoadActivityLog": "Échec du chargement de l'historique d'activité",
             "failedToDeleteReminder": "Impossible de supprimer le rappel. Veuillez réessayer.",
             "genericErrorTitle": "Une erreur est survenue",
             "rateLimitTitle": "Trop de tentatives",

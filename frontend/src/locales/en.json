@@ -28,6 +28,7 @@
             "failedToDeleteProfile": "Failed to delete profile",
             "failedToLoadReminders": "Failed to load reminders",
             "failedToLoadRemindersStatus": "Failed to load reminder status",
+            "failedToLoadActivityLog": "Failed to load the activity log",
             "failedToDeleteReminder": "Unable to delete the reminder. Please try again.",
             "genericErrorTitle": "An error occurred",
             "rateLimitTitle": "Too many attempts",

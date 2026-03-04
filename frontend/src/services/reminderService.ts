@@ -10,6 +10,7 @@ import {
     ReminderData,
     ReminderStatus,
     UpdateReminderStatus,
+    ActivityLogEntry,
 } from '../types/interfaces';
 
 /** Creates a new reminder. */
@@ -59,6 +60,12 @@ export const updateReminderStatus = async (
     data: UpdateReminderStatus
 ): Promise<ReminderStatus> => {
     const response = await apiClient.put(`/api/reminder-status/${reminderId}`, data);
+    return response.data;
+};
+
+/** Returns the activity log for the logged-in caregiver (last 48 hours). */
+export const getCaregiverActivityLog = async (): Promise<ActivityLogEntry[]> => {
+    const response = await apiClient.get('/api/reminder-status/caregiver/recent');
     return response.data;
 };
 
