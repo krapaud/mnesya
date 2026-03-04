@@ -9,7 +9,8 @@ from sqlalchemy.orm import Session
 from app.services.reminder_status_facade import ReminderStatusFacade
 from app.schemas.reminder_status_schema import (
     ReminderStatusResponse,
-    ReminderStatusUpdate
+    ReminderStatusUpdate,
+    ActivityLogEntry,
 )
 from app.models.reminder_status_enum import ReminderStatusEnum
 from app.api.authentication import verify_token
@@ -58,10 +59,10 @@ def get_reminder_status_facade(db: Session = Depends(get_db)) -> ReminderStatusF
                         "status": "PENDING",
                         "reminder_id": "456e7890-e89b-12d3-a456-426614174000",
                         "created_at": "2026-02-27T10:30:00Z",
-                        "updated_at": "2026-02-27T10:30:00Z"
+                        "updated_at": "2026-02-27T10:30:00Z",
                     }
                 }
-            }
+            },
         },
         401: {
             "description": "Unauthorized - Invalid or expired token",
@@ -69,7 +70,7 @@ def get_reminder_status_facade(db: Session = Depends(get_db)) -> ReminderStatusF
                 "application/json": {
                     "example": {"detail": "Could not validate credentials"}
                 }
-            }
+            },
         },
         404: {
             "description": "No status found for this reminder",
@@ -77,63 +78,62 @@ def get_reminder_status_facade(db: Session = Depends(get_db)) -> ReminderStatusF
                 "application/json": {
                     "example": {"detail": "No status found for this reminder"}
                 }
-            }
+            },
         },
         500: {
             "description": "Internal server error",
             "content": {
-                "application/json": {
-                    "example": {"detail": "Failed to retrieve status"}
-                }
-            }
-        }
-    }
+                "application/json": {"example": {"detail": "Failed to retrieve status"}}
+            },
+        },
+    },
 )
 async def get_current_status(
     reminder_id: UUID,
     user_id: str = Depends(lambda token=Depends(verify_token): token.get("sub")),
-    facade: ReminderStatusFacade = Depends(get_reminder_status_facade)
+    facade: ReminderStatusFacade = Depends(get_reminder_status_facade),
 ):
     """Get the current status of a reminder.
-    
+
     Returns the most recent status entry for the specified reminder.
-    
+
     Args:
         reminder_id (UUID): Unique identifier of the reminder
         user_id (str): ID of the authenticated user (from JWT token)
         facade (ReminderStatusFacade): Status service facade
-        
+
     Returns:
         ReminderStatusResponse: The current status of the reminder
-        
+
     Raises:
         HTTPException: 404 if no status found for reminder
     """
     try:
         current_status = facade.get_latest_status(reminder_id)
-        
+
         if not current_status:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="No status found for this reminder"
+                detail="No status found for this reminder",
             )
-        
+
         return ReminderStatusResponse(
             id=current_status.id,
             status=current_status.status,
             reminder_id=current_status.reminder_id,
             created_at=current_status.created_at,
-            updated_at=current_status.updated_at
+            updated_at=current_status.updated_at,
         )
-    
+
     except HTTPException:
         raise
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve status: {str(e)}"
+            detail=f"Failed to retrieve status: {str(e)}",
         )
 
 
@@ -178,25 +178,25 @@ async def get_current_status(
                             "status": "DONE",
                             "reminder_id": "456e7890-e89b-12d3-a456-426614174000",
                             "created_at": "2026-02-27T14:05:00Z",
-                            "updated_at": "2026-02-27T14:05:00Z"
+                            "updated_at": "2026-02-27T14:05:00Z",
                         },
                         {
                             "id": "223e4567-e89b-12d3-a456-426614174001",
                             "status": "POSTPONED",
                             "reminder_id": "456e7890-e89b-12d3-a456-426614174000",
                             "created_at": "2026-02-27T13:00:00Z",
-                            "updated_at": "2026-02-27T13:00:00Z"
+                            "updated_at": "2026-02-27T13:00:00Z",
                         },
                         {
                             "id": "123e4567-e89b-12d3-a456-426614174000",
                             "status": "PENDING",
                             "reminder_id": "456e7890-e89b-12d3-a456-426614174000",
                             "created_at": "2026-02-27T10:30:00Z",
-                            "updated_at": "2026-02-27T10:30:00Z"
-                        }
+                            "updated_at": "2026-02-27T10:30:00Z",
+                        },
                     ]
                 }
-            }
+            },
         },
         401: {
             "description": "Unauthorized - Invalid or expired token",
@@ -204,7 +204,7 @@ async def get_current_status(
                 "application/json": {
                     "example": {"detail": "Could not validate credentials"}
                 }
-            }
+            },
         },
         500: {
             "description": "Internal server error",
@@ -212,51 +212,52 @@ async def get_current_status(
                 "application/json": {
                     "example": {"detail": "Failed to retrieve status history"}
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def get_status_history(
     reminder_id: UUID,
     user_id: str = Depends(lambda token=Depends(verify_token): token.get("sub")),
-    facade: ReminderStatusFacade = Depends(get_reminder_status_facade)
+    facade: ReminderStatusFacade = Depends(get_reminder_status_facade),
 ):
     """Get the complete status history of a reminder.
-    
+
     Returns all status entries for the reminder, ordered from newest to oldest.
     This provides a complete audit trail of status changes.
-    
+
     Args:
         reminder_id (UUID): Unique identifier of the reminder
         user_id (str): ID of the authenticated user (from JWT token)
         facade (ReminderStatusFacade): Status service facade
-        
+
     Returns:
         List[ReminderStatusResponse]: List of all status entries (newest first)
-        
+
     Raises:
         HTTPException: 500 if retrieval fails
     """
     try:
         statuses = facade.get_statuses_by_reminder(reminder_id)
-        
+
         return [
             ReminderStatusResponse(
                 id=s.id,
                 status=s.status,
                 reminder_id=s.reminder_id,
                 created_at=s.created_at,
-                updated_at=s.updated_at
+                updated_at=s.updated_at,
             )
             for s in statuses
         ]
-    
+
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve status history: {str(e)}"
+            detail=f"Failed to retrieve status history: {str(e)}",
         )
 
 
@@ -306,18 +307,20 @@ async def get_status_history(
                         "status": "DONE",
                         "reminder_id": "456e7890-e89b-12d3-a456-426614174000",
                         "created_at": "2026-02-27T14:05:00Z",
-                        "updated_at": "2026-02-27T14:05:00Z"
+                        "updated_at": "2026-02-27T14:05:00Z",
                     }
                 }
-            }
+            },
         },
         400: {
             "description": "Bad request - Invalid status value",
             "content": {
                 "application/json": {
-                    "example": {"detail": "Invalid status value. Must be one of: PENDING, DONE, POSTPONED, UNABLE"}
+                    "example": {
+                        "detail": "Invalid status value. Must be one of: PENDING, DONE, POSTPONED, UNABLE"
+                    }
                 }
-            }
+            },
         },
         401: {
             "description": "Unauthorized - Invalid or expired token",
@@ -325,80 +328,166 @@ async def get_status_history(
                 "application/json": {
                     "example": {"detail": "Could not validate credentials"}
                 }
-            }
+            },
         },
         500: {
             "description": "Internal server error",
             "content": {
-                "application/json": {
-                    "example": {"detail": "Failed to update status"}
-                }
-            }
-        }
-    }
+                "application/json": {"example": {"detail": "Failed to update status"}}
+            },
+        },
+    },
 )
 async def update_reminder_status(
     reminder_id: UUID,
     request: ReminderStatusUpdate,
     user_id: str = Depends(lambda token=Depends(verify_token): token.get("sub")),
-    facade: ReminderStatusFacade = Depends(get_reminder_status_facade)
+    facade: ReminderStatusFacade = Depends(get_reminder_status_facade),
 ):
     """Update the status of a reminder.
-    
+
     Creates a new status entry rather than modifying the existing one,
     maintaining a complete history of status changes. Valid statuses are:
     - PENDING: Reminder is scheduled and waiting
     - DONE: Reminder has been completed
     - POSTPONED: Reminder has been postponed
     - UNABLE: User was unable to complete the reminder
-    
+
     Args:
         reminder_id (UUID): Unique identifier of the reminder
         request (ReminderStatusUpdate): New status value
         user_id (str): ID of the authenticated user (from JWT token)
         facade (ReminderStatusFacade): Status service facade
-        
+
     Returns:
         ReminderStatusResponse: The newly created status entry
-        
+
     Raises:
         HTTPException: 400 for validation errors, 500 if update fails
     """
     try:
         # Create new status entry (preserves history)
-        status_data = {
-            "status": request.status,
-            "reminder_id": reminder_id
-        }
-        
+        status_data = {"status": request.status, "reminder_id": reminder_id}
+
         new_status = facade.create_reminder_status(status_data)
-        
+
         return ReminderStatusResponse(
             id=new_status.id,
             status=new_status.status,
             reminder_id=new_status.reminder_id,
             created_at=new_status.created_at,
-            updated_at=new_status.updated_at
+            updated_at=new_status.updated_at,
         )
-    
+
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update status: {str(e)}"
+            detail=f"Failed to update status: {str(e)}",
+        )
+
+
+@router.get(
+    "/caregiver/recent",
+    response_model=List[ActivityLogEntry],
+    summary="Get recent activity log for the caregiver",
+    description="""
+    Returns all user interactions on reminders (DONE, POSTPONED, UNABLE, MISSED)
+    across all reminders managed by the authenticated caregiver, over the last 48 hours.
+
+    Results are ordered newest first.
+
+    **Authentication required:** Bearer token (caregiver)
+    """,
+    responses={
+        200: {
+            "description": "Activity log retrieved successfully",
+            "content": {
+                "application/json": {
+                    "example": [
+                        {
+                            "status_id": "123e4567-e89b-12d3-a456-426614174000",
+                            "status": "DONE",
+                            "reminder_id": "456e7890-e89b-12d3-a456-426614174000",
+                            "reminder_title": "Take medications",
+                            "user_first_name": "Marie",
+                            "user_last_name": "Dupont",
+                            "occurred_at": "2026-03-04T10:30:00Z",
+                        }
+                    ]
+                }
+            },
+        },
+        401: {
+            "description": "Unauthorized",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Could not validate credentials"}
+                }
+            },
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Failed to retrieve activity log"}
+                }
+            },
+        },
+    },
+)
+async def get_caregiver_activity_log(
+    token_payload: dict = Depends(verify_token),
+    facade: ReminderStatusFacade = Depends(get_reminder_status_facade),
+):
+    """Get the activity log for the authenticated caregiver.
+
+    Returns all DONE/POSTPONED/UNABLE/MISSED interactions across all reminders
+    managed by this caregiver in the last 48 hours, ordered newest first.
+
+    Args:
+        token_payload (dict): JWT payload with caregiver ID under 'sub'.
+        facade (ReminderStatusFacade): Status service facade.
+
+    Returns:
+        List[ActivityLogEntry]: Enriched status entries for the activity log.
+
+    Raises:
+        HTTPException: 500 if retrieval fails.
+    """
+    try:
+        caregiver_id = token_payload.get("sub")
+        entries = facade.get_recent_activity(caregiver_id)
+
+        return [
+            ActivityLogEntry(
+                status_id=e.id,
+                status=e.status,
+                reminder_id=e.reminder_id,
+                reminder_title=e.reminder_title,
+                user_first_name=e.user_first_name,
+                user_last_name=e.user_last_name,
+                occurred_at=e.created_at,
+            )
+            for e in entries
+        ]
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve activity log: {str(e)}",
         )
 
 
 @router.get(
     "/valid-statuses",
     response_model=List[str],
-    summary="Get valid status values",
     description="""
     Retrieve the list of all valid reminder status values.
     
@@ -428,16 +517,16 @@ async def update_reminder_status(
                 "application/json": {
                     "example": ["PENDING", "DONE", "POSTPONED", "UNABLE"]
                 }
-            }
+            },
         }
-    }
+    },
 )
 async def get_valid_statuses():
     """Get the list of valid reminder statuses.
-    
+
     Returns all possible status values that can be set on a reminder.
     This endpoint does not require authentication as it's just reference data.
-    
+
     Returns:
         List[str]: List of valid status values (PENDING, DONE, POSTPONED, UNABLE)
     """
