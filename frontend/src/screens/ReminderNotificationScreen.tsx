@@ -7,7 +7,7 @@
  * On mount, checks the current reminder status:
  * if already DONE or UNABLE, navigates back immediately to prevent duplicate actions.
  *
- * @component
+ * @module ReminderNotificationScreen
  */
 import React, { useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';

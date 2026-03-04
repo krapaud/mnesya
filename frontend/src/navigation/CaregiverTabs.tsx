@@ -82,11 +82,6 @@ const styles = StyleSheet.create({
     inactiveTab: {
         color: '#999999',
     },
-    tabBar: {
-        height: 70,
-        paddingBottom: 10,
-        paddingTop: 5,
-    },
     tabBarLabel: {
         fontSize: 12,
     },

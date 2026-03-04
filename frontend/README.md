@@ -71,10 +71,19 @@ src/
 ├── hooks/                   # Custom hooks
 ├── locales/                 # Translation files (en.json, fr.json)
 ├── navigation/              # React Navigation stack definitions
-├── screens/                 # One folder per screen
+├── screens/                 # All screens (flat)
 │   ├── WelcomeScreen.tsx
-│   ├── caregiver/           # 8 caregiver screens
-│   └── user/                # 3 user screens
+│   ├── LoginScreen.tsx
+│   ├── RegisterScreen.tsx
+│   ├── CreateProfileScreen.tsx
+│   ├── CreateReminderScreen.tsx
+│   ├── DashboardScreen.tsx
+│   ├── CaregiverProfileScreen.tsx
+│   ├── RemindersListScreen.tsx
+│   ├── UserHomeScreen.tsx
+│   ├── UserPairingScreen.tsx
+│   ├── UserProfileDetailScreen.tsx
+│   └── ReminderNotificationScreen.tsx
 ├── services/                # API service layer
 │   ├── api.ts               # Axios instance + token refresh interceptor
 │   ├── authService.ts

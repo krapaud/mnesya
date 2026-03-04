@@ -28,7 +28,9 @@ def send_user_notifications() -> None:
     Queries reminders scheduled within the last 90 seconds and sends
     a push notification to the user's registered devices.
     The 90s window provides a 30s buffer against scheduler jitter.
-    Skips reminders already responded to (DONE, POSTPONED, UNABLE, MISSED).
+    Skips reminders with a terminal status (DONE, UNABLE, MISSED).
+    POSTPONED is intentionally not skipped: the reminder's scheduled_at has
+    been moved forward, so it must fire again at the new time.
     """
     from app import SessionLocal
 

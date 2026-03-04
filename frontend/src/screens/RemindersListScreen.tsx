@@ -5,7 +5,7 @@
  * - Filter by profile (shows full name) and by date using `FilterPickerModal`
  * - Delete a reminder with a confirmation modal before proceeding
  *
- * @component
+ * @module RemindersListScreen
  */
 import React, { useCallback, useState, useRef } from 'react';
 import {

@@ -109,8 +109,12 @@ class ReminderRepository(BaseRepository[ReminderModel]):
 
         Used for retry logic: finds reminders whose scheduled_at was
         approximately offset_minutes ago and have not yet been responded to.
-        Excludes reminders with a terminal status (DONE, POSTPONED, UNABLE, MISSED)
-        to avoid re-notifying users who already responded.
+        Excludes reminders with a truly terminal status (DONE, UNABLE, MISSED).
+
+        POSTPONED is intentionally NOT excluded: postponing moves scheduled_at
+        forward, so the full T+0/T+5/T+10 cycle must restart from the new time.
+        Including POSTPONED here would silently drop the retry and escalation
+        notifications after a snooze.
 
         Args:
             offset_minutes (int): Target offset in minutes from now. Defaults to 60.
@@ -125,7 +129,7 @@ class ReminderRepository(BaseRepository[ReminderModel]):
         end = target + timedelta(seconds=30)
 
         resolved_ids = self.db.query(ReminderStatusModel._reminder_id).filter(
-            ReminderStatusModel._status.in_(["DONE", "POSTPONED", "UNABLE", "MISSED"])
+            ReminderStatusModel._status.in_(["DONE", "UNABLE", "MISSED"])
         )
 
         return (
@@ -142,9 +146,15 @@ class ReminderRepository(BaseRepository[ReminderModel]):
         """Get reminders that should be escalated to the caregiver.
 
         Returns all reminders older than delay_minutes that have never been
-        resolved (DONE, POSTPONED, UNABLE or MISSED). Using a range instead of a strict
+        resolved (DONE, UNABLE or MISSED). Using a range instead of a strict
         window makes the query resilient to worker restarts: any reminder missed
         during a downtime will be caught on the next run.
+
+        POSTPONED is intentionally NOT excluded: a postponed reminder has its
+        scheduled_at moved forward, so the escalation window is evaluated from
+        the new scheduled time, not the original one. A POSTPONED reminder that
+        the user still hasn't responded to after another 10 minutes must trigger
+        a caregiver alert.
 
         Args:
             delay_minutes (int): Minimum age in minutes to trigger escalation. Defaults to 10.
@@ -156,9 +166,9 @@ class ReminderRepository(BaseRepository[ReminderModel]):
         escalate_after = now - timedelta(minutes=delay_minutes)
         escalate_before = now - timedelta(hours=24)  # ignore reminders older than 24h
 
-        # Subquery: reminder IDs that have already been responded to or missed
+        # Subquery: reminder IDs that have already been definitively resolved
         resolved_ids = self.db.query(ReminderStatusModel._reminder_id).filter(
-            ReminderStatusModel._status.in_(["DONE", "POSTPONED", "UNABLE", "MISSED"])
+            ReminderStatusModel._status.in_(["DONE", "UNABLE", "MISSED"])
         )
 
         # Return all unresolved reminders past the escalation threshold (within last 24h)
