@@ -5,6 +5,7 @@ Mobile reminder application for elderly people and their caregivers.
 ## Table of Contents
 
 - [About](#about)
+- [Sprint Planning](#sprint-planning)
 - [Features](#features)
 - [Architecture](#architecture)
 - [Application Diagram](#application-diagram)
@@ -15,6 +16,14 @@ Mobile reminder application for elderly people and their caregivers.
 - [API Documentation](#api-documentation)
 - [Development](#development)
 - [Tests](#tests)
+
+## Sprint Planning
+
+> Track tasks, user stories and sprint progress on the project board:
+
+🔗 [Mnesya Trello Board](https://trello.com/b/IqUf88wh/mnesya-project)
+
+---
 
 ## About
 
