@@ -20,7 +20,8 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import type { UserTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { getUserInfo, deleteToken, deleteUserInfo } from '../services/tokenService';
+import { getUserInfo, saveUserInfo, deleteToken, deleteUserInfo } from '../services/tokenService';
+import { getCurrentUserProfile } from '../services/profileService';
 import { useRefresh } from '../contexts/RefreshContext';
 import { getUserReminders } from '../services/reminderService';
 import { useReminderStatus } from '../hooks';
@@ -172,13 +173,25 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
      */
     useEffect(() => {
         const loadUserData = async () => {
-            const user = await getUserInfo();
-            setCurrentUser(user);
+            try {
+                const freshUser = await getCurrentUserProfile();
+                await saveUserInfo(freshUser);
+                setCurrentUser(freshUser);
 
-            const reminders = await getUserReminders();
-            setUserReminders(reminders);
-
-            setIsRefreshing(false);
+                const reminders = await getUserReminders();
+                setUserReminders(reminders);
+            } catch (error: any) {
+                if (error?.response?.status === 401) {
+                    await deleteUserInfo();
+                    navigation.getParent()?.reset({
+                        index: 0,
+                        routes: [{ name: 'Welcome' }],
+                    });
+                    return;
+                }
+            } finally {
+                setIsRefreshing(false);
+            }
         };
         loadUserData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
