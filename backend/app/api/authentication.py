@@ -12,6 +12,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 import os
 from app.limiter import limiter
+import uuid as _uuid
 
 from app.schemas.authentication_schema import (
     LoginRequest,
@@ -22,6 +23,7 @@ from app.schemas.authentication_schema import (
 from app.services.caregiver_facade import CaregiverFacade
 from app.schemas.caregiver_schema import CaregiverResponse
 from app import get_db
+from app.persistence.revoked_token_repository import RevokedTokenRepository
 
 # JWT Configuration
 SECRET_KEY = os.environ["SECRET_KEY"]
@@ -58,17 +60,22 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
         expire = datetime.now(timezone.utc) + timedelta(
             minutes=ACCESS_TOKEN_EXPIRE_MINUTES
         )
-
-    to_encode.update({"exp": expire, "iat": datetime.now(timezone.utc)})
+    to_encode.update(
+        {"exp": expire, "iat": datetime.now(timezone.utc), "jti": str(_uuid.uuid4())}
+    )
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
-def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
+def verify_token(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db),
+) -> dict:
     """Verify and decode JWT token.
 
     Args:
         credentials (HTTPAuthorizationCredentials): Bearer token from request
+        db (Session): Database session
 
     Returns:
         dict: Decoded token payload
@@ -84,6 +91,14 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) 
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        jti = payload.get("jti")
+        if jti and RevokedTokenRepository(db).is_revoked(jti):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has been revoked",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
@@ -422,34 +437,21 @@ async def get_current_user(
 
 @router.post(
     "/logout",
-    summary="Logout caregiver",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Logout and revoke current token",
     description="""
-    Logout the currently authenticated caregiver.
-    
-    **Important:** JWT tokens are stateless and cannot be invalidated server-side.
-    The client application must discard the token upon receiving this response.
-    
-    This endpoint:
-    - Validates the provided token
-    - Returns a success confirmation
-    - Serves as a logout confirmation point
-    
-    **Client responsibilities:**
-    - Remove token from local storage
-    - Clear authentication state
-    - Redirect to login screen
-    
+    Invalidate the current JWT token server-side.
+
+    Upon logout, the token's unique identifier (JTI) is added to a blacklist.
+    Any further request using this token will be rejected with a 401 error,
+    even if the token has not yet expired.
+
     **Authentication required:** Bearer token
     """,
     responses={
-        200: {
-            "description": "Logout successful",
-            "content": {
-                "application/json": {"example": {"message": "Successfully logged out"}}
-            },
-        },
+        204: {"description": "Token successfully revoked, no content returned"},
         401: {
-            "description": "Unauthorized - Invalid or expired token",
+            "description": "Unauthorized - Invalid, expired, or already revoked token",
             "content": {
                 "application/json": {
                     "example": {"detail": "Could not validate credentials"}
@@ -458,20 +460,22 @@ async def get_current_user(
         },
     },
 )
-async def logout(token_payload: dict = Depends(verify_token)):
-    """Logout current user (client should discard token).
+async def logout(
+    payload: dict = Depends(verify_token),
+    db: Session = Depends(get_db),
+):
+    """Revoke the current JWT token, preventing further use.
 
     Args:
-        token_payload (dict): Decoded JWT token
+        payload (dict): Decoded JWT token payload
+        db (Session): Database session
 
-    Returns:
-        dict: Success message
-
-    Note:
-        JWT tokens are stateless, so actual logout is handled client-side
-        by discarding the token. This endpoint is for consistency.
+    Raises:
+        HTTPException: If token is invalid or already revoked
     """
-    return {"message": "Successfully logged out"}
+    jti = payload.get("jti")
+    if jti:
+        RevokedTokenRepository(db).revoke(jti)
 
 
 @router.post(
