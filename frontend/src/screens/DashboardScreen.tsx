@@ -3,7 +3,7 @@
  *
  * @module DashboardScreen
  */
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import {
     View,
     Text,
@@ -23,7 +23,8 @@ import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList, CaregiverTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { useUserProfiles } from '../hooks';
+import { useUserProfiles, useActivityLog } from '../hooks';
+import { ActivityLogModal } from '../components';
 import { calculateAge } from '../utils/dateUtils';
 
 type Props = CompositeScreenProps<
@@ -37,6 +38,25 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     const { userData, loading, error, reload } = useUserProfiles();
     const isInitialLoading = loading && userData === null;
     const [isRefreshing, setIsRefreshing] = useState(false);
+
+    // Activity log
+    const [showActivityLog, setShowActivityLog] = useState(false);
+    const [hasUnread, setHasUnread] = useState(false);
+    // Tracks how many entries the user has already seen (set when modal opens)
+    const readCount = useRef(0);
+    const {
+        entries: activityEntries,
+        loading: activityLoading,
+        error: activityError,
+        reload: reloadActivity,
+    } = useActivityLog();
+
+    // Show badge only when new entries appeared since the modal was last opened
+    useEffect(() => {
+        if (activityEntries && activityEntries.length > readCount.current) {
+            setHasUnread(true);
+        }
+    }, [activityEntries]);
 
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
@@ -65,11 +85,12 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         setShowScrollFade(!isAtBottom);
     };
 
-    // Reload profiles when screen comes into focus
+    // Reload profiles and activity log when screen comes into focus
     useFocusEffect(
         useCallback(() => {
             reload();
-        }, [reload])
+            reloadActivity();
+        }, [reload, reloadActivity])
     );
 
     return (
@@ -84,7 +105,22 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                     />
                     <Text style={commonStyles.appName}>Mnesya</Text>
                 </View>
-                <View style={commonStyles.headerSpacer} />
+                <TouchableOpacity
+                    style={styles.bellButton}
+                    onPress={() => {
+                        readCount.current = activityEntries?.length ?? 0;
+                        setHasUnread(false);
+                        setShowActivityLog(true);
+                    }}
+                    accessibilityLabel={t('dashboard.activityLog.title')}
+                >
+                    <Ionicons
+                        name={hasUnread ? 'notifications' : 'notifications-outline'}
+                        size={26}
+                        color={hasUnread ? '#4A90E2' : '#333333'}
+                    />
+                    {hasUnread && <View style={styles.bellBadge} />}
+                </TouchableOpacity>
             </View>
 
             {/* Page title */}
@@ -208,6 +244,15 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                     )}
                 </View>
             </View>
+
+            {/* Activity log modal */}
+            <ActivityLogModal
+                visible={showActivityLog}
+                onClose={() => setShowActivityLog(false)}
+                entries={activityEntries}
+                loading={activityLoading}
+                error={activityError}
+            />
         </View>
     );
 };
@@ -295,6 +340,23 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'rgba(255,255,255,0.85)',
+    },
+    bellButton: {
+        width: 44,
+        height: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    bellBadge: {
+        position: 'absolute',
+        top: 6,
+        right: 6,
+        width: 9,
+        height: 9,
+        borderRadius: 5,
+        backgroundColor: '#E53935',
+        borderWidth: 1.5,
+        borderColor: '#FFFFFF',
     },
 });
 
