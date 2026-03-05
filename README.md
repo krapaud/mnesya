@@ -16,6 +16,7 @@ Mobile reminder application for elderly people and their caregivers.
 - [API Documentation](#api-documentation)
 - [Development](#development)
 - [Tests](#tests)
+- [Bug History](#bug-history)
 
 ## Sprint Planning
 
@@ -707,6 +708,14 @@ Features **not included** in v1.0 (postponed post-MVP):
 - ❌ Images in reminders
 
 These features are documented in the User Stories (US-020 to US-028) as **WON'T HAVE** for the MVP.
+
+---
+
+## Bug History
+
+A detailed log of identified bugs, their root cause, and applied fixes is maintained in this document:
+
+🔗 [Bug History - Google Docs](https://docs.google.com/document/d/1sl_qg3E7czLrGO45kJ_kkh6UvvIU0ALRUtCR6lTpcEI/edit?usp=sharing)
 
 ---
 
