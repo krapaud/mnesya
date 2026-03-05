@@ -19,10 +19,13 @@ class ReminderStatusCreate(BaseModel):
         status (str): The status value (must be: PENDING, DONE, POSTPONED, or UNABLE)
         reminder_id (UUID): ID of the reminder this status is for
     """
-    status: str = Field(..., description="Status value: PENDING, DONE, POSTPONED, or UNABLE")
+
+    status: str = Field(
+        ..., description="Status value: PENDING, DONE, POSTPONED, or UNABLE"
+    )
     reminder_id: UUID
 
-    @field_validator('status')
+    @field_validator("status")
     def validate_status(cls, value: str) -> str:
         """Validate and sanitize status field.
 
@@ -37,12 +40,12 @@ class ReminderStatusCreate(BaseModel):
         """
         if not value or len(value.strip()) == 0:
             raise ValueError("Status is required")
-        
+
         value_upper = value.strip().upper()
         if not ReminderStatusEnum.is_valid(value_upper):
             valid_statuses = ", ".join(ReminderStatusEnum.values())
             raise ValueError(f"Invalid status. Must be one of: {valid_statuses}")
-        
+
         return value_upper
 
 
@@ -55,9 +58,12 @@ class ReminderStatusUpdate(BaseModel):
     Attributes:
         status (Optional[str]): Updated status value (must be: PENDING, DONE, POSTPONED, or UNABLE)
     """
-    status: str = Field(..., description="Status value: PENDING, DONE, POSTPONED, or UNABLE")
 
-    @field_validator('status')
+    status: str = Field(
+        ..., description="Status value: PENDING, DONE, POSTPONED, or UNABLE"
+    )
+
+    @field_validator("status")
     def validate_status(cls, value: str) -> str:
         """Validate and sanitize status if provided.
 
@@ -72,12 +78,12 @@ class ReminderStatusUpdate(BaseModel):
         """
         if not value or len(value.strip()) == 0:
             raise ValueError("Status is required")
-        
+
         value_upper = value.strip().upper()
         if not ReminderStatusEnum.is_valid(value_upper):
             valid_statuses = ", ".join(ReminderStatusEnum.values())
             raise ValueError(f"Invalid status. Must be one of: {valid_statuses}")
-        
+
         return value_upper
 
 
@@ -93,6 +99,7 @@ class ReminderStatusResponse(BaseModel):
         created_at (datetime): Creation timestamp
         updated_at (datetime): Last update timestamp
     """
+
     id: UUID
     status: str
     reminder_id: UUID
@@ -110,5 +117,33 @@ class ReminderStatusListResponse(BaseModel):
         reminder_statuses (List[ReminderStatusResponse]): List of status objects
         total (int): Total count of status entries
     """
+
     reminder_statuses: List[ReminderStatusResponse]
     total: int
+
+
+class ActivityLogEntry(BaseModel):
+    """Schema for a single activity log entry in the caregiver dashboard.
+
+    Each entry represents a user interaction on a reminder (DONE, POSTPONED,
+    UNABLE or MISSED) that occurred in the last 48 hours.
+
+    Attributes:
+        status_id (UUID): Unique identifier of the status entry
+        status (str): The interaction type (DONE, POSTPONED, UNABLE, MISSED)
+        reminder_id (UUID): ID of the associated reminder
+        reminder_title (str): Title of the reminder
+        user_first_name (str): First name of the user who interacted
+        user_last_name (str): Last name of the user who interacted
+        occurred_at (datetime): When the interaction occurred
+    """
+
+    status_id: UUID
+    status: str
+    reminder_id: UUID
+    reminder_title: str
+    user_first_name: str
+    user_last_name: str
+    occurred_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

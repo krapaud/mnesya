@@ -56,39 +56,13 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
 
     /** Returns the full name of a month from a date. */
     const getMonthName = (date: Date): string => {
-        const months = [
-            'January',
-            'February',
-            'March',
-            'April',
-            'May',
-            'June',
-            'July',
-            'August',
-            'September',
-            'October',
-            'November',
-            'December',
-        ];
+        const months = t('common.pickersText.months', { returnObjects: true }) as string[];
         return months[date.getMonth()];
     };
 
     /** Returns the list of all month names. */
     const getMonthNames = (): string[] => {
-        return [
-            'January',
-            'February',
-            'March',
-            'April',
-            'May',
-            'June',
-            'July',
-            'August',
-            'September',
-            'October',
-            'November',
-            'December',
-        ];
+        return t('common.pickersText.months', { returnObjects: true }) as string[];
     };
 
     /** Generates the list of selectable years (1920 to next year). */
@@ -173,7 +147,7 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     }
 
     const calendarDays = generateCalendarDays();
-    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const weekDays = t('common.pickersText.weekDays', { returnObjects: true }) as string[];
 
     return (
         <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
@@ -184,7 +158,9 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
                         <View style={styles.pickerOverlay}>
                             <View style={styles.pickerContent}>
                                 <View style={styles.pickerHeader}>
-                                    <Text style={styles.pickerTitle}>Select Year</Text>
+                                    <Text style={styles.pickerTitle}>
+                                        {t('common.pickersText.selectYear')}
+                                    </Text>
                                     <TouchableOpacity onPress={() => setShowYearPicker(false)}>
                                         <Ionicons name="close" size={24} color="#666666" />
                                     </TouchableOpacity>
@@ -221,7 +197,9 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
                         <View style={styles.pickerOverlay}>
                             <View style={styles.pickerContent}>
                                 <View style={styles.pickerHeader}>
-                                    <Text style={styles.pickerTitle}>Select Month</Text>
+                                    <Text style={styles.pickerTitle}>
+                                        {t('common.pickersText.selectMonth')}
+                                    </Text>
                                     <TouchableOpacity onPress={() => setShowMonthPicker(false)}>
                                         <Ionicons name="close" size={24} color="#666666" />
                                     </TouchableOpacity>
