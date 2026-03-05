@@ -169,11 +169,6 @@ class CaregiverModel(database):
         """
         value = value.strip()
 
-        # If it's already a bcrypt hash, store it directly
-        if value.startswith("$2a$") or value.startswith("$2b$"):
-            self._password = value
-            return
-
         SpecialSym = set("$@#%*!~&^()-_+=[]{}|;:,.<>?/\\")
 
         # Length validation (72 is bcrypt's effective max)
