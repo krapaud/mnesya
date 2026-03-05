@@ -43,3 +43,9 @@ export const getProfile = async (id: string): Promise<UserProfileData> => {
 export const deleteProfile = async (id: string): Promise<void> => {
     await apiClient.delete(`/api/users/${id}`);
 };
+
+/** Returns the current authenticated user's own profile. */
+export const getCurrentUserProfile = async (): Promise<UserProfileData> => {
+    const response = await apiClient.get('/api/users/me');
+    return response.data;
+};
