@@ -222,6 +222,7 @@ async def get_all_reminder_by_caregiver(
 async def get_all_reminder_by_user(
     user_id: str = Depends(get_caregiver_id),
     reminder_facade: ReminderFacade = Depends(get_reminder_facade),
+    user_facade: UserFacade = Depends(get_user_facade),
 ):
     """Get all reminders for the authenticated user.
 
@@ -232,14 +233,21 @@ async def get_all_reminder_by_user(
         user_id (str): ID of the authenticated user
             (extracted from JWT token)
         reminder_facade (ReminderFacade): Reminder service facade
+        user_facade (UserFacade): User service facade
 
     Returns:
         List[ReminderResponse]: List of reminders assigned to the user
 
     Raises:
-        HTTPException: If retrieval fails with 500 status code
+        HTTPException: 401 if the user no longer exists, 500 if retrieval fails
     """
     try:
+        user = user_facade.get_user(UUID(user_id))
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found",
+            )
         reminders = reminder_facade.get_reminder_by_user(UUID(user_id))
         return [build_reminder_response(r) for r in reminders]
 
