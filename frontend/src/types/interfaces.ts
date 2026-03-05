@@ -147,3 +147,13 @@ export interface UpdateReminderStatus {
     status?: string;
     reminder_id?: string;
 }
+
+export interface ActivityLogEntry {
+    status_id: string;
+    status: string;
+    reminder_id: string;
+    reminder_title: string;
+    user_first_name: string;
+    user_last_name: string;
+    occurred_at: string;
+}

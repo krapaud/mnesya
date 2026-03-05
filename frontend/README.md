@@ -66,9 +66,30 @@ src/
 ├── App.tsx                  # Root component, navigation setup
 ├── i18n.ts                  # i18next configuration (FR / EN)
 ├── components/              # Shared UI components
+│   ├── ActivityLogModal.tsx         # Caregiver activity log modal (last 48 h)
+│   ├── ChangePasswordModal.tsx
+│   ├── ConfirmationModal.tsx        # Generic confirm/info modal
+│   ├── FilterPickerModal.tsx
+│   ├── MenuModal.tsx
+│   ├── PairingCodeModal.tsx
+│   ├── PlatformDatePicker.tsx       # Fully translated calendar picker
+│   ├── PlatformTimePicker.tsx
+│   ├── RateLimitModal.tsx           # HTTP 429 feedback modal
+│   ├── ReminderCard.tsx
+│   ├── UpdateCaregiverProfileModal.tsx
+│   └── UpdateUserProfileModal.tsx
 ├── config/                  # App configuration (API, constants)
 ├── contexts/                # React contexts (auth state)
 ├── hooks/                   # Custom hooks
+│   ├── useActivityLog.ts            # Activity log fetch + unread badge logic
+│   ├── useAuth.ts                   # Auth state (login/logout/register, 429 detection)
+│   ├── useCaregiverProfile.ts
+│   ├── useCaregiverReminders.ts
+│   ├── useFormValidation.ts
+│   ├── useReminderStatus.ts
+│   ├── useUserProfile.ts
+│   ├── useUserProfiles.ts
+│   └── useUserReminders.ts
 ├── locales/                 # Translation files (en.json, fr.json)
 ├── navigation/              # React Navigation stack definitions
 ├── screens/                 # All screens (flat)
@@ -77,7 +98,7 @@ src/
 │   ├── RegisterScreen.tsx
 │   ├── CreateProfileScreen.tsx
 │   ├── CreateReminderScreen.tsx
-│   ├── DashboardScreen.tsx
+│   ├── DashboardScreen.tsx          # Bell icon + ActivityLogModal + unread badge
 │   ├── CaregiverProfileScreen.tsx
 │   ├── RemindersListScreen.tsx
 │   ├── UserHomeScreen.tsx
@@ -88,7 +109,7 @@ src/
 │   ├── api.ts               # Axios instance + token refresh interceptor
 │   ├── authService.ts
 │   ├── pairingService.ts
-│   ├── reminderService.ts
+│   ├── reminderService.ts   # includes getCaregiverActivityLog()
 │   └── ...
 ├── styles/                  # Global styles and theme
 ├── types/                   # TypeScript interfaces and declarations

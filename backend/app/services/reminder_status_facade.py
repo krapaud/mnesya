@@ -19,6 +19,7 @@ class ReminderStatusFacade:
     Attributes:
         reminder_status_repo (ReminderStatusRepository): Repository for status data access
     """
+
     def __init__(self, db: Session):
         """Initialize the facade with a reminder status repository."""
         self.reminder_status_repo = ReminderStatusRepository(db)
@@ -73,7 +74,8 @@ class ReminderStatusFacade:
         return self.reminder_status_repo.get_all()
 
     def update_reminder_status(
-            self, reminder_status_id: str, reminder_status_data: dict) -> object:
+        self, reminder_status_id: str, reminder_status_data: dict
+    ) -> object:
         """Update an existing reminder status.
 
         Business logic for status updates. Only updates provided fields.
@@ -93,8 +95,7 @@ class ReminderStatusFacade:
             Consider creating a new status entry instead of updating
             to maintain full history
         """
-        self.reminder_status_repo.update(
-            reminder_status_id, reminder_status_data)
+        self.reminder_status_repo.update(reminder_status_id, reminder_status_data)
         return self.reminder_status_repo.get(reminder_status_id)
 
     def delete_reminder_status(self, reminder_status_id: str) -> bool:
@@ -120,10 +121,10 @@ class ReminderStatusFacade:
 
     def get_statuses_by_reminder(self, reminder_id):
         """Get all status entries for a specific reminder.
-        
+
         Args:
             reminder_id (UUID): The reminder's unique identifier
-            
+
         Returns:
             List[ReminderStatusModel]: List of status entries ordered by creation time (newest first)
         """
@@ -131,11 +132,31 @@ class ReminderStatusFacade:
 
     def get_latest_status(self, reminder_id):
         """Get the most recent status for a reminder.
-        
+
         Args:
             reminder_id (UUID): The reminder's unique identifier
-            
+
         Returns:
             ReminderStatusModel: The latest status entry, or None if no status exists
         """
         return self.reminder_status_repo.get_latest_status(reminder_id)
+
+    def get_recent_activity(self, caregiver_id, hours: int = 48) -> list:
+        """Get all user-interaction statuses across all reminders of a caregiver
+        over the last `hours` hours.
+
+        Delegates to the repository which joins reminder_status, reminder and
+        user tables and filters by caregiver, time window and interaction
+        statuses (DONE, POSTPONED, UNABLE, MISSED).
+
+        Args:
+            caregiver_id (UUID): The caregiver's unique identifier.
+            hours (int): Time window in hours. Defaults to 48.
+
+        Returns:
+            list[ReminderStatusModel]: Status entries enriched with
+            reminder_title, user_first_name, user_last_name.
+        """
+        return self.reminder_status_repo.get_recent_activity_by_caregiver(
+            caregiver_id, hours=hours
+        )

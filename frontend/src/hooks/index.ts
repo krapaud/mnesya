@@ -13,3 +13,4 @@ export { useCaregiverReminders } from './useCaregiverReminders';
 export { useReminderStatus } from './useReminderStatus';
 export { useFormValidation } from './useFormValidation';
 export type { FormConfig, FieldConfig, UseFormValidationReturn } from './useFormValidation';
+export { useActivityLog } from './useActivityLog';
