@@ -604,6 +604,11 @@ docs: update README
 
 ### Backend (Python/FastAPI)
 
+**📋 Complete Test Documentation**: [backend/app/test/README.md](backend/app/test/README.md)
+
+**Test Suite**: 296 tests (166 API integration tests + 130 unit tests)  
+**Status**: ✅ All tests passing
+
 ```bash
 cd backend
 
@@ -616,14 +621,22 @@ pytest app/test/ --cov=app
 
 #### Backend Test Files
 
-- `test_authentication_api.py` — Register, login, token validation
-- `test_caregiver_api.py` — Caregiver profile CRUD
-- `test_pairing_api.py` — Generate and verify pairing codes
-- `test_user_api.py` — User profile CRUD
-- `test_reminder_api.py` — Reminder CRUD endpoints
-- `test_reminder_status_api.py` — Reminder status update endpoint
-- `test_push_notification_api.py` — Push token register, unregister, list
-- **Tool**: pytest + SQLAlchemy test database
+**API Integration Tests (166 tests)**:
+- `test_authentication_api.py` — Register, login, token validation (19 tests)
+- `test_caregiver_api.py` — Caregiver profile CRUD (14 tests)
+- `test_pairing_api.py` — Generate and verify pairing codes (18 tests)
+- `test_user_api.py` — User profile CRUD (27 tests)
+- `test_reminder_api.py` — Reminder CRUD endpoints (36 tests)
+- `test_reminder_status_api.py` — Reminder status update endpoint (32 tests)
+- `test_push_notification_api.py` — Push token register, unregister, list (20 tests)
+
+**Unit Tests (130 tests)**:
+- `test.py` — Models validation, schemas validation, business logic, entity relationships
+  - Model tests (65): User, Caregiver, Reminder, ReminderStatus
+  - Schema tests (49): Create/Update validation
+  - Integration tests (16): Edge cases and model interactions
+
+**Tool**: pytest + SQLAlchemy test database
 
 ### Frontend (React Native + Jest)
 
