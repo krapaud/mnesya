@@ -25,6 +25,8 @@ import { validateName } from '../utils/validation';
 import PlatformDatePicker from './PlatformDatePicker';
 import { commonStyles } from '../styles/commonStyles';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 /**
  * Props for UpdateProfileModal component.
  */
@@ -42,6 +44,8 @@ interface UpdateProfileModalProps {
         birthday: string;
     } | null;
 }
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
     visible,
@@ -242,6 +246,8 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({
         </>
     );
 };
+
+// ─── Styles ─────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     modalContent: {

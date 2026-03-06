@@ -24,7 +24,11 @@ import {
     updateReminderStatus,
 } from '../services/reminderService';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = NativeStackScreenProps<RootStackParamList, 'ReminderNotification'>;
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
     const { t } = useTranslation();
@@ -150,6 +154,8 @@ const ReminderNotificationScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // LAYOUT

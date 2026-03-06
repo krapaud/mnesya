@@ -11,6 +11,8 @@ import { getToken } from '../services/tokenService';
 import { getCurrentUser } from '../services/authService';
 import { getUserInfo } from '../services/tokenService';
 
+// ─── Navigator ──────────────────────────────────────────────────────────────
+
 // Screen imports
 import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../screens/LoginScreen';

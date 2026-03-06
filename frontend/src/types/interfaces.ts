@@ -4,6 +4,8 @@
  * @module interfaces
  */
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 /** Credentials payload for the login endpoint. */
 export interface LoginData {
     email: string;

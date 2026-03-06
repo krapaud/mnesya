@@ -13,6 +13,8 @@ import {
     ActivityLogEntry,
 } from '../types/interfaces';
 
+// ─── Endpoints ──────────────────────────────────────────────────────────────
+
 /** Creates a new reminder. */
 export const createReminder = async (data: CreateReminder): Promise<ReminderData> => {
     const response = await apiClient.post('/api/reminder', data);

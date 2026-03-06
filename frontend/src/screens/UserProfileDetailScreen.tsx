@@ -30,7 +30,11 @@ import { deleteReminder } from '../services/reminderService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { cancelNotifications } from '../utils/notifications';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = NativeStackScreenProps<RootStackParamList, 'UserProfileDetails'>;
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) => {
     const { t } = useTranslation();
@@ -438,6 +442,8 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
 };
 
 export default UserProfileDetailScreen;
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // LAYOUT

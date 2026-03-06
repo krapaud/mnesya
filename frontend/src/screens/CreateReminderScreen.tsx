@@ -32,7 +32,11 @@ import { useUserProfiles } from '../hooks';
 import { createReminder } from '../services/reminderService';
 import { createPulseAnimation, getPulseScale } from '../utils/animations';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateReminder'>;
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -386,6 +390,8 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
         </View>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // ========== LAYOUT ==========

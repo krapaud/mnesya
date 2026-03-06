@@ -9,6 +9,8 @@ import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '../i18n';
 
+// ─── Helper ──────────────────────────────────────────────────────────────────
+
 /** Requests push notification permissions and returns the token. */
 export async function registerForPushNotifications(): Promise<string | undefined> {
     if (!Device.isDevice) {

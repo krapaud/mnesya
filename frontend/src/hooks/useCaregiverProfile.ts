@@ -3,9 +3,12 @@
  *
  * @module useCaregiverProfile
  */
+
 import { useState, useEffect, useCallback } from 'react';
 import { getCurrentUser } from '../services/authService';
 import type { CaregiverProfile } from '../types/interfaces';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface UseCaregiverProfileResult {
     caregiverData: CaregiverProfile | null;
@@ -13,6 +16,8 @@ interface UseCaregiverProfileResult {
     error: string | null;
     reload: () => Promise<void>;
 }
+
+// ─── Hook ───────────────────────────────────────────────────────────────────────
 
 export const useCaregiverProfile = (onAuthError?: () => void): UseCaregiverProfileResult => {
     const [caregiverData, setCaregiverData] = useState<CaregiverProfile | null>(null);

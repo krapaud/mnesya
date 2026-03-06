@@ -5,6 +5,8 @@
  */
 import { StyleSheet } from 'react-native';
 
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
 export const commonStyles = StyleSheet.create({
     // ============ CONTAINER STYLES ============
     container: {

@@ -16,7 +16,11 @@ import { validateEmail } from '../utils/validation';
 import { useAuth, useFormValidation } from '../hooks';
 import { RateLimitModal } from '../components';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -198,6 +202,8 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         </View>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // ========== LAYOUT ==========

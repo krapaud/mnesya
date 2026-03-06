@@ -9,6 +9,8 @@ import { View, TouchableOpacity, Text, StyleSheet, Modal, ScrollView } from 'rea
 import { useTranslation } from 'react-i18next';
 import { commonStyles } from '../styles/commonStyles';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 /**
  * Props for the PlatformTimePicker component.
  */
@@ -25,11 +27,15 @@ interface PlatformTimePickerProps {
     displayFormat?: (time: Date) => string;
 }
 
+// ─── Helper ──────────────────────────────────────────────────────────────────
+
 /** Snaps a minute value to the nearest multiple of 5 (0, 5, 10, ..., 55). */
 const snapToNearestMinute = (minute: number): number => {
     const snapped = Math.round(minute / 5) * 5;
     return snapped >= 60 ? 55 : snapped;
 };
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
     value,
@@ -47,7 +53,7 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
 
     const ITEM_HEIGHT = 50;
     const _VISIBLE_ITEMS = 3;
-    const LOOP_COUNT = 5; // Number of times to repeat the array for infinite scroll effect
+    const LOOP_COUNT = 5;
 
     /**
      * Base arrays for hours and minutes.
@@ -315,6 +321,8 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
         </Modal>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     modalContent: {

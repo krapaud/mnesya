@@ -3,9 +3,12 @@
  *
  * @module useUserProfile
  */
+
 import { useState, useEffect, useCallback } from 'react';
 import { getProfile, updateProfile, deleteProfile } from '../services/profileService';
 import type { UserProfileData, UpdateUserProfileData } from '../types/interfaces';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface UseUserProfileResult {
     userData: UserProfileData | null;
@@ -15,6 +18,8 @@ interface UseUserProfileResult {
     update: (data: UpdateUserProfileData) => Promise<void>;
     remove: () => Promise<void>;
 }
+
+// ─── Hook ───────────────────────────────────────────────────────────────────────
 
 export const useUserProfile = (
     profileId: string,

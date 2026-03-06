@@ -33,10 +33,14 @@ import ReminderCard from '../components/ReminderCard';
 import FilterPickerModal from '../components/FilterPickerModal';
 import { ConfirmationModal } from '../components';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = CompositeScreenProps<
     BottomTabScreenProps<CaregiverTabsParamList, 'Reminders'>,
     NativeStackScreenProps<RootStackParamList>
 >;
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -372,6 +376,8 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
         </View>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // LAYOUT

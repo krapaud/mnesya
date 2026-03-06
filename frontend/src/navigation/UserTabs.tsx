@@ -12,6 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { UserTabsParamList } from '../types/index';
 
+// ─── Navigator ──────────────────────────────────────────────────────────────
+
 import UserHomeScreen from '../screens/UserHomeScreen';
 import { RefreshProvider, useRefresh } from '../contexts/RefreshContext';
 
@@ -63,6 +65,8 @@ const UserTabsContent: React.FC = () => {
         </Tab.Navigator>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     activeTab: {

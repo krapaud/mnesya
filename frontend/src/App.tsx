@@ -23,6 +23,8 @@ Notifications.setNotificationHandler({
     }),
 });
 
+// ─── Component ──────────────────────────────────────────────────────────────
+
 const App: React.FC = () => {
     const navigationRef = React.createRef<NavigationContainerRef<RootStackParamList>>(); // Create reference to access navigation from outside the NavigationContainer
 

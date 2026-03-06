@@ -28,7 +28,11 @@ import { useReminderStatus } from '../hooks';
 import { ConfirmationModal, MenuModal } from '../components';
 import type { CaregiverProfile, ReminderData } from '../types/interfaces';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = NativeStackScreenProps<UserTabsParamList, 'Refresh'>;
+
+// ─── Constants ───────────────────────────────────────────────────────────────
 
 /** Maps reminder status keys to their corresponding style from commonStyles. */
 const statusColorMap: Record<string, object> = {
@@ -38,6 +42,8 @@ const statusColorMap: Record<string, object> = {
     UNABLE: commonStyles.statusUnable,
     MISSED: commonStyles.statusMissed,
 };
+
+// ─── Sub-component: reminder item ────────────────────────────────────────────
 
 interface UserReminderItemProps {
     reminder: ReminderData;
@@ -124,6 +130,8 @@ const UserReminderItem: React.FC<UserReminderItemProps> = ({
         </View>
     );
 };
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -339,6 +347,8 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 export default UserHomeScreen;
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // LAYOUT

@@ -6,9 +6,12 @@
  *
  * @module RateLimitModal
  */
+
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import ConfirmationModal from './ConfirmationModal';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface RateLimitModalProps {
     /** Controls modal visibility */
@@ -16,6 +19,8 @@ interface RateLimitModalProps {
     /** Callback to close the modal */
     onClose: () => void;
 }
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const RateLimitModal: React.FC<RateLimitModalProps> = ({ visible, onClose }) => {
     const { t } = useTranslation();

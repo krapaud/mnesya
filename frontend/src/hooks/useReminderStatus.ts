@@ -3,9 +3,12 @@
  *
  * @module useReminderStatus
  */
+
 import { useState, useEffect, useCallback } from 'react';
 import { getReminderStatus, postponeReminder } from '../services/reminderService';
 import type { ReminderStatus } from '../types/interfaces';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface UseReminderStatus {
     reminderStatus: ReminderStatus | null;
@@ -14,6 +17,8 @@ interface UseReminderStatus {
     postpone: (delayMinutes: number) => Promise<void>;
     reload: () => Promise<void>;
 }
+
+// ─── Hook ───────────────────────────────────────────────────────────────────────
 
 export const useReminderStatus = (
     reminderId: string,

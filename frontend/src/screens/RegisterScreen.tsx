@@ -33,7 +33,11 @@ import {
 import { useAuth, useFormValidation } from '../hooks';
 import { ConfirmationModal, RateLimitModal } from '../components';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -316,6 +320,8 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
         </View>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // ========== LAYOUT ==========

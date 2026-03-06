@@ -3,6 +3,7 @@
  *
  * @module useAuth
  */
+
 import { useState, useCallback } from 'react';
 import {
     login as loginService,
@@ -11,6 +12,8 @@ import {
 } from '../services/authService';
 import { getToken } from '../services/tokenService';
 import type { LoginData, RegisterData } from '../types/interfaces';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface UseAuthResult {
     login: (credentials: LoginData) => Promise<boolean>;
@@ -21,6 +24,8 @@ interface UseAuthResult {
     error: string | null;
     clearError: () => void;
 }
+
+// ─── Hook ───────────────────────────────────────────────────────────────────────
 
 export const useAuth = (): UseAuthResult => {
     const [loading, setLoading] = useState(false);

@@ -13,7 +13,11 @@ import { commonStyles } from '../styles/commonStyles';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -80,6 +84,8 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
         </View>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // LAYOUT

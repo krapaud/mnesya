@@ -13,6 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { commonStyles } from '../styles/commonStyles';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 /**
  * Props for ConfirmationModal component.
  */
@@ -40,6 +42,8 @@ interface ConfirmationModalProps {
     /** Whether to show the cancel button (default: true). Set to false for info/error modals with a single OK button. */
     showCancelButton?: boolean;
 }
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     visible,
@@ -98,6 +102,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         </Modal>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     modalContent: {

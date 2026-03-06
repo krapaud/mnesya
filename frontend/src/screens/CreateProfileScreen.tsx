@@ -26,7 +26,11 @@ import { validateName, cleanText } from '../utils/validation';
 import { useFormValidation } from '../hooks';
 import { createProfile } from '../services/profileService';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateProfile'>;
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -207,6 +211,8 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
         </View>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // ========== LAYOUT ==========

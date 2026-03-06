@@ -3,9 +3,12 @@
  *
  * @module useCaregiverReminders
  */
+
 import { useState, useEffect, useCallback } from 'react';
 import { getCaregiverReminders } from '../services/reminderService';
 import type { ReminderData } from '../types/interfaces';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface UseReminderResult {
     reminderData: ReminderData[] | null;
@@ -13,6 +16,8 @@ interface UseReminderResult {
     error: string | null;
     reload: () => Promise<void>;
 }
+
+// ─── Hook ───────────────────────────────────────────────────────────────────────
 
 export const useCaregiverReminders = (onAuthError?: () => void): UseReminderResult => {
     const [reminderData, setReminderData] = useState<ReminderData[] | null>(null);

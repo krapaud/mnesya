@@ -3,9 +3,12 @@
  *
  * @module useUserProfiles
  */
+
 import { useState, useEffect, useCallback } from 'react';
 import { getProfiles } from '../services/profileService';
 import type { UserProfileData } from '../types/interfaces';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface UseUserProfilesResult {
     userData: UserProfileData[] | null;
@@ -13,6 +16,8 @@ interface UseUserProfilesResult {
     error: string | null;
     reload: () => Promise<void>;
 }
+
+// ─── Hook ───────────────────────────────────────────────────────────────────────
 
 export const useUserProfiles = (onAuthError?: () => void): UseUserProfilesResult => {
     const [userData, setUserData] = useState<UserProfileData[] | null>(null);

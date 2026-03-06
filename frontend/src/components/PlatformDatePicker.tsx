@@ -10,6 +10,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { commonStyles } from '../styles/commonStyles';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 /**
  * Props for the PlatformDatePicker component.
  */
@@ -27,6 +29,8 @@ interface PlatformDatePickerProps {
     /** Allow selecting dates in the past (default: false) */
     allowPastDates?: boolean;
 }
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     value,
@@ -328,6 +332,8 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
         </Modal>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     modalContent: {

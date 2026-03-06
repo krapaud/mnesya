@@ -3,9 +3,12 @@
  *
  * @module useActivityLog
  */
+
 import { useState, useEffect, useCallback } from 'react';
 import { getCaregiverActivityLog } from '../services/reminderService';
 import type { ActivityLogEntry } from '../types/interfaces';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface UseActivityLogResult {
     entries: ActivityLogEntry[] | null;
@@ -13,6 +16,8 @@ interface UseActivityLogResult {
     error: string | null;
     reload: () => Promise<void>;
 }
+
+// ─── Hook ───────────────────────────────────────────────────────────────────────
 
 /**
  * Fetches all DONE / POSTPONED / UNABLE / MISSED interactions across all

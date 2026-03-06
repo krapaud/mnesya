@@ -23,7 +23,11 @@ import * as SecureStore from 'expo-secure-store';
 import apiClient from '../services/api';
 import { registerForPushNotifications } from '../utils/notifications';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = NativeStackScreenProps<RootStackParamList, 'UserPairing'>;
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -186,6 +190,8 @@ const UserPairingScreen: React.FC<Props> = ({ navigation }) => {
         </View>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // LAYOUT
