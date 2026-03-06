@@ -10,6 +10,7 @@ from uuid import UUID
 from typing import List
 from app.models.user import UserModel
 from app.persistence.user_repository import UserRepository
+from app.persistence.pairing_code_repository import PairingCodeRepository
 
 
 class UserFacade:
@@ -26,6 +27,7 @@ class UserFacade:
     def __init__(self, db: Session):
         """Initialize the facade with a user repository."""
         self.user_repo = UserRepository(db)
+        self.pairing_code_repo = PairingCodeRepository(db)
 
     # ==================== USER BUSINESS LOGIC ====================
 
@@ -79,7 +81,7 @@ class UserFacade:
         return self.user_repo.get(user_id)
 
     def delete_user(self, user_id: UUID) -> bool:
-        """Delete a user.
+        """Delete a user and associated pairing codes.
 
         Args:
             user_id (str): The user's unique identifier
@@ -90,4 +92,7 @@ class UserFacade:
         Raises:
             Exception: If database operation fails
         """
+        # Delete all pairing codes associated with the user first
+        # to avoid foreign key constraint violations
+        self.pairing_code_repo.delete_by_user_id(user_id)
         return self.user_repo.delete(user_id)

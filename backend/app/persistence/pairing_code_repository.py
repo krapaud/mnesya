@@ -28,3 +28,18 @@ class PairingCodeRepository(BaseRepository[PairingCodeModel]):
             self.model._is_used.is_(False),
             self.model._expires_at > datetime.now(timezone.utc)
         ).first()
+
+    def delete_by_user_id(self, user_id: UUID) -> int:
+        """Delete all pairing codes associated with a user.
+        
+        Args:
+            user_id (UUID): The user's unique identifier
+            
+        Returns:
+            int: Number of pairing codes deleted
+        """
+        deleted_count = self.db.query(self.model).filter(
+            self.model._user_id == user_id
+        ).delete()
+        self.db.commit()
+        return deleted_count
