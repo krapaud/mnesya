@@ -3,15 +3,18 @@
  *
  * @module App
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import type { NavigationContainerRef } from '@react-navigation/native';
-import type { RootStackParamList } from './types/index';
+import { AppState as RNAppState, AppStateStatus } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import './i18n'; // Initialize internationalization before any component renders
 import AppNavigator from './navigation/AppNavigator';
 import { registerForPushNotifications, cancelNotifications } from './utils/notifications';
 import * as Notifications from 'expo-notifications';
+import { navigationRef } from './services/navigationService';
+import { getToken, saveToken } from './services/tokenService';
+import axios from 'axios';
+import { API_BASE_URL } from './config/api';
 
 // Set the notification behavior
 Notifications.setNotificationHandler({
@@ -25,8 +28,56 @@ Notifications.setNotificationHandler({
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
+/** Decode a JWT payload without a library. */
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+    try {
+        const b64 = (token.split('.')[1] ?? '').replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(atob(b64 + '='.repeat((4 - (b64.length % 4)) % 4)));
+    } catch {
+        return null;
+    }
+}
+
 const App: React.FC = () => {
-    const navigationRef = React.createRef<NavigationContainerRef<RootStackParamList>>(); // Create reference to access navigation from outside the NavigationContainer
+    const appState = useRef<AppStateStatus>(RNAppState.currentState);
+
+    useEffect(() => {
+        // Refresh the caregiver token proactively when the app comes to the foreground.
+        // This covers the case where the token is still valid but close to expiry
+        // after the app has been in the background for a while.
+        const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+            if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+                const token = await getToken();
+                if (token) {
+                    const payload = decodeJwtPayload(token);
+                    const now = Math.floor(Date.now() / 1000);
+                    const isCaregiverToken =
+                        payload?.['sub'] !== undefined &&
+                        payload?.['email'] !== undefined &&
+                        payload?.['firstname'] === undefined;
+                    const exp = payload?.['exp'] as number | undefined;
+
+                    if (isCaregiverToken && exp !== undefined && exp > now && exp - now < 24 * 60 * 60) {
+                        try {
+                            const response = await axios.post(
+                                `${API_BASE_URL}/api/auth/refresh`,
+                                {},
+                                { headers: { Authorization: `Bearer ${token}` } }
+                            );
+                            await saveToken(response.data.access_token as string);
+                        } catch {
+                            // Token already expired or refresh failed — the next API call
+                            // will trigger the 401 handler and redirect to Login.
+                        }
+                    }
+                }
+            }
+            appState.current = nextAppState;
+        };
+
+        const subscription = RNAppState.addEventListener('change', handleAppStateChange);
+        return () => subscription.remove();
+    }, []);
 
     useEffect(() => {
         const setupNotifications = async () => {
