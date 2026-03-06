@@ -204,8 +204,6 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                     setPairingExpiresAt(null);
                 }}
                 onClose={() => {
-                    setPairingCode(null);
-                    setPairingExpiresAt(null);
                     navigation.replace('Dashboard');
                 }}
             />

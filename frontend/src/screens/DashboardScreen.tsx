@@ -14,6 +14,8 @@ import {
     ActivityIndicator,
     RefreshControl,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
@@ -46,8 +48,9 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     // Activity log
     const [showActivityLog, setShowActivityLog] = useState(false);
     const [hasUnread, setHasUnread] = useState(false);
-    // Tracks how many entries the user has already seen (set when modal opens)
-    const readCount = useRef(0);
+    // ISO timestamp of the most recent entry seen when the modal was last opened.
+    // Persisted in AsyncStorage so it survives app restarts.
+    const lastSeenAt = useRef<string | null>(null);
     const {
         entries: activityEntries,
         loading: activityLoading,
@@ -55,10 +58,25 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         reload: reloadActivity,
     } = useActivityLog();
 
-    // Show badge only when new entries appeared since the modal was last opened
+    // Restore the persisted lastSeenAt on mount.
     useEffect(() => {
-        if (activityEntries && activityEntries.length > readCount.current) {
+        AsyncStorage.getItem('activity_log_last_seen_at').then((stored) => {
+            lastSeenAt.current = stored;
+        });
+    }, []);
+
+    // Show badge when any entry is newer than the last time the modal was opened.
+    useEffect(() => {
+        if (!activityEntries || activityEntries.length === 0) return;
+        const newestAt = activityEntries[0].occurred_at;
+        if (!lastSeenAt.current || newestAt > lastSeenAt.current) {
+            const unreadCount = lastSeenAt.current
+                ? activityEntries.filter((e) => e.occurred_at > lastSeenAt.current!).length
+                : activityEntries.length;
             setHasUnread(true);
+            Notifications.setBadgeCountAsync(unreadCount);
+        } else {
+            Notifications.setBadgeCountAsync(0);
         }
     }, [activityEntries]);
 
@@ -112,8 +130,13 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 <TouchableOpacity
                     style={styles.bellButton}
                     onPress={() => {
-                        readCount.current = activityEntries?.length ?? 0;
+                        const newestAt = activityEntries?.[0]?.occurred_at ?? null;
+                        if (newestAt) {
+                            lastSeenAt.current = newestAt;
+                            AsyncStorage.setItem('activity_log_last_seen_at', newestAt);
+                        }
                         setHasUnread(false);
+                        Notifications.setBadgeCountAsync(0);
                         setShowActivityLog(true);
                     }}
                     accessibilityLabel={t('dashboard.activityLog.title')}
