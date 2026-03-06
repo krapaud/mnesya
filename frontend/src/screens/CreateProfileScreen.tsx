@@ -171,7 +171,6 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                     onChange={setBirthday}
                     visible={showDatePicker}
                     onClose={() => setShowDatePicker(false)}
-                    displayFormat={formatDate}
                     allowPastDates={true}
                 />
             </ScrollView>

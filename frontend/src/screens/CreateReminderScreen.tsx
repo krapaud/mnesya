@@ -334,7 +334,6 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 onChange={setReminderDate}
                 visible={showDatePicker}
                 onClose={() => setShowDatePicker(false)}
-                displayFormat={formatDate}
             />
             {/* Cross-platform time picker component */}
             <PlatformTimePicker
@@ -342,7 +341,6 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 onChange={setReminderDate}
                 visible={showTimePicker}
                 onClose={() => setShowTimePicker(false)}
-                displayFormat={formatTime}
             />
 
             {/* Cross-platform profile picker component */}

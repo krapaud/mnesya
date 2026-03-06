@@ -23,8 +23,6 @@ interface PlatformTimePickerProps {
     visible: boolean;
     /** Callback triggered when picker closes */
     onClose: () => void;
-    /** Optional custom time formatting function */
-    displayFormat?: (time: Date) => string;
 }
 
 // ─── Helper ──────────────────────────────────────────────────────────────────

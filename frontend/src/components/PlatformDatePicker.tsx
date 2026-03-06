@@ -24,8 +24,6 @@ interface PlatformDatePickerProps {
     visible: boolean;
     /** Callback triggered when picker closes */
     onClose: () => void;
-    /** Optional custom date formatting function */
-    displayFormat?: (date: Date) => string;
     /** Allow selecting dates in the past (default: false) */
     allowPastDates?: boolean;
 }
@@ -37,7 +35,6 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     onChange,
     visible,
     onClose,
-    displayFormat: _displayFormat,
     allowPastDates = false,
 }) => {
     const { t } = useTranslation();
