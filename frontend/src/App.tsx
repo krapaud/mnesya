@@ -38,7 +38,7 @@ const App: React.FC = () => {
         const subscription = Notifications.addNotificationResponseReceivedListener(
             async (response) => {
                 const data = response.notification.request.content.data as {
-                    reminderId: number;
+                    reminder_id: string;
                     message: string;
                     profileId: string | number;
                     isUserNotification?: boolean;
@@ -46,9 +46,9 @@ const App: React.FC = () => {
                 };
 
                 // If it's a user notification, cancel all other remaining notifications
-                if (data.isUserNotification && data.reminderId) {
+                if (data.isUserNotification && data.reminder_id) {
                     try {
-                        const storageKey = `notification_ids_${data.reminderId}`;
+                        const storageKey = `notification_ids_${data.reminder_id}`;
                         const storedIds = await AsyncStorage.getItem(storageKey);
 
                         if (storedIds) {
@@ -63,7 +63,7 @@ const App: React.FC = () => {
                 // Navigate to ReminderNotificationScreen with notification data
                 if (navigationRef.current && data && !data.isCaregiverAlert) {
                     navigationRef.current.navigate('ReminderNotification', {
-                        reminderId: String(data.reminderId),
+                        reminderId: data.reminder_id,
                         message: data.message,
                         profileId: data.profileId,
                     });
