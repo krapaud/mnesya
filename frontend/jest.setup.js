@@ -3,6 +3,15 @@
  */
 // Setup is handled by jest preset
 
+// Mock expo-constants (prevents expo-modules-core NativeModules error in Jest node env)
+jest.mock('expo-constants', () => ({
+  default: {
+    expoConfig: {
+      hostUri: null,
+    },
+  },
+}));
+
 // Mock expo-secure-store
 jest.mock('expo-secure-store', () => ({
   setItemAsync: jest.fn(),
