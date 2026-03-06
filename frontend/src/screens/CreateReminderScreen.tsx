@@ -32,7 +32,11 @@ import { useUserProfiles } from '../hooks';
 import { createReminder } from '../services/reminderService';
 import { createPulseAnimation, getPulseScale } from '../utils/animations';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateReminder'>;
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -330,7 +334,6 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 onChange={setReminderDate}
                 visible={showDatePicker}
                 onClose={() => setShowDatePicker(false)}
-                displayFormat={formatDate}
             />
             {/* Cross-platform time picker component */}
             <PlatformTimePicker
@@ -338,7 +341,6 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 onChange={setReminderDate}
                 visible={showTimePicker}
                 onClose={() => setShowTimePicker(false)}
-                displayFormat={formatTime}
             />
 
             {/* Cross-platform profile picker component */}
@@ -386,6 +388,8 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
         </View>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // ========== LAYOUT ==========

@@ -31,10 +31,14 @@ import {
     MenuModal,
 } from '../components';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = CompositeScreenProps<
     BottomTabScreenProps<CaregiverTabsParamList, 'Profile'>,
     NativeStackScreenProps<RootStackParamList>
 >;
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -310,6 +314,8 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
         </View>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // LAYOUT

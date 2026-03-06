@@ -3,7 +3,10 @@
  *
  * @module useFormValidation
  */
+
 import { useState, useCallback } from 'react';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface FieldConfig {
     validate?: (value: string) => string | null;
@@ -39,6 +42,14 @@ export interface UseFormValidationReturn {
     setError: (fieldName: string, error: string) => void;
 }
 
+// ─── Hook ───────────────────────────────────────────────────────────────────────
+
+/**
+ * Generic form validation hook.
+ *
+ * @param config - Field configuration map (validation function + initial value per field).
+ * @returns values, errors, showErrors flags, and handlers for change, validate and reset.
+ */
 export const useFormValidation = (config: FormConfig): UseFormValidationReturn => {
     // Initialize values from config
     const initialValues: FormValues = {};

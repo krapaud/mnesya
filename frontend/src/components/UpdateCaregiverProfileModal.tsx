@@ -24,6 +24,8 @@ import { useFormValidation } from '../hooks';
 import { validateName, validateEmail } from '../utils/validation';
 import { commonStyles } from '../styles/commonStyles';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 /**
  * Props for UpdateCaregiverProfileModal component.
  */
@@ -41,6 +43,8 @@ interface UpdateCaregiverProfileModalProps {
         email: string;
     } | null;
 }
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = ({
     visible,
@@ -222,6 +226,8 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
         </>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     modalContent: {

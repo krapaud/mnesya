@@ -24,6 +24,8 @@ import { useFormValidation } from '../hooks';
 import { validatePassword, validatePasswordMatch } from '../utils/validation';
 import { commonStyles } from '../styles/commonStyles';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 interface ChangePasswordModalProps {
     /** Controls modal visibility */
     visible: boolean;
@@ -32,6 +34,8 @@ interface ChangePasswordModalProps {
     /** Callback when save button is pressed */
     onSave: (data: { current_password: string; password: string }) => Promise<void>;
 }
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ visible, onClose, onSave }) => {
     const { t } = useTranslation();
@@ -279,6 +283,8 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ visible, onCl
         </Modal>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     modalContent: {

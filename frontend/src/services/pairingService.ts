@@ -10,6 +10,8 @@ import {
 } from '../types/interfaces';
 import apiClient from './api';
 
+// ─── Endpoints ──────────────────────────────────────────────────────────────
+
 /** Generates a pairing code for the given user. */
 export const generatePairingCode = async (user_id: string): Promise<PairingCodeResponse> => {
     const response = await apiClient.post('/api/pairing/generate', { user_id });

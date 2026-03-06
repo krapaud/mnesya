@@ -33,14 +33,18 @@ import ReminderCard from '../components/ReminderCard';
 import FilterPickerModal from '../components/FilterPickerModal';
 import { ConfirmationModal } from '../components';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = CompositeScreenProps<
     BottomTabScreenProps<CaregiverTabsParamList, 'Reminders'>,
     NativeStackScreenProps<RootStackParamList>
 >;
 
+// ─── Screen ──────────────────────────────────────────────────────────────────
+
 const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
-    const { reminderData, loading: _loading, error: _error, reload } = useCaregiverReminders();
+    const { reminderData, reload } = useCaregiverReminders();
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [reloadCounter, setReloadCounter] = useState(0);
 
@@ -87,7 +91,10 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
     const [deleteError, setDeleteError] = useState<boolean>(false);
 
-    // Filter reminders based on selected profile and date
+    /**
+     * Returns reminders filtered by the currently selected profile and date,
+     * sorted by most recent first.
+     */
     const getFilteredReminders = () => {
         return reminderData
             ?.filter((reminder) => {
@@ -372,6 +379,8 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
         </View>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // LAYOUT

@@ -11,6 +11,8 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { CaregiverTabsParamList } from '../types/index';
 
+// ─── Navigator ──────────────────────────────────────────────────────────────
+
 import DashboardScreen from '../screens/DashboardScreen';
 import RemindersListScreen from '../screens/RemindersListScreen';
 import CaregiverProfileScreen from '../screens/CaregiverProfileScreen';
@@ -74,6 +76,8 @@ const CaregiverTabs: React.FC = () => {
         </Tab.Navigator>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     activeTab: {

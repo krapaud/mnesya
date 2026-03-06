@@ -5,11 +5,15 @@
  */
 import * as SecureStore from 'expo-secure-store';
 
+// ─── Keys ───────────────────────────────────────────────────────────────────────
+
 /** Storage key for the JWT authentication token */
 const AUTH_TOKEN_KEY = 'auth_token';
 
 /** Storage key for the user info */
 const USER_INFO_KEY = 'user_info';
+
+// ─── Storage ────────────────────────────────────────────────────────────────────
 
 /** Saves the JWT token. */
 export const saveToken = async (token: string): Promise<void> => {

@@ -26,7 +26,11 @@ import { validateName, cleanText } from '../utils/validation';
 import { useFormValidation } from '../hooks';
 import { createProfile } from '../services/profileService';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateProfile'>;
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -43,6 +47,7 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
     const [pairingCode, setPairingCode] = useState<string | null>(null);
     const [pairingExpiresAt, setPairingExpiresAt] = useState<string | null>(null);
 
+    /** Formats a date for display (DD/MM/YYYY). */
     const formatDate = (date: Date): string => {
         const day = date.getDate().toString().padStart(2, '0');
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -50,6 +55,7 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
         return `${day}/${month}/${year}`;
     };
 
+    /** Formats a date for the API payload (YYYY-MM-DD). */
     const formatDateForAPI = (date: Date): string => {
         const year = date.getFullYear();
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -165,7 +171,6 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
                     onChange={setBirthday}
                     visible={showDatePicker}
                     onClose={() => setShowDatePicker(false)}
-                    displayFormat={formatDate}
                     allowPastDates={true}
                 />
             </ScrollView>
@@ -207,6 +212,8 @@ const CreateProfileScreen: React.FC<Props> = ({ navigation }) => {
         </View>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // ========== LAYOUT ==========

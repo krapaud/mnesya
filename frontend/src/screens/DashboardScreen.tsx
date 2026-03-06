@@ -27,10 +27,14 @@ import { useUserProfiles, useActivityLog } from '../hooks';
 import { ActivityLogModal } from '../components';
 import { calculateAge } from '../utils/dateUtils';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = CompositeScreenProps<
     BottomTabScreenProps<CaregiverTabsParamList, 'Home'>,
     NativeStackScreenProps<RootStackParamList>
 >;
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -256,6 +260,8 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         </View>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // LAYOUT

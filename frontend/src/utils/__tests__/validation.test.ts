@@ -65,9 +65,9 @@ describe('validatePassword', () => {
     });
 
     test('should return error for password too long', () => {
-        const longPassword = 'a'.repeat(21) + 'Password!';
+        const longPassword = 'a'.repeat(64) + 'Password1!'; // 74 chars, satisfies all other rules
         const result = validatePassword(longPassword);
-        expect(result).toBe('register.errors.Password must be at most 20 characters');
+        expect(result).toBe('register.errors.Password must be at most 72 characters');
     });
 });
 
