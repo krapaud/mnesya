@@ -104,7 +104,7 @@ const PairingCodeModal: React.FC<PairingCodeModalProps> = ({
     }
 
     return (
-        <Modal visible={visible} transparent={false} animationType="slide" onRequestClose={onClose}>
+        <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
             <SafeAreaView style={styles.container}>
                 {/* Header with back button and logo */}
                 <View style={styles.header}>
