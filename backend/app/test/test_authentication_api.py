@@ -17,9 +17,7 @@ class TestRegisterEndpoint:
 
     def test_register_success(self, client, sample_caregiver_data):
         """Test successful caregiver registration."""
-        response = client.post(
-            "/api/auth/register",
-            json=sample_caregiver_data)
+        response = client.post("/api/auth/register", json=sample_caregiver_data)
 
         assert response.status_code == 201
         data = response.json()
@@ -35,24 +33,30 @@ class TestRegisterEndpoint:
         """Test registration with duplicate email fails."""
         caregiver, _ = create_test_caregiver()
 
-        response = client.post("/api/auth/register", json={
-            "first_name": "Another",
-            "last_name": "Person",
-            "email": caregiver.email,  # Duplicate email
-            "password": "DifferentPass123!"
-        })
+        response = client.post(
+            "/api/auth/register",
+            json={
+                "first_name": "Another",
+                "last_name": "Person",
+                "email": caregiver.email,  # Duplicate email
+                "password": "DifferentPass123!",
+            },
+        )
 
         assert response.status_code == 400
         assert "already registered" in response.json()["detail"].lower()
 
     def test_register_invalid_email(self, client):
         """Test registration with invalid email format."""
-        response = client.post("/api/auth/register", json={
-            "first_name": "Test",
-            "last_name": "User",
-            "email": "not-an-email",
-            "password": "ValidPass123!"
-        })
+        response = client.post(
+            "/api/auth/register",
+            json={
+                "first_name": "Test",
+                "last_name": "User",
+                "email": "not-an-email",
+                "password": "ValidPass123!",
+            },
+        )
 
         assert response.status_code == 422  # Validation error
 
@@ -73,19 +77,33 @@ class TestRegisterEndpoint:
 
             response = client.post("/api/auth/register", json=data)
             assert response.status_code in [
-                400, 422], f"Weak password '{weak_pass}' should be rejected"
+                400,
+                422,
+            ], f"Weak password '{weak_pass}' should be rejected"
 
     def test_register_missing_fields(self, client):
         """Test registration with missing required fields."""
         incomplete_data = [
-            {"last_name": "Doe", "email": "test@example.com",
-                "password": "Pass123!"},  # Missing first_name
-            {"first_name": "Jane", "email": "test@example.com",
-                "password": "Pass123!"},  # Missing last_name
-            {"first_name": "Jane", "last_name": "Doe",
-                "password": "Pass123!"},  # Missing email
-            {"first_name": "Jane", "last_name": "Doe",
-                "email": "test@example.com"},  # Missing password
+            {
+                "last_name": "Doe",
+                "email": "test@example.com",
+                "password": "Pass123!",
+            },  # Missing first_name
+            {
+                "first_name": "Jane",
+                "email": "test@example.com",
+                "password": "Pass123!",
+            },  # Missing last_name
+            {
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "password": "Pass123!",
+            },  # Missing email
+            {
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "email": "test@example.com",
+            },  # Missing password
         ]
 
         for data in incomplete_data:
@@ -100,10 +118,9 @@ class TestLoginEndpoint:
         """Test successful login returns JWT token."""
         caregiver, password = create_test_caregiver()
 
-        response = client.post("/api/auth/login", json={
-            "email": caregiver.email,
-            "password": password
-        })
+        response = client.post(
+            "/api/auth/login", json={"email": caregiver.email, "password": password}
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -117,20 +134,20 @@ class TestLoginEndpoint:
         """Test login with wrong password fails."""
         caregiver, _ = create_test_caregiver()
 
-        response = client.post("/api/auth/login", json={
-            "email": caregiver.email,
-            "password": "WrongPassword123!"
-        })
+        response = client.post(
+            "/api/auth/login",
+            json={"email": caregiver.email, "password": "WrongPassword123!"},
+        )
 
         assert response.status_code == 401
         assert "Invalid email or password" in response.json()["detail"]
 
     def test_login_nonexistent_email(self, client):
         """Test login with non-existent email fails."""
-        response = client.post("/api/auth/login", json={
-            "email": "nonexistent@example.com",
-            "password": "SomePass123!"
-        })
+        response = client.post(
+            "/api/auth/login",
+            json={"email": "nonexistent@example.com", "password": "SomePass123!"},
+        )
 
         assert response.status_code == 401
         assert "Invalid email or password" in response.json()["detail"]
@@ -138,23 +155,16 @@ class TestLoginEndpoint:
     def test_login_missing_credentials(self, client):
         """Test login with missing credentials."""
         # Missing password
-        response = client.post("/api/auth/login", json={
-            "email": "test@example.com"
-        })
+        response = client.post("/api/auth/login", json={"email": "test@example.com"})
         assert response.status_code == 422
 
         # Missing email
-        response = client.post("/api/auth/login", json={
-            "password": "Pass123!"
-        })
+        response = client.post("/api/auth/login", json={"password": "Pass123!"})
         assert response.status_code == 422
 
     def test_login_empty_credentials(self, client):
         """Test login with empty credentials."""
-        response = client.post("/api/auth/login", json={
-            "email": "",
-            "password": ""
-        })
+        response = client.post("/api/auth/login", json={"email": "", "password": ""})
         assert response.status_code in [401, 422]
 
 
@@ -195,19 +205,31 @@ class TestLogoutEndpoint:
     """Tests for POST /api/auth/logout"""
 
     def test_logout_success(self, authenticated_client):
-        """Test successful logout."""
+        """Test successful logout returns 204."""
         client, _ = authenticated_client
 
         response = client.post("/api/auth/logout")
 
-        assert response.status_code == 200
-        assert "message" in response.json()
+        assert response.status_code == 204
 
     def test_logout_no_token(self, client):
         """Test logout without token."""
         response = client.post("/api/auth/logout")
 
         assert response.status_code == 403
+
+    def test_logout_revokes_token(self, authenticated_client):
+        """Test that after logout, the same token is rejected."""
+        client, _ = authenticated_client
+
+        # Logout
+        response = client.post("/api/auth/logout")
+        assert response.status_code == 204
+
+        # Subsequent request with same token must fail
+        response = client.get("/api/auth/me")
+        assert response.status_code == 401
+        assert "revoked" in response.json()["detail"].lower()
 
 
 class TestRefreshTokenEndpoint:
