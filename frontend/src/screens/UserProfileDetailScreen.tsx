@@ -43,7 +43,7 @@ const UserProfileDetailScreen: React.FC<Props> = ({ navigation, route }: Props) 
     const profileId = route.params?.profileId;
 
     // Fetch user profile data from the backend
-    const { userData, loading, error, reload: _reload, update, remove } = useUserProfile(profileId);
+    const { userData, loading, error, update, remove } = useUserProfile(profileId);
 
     // Fetch and filter reminders for this profile
     const { reminderData, reload: reloadReminders } = useCaregiverReminders();

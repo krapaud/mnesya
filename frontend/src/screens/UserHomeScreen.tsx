@@ -20,13 +20,13 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import type { UserTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { getUserInfo, saveUserInfo, deleteToken, deleteUserInfo } from '../services/tokenService';
+import { saveUserInfo, deleteToken, deleteUserInfo } from '../services/tokenService';
 import { getCurrentUserProfile } from '../services/profileService';
 import { useRefresh } from '../contexts/RefreshContext';
 import { getUserReminders } from '../services/reminderService';
 import { useReminderStatus } from '../hooks';
 import { ConfirmationModal, MenuModal } from '../components';
-import type { CaregiverProfile, ReminderData } from '../types/interfaces';
+import type { UserProfileData, ReminderData } from '../types/interfaces';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -140,7 +140,7 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
     const [showAlert, setShowAlert] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-    const [currentUser, setCurrentUser] = useState<CaregiverProfile | null>(null);
+    const [currentUser, setCurrentUser] = useState<UserProfileData | null>(null);
     const [userReminders, setUserReminders] = useState<ReminderData[]>([]);
     const [focusTrigger, setFocusTrigger] = useState(0);
 
@@ -188,7 +188,8 @@ const UserHomeScreen: React.FC<Props> = ({ navigation }) => {
 
                 const reminders = await getUserReminders();
                 setUserReminders(reminders);
-            } catch (error: any) {
+            } catch (err: unknown) {
+                const error = err as { response?: { status?: number } };
                 if (error?.response?.status === 401) {
                     await deleteUserInfo();
                     navigation.getParent()?.reset({

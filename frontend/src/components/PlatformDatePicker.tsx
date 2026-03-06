@@ -47,17 +47,6 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     const [showYearPicker, setShowYearPicker] = useState(false);
     const [showMonthPicker, setShowMonthPicker] = useState(false);
 
-    /** Formats a date for display (DD/MM/YYYY by default). */
-    const _formatDate = (date: Date): string => {
-        if (displayFormat) {
-            return displayFormat(date);
-        }
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
-    };
-
     /** Returns the full name of a month from a date. */
     const getMonthName = (date: Date): string => {
         const months = t('common.pickersText.months', { returnObjects: true }) as string[];

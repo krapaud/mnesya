@@ -44,7 +44,7 @@ type Props = CompositeScreenProps<
 
 const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
-    const { reminderData, loading: _loading, error: _error, reload } = useCaregiverReminders();
+    const { reminderData, reload } = useCaregiverReminders();
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [reloadCounter, setReloadCounter] = useState(0);
 

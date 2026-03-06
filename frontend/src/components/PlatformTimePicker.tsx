@@ -42,7 +42,6 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
     onChange,
     visible,
     onClose,
-    displayFormat: _displayFormat,
 }) => {
     const { t } = useTranslation();
     const [selectedHour, setSelectedHour] = useState(value.getHours());
@@ -52,7 +51,6 @@ const PlatformTimePicker: React.FC<PlatformTimePickerProps> = ({
     const minuteScrollRef = useRef<ScrollView>(null);
 
     const ITEM_HEIGHT = 50;
-    const _VISIBLE_ITEMS = 3;
     const LOOP_COUNT = 5;
 
     /**
