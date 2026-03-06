@@ -37,7 +37,7 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     onChange,
     visible,
     onClose,
-    displayFormat,
+    displayFormat: _displayFormat,
     allowPastDates = false,
 }) => {
     const { t } = useTranslation();
