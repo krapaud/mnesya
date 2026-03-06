@@ -28,7 +28,10 @@ from app.persistence.revoked_token_repository import RevokedTokenRepository
 # JWT Configuration
 SECRET_KEY = os.environ["SECRET_KEY"]
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+# Default: 7 days.  Override via CAREGIVER_TOKEN_EXPIRE_MINUTES env var.
+ACCESS_TOKEN_EXPIRE_MINUTES = int(
+    os.environ.get("CAREGIVER_TOKEN_EXPIRE_MINUTES", 60 * 24 * 7)
+)
 
 # Security
 security = HTTPBearer()

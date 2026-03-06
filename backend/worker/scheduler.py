@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 def send_user_notifications() -> None:
     """Send initial push notifications for reminders due now (T+0).
 
-    Queries reminders scheduled within the last 90 seconds and sends
+    Queries reminders scheduled within the last 55 seconds and sends
     a push notification to the user's registered devices.
     The 90s window provides a 30s buffer against scheduler jitter.
     Skips reminders with a terminal status (DONE, UNABLE, MISSED).
@@ -41,7 +41,7 @@ def send_user_notifications() -> None:
         push_token_repo = PushTokenRepository(db)
         notification_service = NotificationService()
 
-        reminders = reminder_repo.get_reminders_due_now(window_seconds=90)
+        reminders = reminder_repo.get_reminders_due_now(window_seconds=55)
         logger.info(
             f"[Scheduler] send_user_notifications: {len(reminders)} reminders due"
         )

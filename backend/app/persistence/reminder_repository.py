@@ -88,8 +88,20 @@ class ReminderRepository(BaseRepository[ReminderModel]):
         # POSTPONED is intentionally excluded from this list: a postponed reminder
         # has its scheduled_at moved forward and must fire again at the new time.
         # Only truly terminal statuses (DONE, UNABLE, MISSED) prevent re-firing.
+        # window_seconds must be < the scheduler interval (60s) so that consecutive
+        # CronTrigger ticks do not overlap and re-send the same notification.
         resolved_ids = self.db.query(ReminderStatusModel._reminder_id).filter(
             ReminderStatusModel._status.in_(["DONE", "UNABLE", "MISSED"])
+        )
+
+        return (
+            self.db.query(self.model)
+            .filter(
+                self.model._scheduled_at >= start,
+                self.model._scheduled_at <= now,
+                ~self.model._id.in_(resolved_ids),
+            )
+            .all()
         )
 
         return (
