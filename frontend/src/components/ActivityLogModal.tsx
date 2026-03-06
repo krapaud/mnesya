@@ -7,7 +7,7 @@
  * @module ActivityLogModal
  */
 
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import {
     View,
     Text,
@@ -129,6 +129,20 @@ const ActivityLogModal: React.FC<ActivityLogModalProps> = ({
 }) => {
     const { t } = useTranslation();
 
+    const [showScrollFade, setShowScrollFade] = useState(true);
+    const [isScrollable, setIsScrollable] = useState(false);
+    const scrollContainerHeight = useRef(0);
+
+    const handleContentSizeChange = (_: number, contentHeight: number) => {
+        setIsScrollable(contentHeight > scrollContainerHeight.current);
+    };
+
+    const handleScroll = (event: { nativeEvent: { contentOffset: { y: number }; layoutMeasurement: { height: number }; contentSize: { height: number } } }) => {
+        const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+        const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 10;
+        setShowScrollFade(!isAtBottom);
+    };
+
     const renderContent = () => {
         if (loading) {
             return (
@@ -157,15 +171,26 @@ const ActivityLogModal: React.FC<ActivityLogModalProps> = ({
         }
 
         return (
-            <ScrollView
-                style={styles.list}
-                contentContainerStyle={styles.listContent}
-                showsVerticalScrollIndicator={false}
-            >
-                {entries.map((entry) => (
-                    <LogEntryRow key={entry.status_id} entry={entry} />
-                ))}
-            </ScrollView>
+            <View style={styles.listWrapper}>
+                <ScrollView
+                    style={styles.list}
+                    contentContainerStyle={styles.listContent}
+                    showsVerticalScrollIndicator={false}
+                    onScroll={handleScroll}
+                    onContentSizeChange={handleContentSizeChange}
+                    onLayout={(e) => { scrollContainerHeight.current = e.nativeEvent.layout.height; }}
+                    scrollEventThrottle={16}
+                >
+                    {entries.map((entry) => (
+                        <LogEntryRow key={entry.status_id} entry={entry} />
+                    ))}
+                </ScrollView>
+                {showScrollFade && isScrollable && (
+                    <View style={styles.scrollFade} pointerEvents="none">
+                        <Ionicons name="chevron-down" size={24} color="#4A90E2" />
+                    </View>
+                )}
+            </View>
         );
     };
 
@@ -236,8 +261,22 @@ const styles = StyleSheet.create({
         color: '#9E9E9E',
         textAlign: 'center',
     },
+    listWrapper: {
+        width: '100%',
+        position: 'relative',
+    },
     list: {
         width: '100%',
+    },
+    scrollFade: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255,255,255,0.85)',
     },
     listContent: {
         paddingBottom: 4,
