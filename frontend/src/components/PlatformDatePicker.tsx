@@ -10,6 +10,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { commonStyles } from '../styles/commonStyles';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 /**
  * Props for the PlatformDatePicker component.
  */
@@ -22,18 +24,17 @@ interface PlatformDatePickerProps {
     visible: boolean;
     /** Callback triggered when picker closes */
     onClose: () => void;
-    /** Optional custom date formatting function */
-    displayFormat?: (date: Date) => string;
     /** Allow selecting dates in the past (default: false) */
     allowPastDates?: boolean;
 }
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     value,
     onChange,
     visible,
     onClose,
-    displayFormat,
     allowPastDates = false,
 }) => {
     const { t } = useTranslation();
@@ -42,17 +43,6 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
     );
     const [showYearPicker, setShowYearPicker] = useState(false);
     const [showMonthPicker, setShowMonthPicker] = useState(false);
-
-    /** Formats a date for display (DD/MM/YYYY by default). */
-    const _formatDate = (date: Date): string => {
-        if (displayFormat) {
-            return displayFormat(date);
-        }
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
-    };
 
     /** Returns the full name of a month from a date. */
     const getMonthName = (date: Date): string => {
@@ -328,6 +318,8 @@ const PlatformDatePicker: React.FC<PlatformDatePickerProps> = ({
         </Modal>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     modalContent: {

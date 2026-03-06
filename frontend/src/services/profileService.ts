@@ -10,6 +10,8 @@ import {
     UserWithPairingCodeResponse,
 } from '../types/interfaces';
 
+// ─── Endpoints ──────────────────────────────────────────────────────────────
+
 /** Creates a new user profile and returns the user data along with the generated pairing code. */
 export const createProfile = async (
     data: CreateUserProfileData

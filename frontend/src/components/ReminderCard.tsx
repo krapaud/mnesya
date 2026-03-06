@@ -3,6 +3,7 @@
  *
  * @module ReminderCard
  */
+
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,11 +12,15 @@ import { useReminderStatus } from '../hooks';
 import { commonStyles } from '../styles/commonStyles';
 import type { ReminderData } from '../types/interfaces';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 interface ReminderCardProps {
     reminder: ReminderData;
     onDelete: (id: string) => void;
     reloadTrigger?: number;
 }
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const ReminderCard: React.FC<ReminderCardProps> = ({ reminder, onDelete, reloadTrigger }) => {
     const { t } = useTranslation();

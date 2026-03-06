@@ -10,10 +10,14 @@ import axios from 'axios';
 import { getToken, saveToken, deleteToken } from './tokenService';
 import { API_BASE_URL } from '../config/api';
 
+// ─── Constants ──────────────────────────────────────────────────────────────
+
 const BASE_API_URL = API_BASE_URL;
 
 /** Number of seconds before expiry at which a silent refresh is triggered (7 days). */
 const REFRESH_THRESHOLD_SECONDS = 7 * 24 * 60 * 60;
+
+// ─── Helper ──────────────────────────────────────────────────────────────────
 
 /**
  * Decode a JWT payload without a library.
@@ -28,6 +32,8 @@ function decodeJwtPayload(token: string): { exp?: number; sub?: string } | null 
     }
 }
 
+// ─── Client ───────────────────────────────────────────────────────────────────
+
 const apiClient = axios.create({
     baseURL: BASE_API_URL,
     headers: {
@@ -35,6 +41,8 @@ const apiClient = axios.create({
     },
     timeout: 10000, // 10 seconds timeout
 });
+
+// ─── Interceptors ───────────────────────────────────────────────────────────────
 
 // Attach the JWT token to every outgoing request.
 // If the token expires in < 7 days, silently refresh it first (user side only).

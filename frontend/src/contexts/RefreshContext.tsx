@@ -5,12 +5,16 @@
  */
 import React, { createContext, useContext, useState, useCallback } from 'react';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type RefreshContextType = {
     refreshTrigger: number;
     isRefreshing: boolean;
     triggerRefresh: () => void;
     setIsRefreshing: (value: boolean) => void;
 };
+
+// ─── Context ─────────────────────────────────────────────────────────────────
 
 const RefreshContext = createContext<RefreshContextType | undefined>(undefined);
 

@@ -23,6 +23,8 @@ Notifications.setNotificationHandler({
     }),
 });
 
+// ─── Component ──────────────────────────────────────────────────────────────
+
 const App: React.FC = () => {
     const navigationRef = React.createRef<NavigationContainerRef<RootStackParamList>>(); // Create reference to access navigation from outside the NavigationContainer
 
@@ -61,7 +63,7 @@ const App: React.FC = () => {
                 // Navigate to ReminderNotificationScreen with notification data
                 if (navigationRef.current && data && !data.isCaregiverAlert) {
                     navigationRef.current.navigate('ReminderNotification', {
-                        reminderId: data.reminder_id,
+                        reminderId: String(data.reminderId),
                         message: data.message,
                         profileId: data.profileId,
                     });

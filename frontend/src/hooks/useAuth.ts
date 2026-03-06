@@ -3,6 +3,7 @@
  *
  * @module useAuth
  */
+
 import { useState, useCallback } from 'react';
 import {
     login as loginService,
@@ -11,6 +12,8 @@ import {
 } from '../services/authService';
 import { getToken } from '../services/tokenService';
 import type { LoginData, RegisterData } from '../types/interfaces';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface UseAuthResult {
     login: (credentials: LoginData) => Promise<boolean>;
@@ -22,6 +25,13 @@ interface UseAuthResult {
     clearError: () => void;
 }
 
+// ─── Hook ───────────────────────────────────────────────────────────────────────
+
+/**
+ * Manages login, registration, logout and auth-status check for the current session.
+ *
+ * @returns login, register, logout, checkAuthStatus handlers plus loading and error state.
+ */
 export const useAuth = (): UseAuthResult => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);

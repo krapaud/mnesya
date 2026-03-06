@@ -33,7 +33,11 @@ import {
 import { useAuth, useFormValidation } from '../hooks';
 import { ConfirmationModal, RateLimitModal } from '../components';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
 
 const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     const { t } = useTranslation();
@@ -64,7 +68,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    //Refs
+    // Refs
     const timerPassRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const handleShowPassword = () => {
         setShowPassword(true);
@@ -316,6 +320,8 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
         </View>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     // ========== LAYOUT ==========

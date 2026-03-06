@@ -5,6 +5,8 @@
  * @module validation
  */
 
+// ─── Helper ──────────────────────────────────────────────────────────────────
+
 /** Removes extra spaces from a text input. */
 export const cleanText = (text: string): string => {
     return text.replace(/\s{2,}/g, ' ');

@@ -4,6 +4,8 @@
  * @module dateUtils
  */
 
+// ─── Helper ──────────────────────────────────────────────────────────────────
+
 /** Calculates age in years from a birthday string (YYYY-MM-DD). */
 export const calculateAge = (birthday: string): number => {
     const birthDate = new Date(birthday);

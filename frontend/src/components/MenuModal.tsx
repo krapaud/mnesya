@@ -11,6 +11,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 export interface MenuAction {
     /** Label displayed for the action */
     label: string;
@@ -32,6 +34,8 @@ interface MenuModalProps {
     /** Top offset for the menu position (default: 110) */
     topOffset?: number;
 }
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const MenuModal: React.FC<MenuModalProps> = ({ visible, onClose, actions, topOffset = 110 }) => {
     return (
@@ -71,6 +75,8 @@ const MenuModal: React.FC<MenuModalProps> = ({ visible, onClose, actions, topOff
         </Modal>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     overlay: {

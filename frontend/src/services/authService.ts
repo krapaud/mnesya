@@ -8,6 +8,7 @@ import * as SecureStore from 'expo-secure-store';
 import { saveToken, deleteToken } from './tokenService';
 import { LoginData, RegisterData, AuthResponse, CaregiverProfile } from '../types/interfaces';
 
+// ─── Endpoints ──────────────────────────────────────────────────────────────
 
 /** Logs in a caregiver and stores the token. */
 export const login = async (credentials: LoginData): Promise<AuthResponse> => {

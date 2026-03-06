@@ -6,10 +6,13 @@
  *
  * @module FilterPickerModal
  */
+
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { commonStyles } from '../styles/commonStyles';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface FilterPickerItem {
     value: string;
@@ -30,6 +33,8 @@ interface FilterPickerModalProps {
     /** Called when the modal is closed without selecting */
     onClose: () => void;
 }
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const FilterPickerModal: React.FC<FilterPickerModalProps> = ({
     visible,
@@ -80,6 +85,8 @@ const FilterPickerModal: React.FC<FilterPickerModalProps> = ({
         </Modal>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     modalContent: {

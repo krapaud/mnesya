@@ -5,6 +5,8 @@
  */
 import { Animated } from 'react-native';
 
+// ─── Helper ──────────────────────────────────────────────────────────────────
+
 /** Swinging bell animation that loops forever. */
 export const createBellSwingAnimation = (animatedValue: Animated.Value) => {
     return Animated.loop(

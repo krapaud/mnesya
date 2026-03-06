@@ -9,6 +9,8 @@ import { initReactI18next } from 'react-i18next';
 import fr from './locales/fr.json';
 import en from './locales/en.json';
 
+// ─── Constants ───────────────────────────────────────────────────────────────
+
 const resources = {
     fr: {
         translation: fr,

@@ -11,6 +11,8 @@ import { useTranslation } from 'react-i18next';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 /**
  * Props for the PairingCodeModal component.
  */
@@ -30,6 +32,8 @@ interface PairingCodeModalProps {
     /** Callback triggered when code expires */
     onExpired?: () => void;
 }
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const PairingCodeModal: React.FC<PairingCodeModalProps> = ({
     visible,
@@ -159,6 +163,8 @@ const PairingCodeModal: React.FC<PairingCodeModalProps> = ({
         </Modal>
     );
 };
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     container: {

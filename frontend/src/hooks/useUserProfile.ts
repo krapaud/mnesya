@@ -3,9 +3,12 @@
  *
  * @module useUserProfile
  */
+
 import { useState, useEffect, useCallback } from 'react';
 import { getProfile, updateProfile, deleteProfile } from '../services/profileService';
 import type { UserProfileData, UpdateUserProfileData } from '../types/interfaces';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface UseUserProfileResult {
     userData: UserProfileData | null;
@@ -16,6 +19,15 @@ interface UseUserProfileResult {
     remove: () => Promise<void>;
 }
 
+// ─── Hook ───────────────────────────────────────────────────────────────────────
+
+/**
+ * Fetches, updates and deletes a single user profile.
+ *
+ * @param profileId - ID of the user profile to manage.
+ * @param onAuthError - Optional callback invoked on a 401 response.
+ * @returns userData, loading flag, error key, reload, update and remove functions.
+ */
 export const useUserProfile = (
     profileId: string,
     onAuthError?: () => void

@@ -12,6 +12,8 @@
 
 import Constants from 'expo-constants';
 
+// ─── Constants ───────────────────────────────────────────────────────────────
+
 const hostUri = Constants.expoConfig?.hostUri;
 const localIp = hostUri ? hostUri.split(':')[0] : null;
 
