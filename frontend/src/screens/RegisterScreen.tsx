@@ -68,7 +68,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    //Refs
+    // Refs
     const timerPassRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const handleShowPassword = () => {
         setShowPassword(true);

@@ -91,7 +91,10 @@ const RemindersListScreen: React.FC<Props> = ({ navigation }) => {
     const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
     const [deleteError, setDeleteError] = useState<boolean>(false);
 
-    // Filter reminders based on selected profile and date
+    /**
+     * Returns reminders filtered by the currently selected profile and date,
+     * sorted by most recent first.
+     */
     const getFilteredReminders = () => {
         return reminderData
             ?.filter((reminder) => {

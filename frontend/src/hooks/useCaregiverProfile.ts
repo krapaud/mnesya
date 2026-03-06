@@ -19,6 +19,12 @@ interface UseCaregiverProfileResult {
 
 // ─── Hook ───────────────────────────────────────────────────────────────────────
 
+/**
+ * Fetches and mutates the authenticated caregiver's own profile.
+ *
+ * @param onAuthError - Optional callback invoked on a 401 response.
+ * @returns caregiverData, loading flag, error key, reload, update and remove functions.
+ */
 export const useCaregiverProfile = (onAuthError?: () => void): UseCaregiverProfileResult => {
     const [caregiverData, setCaregiverData] = useState<CaregiverProfile | null>(null);
     const [loading, setLoading] = useState(true);

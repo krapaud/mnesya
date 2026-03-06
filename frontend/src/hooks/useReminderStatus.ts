@@ -20,6 +20,14 @@ interface UseReminderStatus {
 
 // ─── Hook ───────────────────────────────────────────────────────────────────────
 
+/**
+ * Fetches and updates the status of a single reminder.
+ *
+ * @param reminderId - ID of the reminder to track.
+ * @param onAuthError - Optional callback invoked on a 401 response.
+ * @param reloadTrigger - Increment this value to force a status refresh.
+ * @returns reminderStatus, loading flag, error key and a status update function.
+ */
 export const useReminderStatus = (
     reminderId: string,
     onAuthError?: () => void,

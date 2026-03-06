@@ -19,6 +19,12 @@ interface UseReminderResult {
 
 // ─── Hook ───────────────────────────────────────────────────────────────────────
 
+/**
+ * Fetches all reminders assigned to the currently authenticated user.
+ *
+ * @param onAuthError - Optional callback invoked on a 401 response.
+ * @returns reminderData, loading flag, error key and a reload function.
+ */
 export const useUserReminders = (onAuthError?: () => void): UseReminderResult => {
     const [reminderData, setReminderData] = useState<ReminderData[] | null>(null);
     const [loading, setLoading] = useState(true);

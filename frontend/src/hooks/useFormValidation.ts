@@ -44,6 +44,12 @@ export interface UseFormValidationReturn {
 
 // ─── Hook ───────────────────────────────────────────────────────────────────────
 
+/**
+ * Generic form validation hook.
+ *
+ * @param config - Field configuration map (validation function + initial value per field).
+ * @returns values, errors, showErrors flags, and handlers for change, validate and reset.
+ */
 export const useFormValidation = (config: FormConfig): UseFormValidationReturn => {
     // Initialize values from config
     const initialValues: FormValues = {};
