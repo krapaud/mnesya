@@ -18,6 +18,7 @@ from app.persistence.reminder_repository import ReminderRepository
 from app.persistence.push_token_repository import PushTokenRepository
 from app.persistence.reminder_status_repository import ReminderStatusRepository
 from app.services.notification_services import NotificationService
+from app.persistence.revoked_token_repository import RevokedTokenRepository
 
 logger = logging.getLogger(__name__)
 
@@ -173,6 +174,22 @@ def send_caregiver_escalations():
         db.close()
 
 
+def cleanup_revoked_tokens() -> None:
+    """Delete revoked tokens older than 60 minutes (they are already expired)."""
+    from app import SessionLocal
+    from datetime import datetime, timezone, timedelta
+
+    db: Session = SessionLocal()
+    try:
+        cutoff = datetime.now(timezone.utc) - timedelta(minutes=60)
+        deleted = RevokedTokenRepository(db).delete_expired(cutoff)
+        logger.info(f"[Scheduler] cleanup_revoked_tokens: {deleted} token(s) deleted")
+    except Exception as e:
+        logger.error(f"[Scheduler] Error in cleanup_revoked_tokens: {e}")
+    finally:
+        db.close()
+
+
 def start_scheduler():
     """Initialize and start the APScheduler background scheduler.
 
@@ -199,6 +216,12 @@ def start_scheduler():
         send_caregiver_escalations,
         CronTrigger(minute="*", second=0),
         id="send_caregiver_escalations",
+    )
+
+    my_scheduler.add_job(
+        cleanup_revoked_tokens,
+        CronTrigger(minute=0),
+        id="cleanup_revoked_tokens",
     )
 
     my_scheduler.start()
