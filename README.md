@@ -622,6 +622,7 @@ pytest app/test/ --cov=app
 #### Backend Test Files
 
 **API Integration Tests (166 tests)**:
+
 - `test_authentication_api.py` — Register, login, token validation (19 tests)
 - `test_caregiver_api.py` — Caregiver profile CRUD (14 tests)
 - `test_pairing_api.py` — Generate and verify pairing codes (18 tests)
@@ -631,6 +632,7 @@ pytest app/test/ --cov=app
 - `test_push_notification_api.py` — Push token register, unregister, list (20 tests)
 
 **Unit Tests (130 tests)**:
+
 - `test.py` — Models validation, schemas validation, business logic, entity relationships
   - Model tests (65): User, Caregiver, Reminder, ReminderStatus
   - Schema tests (49): Create/Update validation
@@ -639,6 +641,11 @@ pytest app/test/ --cov=app
 **Tool**: pytest + SQLAlchemy test database
 
 ### Frontend (React Native + Jest)
+
+**📋 Complete Test Documentation**: [frontend/README-tests.md](frontend/README-tests.md)
+
+**Test Suite**: 220 tests (16 test suites)  
+**Status**: ✅ All tests passing
 
 ```bash
 cd frontend
@@ -650,22 +657,24 @@ npm test
 npm test -- --coverage
 ```
 
-#### Frontend Test Files (163 tests across 14 suites)
+#### Frontend Test Files (220 tests across 16 suites)
 
-- `services/__tests__/authService.test.ts` — register, login API calls
-- `services/__tests__/tokenService.test.ts` — JWT storage and retrieval
-- `services/__tests__/reminderService.test.ts` — Reminder CRUD API calls
-- `services/__tests__/pairingService.test.ts` — Pairing code generate and verify
-- `services/__tests__/profileService.test.ts` — User profile CRUD API calls
-- `hooks/__tests__/useCaregiverProfile.test.ts` — Hook loading/error/reload behaviour
-- `hooks/__tests__/useUserProfile.test.ts` — User profile hook behaviour
-- `hooks/__tests__/useUserProfiles.test.ts` — Profiles list hook behaviour
-- `hooks/__tests__/useUserReminders.test.ts` — Reminders list hook behaviour
-- `hooks/__tests__/useCaregiverReminders.test.ts` — Caregiver reminders hook behaviour
-- `hooks/__tests__/useReminderStatus.test.ts` — Reminder status hook behaviour
-- `components/__tests__/UpdateUserProfileModal.test.tsx` — Modal rendering and validation
-- `components/__tests__/UpdateCaregiverProfileModal.test.tsx` — Modal rendering and validation
-- `utils/__tests__/validation.test.ts` — Form validation utility functions
+- `__tests__/hooks/useFormValidation.test.ts` — Form validation hook (18 tests)
+- `__tests__/utils/validation.test.ts` — Validation utility functions (42 tests)
+- `services/__tests__/authService.test.ts` — register, login API calls (24 tests)
+- `services/__tests__/tokenService.test.ts` — JWT storage and retrieval (11 tests)
+- `services/__tests__/reminderService.test.ts` — Reminder CRUD API calls (16 tests)
+- `services/__tests__/pairingService.test.ts` — Pairing code generate and verify (7 tests)
+- `services/__tests__/profileService.test.ts` — User profile CRUD API calls (11 tests)
+- `hooks/__tests__/useCaregiverProfile.test.ts` — Hook loading/error/reload behaviour (9 tests)
+- `hooks/__tests__/useUserProfile.test.ts` — User profile hook behaviour (7 tests)
+- `hooks/__tests__/useUserProfiles.test.ts` — Profiles list hook behaviour (6 tests)
+- `hooks/__tests__/useUserReminders.test.ts` — Reminders list hook behaviour (6 tests)
+- `hooks/__tests__/useCaregiverReminders.test.ts` — Caregiver reminders hook behaviour (6 tests)
+- `hooks/__tests__/useReminderStatus.test.ts` — Reminder status hook behaviour (6 tests)
+- `components/__tests__/UpdateUserProfileModal.test.tsx` — Modal rendering and validation (21 tests)
+- `components/__tests__/UpdateCaregiverProfileModal.test.tsx` — Modal rendering and validation (16 tests)
+- `utils/__tests__/validation.test.ts` — Form validation utility functions (42 tests)
 - **Tools**: Jest + React Native Testing Library + ESLint v9
 
 ### Manual Tests
@@ -674,30 +683,30 @@ Acceptance criteria checklist to verify before each Production deployment:
 
 #### Functional
 
-- [ ] A caregiver can create an account and log in
-- [ ] A caregiver can create and edit a user profile
-- [ ] A caregiver can generate a 24h valid pairing code
-- [ ] A user can pair with the code and receive a JWT
-- [ ] A caregiver can create a one-shot reminder
-- [ ] A user receives a full-screen notification at reminder time
-- [ ] A user can respond Done/Remind Later/Unable
-- [ ] "Remind later" triggers a new local notification
-- [ ] "Unable" sends an immediate alert to the caregiver
+- [x] A caregiver can create an account and log in
+- [x] A caregiver can create and edit a user profile
+- [x] A caregiver can generate a 24h valid pairing code
+- [x] A user can pair with the code and receive a JWT
+- [x] A caregiver can create a one-shot reminder
+- [x] A user receives a full-screen notification at reminder time
+- [x] A user can respond Done/Remind Later/Unable
+- [x] "Remind later" triggers a new local notification
+- [x] "Unable" sends an immediate alert to the caregiver
 
 #### Design
 
-- [ ] All texts are readable (minimum 16px)
-- [ ] All buttons respect 56px minimum height
-- [ ] Maximum 3 actions per screen
-- [ ] Clear and linear navigation
-- [ ] Contrasted colors (WCAG AA accessibility test)
+- [x] All texts are readable (minimum 16px)
+- [x] All buttons respect 56px minimum height
+- [x] Maximum 3 actions per screen
+- [x] Clear and linear navigation
+- [x] Contrasted colors (WCAG AA accessibility test)
 
 #### Technical
 
-- [ ] JWT token is stored and restored correctly across sessions
-- [ ] Pairing code expires after 24h (backend enforcement)
-- [ ] Notifications work when the app is in the background
-- [ ] API errors are displayed gracefully (no crashes)
+- [x] JWT token is stored and restored correctly across sessions
+- [x] Pairing code expires after 24h (backend enforcement)
+- [x] Notifications work when the app is in the background
+- [x] API errors are displayed gracefully (no crashes)
 
 ### CI/CD
 

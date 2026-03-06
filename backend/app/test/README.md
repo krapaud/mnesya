@@ -12,7 +12,7 @@ Complete test suite for all Mnesya API endpoints.
 
 Tests are organized by API in separate files:
 
-```
+```text
 backend/app/test/
 ├── __init__.py                      # Package marker
 ├── conftest.py                      # Shared fixtures and pytest configuration
@@ -33,12 +33,14 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 ### Model Tests - 65 tests
 
 #### TestUserModel - 18 tests
+
 - First name and last name validation (required, length, whitespace)
 - Birthday validation (future dates, unrealistic ages)
 - Age calculation
 - Model instantiation and property assignment
 
 #### TestCaregiverModel - 26 tests
+
 - Email format validation
 - Password strength validation (length, complexity)
 - Password hashing verification
@@ -47,6 +49,7 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 - Model instantiation and property management
 
 #### TestReminderModel - 14 tests
+
 - Title validation (required, length, whitespace)
 - Scheduled date validation
 - User and caregiver relationships
@@ -54,6 +57,7 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 - Model instantiation
 
 #### TestReminderStatusModel - 7 tests
+
 - Status value validation (DONE, POSTPONED, UNABLE)
 - Status timestamp generation
 - Relationship with reminders
@@ -62,12 +66,14 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 ### Schema Tests - 49 tests
 
 #### TestUserSchema - 8 tests
+
 - UserCreate schema validation
 - UserUpdate schema validation
 - Required fields enforcement
 - Date format validation
 
 #### TestCaregiverSchema - 16 tests
+
 - CaregiverCreate schema validation
 - CaregiverUpdate schema validation
 - Email format enforcement
@@ -75,6 +81,7 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 - Optional field handling
 
 #### TestReminderSchema - 13 tests
+
 - ReminderCreate schema validation
 - ReminderUpdate schema validation
 - Title and description validation
@@ -82,6 +89,7 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 - User ID validation
 
 #### TestReminderStatusSchema - 12 tests
+
 - ReminderStatusCreate schema validation
 - ReminderStatusUpdate schema validation
 - Status enum validation
@@ -90,6 +98,7 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 ### Integration Tests - 16 tests
 
 #### TestEdgeCases - 11 tests
+
 - Boundary value testing
 - Special character handling
 - Null and empty value handling
@@ -97,6 +106,7 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 - UUID validation edge cases
 
 #### TestModelInteractions - 5 tests
+
 - User-Caregiver relationships
 - Reminder-User associations
 - Status-Reminder tracking
@@ -108,7 +118,7 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 ### 1. Authentication API (`/api/auth`) - 19 tests ✅
 
 | # | Test Name | Endpoint | Status | Description |
-|---|------------|----------|--------|-------------|
+| --- | ------------ | -------- | ------ | ----------- |
 | 1 | `test_register_success` | POST /register | ✅ | Successful registration of a new caregiver |
 | 2 | `test_register_duplicate_email` | POST /register | ✅ | Rejection of registration with existing email |
 | 3 | `test_register_invalid_email` | POST /register | ✅ | Email format validation |
@@ -132,7 +142,7 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 ### 2. Caregiver API (`/api/caregivers`) - 14 tests ✅
 
 | # | Test Name | Endpoint | Status | Description |
-|---|------------|----------|--------|-------------|
+| --- | ------------ | -------- | ------ | ----------- |
 | 20 | `test_update_first_name` | PUT /me | ✅ | First name update |
 | 21 | `test_update_last_name` | PUT /me | ✅ | Last name update |
 | 22 | `test_update_email` | PUT /me | ✅ | Email update |
@@ -153,7 +163,7 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 ### 3. User API (`/api/users`) - 27 tests ✅
 
 | # | Test Name | Endpoint | Status | Description |
-|---|------------|----------|--------|-------------|
+| --- | ------------ | -------- | ------ | ----------- |
 | 36 | `test_create_profile_success` | POST / | ✅ | Successful user profile creation |
 | 37 | `test_create_profile_missing_first_name` | POST / | ✅ | Required first name validation |
 | 38 | `test_create_profile_missing_last_name` | POST / | ✅ | Required last name validation |
@@ -187,7 +197,7 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 ### 4. Pairing API (`/api/pairing`) - 18 tests ✅
 
 | # | Test Name | Endpoint | Status | Description |
-|---|------------|----------|--------|-------------|
+| --- | ------------ | -------- | ------ | ----------- |
 | 65 | `test_generate_code_success` | POST /generate | ✅ | Successful pairing code generation |
 | 66 | `test_generate_code_returns_existing_active` | POST /generate | ✅ | Returns existing active code |
 | 67 | `test_generate_code_user_not_found` | POST /generate | ✅ | Non-existent user handling |
@@ -209,7 +219,7 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 ### 5. Reminder API (`/api/reminder`) - 36 tests ✅
 
 | # | Test Name | Endpoint | Status | Description |
-|---|------------|----------|--------|-------------|
+| --- | ------------ | -------- | ------ | ----------- |
 | 82 | `test_create_reminder_success` | POST / | ✅ | Successful reminder creation |
 | 83 | `test_create_reminder_minimal_data` | POST / | ✅ | Creation with minimal data |
 | 84 | `test_create_reminder_without_user_access` | POST / | ✅ | Unauthorized access rejection |
@@ -251,7 +261,7 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 ### 6. Reminder Status API (`/api/reminder-status`) - 32 tests ✅
 
 | # | Test Name | Endpoint | Status | Description |
-|---|------------|----------|--------|-------------|
+| --- | ------------ | -------- | ------ | ----------- |
 | 119 | `test_get_current_status_success` | GET /{reminder_id}/current | ✅ | Current status retrieval |
 | 120 | `test_get_current_status_latest` | GET /{reminder_id}/current | ✅ | Latest status retrieval |
 | 121 | `test_get_current_status_not_found` | GET /{reminder_id}/current | ✅ | Non-existent status handling |
@@ -284,7 +294,7 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 ### 7. Push Notification API (`/api/push-notifications`) - 20 tests ✅
 
 | # | Test Name | Endpoint | Status | Description |
-|---|------------|----------|--------|-------------|
+| --- | ------------ | -------- | ------ | ----------- |
 | 147 | `test_register_token_success` | POST /register | ✅ | Successful push token registration |
 | 148 | `test_register_token_minimal_data` | POST /register | ✅ | Registration with minimal data |
 | 149 | `test_register_token_with_user_id` | POST /register | ✅ | Registration with user_id |
@@ -310,6 +320,7 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 ## Tested APIs - Summary
 
 ### 1. Authentication API (`/api/auth`) - 19 tests
+
 - **POST /register** - New caregiver registration
 - **POST /login** - Login with email/password
 - **GET /me** - Get current caregiver profile
@@ -317,10 +328,12 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 - **POST /refresh** - Refresh JWT token
 
 ### 2. Caregiver API (`/api/caregivers`) - 14 tests
+
 - **PUT /me** - Update caregiver profile
 - **DELETE /me** - Delete caregiver account
 
 ### 3. User API (`/api/users`) - 27 tests
+
 - **POST /** - Create a new user profile
 - **GET /** - Get all caregiver profiles
 - **GET /{profile_id}** - Get a specific profile
@@ -328,10 +341,12 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 - **DELETE /{profile_id}** - Delete a profile
 
 ### 4. Pairing API (`/api/pairing`) - 18 tests
+
 - **POST /generate** - Generate a pairing code
 - **POST /verify** - Verify a pairing code
 
 ### 5. Reminder API (`/api/reminder`) - 36 tests
+
 - **POST /** - Create a new reminder
 - **GET /caregiver** - Get all caregiver reminders
 - **GET /user** - Get all user reminders
@@ -340,12 +355,14 @@ In addition to API integration tests, `test.py` contains comprehensive unit test
 - **DELETE /{reminder_id}** - Delete a reminder
 
 ### 6. Reminder Status API (`/api/reminder-status`) - 32 tests
+
 - **GET /{reminder_id}/current** - Get current status of a reminder
 - **GET /{reminder_id}/history** - Get status history of a reminder
 - **PUT /{reminder_id}/status** - Update reminder status
 - **GET /statuses** - Get list of valid statuses
 
 ### 7. Push Notification API (`/api/push-notifications`) - 20 tests
+
 - **POST /register** - Register a push notification token
 - **POST /unregister** - Unregister a push notification token
 - **GET /my-tokens** - Get all active tokens of current user
@@ -361,6 +378,7 @@ docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit -
 ```
 
 This command:
+
 - Launches an isolated PostgreSQL test database
 - Builds the backend Docker image
 - Runs all tests with coverage
@@ -369,11 +387,13 @@ This command:
 ### In a running backend container
 
 #### All tests
+
 ```bash
 docker exec mnesya-backend pytest app/test/
 ```
 
 #### Tests for a specific API
+
 ```bash
 # Authentication tests
 docker exec mnesya-backend pytest app/test/test_authentication_api.py
@@ -401,21 +421,25 @@ docker exec mnesya-backend pytest app/test/test.py
 ```
 
 #### Tests for a specific class
+
 ```bash
 docker exec mnesya-backend pytest app/test/test_authentication_api.py::TestLoginEndpoint
 ```
 
 #### A specific test
+
 ```bash
 docker exec mnesya-backend pytest app/test/test_authentication_api.py::TestLoginEndpoint::test_login_success
 ```
 
 #### With verbose and print output
+
 ```bash
 docker exec mnesya-backend pytest app/test/ -v -s
 ```
 
 #### With coverage
+
 ```bash
 docker exec mnesya-backend pytest app/test/ --cov=app --cov-report=html
 ```
@@ -449,6 +473,7 @@ Each endpoint is tested for:
 ## Dependencies
 
 Tests require:
+
 - pytest
 - fastapi[test]
 - sqlalchemy
@@ -460,6 +485,7 @@ Installed via backend `requirements.txt`.
 ## Test Database
 
 Tests use a separate PostgreSQL database:
+
 - URL: `postgresql://mnesya_user:mnesya_password@db:5432/mnesya_test_db`
 - Created and cleaned automatically for each test
 - Complete isolation from production database
