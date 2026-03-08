@@ -1,0 +1,87 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+*.env
+venv/
+ENV/
+*.egg-info/
+.pytest_cache/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.coverage
+htmlcov/
+.nyc_output/
+junit.xml
+*.lcov
+.cache/
+test-results/
+
+# React Native
+.expo/
+.expo-shared/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Copilot
+.github/copilot-instructions.md
+
+# Project Management
+docs/trello-status.md
+docs/trello-status.txt
+docs/concepts-a-reimplementer.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment — ne JAMAIS committer ces fichiers
+.env
+.env.local
+.env.*.local
+docker/.env
+backend/.env
+frontend/.env.local
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+logs/
+*.log
+
+# Firebase
+firebase-credentials.json
+google-services.json
+GoogleService-Info.plist
+
+# Test Coverage
+coverage/
+.nyc_output/
+junit.xml
+*.lcov
+.cache/
+test-results/

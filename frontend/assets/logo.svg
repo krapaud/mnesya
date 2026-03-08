@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="bgGrad" cx="40%" cy="35%" r="65%" fx="40%" fy="35%">
+      <stop offset="0%" style="stop-color:#5FB5F5;stop-opacity:1"/>
+      <stop offset="60%" style="stop-color:#3A7FD5;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#2A4FC8;stop-opacity:1"/>
+    </radialGradient>
+    <filter id="mShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1A5FB4" flood-opacity="0.4"/>
+    </filter>
+    <filter id="bgShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#1A3A6B" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Fond arrondi avec dégradé -->
+  <rect width="200" height="200" rx="45" ry="45" fill="url(#bgGrad)" filter="url(#bgShadow)"/>
+
+  <!-- Lettre M avec ombre douce -->
+  <path d="M 36 137 L 36 44 L 100 115 L 164 44 L 164 137"
+        fill="none"
+        stroke="white"
+        stroke-width="13"
+        stroke-linecap="butt"
+        stroke-linejoin="bevel"
+        filter="url(#mShadow)"/>
+
+  <!-- Ligne de temps -->
+  <line x1="28" y1="155" x2="172" y2="155"
+        stroke="white"
+        stroke-width="4"
+        stroke-linecap="round"
+        opacity="0.5"/>
+
+  <!-- Petit trait vertical au-dessus de l'horloge -->
+  <line x1="122" y1="137" x2="122" y2="142"
+        stroke="white"
+        stroke-width="3"
+        stroke-linecap="round"/>
+
+  <!-- Horloge : cadran blanc -->
+  <circle cx="122" cy="155" r="13" fill="white"/>
+
+  <!-- Horloge : aiguille des minutes (vers 12h) -->
+  <line x1="122" y1="155" x2="122" y2="145"
+        stroke="#1A3A6B"
+        stroke-width="2.5"
+        stroke-linecap="round"/>
+
+  <!-- Horloge : aiguille des heures (vers 10h) -->
+  <line x1="122" y1="155" x2="114" y2="148"
+        stroke="#1A3A6B"
+        stroke-width="2.5"
+        stroke-linecap="round"/>
+
+  <!-- Horloge : centre -->
+  <circle cx="122" cy="155" r="2" fill="#1A3A6B"/>
+</svg>

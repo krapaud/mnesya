@@ -1,0 +1,76 @@
+# Docker Compose — Production (Coolify)
+#
+# Toutes les variables d'environnement sont injectées par Coolify.
+# Ne pas committer de valeurs ici.
+#
+# Variables requises dans Coolify :
+#   POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+#   DATABASE_URL
+#   SECRET_KEY
+#   DOCS_USERNAME, DOCS_PASSWORD
+#   WORKER_SECRET (optionnel, si le worker est activé)
+
+services:
+  db:
+    image: postgres:13-alpine
+    container_name: mnesya-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mnesya-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: mnesya-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      DOCS_USERNAME: ${DOCS_USERNAME}
+      DOCS_PASSWORD: ${DOCS_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - mnesya-network
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+  worker:
+    profiles:
+      - worker
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: mnesya-worker
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    depends_on:
+      db:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    networks:
+      - mnesya-network
+    command: python -m worker.scheduler
+
+volumes:
+  postgres_data:
+
+networks:
+  mnesya-network:
+    driver: bridge

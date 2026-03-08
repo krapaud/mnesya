@@ -1,0 +1,351 @@
+{
+    "common": {
+        "buttons": {
+            "New reminder": "Nouveau Rappel",
+            "Validate": "Valider",
+            "Cancel": "Annuler",
+            "Close": "Fermer",
+            "Edit": "Modifier",
+            "Confirm": "Confirmer"
+        },
+        "fields": {
+            "Email": "Email",
+            "Password": "Mot de passe",
+            "Confirm Password": "Confirmation du mot de passe"
+        },
+        "units": {
+            "years old": "ans"
+        },
+        "messages": {
+            "profileCreated": "Profil créé",
+            "profileUpdated": "Profil mis à jour",
+            "profileDeleted": "Profil supprimé",
+            "loading": "Chargement..."
+        },
+        "errors": {
+            "failedToLoadProfiles": "Échec du chargement des profils",
+            "failedToLoadProfile": "Échec du chargement du profil",
+            "failedToUpdateProfile": "Échec de la mise à jour du profil",
+            "failedToDeleteProfile": "Échec de la suppression du profil",
+            "failedToLoadReminders": "Échec du chargement des rappels",
+            "failedToLoadRemindersStatus": "Échec du chargement du statut des rappels",
+            "failedToLoadActivityLog": "Échec du chargement de l'historique d'activité",
+            "failedToDeleteReminder": "Impossible de supprimer le rappel. Veuillez réessayer.",
+            "genericErrorTitle": "Une erreur est survenue",
+            "rateLimitTitle": "Trop de tentatives",
+            "rateLimitMessage": "Vous avez effectué trop de tentatives. Veuillez patienter une minute avant de réessayer."
+        },
+        "pickersText": {
+            "All Profiles": "Tous",
+            "All Dates": "Toutes",
+            "Select a profile": "Sélectionner un Profil",
+            "Select Time": "Sélectionner une Heure",
+            "selectYear": "Sélectionner une année",
+            "selectMonth": "Sélectionner un mois",
+            "months": [
+                "Janvier",
+                "Février",
+                "Mars",
+                "Avril",
+                "Mai",
+                "Juin",
+                "Juillet",
+                "Août",
+                "Septembre",
+                "Octobre",
+                "Novembre",
+                "Décembre"
+            ],
+            "weekDays": ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
+        }
+    },
+    "welcome": {
+        "title": "Bienvenue sur Mnesya",
+        "subtitle": "Choisissez votre type de profil",
+        "userButton": "Utilisateur",
+        "caregiverButton": "Accompagnant"
+    },
+    "login": {
+        "title": "Connexion Accompagnant",
+        "buttons": {
+            "submit": "Se connecter",
+            "Logging in...": "Connexion en cours...",
+            "lostPassword": "Mot de passe oublié",
+            "createAccount": "Créer un compte"
+        },
+        "errors": {
+            "invalidCredentials": "Email ou mot de passe invalide"
+        }
+    },
+    "register": {
+        "title": "Créez votre compte",
+        "fields": {
+            "First Name": "Prénom",
+            "Last Name": "Nom",
+            "Email": "Email"
+        },
+        "placeholders": {
+            "Enter your First Name": "Entrez votre prénom",
+            "Enter your Last Name": "Entrez votre nom",
+            "Enter your Email": "Entrez votre adresse Email",
+            "Enter your Password": "Entrez votre mot de passe",
+            "Confirm your password": "Confirmez votre mot de passe"
+        },
+        "buttons": {
+            "Sign Up": "S'enregistrer",
+            "Signing up...": "Inscription en cours...",
+            "Already have an account? Log in": "Vous avez déjà un compte? Connectez vous"
+        },
+        "errors": {
+            "Email must be between 5 and 255 characters": "L'email doit contenir entre 5 et 255 caractères",
+            "Invalid email": "Format d'email invalide",
+            "Password must be at least 8 characters": "Le mot de passe doit contenir au moins 8 caractères",
+            "Password must be at most 20 characters": "Le mot de passe doit contenir au maximum 20 caractères",
+            "Password must be at most 72 characters": "Le mot de passe doit contenir au maximum 72 caractères",
+            "Password must contain at least one digit": "Le mot de passe doit contenir au moins un chiffre",
+            "Password must contain at least one uppercase letter": "Le mot de passe doit contenir au moins une majuscule",
+            "Password must contain at least one lowercase letter": "Le mot de passe doit contenir au moins une minuscule",
+            "Password must contain at least one special character": "Le mot de passe doit contenir au moins un caractère spécial ($@#%*!~&)",
+            "Passwords do not match": "Les mots de passe ne correspondent pas",
+            "Name cannot be empty": "Ce champ ne peut pas être vide",
+            "Name must be at most 100 characters": "Le nom doit contenir au maximum 100 caractères",
+            "Email already registered": "Cet email est déjà enregistré",
+            "Please use a different email": "Veuillez utiliser une adresse email différente",
+            "Registration failed": "L'inscription a échoué",
+            "Please try again": "Veuillez réessayer plus tard",
+            "This field is required": "Ce champ est requis"
+        },
+        "success": {
+            "Valid email": "✓ Email valide",
+            "Valid password": "✓ Mot de passe valide",
+            "Passwords match": "✓ Les mots de passe correspondent",
+            "Valid name": "✓ Nom valide",
+            "Account created": "Compte créé avec succès !",
+            "Please log in": "Veuillez vous connecter avec vos identifiants"
+        }
+    },
+    "dashboard": {
+        "title": "Tableau de Bord",
+        "profilesListTitle": "Gestion de Profils",
+        "buttons": {
+            "New profile": "Nouveau Profil",
+            "View": "Consulter"
+        },
+        "messages": {
+            "No profiles yet": "Aucun profil pour le moment"
+        },
+        "activityLog": {
+            "title": "Activité récente",
+            "subtitle": "Interactions des 48 dernières heures",
+            "empty": "Aucune activité récente",
+            "statusDone": "Effectué",
+            "statusPostponed": "Reporté",
+            "statusUnable": "Annulé",
+            "statusMissed": "Manqué"
+        }
+    },
+    "reminders": {
+        "Title": "Rappels",
+        "pickersTitle": {
+            "Profile": "Profil"
+        },
+        "buttons": {
+            "Reset Filters": "Effacer les filtres",
+            "New Reminder": "Nouveau Rappel"
+        },
+        "labels": {
+            "Date:": "Date :"
+        },
+        "status": {
+            "Pending": "En attente",
+            "Postponed": "Reporté",
+            "Done": "Effectué",
+            "Unable": "Annulé",
+            "Missed": "Manqué"
+        },
+        "deleteModal": {
+            "title": "Supprimer le rappel",
+            "message": "Êtes-vous sûr de vouloir supprimer ce rappel ? Cette action est irréversible.",
+            "confirm": "Supprimer"
+        },
+        "errors": {
+            "deleteError": "Une erreur est survenue lors de la suppression du rappel."
+        }
+    },
+    "CreateReminder": {
+        "Title": "Créer un Rappel",
+        "fields": {
+            "For Profile": "Destinataire",
+            "Reminder Title": "Titre du Rappel",
+            "Time": "Heure"
+        },
+        "placeholders": {
+            "Ex. : Take Medication": "Ex : Prendre les médicaments",
+            "Enter the description about your reminder": "Entrer la description à propos de votre rappel"
+        },
+        "buttons": {
+            "Save Reminder": "Sauvegarder le Rappel"
+        },
+        "message": {
+            "Be careful not to enter sensitive confidential information.": "Par mesure de sécurité, ne partagez pas d'informations confidentielles dans ce champ."
+        },
+        "errors": {
+            "Please select a profile": "Veuillez sélectionner un profil",
+            "Please enter a title": "Veuillez entrer un titre",
+            "Please enter a message": "Veuillez entrer un message",
+            "Error scheduling notification": "Erreur lors de la programmation de la notification"
+        },
+        "modal": {
+            "title": "Confirmer le rappel",
+            "message": "Êtes-vous sûr de vouloir créer ce rappel ?",
+            "cancel": "Annuler",
+            "confirm": "Confirmer"
+        }
+    },
+    "UserPairing": {
+        "title": "Appairage des utilisateurs",
+        "subtitle": "Entrez le code d'appairage",
+        "tipText": "Astuce : Votre accompagnant peut vous fournir le code de jumelage pour connecter vos comptes.",
+        "buttons": {
+            "Back to profile type": "Retour vers choix du type de profil"
+        },
+        "error": {
+            "invalid_code": "Code invalide ou expiré. Veuillez réessayer."
+        }
+    },
+    "CreateProfile": {
+        "title": "Nouveau Profil",
+        "fields": {
+            "First Name": "Prénom",
+            "Last Name": "Nom",
+            "Birthday": "Date de naissance"
+        },
+        "placeholders": {
+            "Enter the profile First Name": "Entrez le prénom du profil",
+            "Enter the profile Last Name": "Entrez le nom du profil"
+        },
+        "buttons": {
+            "Create profile": "Créer le profil"
+        }
+    },
+    "UserHome": {
+        "greeting": "Bonjour",
+        "subtitle": "Vos rappels",
+        "messages": {
+            "noReminders": "Aucun rappel actif",
+            "notAvailableTitle": "Non disponible",
+            "notAvailableMessage": "Veuillez patienter, ceci est un rappel à venir",
+            "ok": "OK"
+        }
+    },
+    "UserProfile": {
+        "title": "Paramètres",
+        "buttons": {
+            "Logout": "Déconnexion"
+        }
+    },
+    "UserProfileDetail": {
+        "title": "Détails du Profil",
+        "buttons": {
+            "Generate pairing code": "Générer un code d'appairage",
+            "Edit": "Modifier",
+            "Delete": "Supprimer",
+            "Save": "Enregistrer"
+        },
+        "sections": {
+            "Active Reminders": "Rappels Actifs"
+        },
+        "messages": {
+            "Profile not found": "Profil introuvable",
+            "No active reminders": "Aucun rappel actif"
+        },
+        "modals": {
+            "update": {
+                "title": "Modifier le Profil"
+            },
+            "delete": {
+                "title": "Supprimer le Profil ?",
+                "message": "Cette action est irréversible. Toutes les données associées à ce profil seront définitivement supprimées."
+            }
+        }
+    },
+    "pairingCode": {
+        "title": "Code de jumelage",
+        "description": "Partagez ce code avec votre utilisateur pour jumeler son appareil",
+        "buttons": {
+            "copyCode": "Copier le code",
+            "done": "Terminé"
+        },
+        "tip": "Astuce : Ce code expire dans 5 minutes",
+        "expiresIn": "Expire dans"
+    },
+    "ReminderNotification": {
+        "title": "Rappel",
+        "defaultMessage": "Vous avez un nouveau rappel",
+        "buttons": {
+            "Done": "Terminé",
+            "Remind later": "Me rappeler plus tard",
+            "Unable": "Impossible"
+        }
+    },
+    "caregiverProfile": {
+        "title": "Mon Profil",
+        "sections": {
+            "accountInfo": "Informations du compte",
+            "actions": "Actions du compte"
+        },
+        "fields": {
+            "name": "Nom",
+            "email": "Email"
+        },
+        "buttons": {
+            "changePassword": "Changer le mot de passe",
+            "logout": "Déconnexion",
+            "retry": "Réessayer"
+        },
+        "modal": {
+            "title": "Confirmer la déconnexion",
+            "message": "Vous allez être déconnecté et devrez saisir vos identifiants à nouveau pour vous reconnecter.",
+            "cancel": "Annuler",
+            "confirm": "Se déconnecter"
+        },
+        "changePassword": {
+            "title": "Changer le mot de passe",
+            "fields": {
+                "currentPassword": "Mot de passe actuel",
+                "newPassword": "Nouveau mot de passe",
+                "confirmPassword": "Confirmation du nouveau mot de passe"
+            },
+            "placeholders": {
+                "currentPassword": "Entrez votre mot de passe actuel",
+                "newPassword": "Entrez votre nouveau mot de passe",
+                "confirmPassword": "Confirmez votre nouveau mot de passe"
+            },
+            "buttons": {
+                "save": "Modifier"
+            },
+            "errors": {
+                "wrongPassword": "Le mot de passe actuel est incorrect",
+                "generic": "Une erreur est survenue. Veuillez réessayer."
+            }
+        }
+    },
+
+    "notifications": {
+        "repetitions": {
+            "reminder": "⏰ RAPPEL: {{title}}",
+            "urgent": "🔔 URGENT: {{title}}"
+        },
+        "caregiver": {
+            "alert": "⚠️ {{profileName}} n'a pas répondu au rappel",
+            "message": "Aucune action effectuée pour: {{title}}",
+            "defaultUser": "L'utilisateur"
+        }
+    },
+    "tabs": {
+        "Home": "Accueil",
+        "Profile": "Profil",
+        "Reminders": "Rappels",
+        "Refresh": "Actualiser"
+    }
+}

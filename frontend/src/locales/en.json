@@ -1,0 +1,351 @@
+{
+    "common": {
+        "buttons": {
+            "New reminder": "New Reminder",
+            "Validate": "Validate",
+            "Cancel": "Cancel",
+            "Close": "Close",
+            "Edit": "Edit",
+            "Confirm": "Confirm"
+        },
+        "fields": {
+            "Email": "Email",
+            "Password": "Password",
+            "Confirm Password": "Confirm Password"
+        },
+        "units": {
+            "years old": "years old"
+        },
+        "messages": {
+            "profileCreated": "Profile created",
+            "profileUpdated": "Profile updated",
+            "profileDeleted": "Profile deleted",
+            "loading": "Loading..."
+        },
+        "errors": {
+            "failedToLoadProfiles": "Failed to load profiles",
+            "failedToLoadProfile": "Failed to load profile",
+            "failedToUpdateProfile": "Failed to update profile",
+            "failedToDeleteProfile": "Failed to delete profile",
+            "failedToLoadReminders": "Failed to load reminders",
+            "failedToLoadRemindersStatus": "Failed to load reminder status",
+            "failedToLoadActivityLog": "Failed to load the activity log",
+            "failedToDeleteReminder": "Unable to delete the reminder. Please try again.",
+            "genericErrorTitle": "An error occurred",
+            "rateLimitTitle": "Too many attempts",
+            "rateLimitMessage": "You have made too many attempts. Please wait a minute before trying again."
+        },
+        "pickersText": {
+            "All Profiles": "All",
+            "All Dates": "All",
+            "Select a profile": "Select a Profile",
+            "Select Time": "Select Time",
+            "selectYear": "Select Year",
+            "selectMonth": "Select Month",
+            "months": [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December"
+            ],
+            "weekDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+        }
+    },
+    "welcome": {
+        "title": "Welcome to Mnesya",
+        "subtitle": "Choose your profile type",
+        "userButton": "User",
+        "caregiverButton": "Caregiver"
+    },
+    "login": {
+        "title": "Caregiver Login",
+        "buttons": {
+            "submit": "Log in",
+            "Logging in...": "Logging in...",
+            "lostPassword": "Lost password?",
+            "createAccount": "Create an account"
+        },
+        "errors": {
+            "invalidCredentials": "Invalid email or password"
+        }
+    },
+    "register": {
+        "title": "Create an account",
+        "fields": {
+            "First Name": "First Name",
+            "Last Name": "Last Name",
+            "Email": "Email"
+        },
+        "placeholders": {
+            "Enter your First Name": "Enter your First Name",
+            "Enter your Last Name": "Enter your Last Name",
+            "Enter your Email": "Enter your Email",
+            "Enter your Password": "Enter your Password",
+            "Confirm your password": "Confirm your Password"
+        },
+        "buttons": {
+            "Sign Up": "Sign Up",
+            "Signing up...": "Signing up...",
+            "Already have an account? Log in": "Already have an account? Log in"
+        },
+        "errors": {
+            "Email must be between 5 and 255 characters": "Email must be between 5 and 255 characters",
+            "Invalid email": "Invalid email format",
+            "Password must be at least 8 characters": "Password must be at least 8 characters",
+            "Password must be at most 20 characters": "Password must be at most 20 characters",
+            "Password must be at most 72 characters": "Password must be at most 72 characters",
+            "Password must contain at least one digit": "Password must contain at least one digit",
+            "Password must contain at least one uppercase letter": "Password must contain at least one uppercase letter",
+            "Password must contain at least one lowercase letter": "Password must contain at least one lowercase letter",
+            "Password must contain at least one special character": "Password must contain at least one special character ($@#%*!~&)",
+            "Passwords do not match": "Passwords do not match",
+            "Name cannot be empty": "This field cannot be empty",
+            "Name must be at most 100 characters": "Name must be at most 100 characters",
+            "Email already registered": "Email already registered",
+            "Please use a different email": "Please use a different email address",
+            "Registration failed": "Registration failed",
+            "Please try again": "Please try again later",
+            "This field is required": "This field is required"
+        },
+        "success": {
+            "Valid email": "✓ Valid email",
+            "Valid password": "✓ Valid password",
+            "Passwords match": "✓ Passwords match",
+            "Valid name": "✓ Valid name",
+            "Account created": "Account created successfully!",
+            "Please log in": "Please log in with your credentials"
+        }
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "profilesListTitle": "Managed Profiles",
+        "buttons": {
+            "New profile": "New Profile",
+            "View": "View"
+        },
+        "messages": {
+            "No profiles yet": "No profiles yet"
+        },
+        "activityLog": {
+            "title": "Recent activity",
+            "subtitle": "Interactions from the last 48 hours",
+            "empty": "No recent activity",
+            "statusDone": "Done",
+            "statusPostponed": "Postponed",
+            "statusUnable": "Unable",
+            "statusMissed": "Missed"
+        }
+    },
+    "reminders": {
+        "Title": "Reminders",
+        "pickersTitle": {
+            "Profile": "Profile"
+        },
+        "buttons": {
+            "Reset Filters": "Reset Filters",
+            "New Reminder": "New Reminder"
+        },
+        "labels": {
+            "Date:": "Date:"
+        },
+        "status": {
+            "Pending": "Pending",
+            "Postponed": "Postponed",
+            "Done": "Done",
+            "Unable": "Unable",
+            "Missed": "Missed"
+        },
+        "deleteModal": {
+            "title": "Delete reminder",
+            "message": "Are you sure you want to delete this reminder? This action is irreversible.",
+            "confirm": "Delete"
+        },
+        "errors": {
+            "deleteError": "An error occurred while deleting the reminder."
+        }
+    },
+    "CreateReminder": {
+        "Title": "Create Reminder",
+        "fields": {
+            "For Profile": "Recipient",
+            "Reminder Title": "Reminder Title",
+            "Time": "Time"
+        },
+        "placeholders": {
+            "Ex. : Take Medication": "Ex.: Take Medication",
+            "Enter the description about your reminder": "Enter the description about your reminder"
+        },
+        "buttons": {
+            "Save Reminder": "Save Reminder"
+        },
+        "message": {
+            "Be careful not to enter sensitive confidential information.": "For security reasons, do not share confidential information in this field."
+        },
+        "errors": {
+            "Please select a profile": "Please select a profile",
+            "Please enter a title": "Please enter a title",
+            "Please enter a message": "Please enter a message",
+            "Error scheduling notification": "Error scheduling notification"
+        },
+        "modal": {
+            "title": "Confirm Reminder",
+            "message": "Are you sure you want to create this reminder?",
+            "cancel": "Cancel",
+            "confirm": "Confirm"
+        }
+    },
+    "UserPairing": {
+        "title": "User Pairing",
+        "subtitle": "Enter the pairing code",
+        "tipText": "Tip: Ask your caregiver for the pairing code to link your account.",
+        "buttons": {
+            "Back to profile type": "Back to profile type"
+        },
+        "error": {
+            "invalid_code": "Invalid or expired code. Please try again."
+        }
+    },
+    "CreateProfile": {
+        "title": "New Profile",
+        "fields": {
+            "First Name": "First Name",
+            "Last Name": "Last Name",
+            "Birthday": "Birthday"
+        },
+        "placeholders": {
+            "Enter the profile First Name": "Enter the profile First Name",
+            "Enter the profile Last Name": "Enter the profile Last Name"
+        },
+        "buttons": {
+            "Create profile": "Create profile"
+        }
+    },
+    "UserHome": {
+        "greeting": "Hello",
+        "subtitle": "Your reminders",
+        "messages": {
+            "noReminders": "No active reminders",
+            "notAvailableTitle": "Not Available",
+            "notAvailableMessage": "Please wait, this is an upcoming reminder",
+            "ok": "OK"
+        }
+    },
+    "UserProfile": {
+        "title": "Settings",
+        "buttons": {
+            "Logout": "Logout"
+        }
+    },
+    "UserProfileDetail": {
+        "title": "Profile Details",
+        "buttons": {
+            "Generate pairing code": "Generate pairing code",
+            "Edit": "Edit",
+            "Delete": "Delete",
+            "Save": "Save Changes"
+        },
+        "sections": {
+            "Active Reminders": "Active Reminders"
+        },
+        "messages": {
+            "Profile not found": "Profile not found",
+            "No active reminders": "No active reminders"
+        },
+        "modals": {
+            "update": {
+                "title": "Edit Profile"
+            },
+            "delete": {
+                "title": "Delete Profile?",
+                "message": "This action cannot be undone. All data associated with this profile will be permanently deleted."
+            }
+        }
+    },
+    "pairingCode": {
+        "title": "Pairing Code",
+        "description": "Share this code with your user to pair their device",
+        "buttons": {
+            "copyCode": "Copy code",
+            "done": "Done"
+        },
+        "tip": "Tip: This code expires in 5 minutes",
+        "expiresIn": "Expires in"
+    },
+    "ReminderNotification": {
+        "title": "Reminder",
+        "defaultMessage": "You have a new reminder",
+        "buttons": {
+            "Done": "Done",
+            "Remind later": "Remind later",
+            "Unable": "Unable"
+        }
+    },
+    "caregiverProfile": {
+        "title": "My Profile",
+        "sections": {
+            "accountInfo": "Account Information",
+            "actions": "Account Actions"
+        },
+        "fields": {
+            "name": "Name",
+            "email": "Email"
+        },
+        "buttons": {
+            "changePassword": "Change Password",
+            "logout": "Logout",
+            "retry": "Retry"
+        },
+        "modal": {
+            "title": "Confirm Logout",
+            "message": "You will be logged out and will need to enter your credentials again to reconnect.",
+            "cancel": "Cancel",
+            "confirm": "Logout"
+        },
+        "changePassword": {
+            "title": "Change Password",
+            "fields": {
+                "currentPassword": "Current Password",
+                "newPassword": "New Password",
+                "confirmPassword": "Confirm New Password"
+            },
+            "placeholders": {
+                "currentPassword": "Enter your current password",
+                "newPassword": "Enter your new password",
+                "confirmPassword": "Confirm your new password"
+            },
+            "buttons": {
+                "save": "Update"
+            },
+            "errors": {
+                "wrongPassword": "The current password is incorrect",
+                "generic": "An error occurred. Please try again."
+            }
+        }
+    },
+
+    "notifications": {
+        "repetitions": {
+            "reminder": "⏰ REMINDER: {{title}}",
+            "urgent": "🔔 URGENT: {{title}}"
+        },
+        "caregiver": {
+            "alert": "⚠️ {{profileName}} did not respond to the reminder",
+            "message": "No action taken for: {{title}}",
+            "defaultUser": "User"
+        }
+    },
+    "tabs": {
+        "Home": "Home",
+        "Profile": "Profile",
+        "Reminders": "Reminders",
+        "Refresh": "Refresh"
+    }
+}
