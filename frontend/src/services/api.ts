@@ -7,7 +7,7 @@
  * @module api
  */
 import axios from 'axios';
-import { getToken, saveToken, deleteToken } from './tokenService';
+import { getToken, saveToken, deleteToken, decodeJwtPayload } from './tokenService';
 import { API_BASE_URL } from '../config/api';
 import { navigationRef } from './navigationService';
 
@@ -20,21 +20,6 @@ const REFRESH_THRESHOLD_SECONDS = 7 * 24 * 60 * 60;
 
 /** Number of seconds before expiry at which a silent refresh is triggered for caregiver tokens (1 day). */
 const CAREGIVER_REFRESH_THRESHOLD_SECONDS = 24 * 60 * 60;
-
-// ─── Helper ──────────────────────────────────────────────────────────────────
-
-/**
- * Decode a JWT payload without a library.
- * Handles base64url encoding (no padding, `-` and `_` instead of `+` and `/`).
- */
-function decodeJwtPayload(token: string): { exp?: number; sub?: string } | null {
-    try {
-        const b64 = (token.split('.')[1] ?? '').replace(/-/g, '+').replace(/_/g, '/');
-        return JSON.parse(atob(b64 + '='.repeat((4 - (b64.length % 4)) % 4)));
-    } catch {
-        return null;
-    }
-}
 
 // ─── Client ───────────────────────────────────────────────────────────────────
 

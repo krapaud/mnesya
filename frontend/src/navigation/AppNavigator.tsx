@@ -7,9 +7,8 @@ import React, { useState, useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/index';
-import { getToken } from '../services/tokenService';
+import { getToken, decodeJwtPayload } from '../services/tokenService';
 import { getCurrentUser } from '../services/authService';
-import { getUserInfo } from '../services/tokenService';
 
 // ─── Navigator ──────────────────────────────────────────────────────────────
 
@@ -35,8 +34,9 @@ const AppNavigator: React.FC = () => {
         const checkAuth = async () => {
             const token = await getToken();
             if (token) {
-                const userInfo = await getUserInfo();
-                if (userInfo && userInfo.caregiver_id) {
+                const payload = decodeJwtPayload(token);
+                const isUserToken = payload?.['firstname'] !== undefined;
+                if (isUserToken) {
                     setInitialRoute('UserDashboard');
                 } else {
                     try {

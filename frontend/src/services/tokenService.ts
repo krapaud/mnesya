@@ -4,6 +4,7 @@
  * @module tokenService
  */
 import * as SecureStore from 'expo-secure-store';
+import { jwtDecode } from 'jwt-decode';
 
 // ─── Keys ───────────────────────────────────────────────────────────────────────
 
@@ -47,3 +48,21 @@ export const getUserInfo = async (): Promise<any | null> => {
 export const deleteUserInfo = async (): Promise<void> => {
     await SecureStore.deleteItemAsync(USER_INFO_KEY);
 };
+
+// ─── JWT ────────────────────────────────────────────────────────────────────────
+
+export interface JwtPayload {
+    exp?: number;
+    sub?: string;
+    firstname?: string;
+    [key: string]: unknown;
+}
+
+/** Decode a JWT payload. Returns null if the token is malformed. */
+export function decodeJwtPayload(token: string): JwtPayload | null {
+    try {
+        return jwtDecode<JwtPayload>(token);
+    } catch {
+        return null;
+    }
+}
