@@ -111,7 +111,12 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
-        if (error.response?.status === 401) {
+        const requestUrl: string = error.config?.url ?? '';
+        const isAuthEndpoint =
+            requestUrl.includes('/api/auth/login') ||
+            requestUrl.includes('/api/auth/register');
+
+        if (error.response?.status === 401 && !isAuthEndpoint) {
             // Determine token type from the failed request's Authorization header
             // so we can redirect to the appropriate screen.
             const authHeader: string | undefined = error.config?.headers?.Authorization;
