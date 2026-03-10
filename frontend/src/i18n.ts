@@ -6,6 +6,7 @@
 
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import * as RNLocalize from 'react-native-localize';
 import fr from './locales/fr.json';
 import en from './locales/en.json';
 
@@ -20,11 +21,16 @@ const resources = {
     },
 };
 
+const SUPPORTED_LANGUAGES = Object.keys(resources);
+
+const deviceLanguage =
+    RNLocalize.findBestLanguageTag(SUPPORTED_LANGUAGES)?.languageTag ?? 'fr';
+
 // Initialize i18next with React integration
 i18n.use(initReactI18next).init({
     resources,
     fallbackLng: 'fr',
-    lng: 'fr',
+    lng: deviceLanguage,
     interpolation: {
         escapeValue: false,
     },
