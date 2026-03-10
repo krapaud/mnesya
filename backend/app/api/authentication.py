@@ -460,14 +460,9 @@ async def update_current_user(
                 detail="Caregiver not found",
             )
 
-        update_data = {}
-        if request.first_name is not None:
-            update_data["first_name"] = request.first_name
-        if request.last_name is not None:
-            update_data["last_name"] = request.last_name
-        if request.email is not None:
-            update_data["email"] = request.email
-        if request.password is not None:
+        update_data = request.model_dump(exclude_none=True, exclude={"current_password"})
+
+        if "password" in update_data:
             if not request.current_password:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -478,24 +473,14 @@ async def update_current_user(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Current password is incorrect",
                 )
-            update_data["password"] = request.password
 
-        if not update_data:
-            return CaregiverResponse(
-                id=str(caregiver.id),
-                first_name=caregiver.first_name,
-                last_name=caregiver.last_name,
-                email=caregiver.email,
-                created_at=caregiver.created_at,
-            )
-
-        updated = caregiver_facade.update_caregiver(UUID(caregiver_id), update_data)
+        target = caregiver_facade.update_caregiver(UUID(caregiver_id), update_data) if update_data else caregiver
         return CaregiverResponse(
-            id=str(updated.id),
-            first_name=updated.first_name,
-            last_name=updated.last_name,
-            email=updated.email,
-            created_at=updated.created_at,
+            id=str(target.id),
+            first_name=target.first_name,
+            last_name=target.last_name,
+            email=target.email,
+            created_at=target.created_at,
         )
 
     except HTTPException:
