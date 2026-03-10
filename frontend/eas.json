@@ -22,9 +22,9 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "VOTRE_APPLE_ID@example.com",
-        "ascAppId": "VOTRE_APP_STORE_CONNECT_APP_ID",
-        "appleTeamId": "VOTRE_TEAM_ID"
+        "appleId": "11456@holbertonstudents.com",
+        "ascAppId": "6760304001",
+        "appleTeamId": "JTTQ2PFTCJ"
       }
     }
   }
