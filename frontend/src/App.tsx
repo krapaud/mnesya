@@ -112,7 +112,9 @@ const App: React.FC = () => {
                 }
 
                 // Navigate to ReminderNotificationScreen with notification data
-                if (navigationRef.current && data && !data.isCaregiverAlert) {
+                // Exclude caregiver alerts: locally scheduled ones use `isCaregiverAlert`,
+                // server-sent T10 escalations use `type === "caregiver_alert"`.
+                if (navigationRef.current && data && !data.isCaregiverAlert && data.type !== 'caregiver_alert') {
                     navigationRef.current.navigate('ReminderNotification', {
                         reminderId: data.reminder_id,
                         message: data.message,
