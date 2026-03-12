@@ -345,7 +345,8 @@
     "premium": {
         "title": "Upgrade to Premium",
         "limitReached": {
-            "profiles": "You have reached the 2-profile limit on the free plan."
+            "profiles": "You have reached the 2-profile limit on the free plan.",
+            "recurrence": "Recurring reminders are a Premium feature."
         },
         "benefits": {
             "profiles": "Unlimited profiles",
@@ -353,6 +354,11 @@
             "history": "30-day activity history"
         },
         "upgradeButton": "Upgrade to Premium"
+    },
+    "recurrence": {
+        "label": "Repeat weekly",
+        "premiumHint": "Premium feature — unlock recurrence above.",
+        "days": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
     },
     "tabs": {
         "Home": "Home",

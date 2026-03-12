@@ -27,8 +27,9 @@ import {
     PlatformTimePicker,
     FilterPickerModal,
     ConfirmationModal,
+    RecurrencePicker,
 } from '../components';
-import { useUserProfiles } from '../hooks';
+import { useUserProfiles, usePlan } from '../hooks';
 import { createReminder } from '../services/reminderService';
 import { createPulseAnimation, getPulseScale } from '../utils/animations';
 
@@ -44,9 +45,12 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
 
     // Load user profiles from API
     const { userData, loading: loadingProfiles, error: profilesError } = useUserProfiles();
+    const { isPremium } = usePlan();
 
     /** Reminder title input state */
     const [reminderTitle, setReminderTitle] = useState<string>('');
+    /** Days of week for recurring reminders (0=Mon, 6=Sun). Empty = no recurrence. */
+    const [recurrenceDays, setRecurrenceDays] = useState<number[]>([]);
     /** Reminder message/description input state */
     const [reminderMessage, setReminderMessage] = useState<string>('');
     /** Selected date and time for the reminder — defaults to now + 5 min, snapped to nearest 5-minute slot */
@@ -175,6 +179,7 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                 description: reminderMessage,
                 scheduled_at: reminderDate.toISOString(),
                 user_id: String(selectedProfile),
+                recurrence_days: recurrenceDays.length > 0 ? recurrenceDays : undefined,
             });
 
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -324,6 +329,11 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                                 </TouchableOpacity>
                             </View>
                         </View>
+                        <RecurrencePicker
+                            selectedDays={recurrenceDays}
+                            onChange={setRecurrenceDays}
+                            isPremium={isPremium}
+                        />
                     </>
                 )}
             </ScrollView>

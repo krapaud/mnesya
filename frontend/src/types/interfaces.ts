@@ -116,6 +116,7 @@ export interface CreateReminder {
     description?: string;
     scheduled_at: string;
     user_id: string;
+    recurrence_days?: number[];
 }
 
 /** Full reminder data returned by the backend. */
@@ -128,6 +129,7 @@ export interface ReminderData {
     user_first_name?: string;
     user_last_name?: string;
     caregiver_id: string;
+    recurrence_days?: number[];
     created_at: string;
     updated_at: string;
 }
@@ -139,6 +141,7 @@ export interface UpdateReminder {
     scheduled_at?: string;
     caregiver_id?: string;
     user_id?: string;
+    recurrence_days?: number[];
 }
 
 export interface ReminderStatus {

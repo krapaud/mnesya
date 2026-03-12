@@ -18,6 +18,7 @@ from app.persistence.reminder_repository import ReminderRepository
 from app.persistence.push_token_repository import PushTokenRepository
 from app.persistence.reminder_status_repository import ReminderStatusRepository
 from app.services.notification_services import NotificationService
+from app.services.reminder_facade import ReminderFacade
 from app.persistence.revoked_token_repository import RevokedTokenRepository
 
 logger = logging.getLogger(__name__)
@@ -164,6 +165,13 @@ def send_caregiver_escalations():
             )
             result = reminder_status_repo.add(missed_status)
             logger.info(f"[Scheduler] MISSED status created: {result.id}")
+
+            # Advance recurring reminders to the next occurrence
+            if reminder.recurrence_days:
+                ReminderFacade(db).advance_recurrence(reminder.id)
+                logger.info(
+                    f"[Scheduler] Recurrence advanced for reminder {reminder.id}"
+                )
     except Exception as e:
         import traceback
 

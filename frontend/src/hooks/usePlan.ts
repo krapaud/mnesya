@@ -12,14 +12,18 @@ export const FREE_LIMITS = {
     profiles: 2,
 } as const;
 
-export type PlanFeature = keyof typeof FREE_LIMITS;
+/** Features with a numeric free-plan cap. */
+type LimitedFeature = keyof typeof FREE_LIMITS;
+
+/** All premium-gated features (limited or premium-only). */
+export type PlanFeature = LimitedFeature | 'recurrence';
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export interface UsePlanReturn {
     plan: PlanType;
     isPremium: boolean;
-    isLimitReached: (feature: PlanFeature, currentCount: number) => boolean;
+    isLimitReached: (feature: LimitedFeature, currentCount: number) => boolean;
 }
 
 export const usePlan = (): UsePlanReturn => {
@@ -28,7 +32,7 @@ export const usePlan = (): UsePlanReturn => {
     const plan: PlanType = caregiverData?.plan ?? 'free';
     const isPremium = plan === 'premium';
 
-    const isLimitReached = (feature: PlanFeature, currentCount: number): boolean => {
+    const isLimitReached = (feature: LimitedFeature, currentCount: number): boolean => {
         if (isPremium) return false;
         return currentCount >= FREE_LIMITS[feature];
     };

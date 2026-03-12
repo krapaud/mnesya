@@ -54,6 +54,7 @@ def build_reminder_response(reminder) -> ReminderResponse:
         user_id=reminder.user_id,
         user_first_name=getattr(reminder, "user_first_name", None),
         user_last_name=getattr(reminder, "user_last_name", None),
+        recurrence_days=reminder.recurrence_days,
         created_at=reminder.created_at,
         updated_at=reminder.updated_at,
     )
@@ -480,6 +481,7 @@ async def create_reminder(
             "scheduled_at": request.scheduled_at,
             "user_id": request.user_id,
             "caregiver_id": UUID(caregiver_id),
+            "recurrence_days": request.recurrence_days,
         }
 
         reminder = reminder_facade.create_reminder(reminder_data)
@@ -637,6 +639,8 @@ async def update_reminder(
             update_data["description"] = request.description
         if request.scheduled_at is not None:
             update_data["scheduled_at"] = request.scheduled_at
+        if request.recurrence_days is not None:
+            update_data["recurrence_days"] = request.recurrence_days
 
         # If no fields to update, return current data
         if not update_data:

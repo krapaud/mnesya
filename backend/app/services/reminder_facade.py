@@ -141,6 +141,40 @@ class ReminderFacade:
 
         return self.reminder_repo.get(UUID(reminder_id))
 
+    def advance_recurrence(self, reminder_id: UUID) -> None:
+        """Advance a recurring reminder to its next occurrence.
+
+        Computes the next matching weekday at the same time-of-day as
+        scheduled_at, updates scheduled_at, and creates a new PENDING status.
+        Does nothing if the reminder has no recurrence_days.
+
+        Args:
+            reminder_id (UUID): The reminder's unique identifier.
+        """
+        from datetime import datetime, timedelta, timezone
+
+        reminder = self.reminder_repo.get(reminder_id)
+        if not reminder or not reminder.recurrence_days:
+            return
+
+        now = datetime.now(timezone.utc)
+        target_time = reminder.scheduled_at.time()
+
+        for days_ahead in range(1, 8):
+            candidate = (now + timedelta(days=days_ahead)).replace(
+                hour=target_time.hour,
+                minute=target_time.minute,
+                second=0,
+                microsecond=0,
+            )
+            if candidate.weekday() in reminder.recurrence_days:
+                self.reminder_repo.update(reminder_id, {"scheduled_at": candidate})
+                pending = ReminderStatusModel()
+                pending.status = ReminderStatusEnum.PENDING.value
+                pending.reminder_id = reminder_id
+                self.reminder_status_repo.add(pending)
+                return
+
     def delete_reminder(self, reminder_id: str) -> bool:
         """Delete a reminder and its associated statuses.
 

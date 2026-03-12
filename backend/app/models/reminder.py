@@ -6,8 +6,9 @@ Reminders are created by caregivers for users and track scheduled activities.
 
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, DateTime, Text, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from typing import List, Optional
+from sqlalchemy import Column, String, DateTime, Text, ForeignKey, Integer
+from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from app import database
 
 
@@ -45,6 +46,7 @@ class ReminderModel(database):
             as_uuid=True),
         ForeignKey('caregiver.id'))
     _user_id = Column('user_id', UUID(as_uuid=True), ForeignKey('user.id'))
+    _recurrence_days = Column('recurrence_days', ARRAY(Integer), nullable=True)
     _created_at = Column(
         DateTime(
             timezone=True), default=lambda: datetime.now(
@@ -179,6 +181,33 @@ class ReminderModel(database):
             value (UUID): The user's unique identifier
         """
         self._user_id = value
+
+    @property
+    def recurrence_days(self) -> Optional[List[int]]:
+        """Get the days of week on which this reminder recurs.
+
+        Returns:
+            Optional[List[int]]: List of weekday integers (0=Monday, 6=Sunday),
+                or None if the reminder does not recur.
+        """
+        return list(self._recurrence_days) if self._recurrence_days else None
+
+    @recurrence_days.setter
+    def recurrence_days(self, value: Optional[List[int]]) -> None:
+        """Set the recurrence days with validation.
+
+        Args:
+            value (Optional[List[int]]): List of weekday integers (0-6), or None.
+
+        Raises:
+            ValueError: If any value is not in range 0-6.
+        """
+        if value is None:
+            self._recurrence_days = None
+            return
+        if not all(isinstance(d, int) and 0 <= d <= 6 for d in value):
+            raise ValueError("recurrence_days values must be integers between 0 and 6")
+        self._recurrence_days = sorted(set(value))
 
     @property
     def created_at(self) -> datetime:

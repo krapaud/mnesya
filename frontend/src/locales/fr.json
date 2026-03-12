@@ -345,7 +345,8 @@
     "premium": {
         "title": "Passez à Premium",
         "limitReached": {
-            "profiles": "Vous avez atteint la limite de 2 profils du plan gratuit."
+            "profiles": "Vous avez atteint la limite de 2 profils du plan gratuit.",
+            "recurrence": "Les rappels récurrents sont réservés aux abonnés Premium."
         },
         "benefits": {
             "profiles": "Profils illimités",
@@ -353,6 +354,11 @@
             "history": "Historique d'activité sur 30 jours"
         },
         "upgradeButton": "Passer à Premium"
+    },
+    "recurrence": {
+        "label": "Répéter chaque semaine",
+        "premiumHint": "Fonctionnalité Premium — activez la récurrence ci-dessus.",
+        "days": ["Lu", "Ma", "Me", "Je", "Ve", "Sa", "Di"]
     },
     "tabs": {
         "Home": "Accueil",

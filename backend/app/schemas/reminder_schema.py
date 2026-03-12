@@ -21,11 +21,22 @@ class ReminderCreate(BaseModel):
         scheduled_at (datetime): When the reminder should trigger
         caregiver_id (UUID): ID of caregiver creating the reminder
         user_id (UUID): ID of user this reminder is for
+        recurrence_days (Optional[List[int]]): Days of week to repeat (0=Mon, 6=Sun)
     """
     title: str = Field(..., min_length=1, max_length=200)
     description: Optional[str] = None
     scheduled_at: datetime
     user_id: UUID
+    recurrence_days: Optional[List[int]] = None
+
+    @field_validator('recurrence_days')
+    def validate_recurrence_days(cls, value: Optional[List[int]]) -> Optional[List[int]]:
+        """Validate recurrence_days are in range 0-6."""
+        if value is None:
+            return None
+        if not all(isinstance(d, int) and 0 <= d <= 6 for d in value):
+            raise ValueError("recurrence_days must be integers between 0 and 6")
+        return sorted(set(value))
 
     @field_validator('title')
     def validate_title(cls, value: str) -> str:
@@ -56,12 +67,23 @@ class ReminderUpdate(BaseModel):
         scheduled_at (Optional[datetime]): Updated scheduled time
         caregiver_id (Optional[UUID]): Updated caregiver ID
         user_id (Optional[UUID]): Updated user ID
+        recurrence_days (Optional[List[int]]): Updated recurrence days (0=Mon, 6=Sun)
     """
     title: Optional[str] = Field(None, min_length=1, max_length=200)
     description: Optional[str] = None
     scheduled_at: Optional[datetime] = None
     caregiver_id: Optional[UUID] = None
     user_id: Optional[UUID] = None
+    recurrence_days: Optional[List[int]] = None
+
+    @field_validator('recurrence_days')
+    def validate_recurrence_days(cls, value: Optional[List[int]]) -> Optional[List[int]]:
+        """Validate recurrence_days are in range 0-6."""
+        if value is None:
+            return None
+        if not all(isinstance(d, int) and 0 <= d <= 6 for d in value):
+            raise ValueError("recurrence_days must be integers between 0 and 6")
+        return sorted(set(value))
 
     @field_validator('title')
     def validate_title(cls, value: Optional[str]) -> Optional[str]:
@@ -108,6 +130,7 @@ class ReminderResponse(BaseModel):
     user_id: UUID
     user_first_name: Optional[str] = None
     user_last_name: Optional[str] = None
+    recurrence_days: Optional[List[int]] = None
     created_at: datetime
     updated_at: datetime
 

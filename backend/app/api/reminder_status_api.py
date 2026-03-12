@@ -7,6 +7,8 @@ Statuses track the lifecycle of reminders (PENDING, DONE, POSTPONED, UNABLE).
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from app.services.reminder_status_facade import ReminderStatusFacade
+from app.services.caregiver_facade import CaregiverFacade
+from app.services.reminder_facade import ReminderFacade
 from app.schemas.reminder_status_schema import (
     ReminderStatusResponse,
     ReminderStatusUpdate,
@@ -21,9 +23,21 @@ from typing import List
 router = APIRouter(prefix="/api/reminder-status", tags=["Reminder Status"])
 
 
-def get_reminder_status_facade(db: Session = Depends(get_db)) -> ReminderStatusFacade:
+def get_caregiver_facade(db: Session = Depends(get_db)) -> CaregiverFacade:
+    """Dependency to create CaregiverFacade instance with database session."""
+    return CaregiverFacade(db)
+
+
+def get_reminder_status_facade(
+    db: Session = Depends(get_db),
+) -> ReminderStatusFacade:
     """Dependency to create ReminderStatusFacade instance with database session."""
     return ReminderStatusFacade(db)
+
+
+def get_reminder_facade(db: Session = Depends(get_db)) -> ReminderFacade:
+    """Dependency to create ReminderFacade instance with database session."""
+    return ReminderFacade(db)
 
 
 @router.get(
@@ -343,6 +357,7 @@ async def update_reminder_status(
     request: ReminderStatusUpdate,
     user_id: str = Depends(lambda token=Depends(verify_token): token.get("sub")),
     facade: ReminderStatusFacade = Depends(get_reminder_status_facade),
+    reminder_facade: ReminderFacade = Depends(get_reminder_facade),
 ):
     """Update the status of a reminder.
 
@@ -353,11 +368,15 @@ async def update_reminder_status(
     - POSTPONED: Reminder has been postponed
     - UNABLE: User was unable to complete the reminder
 
+    For recurring reminders, a DONE or UNABLE status automatically advances
+    scheduled_at to the next matching day of week.
+
     Args:
         reminder_id (UUID): Unique identifier of the reminder
         request (ReminderStatusUpdate): New status value
         user_id (str): ID of the authenticated user (from JWT token)
         facade (ReminderStatusFacade): Status service facade
+        reminder_facade (ReminderFacade): Reminder service facade
 
     Returns:
         ReminderStatusResponse: The newly created status entry
@@ -370,6 +389,10 @@ async def update_reminder_status(
         status_data = {"status": request.status, "reminder_id": reminder_id}
 
         new_status = facade.create_reminder_status(status_data)
+
+        # Advance recurring reminders to their next occurrence
+        if request.status in ("DONE", "UNABLE"):
+            reminder_facade.advance_recurrence(reminder_id)
 
         return ReminderStatusResponse(
             id=new_status.id,
@@ -443,15 +466,17 @@ async def update_reminder_status(
 async def get_caregiver_activity_log(
     token_payload: dict = Depends(verify_token),
     facade: ReminderStatusFacade = Depends(get_reminder_status_facade),
+    caregiver_facade: CaregiverFacade = Depends(get_caregiver_facade),
 ):
     """Get the activity log for the authenticated caregiver.
 
     Returns all DONE/POSTPONED/UNABLE/MISSED interactions across all reminders
-    managed by this caregiver in the last 48 hours, ordered newest first.
+    managed by this caregiver. Free plan: last 48 hours. Premium: last 30 days.
 
     Args:
         token_payload (dict): JWT payload with caregiver ID under 'sub'.
         facade (ReminderStatusFacade): Status service facade.
+        caregiver_facade (CaregiverFacade): Caregiver service facade.
 
     Returns:
         List[ActivityLogEntry]: Enriched status entries for the activity log.
@@ -461,7 +486,9 @@ async def get_caregiver_activity_log(
     """
     try:
         caregiver_id = token_payload.get("sub")
-        entries = facade.get_recent_activity(caregiver_id)
+        caregiver = caregiver_facade.get_caregiver(caregiver_id)
+        hours = 720 if caregiver and caregiver.plan == "premium" else 48
+        entries = facade.get_recent_activity(caregiver_id, hours=hours)
 
         return [
             ActivityLogEntry(
