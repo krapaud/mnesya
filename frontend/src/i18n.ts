@@ -23,11 +23,14 @@ const resources = {
 
 const SUPPORTED_LANGUAGES = Object.keys(resources);
 
+const deviceLocale = getLocales()[0]?.languageCode ?? 'en';
+const lng = SUPPORTED_LANGUAGES.includes(deviceLocale) ? deviceLocale : 'en';
+
 // Initialize i18next with React integration
 i18n.use(initReactI18next).init({
     resources,
     fallbackLng: 'en',
-    lng: 'en',
+    lng,
     interpolation: {
         escapeValue: false,
     },

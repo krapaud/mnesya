@@ -44,8 +44,8 @@
       padding: 0 5%;
       height: 64px;
       background: rgba(255,255,255,.85);
-      backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
       border-bottom: 1px solid rgba(74,144,226,.1);
     }
     .logo {
@@ -412,6 +412,54 @@
     }
     .reveal.visible { opacity: 1; transform: translateY(0); }
 
+    /* ── Feature cards animation ──────────────────────────────── */
+    .feature-card.reveal:nth-child(2) { transition-delay: 0.1s; }
+    .feature-card.reveal:nth-child(3) { transition-delay: 0.2s; }
+
+    /* ── Team section ─────────────────────────────────────────── */
+    .team-section { transition-delay: 0.15s; }
+    .team-section h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+
+    /* ── Stats grid ───────────────────────────────────────────── */
+    .stats-grid {
+      margin-top: 32px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+    .stat-card {
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-card.blue {
+      background: rgba(74,144,226,.1);
+      border: 1px solid rgba(74,144,226,.2);
+    }
+    .stat-card.green {
+      background: rgba(76,175,80,.1);
+      border: 1px solid rgba(76,175,80,.2);
+    }
+    .stat-card.orange {
+      background: rgba(255,152,0,.1);
+      border: 1px solid rgba(255,152,0,.2);
+    }
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
     /* ── Responsive ───────────────────────────────────────────── */
     @media (max-width: 768px) {
       nav { display: none; }
@@ -456,7 +504,7 @@
       <button type="button" id="btn-en" class="active" onclick="setLang('en')">EN</button>
       <button type="button" id="btn-fr" onclick="setLang('fr')">FR</button>
     </div>
-    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+    <button type="button" class="hamburger" id="hamburger" aria-label="Toggle menu">
       <span></span><span></span><span></span>
     </button>
   </header>
@@ -526,7 +574,7 @@
       </div>
 
       <!-- Feature 2 -->
-      <div class="feature-card reveal" style="transition-delay:.1s">
+      <div class="feature-card reveal">
         <div class="feature-img-wrapper">
           <img src="img/DashboardScreen.png" alt="Caregiver dashboard screen" />
         </div>
@@ -540,9 +588,9 @@
       </div>
 
       <!-- Feature 3 -->
-      <div class="feature-card reveal" style="transition-delay:.2s">
+      <div class="feature-card reveal">
         <div class="feature-img-wrapper">
-          <img src="img/WelcomeScreen.png" alt="Pairing code screen" />
+          <img src="img/PairingScreen.png" alt="Pairing code screen" />
         </div>
         <div class="feature-body">
           <div class="feature-icon icon-orange">🔗</div>
@@ -588,8 +636,8 @@
       </div>
 
       <!-- Team -->
-      <div class="reveal" style="transition-delay:.15s">
-        <h3 style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:20px;" data-i18n="about.team">The team</h3>
+      <div class="reveal team-section">
+        <h3 data-i18n="about.team">The team</h3>
         <div class="team-grid">
 
           <div class="team-card">
@@ -633,18 +681,18 @@
         </div>
 
         <!-- Stats -->
-        <div style="margin-top:32px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
-          <div style="background:rgba(74,144,226,.1);border:1px solid rgba(74,144,226,.2);border-radius:12px;padding:16px;text-align:center;">
-            <div style="font-size:1.8rem;font-weight:800;color:#fff;">516</div>
-            <div style="font-size:.8rem;color:#64748b;margin-top:2px;" data-i18n="stats.tests">Tests passing</div>
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-value">516</div>
+            <div class="stat-label" data-i18n="stats.tests">Tests passing</div>
           </div>
-          <div style="background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.2);border-radius:12px;padding:16px;text-align:center;">
-            <div style="font-size:1.8rem;font-weight:800;color:#fff;">12</div>
-            <div style="font-size:.8rem;color:#64748b;margin-top:2px;" data-i18n="stats.screens">App screens</div>
+          <div class="stat-card green">
+            <div class="stat-value">12</div>
+            <div class="stat-label" data-i18n="stats.screens">App screens</div>
           </div>
-          <div style="background:rgba(255,152,0,.1);border:1px solid rgba(255,152,0,.2);border-radius:12px;padding:16px;text-align:center;">
-            <div style="font-size:1.8rem;font-weight:800;color:#fff;">2</div>
-            <div style="font-size:.8rem;color:#64748b;margin-top:2px;" data-i18n="stats.languages">Languages</div>
+          <div class="stat-card orange">
+            <div class="stat-value">2</div>
+            <div class="stat-label" data-i18n="stats.languages">Languages</div>
           </div>
         </div>
       </div>
