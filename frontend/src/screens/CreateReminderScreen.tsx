@@ -3,7 +3,7 @@
  *
  * @module CreateReminderScreen
  */
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -13,7 +13,6 @@ import {
     Image,
     ScrollView,
     ActivityIndicator,
-    Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -31,7 +30,6 @@ import {
 } from '../components';
 import { useUserProfiles, usePlan } from '../hooks';
 import { createReminder } from '../services/reminderService';
-import { createPulseAnimation, getPulseScale } from '../utils/animations';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -78,10 +76,6 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
 
     const selectedProfileData = userData?.find((p) => String(p.id) === selectedProfile);
 
-    const pulseAnim = useRef(new Animated.Value(1)).current;
-    useEffect(() => {
-        createPulseAnimation(pulseAnim).start();
-    }, [pulseAnim]);
 
     const formatDate = (date: Date): string => {
         const day = date.getDate().toString().padStart(2, '0');
@@ -294,11 +288,6 @@ const CreateReminderScreen: React.FC<Props> = ({ navigation }) => {
                         <Text style={[styles.errorText, { opacity: showMessageError ? 1 : 0 }]}>
                             {messageError || t('CreateReminder.errors.Please enter a message')}
                         </Text>
-                        <Animated.Text style={[styles.text, getPulseScale(pulseAnim)]}>
-                            {t(
-                                'CreateReminder.message.Be careful not to enter sensitive confidential information.'
-                            )}
-                        </Animated.Text>
                         <View style={styles.pickerContainer}>
                             <View style={styles.pickerColumn}>
                                 <Text style={styles.label}>Date</Text>
@@ -406,12 +395,12 @@ const styles = StyleSheet.create({
     titleSection: {
         width: '100%',
         paddingLeft: 10,
-        marginTop: 20,
-        marginBottom: 20,
+        marginTop: 15,
+        marginBottom: 15,
     },
     scrollContainer: {
         width: '100%',
-        paddingBottom: 10,
+        paddingBottom: 8,
     },
     buttonsContainer: {},
 
@@ -419,46 +408,37 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 28,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 8,
     },
     label: {
-        fontSize: 18,
+        fontSize: 17,
         fontWeight: '500',
-        marginBottom: 10,
+        marginBottom: 6,
         marginTop: 5,
     },
     messageLabel: {
-        fontSize: 18,
+        fontSize: 17,
         fontWeight: '500',
-        marginBottom: 10,
+        marginBottom: 6,
         marginTop: 0,
-    },
-    text: {
-        fontSize: 13,
-        width: '100%',
-        justifyContent: 'flex-start',
-        color: '#FF0000',
-        marginTop: 0,
-        marginBottom: 4,
-        paddingBottom: 4,
     },
 
     // ========== FORM ELEMENTS ==========
     input: {
         backgroundColor: '#F5F5F5',
-        padding: 15,
-        borderRadius: 20,
-        marginBottom: 10,
+        padding: 13,
+        borderRadius: 18,
+        marginBottom: 6,
         width: '100%',
     },
     errorText: {
         color: '#FF0000',
         fontSize: 12,
         textAlign: 'right',
-        marginTop: -5,
-        marginBottom: 5,
-        minHeight: 16,
-        lineHeight: 16,
+        marginTop: -3,
+        marginBottom: 4,
+        minHeight: 15,
+        lineHeight: 15,
         paddingRight: 10,
     },
     profilePicker: {
@@ -467,7 +447,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     messageInput: {
-        height: 80,
+        height: 76,
         marginBottom: 2,
     },
 
@@ -487,9 +467,9 @@ const styles = StyleSheet.create({
     },
     pickerButton: {
         backgroundColor: '#F5F5F5',
-        padding: 18,
-        borderRadius: 20,
-        marginBottom: 15,
+        padding: 16,
+        borderRadius: 18,
+        marginBottom: 12,
         width: '100%',
     },
 });

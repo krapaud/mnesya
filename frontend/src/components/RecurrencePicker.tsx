@@ -128,9 +128,10 @@ const styles = StyleSheet.create({
     },
     lockedHint: {
         fontSize: 12,
-        color: '#999999',
+        color: '#F6AD55',
         fontStyle: 'italic',
         marginBottom: 8,
+        textAlign: 'center',
     },
 });
 
