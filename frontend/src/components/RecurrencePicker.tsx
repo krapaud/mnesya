@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { PremiumModal } from './PremiumModal';
+import PremiumModal from './PremiumModal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -31,7 +31,7 @@ const RecurrencePicker: React.FC<RecurrencePickerProps> = ({
     const { t } = useTranslation();
     const [showPremiumModal, setShowPremiumModal] = useState(false);
 
-    const dayKeys: string[] = t('recurrence.days', { returnObjects: true }) as string[];
+    const dayKeys = t('recurrence.days', { returnObjects: true }) as string[];
 
     const handlePress = (index: number) => {
         if (!isPremium) {
