@@ -3,8 +3,8 @@
  *
  * @module UserTabs
  */
-import React from 'react';
-import { StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, ActivityIndicator, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -16,6 +16,7 @@ import type { UserTabsParamList } from '../types/index';
 
 import UserHomeScreen from '../screens/UserHomeScreen';
 import { RefreshProvider, useRefresh } from '../contexts/RefreshContext';
+import EmergencyModal from '../components/EmergencyModal';
 
 const Tab = createBottomTabNavigator<UserTabsParamList>();
 
@@ -23,46 +24,75 @@ const UserTabsContent: React.FC = () => {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
     const { triggerRefresh, isRefreshing } = useRefresh();
+    const [emergencyVisible, setEmergencyVisible] = useState(false);
 
     return (
-        <Tab.Navigator
-            id="user-tabs"
-            screenOptions={{
-                headerShown: false,
-                tabBarActiveTintColor: styles.activeTab.color,
-                tabBarInactiveTintColor: styles.inactiveTab.color,
-                tabBarStyle: {
-                    height: 40 + insets.bottom,
-                    paddingBottom: 6 + insets.bottom,
-                    paddingTop: 5,
-                },
-                tabBarLabelStyle: styles.tabBarLabel,
-            }}
-        >
-            {/* Refresh button - Single tab that reloads data */}
-            <Tab.Screen
-                name="Refresh"
-                component={UserHomeScreen}
-                listeners={() => ({
-                    tabPress: (e) => {
-                        e.preventDefault();
-                        // Trigger haptic feedback
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                        // Show spinner then trigger refresh
-                        triggerRefresh();
+        <>
+            <Tab.Navigator
+                id="user-tabs"
+                screenOptions={{
+                    headerShown: false,
+                    tabBarActiveTintColor: styles.activeTab.color,
+                    tabBarInactiveTintColor: styles.inactiveTab.color,
+                    tabBarStyle: {
+                        height: 40 + insets.bottom,
+                        paddingBottom: 6 + insets.bottom,
+                        paddingTop: 5,
                     },
-                })}
-                options={{
-                    tabBarLabel: t('tabs.Refresh'),
-                    tabBarIcon: ({ color, size }) =>
-                        isRefreshing ? (
-                            <ActivityIndicator size={size} color={color} />
-                        ) : (
-                            <Ionicons name="refresh" size={size} color={color} />
-                        ),
+                    tabBarLabelStyle: styles.tabBarLabel,
                 }}
+            >
+                {/* Emergency button - Opens emergency numbers modal */}
+                <Tab.Screen
+                    name="Emergency"
+                    component={UserHomeScreen}
+                    listeners={() => ({
+                        tabPress: (e) => {
+                            e.preventDefault();
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                            setEmergencyVisible(true);
+                        },
+                    })}
+                    options={{
+                        tabBarIcon: ({ size }) => (
+                            <Ionicons name="call" size={size} color="#E53E3E" />
+                        ),
+                        tabBarLabel: () => (
+                            <Text style={styles.emergencyLabel}>{t('tabs.Emergency')}</Text>
+                        ),
+                    }}
+                />
+
+                {/* Refresh button - Single tab that reloads data */}
+                <Tab.Screen
+                    name="Refresh"
+                    component={UserHomeScreen}
+                    listeners={() => ({
+                        tabPress: (e) => {
+                            e.preventDefault();
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                            triggerRefresh();
+                        },
+                    })}
+                    options={{
+                        tabBarIcon: ({ size }) =>
+                            isRefreshing ? (
+                                <ActivityIndicator size={size} color="#4A90E2" />
+                            ) : (
+                                <Ionicons name="refresh" size={size} color="#4A90E2" />
+                            ),
+                        tabBarLabel: () => (
+                            <Text style={styles.refreshLabel}>{t('tabs.Refresh')}</Text>
+                        ),
+                    }}
+                />
+            </Tab.Navigator>
+
+            <EmergencyModal
+                visible={emergencyVisible}
+                onClose={() => setEmergencyVisible(false)}
             />
-        </Tab.Navigator>
+        </>
     );
 };
 
@@ -77,6 +107,14 @@ const styles = StyleSheet.create({
     },
     tabBarLabel: {
         fontSize: 12,
+    },
+    emergencyLabel: {
+        fontSize: 12,
+        color: '#E53E3E',
+    },
+    refreshLabel: {
+        fontSize: 12,
+        color: '#4A90E2',
     },
 });
 
