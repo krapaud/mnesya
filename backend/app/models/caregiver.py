@@ -40,6 +40,7 @@ class CaregiverModel(database):
     _user_ids = Column(
         "user_ids", ARRAY(UUID(as_uuid=True), ForeignKey("user.id")), default=list
     )
+    _plan = Column("plan", String(20), nullable=False, default="free")
     _created_at = Column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -228,6 +229,29 @@ class CaregiverModel(database):
             value (list[UUID]): List of user UUIDs
         """
         self._user_ids = value
+
+    @property
+    def plan(self) -> str:
+        """Get the caregiver's subscription plan.
+
+        Returns:
+            str: 'free' or 'premium'
+        """
+        return self._plan or "free"
+
+    @plan.setter
+    def plan(self, value: str) -> None:
+        """Set the caregiver's subscription plan.
+
+        Args:
+            value (str): 'free' or 'premium'
+
+        Raises:
+            ValueError: If value is not a valid plan
+        """
+        if value not in ("free", "premium"):
+            raise ValueError("plan must be 'free' or 'premium'")
+        self._plan = value
 
     @property
     def created_at(self) -> datetime:

@@ -124,5 +124,6 @@ class CaregiverProfile(BaseModel):
     last_name: str
     email: str
     created_at: datetime
+    plan: str = "free"
 
     model_config = {"from_attributes": True}

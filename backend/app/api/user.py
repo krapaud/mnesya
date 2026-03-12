@@ -137,6 +137,14 @@ async def create_profile(
 ):
     """Create a new user profile and generate pairing code."""
     try:
+        # Enforce free plan limit: max 2 profiles
+        caregiver = caregiver_facade.get_caregiver(caregiver_id)
+        if caregiver and caregiver.plan == "free" and len(caregiver.user_ids) >= 2:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="PROFILE_LIMIT_REACHED",
+            )
+
         # Create user
         user_data = {
             "first_name": request.first_name,
