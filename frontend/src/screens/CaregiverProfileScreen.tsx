@@ -23,12 +23,13 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { CaregiverTabsParamList, RootStackParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
 import { logout, updateCaregiverProfile, changePassword } from '../services/authService';
-import { useCaregiverProfile } from '../hooks';
+import { useCaregiverProfile, usePlan } from '../hooks';
 import {
     UpdateCaregiverProfileModal,
     ChangePasswordModal,
     ConfirmationModal,
     MenuModal,
+    PremiumModal,
 } from '../components';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -46,12 +47,14 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
     // Use custom hook for profile management
     const handleAuthError = useCallback(() => navigation.navigate('Welcome'), [navigation]);
     const { caregiverData, loading, error, reload } = useCaregiverProfile(handleAuthError);
+    const { isPremium } = usePlan();
 
     // Modal visibility states
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+    const [showPremiumModal, setShowPremiumModal] = useState(false);
 
     /**
      * Opens the change password modal.
@@ -226,6 +229,48 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                         </View>
                     </View>
 
+                    {/* Plan Section */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>
+                            {t('caregiverProfile.sections.plan')}
+                        </Text>
+
+                        {/* Current plan badge */}
+                        <View style={[styles.infoRow, isPremium ? styles.premiumRow : styles.freeRow]}>
+                            <Ionicons
+                                name="star"
+                                size={24}
+                                color={isPremium ? '#F6AD55' : '#999999'}
+                            />
+                            <View style={styles.infoContent}>
+                                <Text style={styles.infoLabel}>
+                                    {t('caregiverProfile.fields.plan')}
+                                </Text>
+                                <Text style={[styles.infoValue, isPremium ? styles.premiumText : styles.freeText]}>
+                                    {isPremium
+                                        ? t('caregiverProfile.plan.premium')
+                                        : t('caregiverProfile.plan.free')}
+                                </Text>
+                            </View>
+                        </View>
+
+                        {/* Upgrade button — only for free users */}
+                        {!isPremium && (
+                            <TouchableOpacity
+                                style={styles.upgradeButton}
+                                onPress={() => {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                    setShowPremiumModal(true);
+                                }}
+                            >
+                                <Ionicons name="star" size={20} color="#FFFFFF" />
+                                <Text style={styles.upgradeButtonText}>
+                                    {t('caregiverProfile.plan.upgradeButton')}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+
                     {/* Actions Section */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>
@@ -311,6 +356,13 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                 onClose={() => setShowChangePasswordModal(false)}
                 onSave={handleSavePassword}
             />
+
+            {/* Premium Upgrade Modal */}
+            <PremiumModal
+                visible={showPremiumModal}
+                onClose={() => setShowPremiumModal(false)}
+                feature="profiles"
+            />
         </View>
     );
 };
@@ -322,50 +374,50 @@ const styles = StyleSheet.create({
     titleSection: {
         width: '100%',
         paddingLeft: 10,
-        marginTop: 20,
-        marginBottom: 20,
+        marginTop: 12,
+        marginBottom: 12,
     },
     scrollContainer: {
         width: '100%',
-        paddingBottom: 10,
+        paddingBottom: 6,
     },
 
     // TYPOGRAPHY
     title: {
         fontSize: 28,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 6,
     },
 
     // SECTIONS
     section: {
-        marginBottom: 30,
+        marginBottom: 16,
     },
     sectionTitle: {
-        fontSize: 18,
+        fontSize: 17,
         fontWeight: '600',
         color: '#333333',
-        marginBottom: 15,
+        marginBottom: 8,
     },
     infoRow: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#F5F5F5',
-        padding: 15,
+        padding: 12,
         borderRadius: 10,
-        marginBottom: 10,
+        marginBottom: 6,
     },
     infoContent: {
-        marginLeft: 15,
+        marginLeft: 12,
         flex: 1,
     },
     infoLabel: {
-        fontSize: 16,
+        fontSize: 14,
         color: '#666666',
-        marginBottom: 4,
+        marginBottom: 2,
     },
     infoValue: {
-        fontSize: 16,
+        fontSize: 15,
         color: '#333333',
         fontWeight: '500',
     },
@@ -374,16 +426,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         backgroundColor: '#FFFFFF',
-        padding: 18,
+        padding: 14,
         borderRadius: 10,
-        marginBottom: 10,
+        marginBottom: 8,
         borderWidth: 1,
         borderColor: '#E0E0E0',
     },
     actionButtonContent: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 15,
+        gap: 12,
     },
     actionButtonText: {
         fontSize: 16,
@@ -396,6 +448,36 @@ const styles = StyleSheet.create({
     },
     logoutText: {
         color: '#E53935',
+    },
+    premiumRow: {
+        backgroundColor: '#FFFBEB',
+        borderWidth: 1,
+        borderColor: '#F6AD55',
+    },
+    freeRow: {
+        backgroundColor: '#F5F5F5',
+    },
+    premiumText: {
+        color: '#D69E2E',
+        fontWeight: '700',
+    },
+    freeText: {
+        color: '#666666',
+    },
+    upgradeButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        backgroundColor: '#F6AD55',
+        padding: 14,
+        borderRadius: 10,
+        marginTop: 6,
+    },
+    upgradeButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '700',
     },
     loadingContainer: {
         flex: 1,

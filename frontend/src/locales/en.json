@@ -56,7 +56,15 @@
                 "November",
                 "December"
             ],
-            "weekDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+            "weekDays": [
+                "Sun",
+                "Mon",
+                "Tue",
+                "Wed",
+                "Thu",
+                "Fri",
+                "Sat"
+            ]
         }
     },
     "welcome": {
@@ -292,11 +300,13 @@
         "title": "My Profile",
         "sections": {
             "accountInfo": "Account Information",
-            "actions": "Account Actions"
+            "actions": "Account Actions",
+            "plan": "Subscription"
         },
         "fields": {
             "name": "Name",
-            "email": "Email"
+            "email": "Email",
+            "plan": "Plan"
         },
         "buttons": {
             "changePassword": "Change Password",
@@ -328,9 +338,13 @@
                 "wrongPassword": "The current password is incorrect",
                 "generic": "An error occurred. Please try again."
             }
+        },
+        "plan": {
+            "free": "Free",
+            "premium": "Premium",
+            "upgradeButton": "Upgrade to Premium"
         }
     },
-
     "notifications": {
         "repetitions": {
             "reminder": "⏰ REMINDER: {{title}}",
@@ -358,7 +372,15 @@
     "recurrence": {
         "label": "Repeat weekly",
         "premiumHint": "Premium feature — unlock recurrence above.",
-        "days": ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+        "days": [
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa",
+            "Su"
+        ]
     },
     "tabs": {
         "Home": "Home",

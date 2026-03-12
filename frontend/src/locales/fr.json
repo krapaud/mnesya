@@ -56,7 +56,15 @@
                 "Novembre",
                 "Décembre"
             ],
-            "weekDays": ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
+            "weekDays": [
+                "Dim",
+                "Lun",
+                "Mar",
+                "Mer",
+                "Jeu",
+                "Ven",
+                "Sam"
+            ]
         }
     },
     "welcome": {
@@ -292,11 +300,13 @@
         "title": "Mon Profil",
         "sections": {
             "accountInfo": "Informations du compte",
-            "actions": "Actions du compte"
+            "actions": "Actions du compte",
+            "plan": "Abonnement"
         },
         "fields": {
             "name": "Nom",
-            "email": "Email"
+            "email": "Email",
+            "plan": "Plan"
         },
         "buttons": {
             "changePassword": "Changer le mot de passe",
@@ -328,9 +338,13 @@
                 "wrongPassword": "Le mot de passe actuel est incorrect",
                 "generic": "Une erreur est survenue. Veuillez réessayer."
             }
+        },
+        "plan": {
+            "free": "Gratuit",
+            "premium": "Premium",
+            "upgradeButton": "Passer à Premium"
         }
     },
-
     "notifications": {
         "repetitions": {
             "reminder": "⏰ RAPPEL: {{title}}",
@@ -358,7 +372,15 @@
     "recurrence": {
         "label": "Répéter chaque semaine",
         "premiumHint": "Fonctionnalité Premium — activez la récurrence ci-dessus.",
-        "days": ["Lu", "Ma", "Me", "Je", "Ve", "Sa", "Di"]
+        "days": [
+            "Lu",
+            "Ma",
+            "Me",
+            "Je",
+            "Ve",
+            "Sa",
+            "Di"
+        ]
     },
     "tabs": {
         "Home": "Accueil",
