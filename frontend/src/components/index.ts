@@ -13,5 +13,6 @@ export { default as ChangePasswordModal } from './ChangePasswordModal';
 export { default as MenuModal } from './MenuModal';
 export { default as RateLimitModal } from './RateLimitModal';
 export { default as ActivityLogModal } from './ActivityLogModal';
+export { default as PremiumModal } from './PremiumModal';
 export type { MenuAction } from './MenuModal';
 export type { FilterPickerItem } from './FilterPickerModal';

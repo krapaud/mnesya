@@ -342,6 +342,18 @@
             "defaultUser": "User"
         }
     },
+    "premium": {
+        "title": "Upgrade to Premium",
+        "limitReached": {
+            "profiles": "You have reached the 2-profile limit on the free plan."
+        },
+        "benefits": {
+            "profiles": "Unlimited profiles",
+            "recurrence": "Recurring reminders (Monday, Tuesday…)",
+            "history": "30-day activity history"
+        },
+        "upgradeButton": "Upgrade to Premium"
+    },
     "tabs": {
         "Home": "Home",
         "Profile": "Profile",

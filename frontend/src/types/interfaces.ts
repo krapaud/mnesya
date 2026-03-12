@@ -27,6 +27,9 @@ export interface AuthResponse {
     expires_in: number;
 }
 
+/** Subscription plan for a caregiver account. */
+export type PlanType = 'free' | 'premium';
+
 /** Caregiver profile data returned by the backend. */
 export interface CaregiverProfile {
     id: string;
@@ -34,6 +37,7 @@ export interface CaregiverProfile {
     last_name: string;
     email: string;
     created_at: string;
+    plan?: PlanType;
 }
 
 /** Payload for creating a new elderly user profile. */

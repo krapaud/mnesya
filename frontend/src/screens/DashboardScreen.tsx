@@ -25,8 +25,8 @@ import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList, CaregiverTabsParamList } from '../types/index';
 import { commonStyles } from '../styles/commonStyles';
-import { useUserProfiles, useActivityLog } from '../hooks';
-import { ActivityLogModal } from '../components';
+import { useUserProfiles, useActivityLog, usePlan } from '../hooks';
+import { ActivityLogModal, PremiumModal } from '../components';
 import { calculateAge } from '../utils/dateUtils';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -44,6 +44,8 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     const { userData, loading, error, reload } = useUserProfiles();
     const isInitialLoading = loading && userData === null;
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const { isLimitReached } = usePlan();
+    const [showPremiumModal, setShowPremiumModal] = useState(false);
 
     // Activity log
     const [showActivityLog, setShowActivityLog] = useState(false);
@@ -161,6 +163,10 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                     style={commonStyles.primaryButton}
                     onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        if (isLimitReached('profiles', userData?.length ?? 0)) {
+                            setShowPremiumModal(true);
+                            return;
+                        }
                         navigation.navigate('CreateProfile');
                     }}
                 >
@@ -271,6 +277,13 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                     )}
                 </View>
             </View>
+
+            {/* Premium upsell modal */}
+            <PremiumModal
+                visible={showPremiumModal}
+                onClose={() => setShowPremiumModal(false)}
+                feature="profiles"
+            />
 
             {/* Activity log modal */}
             <ActivityLogModal

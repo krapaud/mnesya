@@ -342,6 +342,18 @@
             "defaultUser": "L'utilisateur"
         }
     },
+    "premium": {
+        "title": "Passez à Premium",
+        "limitReached": {
+            "profiles": "Vous avez atteint la limite de 2 profils du plan gratuit."
+        },
+        "benefits": {
+            "profiles": "Profils illimités",
+            "recurrence": "Rappels récurrents (lundi, mardi…)",
+            "history": "Historique d'activité sur 30 jours"
+        },
+        "upgradeButton": "Passer à Premium"
+    },
     "tabs": {
         "Home": "Accueil",
         "Profile": "Profil",
