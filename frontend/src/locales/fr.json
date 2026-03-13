@@ -371,7 +371,7 @@
     },
     "recurrence": {
         "label": "Répéter chaque semaine",
-        "premiumHint": "Fonctionnalité Premium — activez la récurrence ci-dessus.",
+        "premiumHint": "Appuyez sur un jour pour répéter ce rappel chaque semaine (Premium)",
         "days": [
             "Lu",
             "Ma",

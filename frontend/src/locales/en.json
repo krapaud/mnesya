@@ -371,7 +371,7 @@
     },
     "recurrence": {
         "label": "Repeat weekly",
-        "premiumHint": "Premium feature — unlock recurrence above.",
+        "premiumHint": "Tap a day to repeat this reminder weekly (Premium)",
         "days": [
             "Mo",
             "Tu",
