@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "985621827460",
+    "project_id": "mnesya-4862e",
+    "storage_bucket": "mnesya-4862e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:985621827460:android:369329addb6e12397297d1",
+        "android_client_info": {
+          "package_name": "com.krapaud.mnesya"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpUQO8VUOU9zxUQGMjpZ1rsusA1P1WNyo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
