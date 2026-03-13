@@ -346,6 +346,13 @@
         "Home": "Home",
         "Profile": "Profile",
         "Reminders": "Reminders",
-        "Refresh": "Refresh"
+        "Refresh": "Refresh",
+        "Emergency": "Emergency"
+    },
+    "emergency": {
+        "title": "Emergency Numbers",
+        "country": "Detected country",
+        "callButton": "Call",
+        "callHint": "Tap to call {{number}}"
     }
 }
