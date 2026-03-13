@@ -15,5 +15,6 @@ export { default as RateLimitModal } from './RateLimitModal';
 export { default as ActivityLogModal } from './ActivityLogModal';
 export { default as PremiumModal } from './PremiumModal';
 export { default as RecurrencePicker } from './RecurrencePicker';
+export { default as EmergencyModal } from './EmergencyModal';
 export type { MenuAction } from './MenuModal';
 export type { FilterPickerItem } from './FilterPickerModal';
