@@ -1,7 +1,7 @@
 /**
  * Modal component for updating caregiver profile information.
  *
- * Provides a form to edit first name, last name, and email of a caregiver profile.
+ * Provides a form to edit first name and last name of a caregiver profile.
  * Includes validation for all fields.
  *
  * @module UpdateCaregiverProfileModal
@@ -21,7 +21,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useFormValidation } from '../hooks';
-import { validateName, validateEmail } from '../utils/validation';
+import { validateName } from '../utils/validation';
 import { commonStyles } from '../styles/commonStyles';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -35,12 +35,11 @@ interface UpdateCaregiverProfileModalProps {
     /** Callback to close the modal */
     onClose: () => void;
     /** Callback when save button is pressed */
-    onSave: (data: { first_name: string; last_name: string; email: string }) => Promise<void>;
+    onSave: (data: { first_name: string; last_name: string }) => Promise<void>;
     /** Initial profile data to pre-fill the form */
     initialData: {
         first_name: string;
         last_name: string;
-        email: string;
     } | null;
 }
 
@@ -65,10 +64,6 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
             validate: validateName,
             initialValue: '',
         },
-        email: {
-            validate: validateEmail,
-            initialValue: '',
-        },
     });
 
     // Pre-fill form when initialData changes
@@ -76,7 +71,6 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
         if (initialData) {
             setValue('firstname', initialData.first_name);
             setValue('lastname', initialData.last_name);
-            setValue('email', initialData.email);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialData]);
@@ -94,7 +88,6 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
             await onSave({
                 first_name: values.firstname,
                 last_name: values.lastname,
-                email: values.email,
             });
             onClose();
         } catch (_err) {
@@ -148,8 +141,7 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
                                 )}
                             </View>
 
-                            {/* Last Name */}
-                            <View style={styles.inputGroup}>
+                            {/* Last Name */}<View style={styles.inputGroup}>
                                 <Text style={styles.label}>
                                     {t('CreateProfile.fields.Last Name')}
                                 </Text>
@@ -167,25 +159,6 @@ const UpdateCaregiverProfileModal: React.FC<UpdateCaregiverProfileModalProps> = 
                                 />
                                 {showErrors.lastname && errors.lastname && (
                                     <Text style={styles.errorText}>{t(errors.lastname)}</Text>
-                                )}
-                            </View>
-
-                            {/* Email */}
-                            <View style={styles.inputGroup}>
-                                <Text style={styles.label}>{t('register.fields.Email')}</Text>
-                                <TextInput
-                                    style={[
-                                        styles.input,
-                                        showErrors.email && errors.email && styles.inputError,
-                                    ]}
-                                    value={values.email}
-                                    onChangeText={handleChange('email')}
-                                    placeholder={t('register.placeholders.Enter your Email')}
-                                    keyboardType="email-address"
-                                    autoCapitalize="none"
-                                />
-                                {showErrors.email && errors.email && (
-                                    <Text style={styles.errorText}>{t(errors.email)}</Text>
                                 )}
                             </View>
 

@@ -26,15 +26,6 @@ jest.mock('../../utils/validation', () => ({
         }
         return '';
     }),
-    validateEmail: jest.fn((value: string) => {
-        if (!value || value.length < 5) {
-            return 'register.errors.Email must be between 5 and 255 characters';
-        }
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-            return 'register.errors.Invalid email';
-        }
-        return '';
-    }),
 }));
 
 describe('UpdateCaregiverProfileModal', () => {
@@ -44,7 +35,6 @@ describe('UpdateCaregiverProfileModal', () => {
     const defaultInitialData = {
         first_name: 'John',
         last_name: 'Doe',
-        email: 'john.doe@example.com',
     };
 
     beforeEach(() => {
@@ -90,7 +80,6 @@ describe('UpdateCaregiverProfileModal', () => {
 
             expect(getByDisplayValue('John')).toBeTruthy();
             expect(getByDisplayValue('Doe')).toBeTruthy();
-            expect(getByDisplayValue('john.doe@example.com')).toBeTruthy();
         });
 
         it('should render all form fields', () => {
@@ -105,7 +94,6 @@ describe('UpdateCaregiverProfileModal', () => {
 
             expect(getByText('CreateProfile.fields.First Name')).toBeTruthy();
             expect(getByText('CreateProfile.fields.Last Name')).toBeTruthy();
-            expect(getByText('register.fields.Email')).toBeTruthy();
             expect(
                 getByPlaceholderText('CreateProfile.placeholders.Enter the profile First Name')
             ).toBeTruthy();
@@ -140,29 +128,6 @@ describe('UpdateCaregiverProfileModal', () => {
             expect(mockOnSave).not.toHaveBeenCalled();
         });
 
-        it('should show error when email is invalid', async () => {
-            const { getByDisplayValue, getByText } = render(
-                <UpdateCaregiverProfileModal
-                    visible={true}
-                    onClose={mockOnClose}
-                    onSave={mockOnSave}
-                    initialData={defaultInitialData}
-                />
-            );
-
-            const emailInput = getByDisplayValue('john.doe@example.com');
-            fireEvent.changeText(emailInput, 'invalid-email');
-
-            const saveButton = getByText('UserProfileDetail.buttons.Save');
-            fireEvent.press(saveButton);
-
-            await waitFor(() => {
-                expect(getByText('register.errors.Invalid email')).toBeTruthy();
-            });
-
-            expect(mockOnSave).not.toHaveBeenCalled();
-        });
-
         it('should validate all fields before submission', async () => {
             const { getByDisplayValue, getByText, getAllByText } = render(
                 <UpdateCaregiverProfileModal
@@ -175,11 +140,9 @@ describe('UpdateCaregiverProfileModal', () => {
 
             const firstNameInput = getByDisplayValue('John');
             const lastNameInput = getByDisplayValue('Doe');
-            const emailInput = getByDisplayValue('john.doe@example.com');
 
             fireEvent.changeText(firstNameInput, '');
             fireEvent.changeText(lastNameInput, '');
-            fireEvent.changeText(emailInput, 'bad');
 
             const saveButton = getByText('UserProfileDetail.buttons.Save');
             fireEvent.press(saveButton);
@@ -209,11 +172,9 @@ describe('UpdateCaregiverProfileModal', () => {
 
             const firstNameInput = getByDisplayValue('John');
             const lastNameInput = getByDisplayValue('Doe');
-            const emailInput = getByDisplayValue('john.doe@example.com');
 
             fireEvent.changeText(firstNameInput, 'Jane');
             fireEvent.changeText(lastNameInput, 'Smith');
-            fireEvent.changeText(emailInput, 'jane.smith@example.com');
 
             const saveButton = getByText('UserProfileDetail.buttons.Save');
             fireEvent.press(saveButton);
@@ -222,7 +183,6 @@ describe('UpdateCaregiverProfileModal', () => {
                 expect(mockOnSave).toHaveBeenCalledWith({
                     first_name: 'Jane',
                     last_name: 'Smith',
-                    email: 'jane.smith@example.com',
                 });
             });
 
@@ -387,7 +347,6 @@ describe('UpdateCaregiverProfileModal', () => {
             const newData = {
                 first_name: 'Jane',
                 last_name: 'Smith',
-                email: 'jane.smith@example.com',
             };
 
             rerender(

@@ -116,7 +116,6 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
     const handleUpdateProfile = async (data: {
         first_name: string;
         last_name: string;
-        email: string;
     }) => {
         try {
             await updateCaregiverProfile(data);
@@ -345,7 +344,6 @@ const CaregiverProfileScreen: React.FC<Props> = ({ navigation }) => {
                     initialData={{
                         first_name: caregiverData.first_name,
                         last_name: caregiverData.last_name,
-                        email: caregiverData.email,
                     }}
                 />
             )}

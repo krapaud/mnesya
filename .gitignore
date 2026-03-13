@@ -75,7 +75,6 @@ logs/
 
 # Firebase
 firebase-credentials.json
-google-services.json
 GoogleService-Info.plist
 
 # Test Coverage
