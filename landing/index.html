@@ -3,28 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mnesya — Smart Reminders for Elderly Care</title>
+  <title>Mnesya: Smart Reminders for Elderly Care</title>
   <meta name="description" content="Mnesya is a mobile reminder app designed to help elderly people and their caregivers stay connected and on schedule." />
-  <link rel="icon" href="../frontend/assets/favicon.png" type="image/png" />
+  <link rel="icon" href="img/favicon.png" type="image/png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
     /* ── Reset & Base ─────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --blue:    #4A90E2;
-      --blue-dark: #2c6fbe;
-      --green:   #4CAF50;
-      --orange:  #FF9800;
-      --red:     #F44336;
-      --bg:      #f8faff;
-      --text:    #1a1a2e;
-      --muted:   #6b7280;
-      --card-bg: #ffffff;
-      --radius:  16px;
-      --shadow:  0 8px 32px rgba(74,144,226,.12);
+      --blue:        #4A90E2;
+      --blue-dark:   #2c6fbe;
+      --purple:      #8B5CF6;
+      --purple-dark: #6D28D9;
+      --green:       #4CAF50;
+      --orange:      #FF9800;
+      --bg:          #f8faff;
+      --text:        #0f0f1a;
+      --muted:       #6b7280;
+      --radius:      16px;
+      --shadow:      0 8px 32px rgba(74,144,226,.12);
     }
     html { scroll-behavior: smooth; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
       color: var(--text);
       line-height: 1.6;
@@ -32,6 +33,17 @@
     a { color: var(--blue); text-decoration: none; }
     a:hover { text-decoration: underline; }
     img { max-width: 100%; height: auto; display: block; }
+
+    /* ── Scroll progress bar ──────────────────────────────────── */
+    #scroll-progress {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--blue), var(--purple));
+      z-index: 200;
+      transition: width .08s linear;
+    }
 
     /* ── Header / Nav ─────────────────────────────────────────── */
     header {
@@ -52,20 +64,22 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      font-weight: 700;
-      font-size: 1.25rem;
-      color: var(--blue);
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--text);
       text-decoration: none;
+      letter-spacing: -.02em;
     }
-    .logo img { width: 36px; height: 36px; border-radius: 8px; }
+    .logo img { width: 32px; height: 32px; border-radius: 8px; }
+    .logo span { color: var(--blue); }
     nav { display: flex; align-items: center; gap: 32px; }
     nav a {
-      font-size: .95rem;
+      font-size: .9rem;
       font-weight: 500;
-      color: var(--text);
+      color: var(--muted);
       transition: color .2s;
     }
-    nav a:hover { color: var(--blue); text-decoration: none; }
+    nav a:hover { color: var(--text); text-decoration: none; }
     .btn {
       display: inline-flex;
       align-items: center;
@@ -73,23 +87,25 @@
       padding: 10px 22px;
       border-radius: 50px;
       font-weight: 600;
-      font-size: .95rem;
+      font-size: .9rem;
       cursor: pointer;
       transition: transform .15s, box-shadow .15s, background .15s;
       text-decoration: none;
+      letter-spacing: -.01em;
     }
     .btn:hover { transform: translateY(-2px); text-decoration: none; }
     .btn-primary {
-      background: var(--blue);
+      background: linear-gradient(135deg, var(--blue), var(--purple));
       color: #fff;
-      box-shadow: 0 4px 18px rgba(74,144,226,.4);
+      box-shadow: 0 4px 18px rgba(74,144,226,.35);
     }
-    .btn-primary:hover { background: var(--blue-dark); box-shadow: 0 6px 24px rgba(74,144,226,.5); }
+    .btn-primary:hover { box-shadow: 0 8px 28px rgba(139,92,246,.45); }
     .btn-outline {
-      border: 2px solid var(--blue);
-      color: var(--blue);
+      border: 1.5px solid rgba(74,144,226,.3);
+      color: var(--text);
+      background: rgba(255,255,255,.7);
     }
-    .btn-outline:hover { background: var(--blue); color: #fff; }
+    .btn-outline:hover { border-color: var(--blue); color: var(--blue); background: rgba(74,144,226,.05); }
 
     .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 6px; }
     .hamburger span {
@@ -97,12 +113,16 @@
       background: var(--text); border-radius: 2px; margin: 4px 0;
       transition: all .25s;
     }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4px, 5px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4px, -5px); }
+
     /* ── Lang toggle ──────────────────────────────────────────── */
     .lang-toggle {
       display: flex;
       align-items: center;
-      background: var(--bg);
-      border: 1.5px solid rgba(74,144,226,.25);
+      background: rgba(255,255,255,.8);
+      border: 1.5px solid rgba(74,144,226,.2);
       border-radius: 50px;
       padding: 3px;
       gap: 2px;
@@ -112,104 +132,142 @@
       background: none;
       border: none;
       cursor: pointer;
-      font-size: .8rem;
+      font-family: inherit;
+      font-size: .78rem;
       font-weight: 700;
       padding: 4px 10px;
       border-radius: 50px;
       color: var(--muted);
       transition: all .2s;
     }
-    .lang-toggle button.active {
-      background: var(--blue);
-      color: #fff;
-    }
+    .lang-toggle button.active { background: var(--blue); color: #fff; }
 
     /* ── Hero ─────────────────────────────────────────────────── */
     #hero {
       min-height: 100vh;
       display: flex;
       align-items: center;
-      padding: 100px 5% 60px;
-      background: linear-gradient(135deg, #e8f1fd 0%, #f0f7ee 50%, #fff3e0 100%);
+      padding: 100px 5% 80px;
+      background: linear-gradient(135deg, #eef2ff 0%, #f5f0ff 40%, #e8f4f8 100%);
       position: relative;
       overflow: hidden;
     }
-    #hero::before {
-      content: '';
+    /* Animated blobs */
+    .blob {
       position: absolute;
-      width: 600px; height: 600px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(74,144,226,.08) 0%, transparent 70%);
-      top: -100px; right: -100px;
+      filter: blur(90px);
       pointer-events: none;
+      animation: blob-float var(--dur, 12s) ease-in-out infinite;
     }
-    #hero::after {
-      content: '';
-      position: absolute;
-      width: 400px; height: 400px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(76,175,80,.06) 0%, transparent 70%);
-      bottom: 0; left: -80px;
-      pointer-events: none;
+    .blob-1 {
+      width: 560px; height: 560px;
+      background: rgba(74,144,226,.18);
+      top: -140px; right: -80px;
+      --dur: 14s;
+    }
+    .blob-2 {
+      width: 420px; height: 420px;
+      background: rgba(139,92,246,.14);
+      bottom: -100px; left: -80px;
+      --dur: 10s;
+      animation-delay: -4s;
+    }
+    .blob-3 {
+      width: 280px; height: 280px;
+      background: rgba(76,175,80,.12);
+      top: 45%; left: 42%;
+      --dur: 16s;
+      animation-delay: -8s;
+    }
+    @keyframes blob-float {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33%      { transform: translate(28px,-18px) scale(1.06); }
+      66%      { transform: translate(-18px,28px) scale(0.94); }
     }
     .hero-inner {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 60px;
+      gap: 64px;
       align-items: center;
       width: 100%;
       max-width: 1200px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
     .hero-image-wrapper {
       position: relative;
       animation: fadeInUp .8s .1s both;
     }
+    .hero-image-wrapper::before {
+      content: '';
+      position: absolute;
+      inset: -12px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(74,144,226,.2), rgba(139,92,246,.15));
+      z-index: -1;
+      filter: blur(24px);
+    }
     .hero-image-wrapper img {
       width: 100%;
-      border-radius: 20px;
-      box-shadow: 0 24px 80px rgba(74,144,226,.2), 0 4px 20px rgba(0,0,0,.08);
+      border-radius: 24px;
+      box-shadow: 0 32px 80px rgba(74,144,226,.18), 0 4px 20px rgba(0,0,0,.06);
     }
-    .hero-content {
-      animation: fadeInUp .7s .2s both;
-    }
-    #hero h1 {
-      font-size: clamp(2.2rem, 4vw, 3.4rem);
-      font-weight: 800;
-      line-height: 1.15;
-      letter-spacing: -.02em;
+    .hero-content { animation: fadeInUp .7s .2s both; }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--purple);
+      background: rgba(139,92,246,.08);
+      border: 1px solid rgba(139,92,246,.2);
+      border-radius: 50px;
+      padding: 5px 14px;
       margin-bottom: 20px;
     }
-    #hero h1 span { color: var(--blue); }
+    #hero h1 {
+      font-size: clamp(2.4rem, 4.5vw, 3.8rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -.03em;
+      margin-bottom: 20px;
+    }
+    #hero h1 span {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: inline-block;
+    }
     #hero p.tagline {
-      font-size: clamp(1rem, 1.8vw, 1.2rem);
+      font-size: clamp(1rem, 1.6vw, 1.15rem);
       color: var(--muted);
       margin-bottom: 36px;
+      line-height: 1.7;
+      max-width: 480px;
     }
     .hero-cta {
       display: flex;
-      gap: 16px;
+      gap: 12px;
       flex-wrap: wrap;
+      margin-top: 20px;
     }
     .hero-platforms {
-      margin-top: 20px;
+      margin-top: 24px;
       display: flex;
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
     }
-    .store-badge {
-      height: 44px;
-      width: auto;
-      display: block;
-      object-fit: contain;
-      opacity: .8;
-    }
-    .hero-cta { margin-top: 20px; }
-    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+    .store-badge { height: 40px; width: auto; display: block; object-fit: contain; }
 
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(24px); }
+      from { opacity: 0; transform: translateY(28px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
@@ -217,52 +275,61 @@
     section { padding: 96px 5%; }
     .section-label {
       display: inline-block;
-      font-size: .8rem;
+      font-size: .72rem;
       font-weight: 700;
-      letter-spacing: .12em;
+      letter-spacing: .14em;
       text-transform: uppercase;
       color: var(--blue);
       background: rgba(74,144,226,.08);
+      border: 1px solid rgba(74,144,226,.15);
       border-radius: 50px;
       padding: 4px 14px;
       margin-bottom: 14px;
     }
     .section-title {
-      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-      font-weight: 800;
-      line-height: 1.2;
-      letter-spacing: -.02em;
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -.03em;
       margin-bottom: 14px;
     }
     .section-subtitle {
       font-size: 1.05rem;
       color: var(--muted);
       max-width: 560px;
+      line-height: 1.7;
     }
     .section-header { margin-bottom: 56px; }
     .section-header.centered { text-align: center; }
     .section-header.centered .section-subtitle { margin: 0 auto; }
 
     /* ── Features ─────────────────────────────────────────────── */
-    #features { background: #fff; }
+    #features {
+      background: linear-gradient(160deg, #eef2ff 0%, #f8f5ff 50%, #e8f4f8 100%);
+    }
     .features-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 32px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
     }
+
     .feature-card {
-      background: var(--bg);
-      border-radius: var(--radius);
+      background: rgba(255,255,255,.68);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
       overflow: hidden;
-      transition: transform .25s, box-shadow .25s;
-      border: 1px solid rgba(74,144,226,.08);
+      transition: transform .3s, box-shadow .3s;
+      border: 1px solid rgba(255,255,255,.9);
+      box-shadow: 0 4px 24px rgba(74,144,226,.07), inset 0 1px 0 rgba(255,255,255,.9);
     }
     .feature-card:hover {
-      transform: translateY(-6px);
-      box-shadow: var(--shadow);
+      transform: translateY(-5px);
+      box-shadow: 0 20px 60px rgba(74,144,226,.14), inset 0 1px 0 rgba(255,255,255,.9);
     }
+
     .feature-img-wrapper {
-      background: linear-gradient(135deg, #e8f1fd 0%, #eef7f1 100%);
+      background: linear-gradient(135deg, #e8f1fd 0%, #eef0ff 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -286,18 +353,18 @@
       font-size: 1.4rem;
       margin-bottom: 14px;
     }
-    .icon-blue  { background: rgba(74,144,226,.12); }
-    .icon-green { background: rgba(76,175,80,.12); }
-    .icon-orange{ background: rgba(255,152,0,.12); }
-    .feature-body h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
-    .feature-body p  { font-size: .95rem; color: var(--muted); line-height: 1.65; }
+    .icon-blue   { background: rgba(74,144,226,.12); }
+    .icon-green  { background: rgba(76,175,80,.12); }
+    .icon-orange { background: rgba(255,152,0,.12); }
+    .feature-body h3 { font-size: 1.15rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: 8px; }
+    .feature-body p  { font-size: .93rem; color: var(--muted); line-height: 1.65; }
 
     /* ── About ────────────────────────────────────────────────── */
     #about {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      background: linear-gradient(135deg, #0f0f1e 0%, #16213e 100%);
       color: #e2e8f0;
     }
-    #about .section-label { background: rgba(74,144,226,.2); }
+    #about .section-label { background: rgba(139,92,246,.15); border-color: rgba(139,92,246,.25); color: #a78bfa; }
     #about .section-title { color: #fff; }
     #about .section-subtitle { color: #94a3b8; }
     .about-grid {
@@ -307,187 +374,205 @@
       align-items: start;
     }
     .about-story h3 {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 700;
-      color: var(--blue);
+      color: #a78bfa;
       margin-bottom: 12px;
       margin-top: 28px;
+      letter-spacing: -.01em;
     }
     .about-story h3:first-child { margin-top: 0; }
-    .about-story p {
-      font-size: .97rem;
-      color: #94a3b8;
-      line-height: 1.75;
-      margin-bottom: 16px;
-    }
-    .about-story a { color: var(--blue); }
+    .about-story p { font-size: .95rem; color: #94a3b8; line-height: 1.8; margin-bottom: 16px; }
+    .about-story a { color: #a78bfa; }
     .repo-link {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(74,144,226,.15);
-      border: 1px solid rgba(74,144,226,.3);
-      color: var(--blue);
+      background: rgba(139,92,246,.12);
+      border: 1px solid rgba(139,92,246,.25);
+      color: #a78bfa;
       padding: 10px 20px;
       border-radius: 50px;
       font-weight: 600;
-      font-size: .95rem;
+      font-size: .9rem;
       margin-top: 20px;
       transition: background .2s;
     }
-    .repo-link:hover { background: rgba(74,144,226,.25); text-decoration: none; }
+    .repo-link:hover { background: rgba(139,92,246,.22); text-decoration: none; }
 
     /* Team */
-    .team-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
+    .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .team-card {
-      background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: var(--radius);
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 16px;
       padding: 20px;
-      transition: background .2s;
+      transition: background .2s, border-color .2s;
     }
-    .team-card:hover { background: rgba(255,255,255,.08); }
-    .team-card h4 { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
-    .team-card .role { font-size: .85rem; color: #64748b; margin-bottom: 12px; }
-    .team-links { display: flex; gap: 10px; flex-wrap: wrap; }
+    .team-card:hover { background: rgba(255,255,255,.07); border-color: rgba(139,92,246,.2); }
+    .team-card h4 { font-size: .95rem; font-weight: 700; color: #fff; margin-bottom: 3px; letter-spacing: -.01em; }
+    .team-card .role { font-size: .82rem; color: #475569; margin-bottom: 14px; }
+    .team-links { display: flex; gap: 8px; flex-wrap: wrap; }
     .team-links a {
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 5px 12px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.1);
+      padding: 4px 11px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
       border-radius: 50px;
-      font-size: .8rem;
+      font-size: .78rem;
       color: #94a3b8;
       transition: all .2s;
     }
-    .team-links a:hover { background: rgba(74,144,226,.2); color: var(--blue); text-decoration: none; border-color: rgba(74,144,226,.3); }
+    .team-links a:hover { background: rgba(139,92,246,.15); color: #a78bfa; text-decoration: none; border-color: rgba(139,92,246,.3); }
+
+    /* Stats */
+    .stats-grid { margin-top: 28px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .stat-card {
+      border-radius: 14px;
+      padding: 18px 16px;
+      text-align: center;
+    }
+    .stat-card.blue   { background: rgba(74,144,226,.08);  border: 1px solid rgba(74,144,226,.18); }
+    .stat-card.green  { background: rgba(76,175,80,.08);   border: 1px solid rgba(76,175,80,.18); }
+    .stat-card.orange { background: rgba(255,152,0,.08);   border: 1px solid rgba(255,152,0,.18); }
+    .stat-value { font-size: 1.9rem; font-weight: 900; color: #fff; letter-spacing: -.03em; }
+    .stat-label { font-size: .78rem; color: #475569; margin-top: 2px; }
+
+    /* ── Video ────────────────────────────────────────────────── */
+    .video-wrapper { margin-top: 72px; }
+    .video-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .video-text .section-label { display: inline-block; margin-bottom: 14px; }
+    .video-text .section-title { margin-bottom: 16px; }
+    .video-text p { font-size: 1rem; color: var(--muted); line-height: 1.7; }
+    .video-ratio {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 0 24px 64px rgba(74,144,226,.18), 0 4px 16px rgba(0,0,0,.08);
+      transition: box-shadow .3s, transform .3s;
+    }
+    .video-ratio:hover { transform: translateY(-4px); box-shadow: 0 36px 80px rgba(139,92,246,.22), 0 8px 24px rgba(0,0,0,.1); }
+    .video-ratio:focus-visible { outline: 3px solid var(--purple); outline-offset: 4px; }
+    .video-ratio iframe, .video-ratio .video-iframe, .video-poster {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    }
+    .video-poster { background-size: cover; background-position: center; background-color: #0f0f1a; }
+    .video-poster::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(74,144,226,.12) 0%, rgba(139,92,246,.25) 100%);
+    }
+    .play-btn {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      z-index: 2;
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.95);
+      box-shadow: 0 8px 28px rgba(0,0,0,.2);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .video-ratio:hover .play-btn { transform: translate(-50%,-50%) scale(1.1); box-shadow: 0 12px 36px rgba(139,92,246,.4); }
+    .play-btn svg { margin-left: 4px; }
 
     /* ── Tech Stack Strip ─────────────────────────────────────── */
     #stack {
-      background: #fff;
+      background: #0a0a14;
       padding: 40px 5%;
-      border-top: 1px solid rgba(74,144,226,.08);
-      border-bottom: 1px solid rgba(74,144,226,.08);
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+    .stack-header {
+      text-align: center;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #475569;
+      margin-bottom: 20px;
     }
     .stack-inner {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 36px;
+      gap: 10px;
       flex-wrap: wrap;
     }
     .stack-inner span {
-      font-size: .85rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .82rem;
       font-weight: 600;
-      color: var(--muted);
-      padding: 6px 16px;
-      background: var(--bg);
+      color: #475569;
+      padding: 7px 18px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
       border-radius: 50px;
-      border: 1px solid rgba(74,144,226,.1);
     }
-    .stack-label { font-weight: 700; color: var(--text); font-size: .85rem; }
 
     /* ── Footer ───────────────────────────────────────────────── */
     footer {
-      background: #0f0f1a;
-      color: #475569;
+      background: #0a0a14;
+      color: #334155;
       text-align: center;
-      padding: 32px 5%;
-      font-size: .88rem;
+      padding: 28px 5%;
+      font-size: .85rem;
+      border-top: 1px solid rgba(255,255,255,.04);
     }
-    footer a { color: #64748b; }
+    footer a { color: #475569; transition: color .2s; }
     footer a:hover { color: var(--blue); }
 
     /* ── Scroll reveal ────────────────────────────────────────── */
-    .reveal {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity .6s ease, transform .6s ease;
-    }
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
-
-    /* ── Feature cards animation ──────────────────────────────── */
-    .feature-card.reveal:nth-child(2) { transition-delay: 0.1s; }
-    .feature-card.reveal:nth-child(3) { transition-delay: 0.2s; }
-
-    /* ── Team section ─────────────────────────────────────────── */
-    .team-section { transition-delay: 0.15s; }
-    .team-section h3 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 20px;
-    }
-
-    /* ── Stats grid ───────────────────────────────────────────── */
-    .stats-grid {
-      margin-top: 32px;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px;
-    }
-    .stat-card {
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-    }
-    .stat-card.blue {
-      background: rgba(74,144,226,.1);
-      border: 1px solid rgba(74,144,226,.2);
-    }
-    .stat-card.green {
-      background: rgba(76,175,80,.1);
-      border: 1px solid rgba(76,175,80,.2);
-    }
-    .stat-card.orange {
-      background: rgba(255,152,0,.1);
-      border: 1px solid rgba(255,152,0,.2);
-    }
-    .stat-value {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: #fff;
-    }
-    .stat-label {
-      font-size: 0.8rem;
-      color: #64748b;
-      margin-top: 2px;
-    }
+    .feature-card.reveal:nth-child(2) { transition-delay: .1s; }
+    .feature-card.reveal:nth-child(3) { transition-delay: .2s; }
+    .team-section { transition-delay: .15s; }
+    .team-section h3 { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 18px; letter-spacing: -.01em; }
 
     /* ── Responsive ───────────────────────────────────────────── */
     @media (max-width: 768px) {
       nav { display: none; }
       nav.open {
-        display: flex;
-        flex-direction: column;
-        position: fixed;
-        top: 64px; left: 0; right: 0;
-        background: #fff;
+        display: flex; flex-direction: column;
+        position: fixed; top: 64px; left: 0; right: 0;
+        background: rgba(255,255,255,.97);
+        -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
         padding: 20px 5%;
         border-bottom: 1px solid rgba(74,144,226,.1);
-        gap: 16px;
-        align-items: flex-start;
-        z-index: 99;
+        gap: 16px; align-items: flex-start; z-index: 99;
       }
-      nav.open a { font-size: 1rem; }
+      nav.open a { font-size: 1rem; color: var(--text); }
       nav.open .btn { width: 100%; justify-content: center; }
       .hamburger { display: block; }
       .hero-inner { grid-template-columns: 1fr; gap: 36px; }
-      .hero-content { text-align: center; }
+      .hero-image-wrapper { order: 2; }
+      .hero-content { order: 1; text-align: center; }
       .hero-cta { justify-content: center; }
+      #hero p.tagline { margin-left: auto; margin-right: auto; }
+      .features-grid { grid-template-columns: 1fr; }
       .about-grid { grid-template-columns: 1fr; gap: 40px; }
       .team-grid  { grid-template-columns: 1fr; }
-      section { padding: 60px 5%; }
+      .video-split { grid-template-columns: 1fr; gap: 28px; }
+      section { padding: 64px 5%; }
     }
   </style>
 </head>
 <body>
+
+  <div id="scroll-progress"></div>
 
   <!-- ── Header ───────────────────────────────────────────────── -->
   <header>
@@ -509,45 +594,36 @@
     </button>
   </header>
 
+  <main>
+
   <!-- ── Hero ─────────────────────────────────────────────────── -->
   <section id="hero">
+    <!-- Animated blobs -->
+    <div class="blob blob-1" aria-hidden="true"></div>
+    <div class="blob blob-2" aria-hidden="true"></div>
+    <div class="blob blob-3" aria-hidden="true"></div>
+
     <div class="hero-inner">
       <div class="hero-image-wrapper">
-        <img
-          src="img/CoverLandingPage.png"
-          alt="Mnesya – young adult and elderly person using the app"
-        />
+        <img src="img/CoverLandingPage.png" alt="Mnesya – young adult and elderly person using the app" />
       </div>
       <div class="hero-content">
+        <div class="hero-eyebrow" data-i18n="hero.eyebrow">Mobile app &middot; iOS &amp; Android</div>
         <h1 data-i18n="hero.h1">Smart reminders for<br /><span>elderly care</span></h1>
         <p class="tagline" data-i18n="hero.tagline">
           Mnesya connects caregivers and their elderly loved ones through a simple, accessible reminder system that never lets an important moment slip away.
         </p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#video-demo" data-i18n="hero.cta1">Watch demo</a>
+          <a class="btn btn-outline" href="#features" data-i18n="hero.cta2">Discover features</a>
+        </div>
         <div class="hero-platforms">
           <img src="img/app-store-coming-soon.png" alt="Coming soon on App Store" class="store-badge" />
           <img src="img/google-play-badge-coming-soon.webp" alt="Coming soon on Google Play" class="store-badge" />
         </div>
-        <div class="hero-cta">
-          <a class="btn btn-outline" href="#features" data-i18n="hero.cta2">Discover features</a>
-        </div>
       </div>
     </div>
   </section>
-
-  <!-- ── Tech Stack Strip ──────────────────────────────────────── -->
-  <div id="stack">
-    <div class="stack-inner">
-      <span class="stack-label" data-i18n="stack.label">Built with</span>
-      <span>React Native</span>
-      <span>Expo</span>
-      <span>TypeScript</span>
-      <span>FastAPI</span>
-      <span>PostgreSQL</span>
-      <span>Docker</span>
-      <span>JWT Auth</span>
-      <span>i18n FR/EN</span>
-    </div>
-  </div>
 
   <!-- ── Features ─────────────────────────────────────────────── -->
   <section id="features">
@@ -559,49 +635,72 @@
 
     <div class="features-grid">
 
-      <!-- Feature 1 -->
+      <!-- Feature 1 — tall card (left) -->
       <div class="feature-card reveal">
         <div class="feature-img-wrapper">
-          <img src="img/Notificationscreen.png" alt="Reminder notification screen" />
+          <img src="img/Notificationscreen.png" alt="Reminder notification screen" loading="lazy" />
         </div>
         <div class="feature-body">
           <div class="feature-icon icon-blue">🔔</div>
           <h3 data-i18n="f1.title">Smart Escalation Notifications</h3>
           <p data-i18n="f1.desc">
-            When a reminder fires, Mnesya sends three automatic follow-ups (T+0, T+5, T+10 min). If there's still no response, the caregiver receives an immediate alert — so no medication or appointment is ever truly missed.
+            When a reminder fires, Mnesya sends three automatic follow-ups (T+0, T+5, T+10 min). If there's still no response, the caregiver receives an immediate alert, so no medication or appointment is ever truly missed.
           </p>
         </div>
       </div>
 
-      <!-- Feature 2 -->
+      <!-- Feature 2 — compact (top right) -->
       <div class="feature-card reveal">
         <div class="feature-img-wrapper">
-          <img src="img/DashboardScreen.png" alt="Caregiver dashboard screen" />
+          <img src="img/DashboardScreen.png" alt="Caregiver dashboard screen" loading="lazy" />
         </div>
         <div class="feature-body">
           <div class="feature-icon icon-green">📋</div>
           <h3 data-i18n="f2.title">Real-Time Activity Dashboard</h3>
           <p data-i18n="f2.desc">
-            Caregivers get a live feed of every interaction — Done, Postponed, Unable, or Missed — for the last 48 hours. An unread badge keeps you informed at a glance without having to dig through the app.
+            Caregivers get a live feed of every interaction (Done, Postponed, Unable, or Missed) for the last 48 hours. An unread badge keeps you informed at a glance without having to dig through the app.
           </p>
         </div>
       </div>
 
-      <!-- Feature 3 -->
+      <!-- Feature 3 — compact (bottom right) -->
       <div class="feature-card reveal">
         <div class="feature-img-wrapper">
-          <img src="img/PairingScreen.png" alt="Pairing code screen" />
+          <img src="img/PairingScreen.png" alt="Pairing code screen" loading="lazy" />
         </div>
         <div class="feature-body">
           <div class="feature-icon icon-orange">🔗</div>
           <h3 data-i18n="f3.title">One-Code Pairing</h3>
           <p data-i18n="f3.desc">
-            No account creation needed for the elderly user. The caregiver generates a 6-character code valid for 24 hours. The user enters it once and is instantly connected — a setup gentle enough for any generation.
+            No account creation needed for the elderly user. The caregiver generates a 6-character code valid for 5 minutes. The user enters it once and is instantly connected, a setup gentle enough for any generation.
           </p>
         </div>
       </div>
 
     </div>
+
+    <!-- Video demo -->
+    <div class="video-wrapper reveal" id="video-demo">
+      <div class="video-split">
+        <div class="video-text">
+          <span class="section-label" data-i18n="video.label">Demo</span>
+          <h2 class="section-title" data-i18n="video.title">See Mnesya in action</h2>
+          <p data-i18n="video.desc">Watch a full walkthrough of the app: from caregiver setup to reminder delivery and real-time activity tracking.</p>
+        </div>
+        <div class="video-ratio" id="video-facade"
+             onclick="loadVideo()"
+             tabindex="0"
+             role="button"
+             aria-label="Play Mnesya demo video"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();loadVideo();}">
+          <div class="video-poster" id="video-poster"></div>
+          <div class="play-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="#4A90E2"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </section>
 
   <!-- ── About ─────────────────────────────────────────────────── -->
@@ -613,7 +712,6 @@
     </div>
 
     <div class="about-grid">
-      <!-- Story -->
       <div class="about-story reveal">
         <h3 data-i18n="about.spark">The spark</h3>
         <p data-i18n="about.p1">
@@ -635,25 +733,23 @@
         </a>
       </div>
 
-      <!-- Team -->
       <div class="reveal team-section">
         <h3 data-i18n="about.team">The team</h3>
         <div class="team-grid">
-
           <div class="team-card">
             <h4>Mickael MUR</h4>
             <p class="role">Full-Stack Developer</p>
             <div class="team-links">
               <a href="https://www.linkedin.com/in/mickael-mur-b13035371/" target="_blank" rel="noopener">
-                <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+                <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
                 LinkedIn
               </a>
               <a href="https://github.com/krapaud" target="_blank" rel="noopener">
-                <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.49.5.092.682-.217.682-.483 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.03-2.683-.103-.253-.447-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844a9.56 9.56 0 012.504.337c1.909-1.294 2.748-1.025 2.748-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.337 4.687-4.565 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z"/></svg>
+                <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.49.5.092.682-.217.682-.483 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.03-2.683-.103-.253-.447-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844a9.56 9.56 0 012.504.337c1.909-1.294 2.748-1.025 2.748-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.337 4.687-4.565 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z"/></svg>
                 GitHub
               </a>
               <a href="https://krapaud.github.io/" target="_blank" rel="noopener">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
                 Portfolio
               </a>
             </div>
@@ -664,34 +760,32 @@
             <p class="role">Full-Stack Developer</p>
             <div class="team-links">
               <a href="https://www.linkedin.com/in/jordann-miso-64a252255/" target="_blank" rel="noopener">
-                <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+                <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
                 LinkedIn
               </a>
               <a href="https://github.com/JordannM83" target="_blank" rel="noopener">
-                <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.49.5.092.682-.217.682-.483 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.03-2.683-.103-.253-.447-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844a9.56 9.56 0 012.504.337c1.909-1.294 2.748-1.025 2.748-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.337 4.687-4.565 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z"/></svg>
+                <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.49.5.092.682-.217.682-.483 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.03-2.683-.103-.253-.447-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844a9.56 9.56 0 012.504.337c1.909-1.294 2.748-1.025 2.748-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.337 4.687-4.565 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z"/></svg>
                 GitHub
               </a>
               <a href="https://jordannm83.github.io/" target="_blank" rel="noopener">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
                 Portfolio
               </a>
             </div>
           </div>
-
         </div>
 
-        <!-- Stats -->
         <div class="stats-grid">
           <div class="stat-card blue">
-            <div class="stat-value">516</div>
+            <div class="stat-value" data-count="386">386</div>
             <div class="stat-label" data-i18n="stats.tests">Tests passing</div>
           </div>
           <div class="stat-card green">
-            <div class="stat-value">12</div>
+            <div class="stat-value" data-count="12">12</div>
             <div class="stat-label" data-i18n="stats.screens">App screens</div>
           </div>
           <div class="stat-card orange">
-            <div class="stat-value">2</div>
+            <div class="stat-value" data-count="2">2</div>
             <div class="stat-label" data-i18n="stats.languages">Languages</div>
           </div>
         </div>
@@ -699,10 +793,27 @@
     </div>
   </section>
 
+  </main>
+
+  <!-- ── Tech Stack Strip ──────────────────────────────────────── -->
+  <div id="stack">
+    <p class="stack-header" data-i18n="stack.label">Built with</p>
+    <div class="stack-inner">
+      <span>⚛️ React Native</span>
+      <span>📱 Expo</span>
+      <span>🔷 TypeScript</span>
+      <span>⚡ FastAPI</span>
+      <span>🐘 PostgreSQL</span>
+      <span>🐳 Docker</span>
+      <span>🔐 JWT Auth</span>
+      <span>🌍 i18n FR/EN</span>
+    </div>
+  </div>
+
   <!-- ── Footer ────────────────────────────────────────────────── -->
   <footer>
     <p>
-      &copy; 2026 Mnesya — <span data-i18n="footer.text">Portfolio Project for</span>
+      &copy; 2026 Mnesya · <span data-i18n="footer.text">Portfolio Project for</span>
       <a href="https://www.holbertonschool.com/" target="_blank" rel="noopener">Holberton School</a>.
       &nbsp;·&nbsp;
       <a href="https://github.com/krapaud/mnesya" target="_blank" rel="noopener">GitHub</a>
@@ -710,39 +821,95 @@
   </footer>
 
   <script>
+    // Scroll progress bar
+    window.addEventListener('scroll', () => {
+      const scrolled = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+      document.getElementById('scroll-progress').style.width = (scrolled * 100) + '%';
+    }, { passive: true });
+
     // Hamburger menu
     const hamburger = document.getElementById('hamburger');
     const nav = document.getElementById('main-nav');
-    hamburger.addEventListener('click', () => nav.classList.toggle('open'));
+    hamburger.addEventListener('click', () => {
+      nav.classList.toggle('open');
+      hamburger.classList.toggle('open');
+    });
     document.querySelectorAll('#main-nav a').forEach(a =>
-      a.addEventListener('click', () => nav.classList.remove('open'))
+      a.addEventListener('click', () => {
+        nav.classList.remove('open');
+        hamburger.classList.remove('open');
+      })
     );
 
     // Scroll reveal
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.12 });
+    }, { threshold: 0.1 });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    // ── i18n ────────────────────────────────────────────────────
+    // Count-up animation for stats
+    function animateCount(el) {
+      const target = parseInt(el.dataset.count, 10);
+      const duration = 1200;
+      const start = performance.now();
+      function step(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(eased * target);
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    const statsObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.querySelectorAll('.stat-value[data-count]').forEach(animateCount);
+          statsObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    const statsGrid = document.querySelector('.stats-grid');
+    if (statsGrid) statsObserver.observe(statsGrid);
+
+    // Video facade
+    const YT_ID = 'tg_gEYVjkgo';
+    document.getElementById('video-poster').style.backgroundImage =
+      `url('https://img.youtube.com/vi/${YT_ID}/maxresdefault.jpg')`;
+
+    function loadVideo() {
+      const facade = document.getElementById('video-facade');
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube.com/embed/${YT_ID}?autoplay=1`;
+      iframe.title = 'Mnesya demo';
+      iframe.style.border = '0';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      iframe.className = 'video-iframe';
+      facade.innerHTML = '';
+      facade.appendChild(iframe);
+      facade.style.cursor = 'default';
+    }
+
+    // ── i18n ──────────────────────────────────────────────────
     const translations = {
       en: {
         'nav.features': 'Features',
         'nav.about': 'About',
+        'hero.eyebrow': 'Mobile app &middot; iOS &amp; Android',
         'hero.h1': 'Smart reminders for<br /><span>elderly care</span>',
         'hero.tagline': 'Mnesya connects caregivers and their elderly loved ones through a simple, accessible reminder system that never lets an important moment slip away.',
+        'hero.cta1': 'Watch demo',
         'hero.cta2': 'Discover features',
-        'hero.platforms': '<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.341 5.95 22.232a1.398 1.398 0 0 1-1.41.03 1.37 1.37 0 0 1-.69-1.195V2.933c0-.5.265-.963.69-1.195a1.398 1.398 0 0 1 1.41.03l11.573 6.89-2.197 1.308-9.476-5.633v13.334l9.476-5.633 2.197 1.307zm1.303-2.67-2.196-1.307 2.293-1.363 2.537 1.51a1.37 1.37 0 0 1 0 2.32l-2.537 1.51-2.293-1.363 2.196-1.307z"/></svg> Coming soon on iOS &amp; Android',
         'stack.label': 'Built with',
         'features.label': 'Features',
         'features.title': 'Everything a caregiver needs',
         'features.subtitle': 'Three pillars designed with simplicity and reliability at their core.',
         'f1.title': 'Smart Escalation Notifications',
-        'f1.desc': 'When a reminder fires, Mnesya sends three automatic follow-ups (T+0, T+5, T+10 min). If there\'s still no response, the caregiver receives an immediate alert — so no medication or appointment is ever truly missed.',
+        'f1.desc': 'When a reminder fires, Mnesya sends three automatic follow-ups (T+0, T+5, T+10 min). If there\'s still no response, the caregiver receives an immediate alert, so no medication or appointment is ever truly missed.',
         'f2.title': 'Real-Time Activity Dashboard',
-        'f2.desc': 'Caregivers get a live feed of every interaction — Done, Postponed, Unable, or Missed — for the last 48 hours. An unread badge keeps you informed at a glance without having to dig through the app.',
+        'f2.desc': 'Caregivers get a live feed of every interaction (Done, Postponed, Unable, or Missed) for the last 48 hours. An unread badge keeps you informed at a glance without having to dig through the app.',
         'f3.title': 'One-Code Pairing',
-        'f3.desc': 'No account creation needed for the elderly user. The caregiver generates a 6-character code valid for 24 hours. The user enters it once and is instantly connected — a setup gentle enough for any generation.',
+        'f3.desc': 'No account creation needed for the elderly user. The caregiver generates a 6-character code valid for 5 minutes. The user enters it once and is instantly connected, a setup gentle enough for any generation.',
         'about.label': 'About',
         'about.title': 'Why Mnesya exists',
         'about.subtitle': 'A personal story behind a simple app.',
@@ -757,25 +924,29 @@
         'stats.tests': 'Tests passing',
         'stats.screens': 'App screens',
         'stats.languages': 'Languages',
+        'video.label': 'Demo',
+        'video.title': 'See Mnesya in action',
+        'video.desc': 'Watch a full walkthrough of the app: from caregiver setup to reminder delivery and real-time activity tracking.',
         'footer.text': 'Portfolio Project for',
       },
       fr: {
         'nav.features': 'Fonctionnalités',
         'nav.about': 'À propos',
+        'hero.eyebrow': 'Application mobile &middot; iOS &amp; Android',
         'hero.h1': 'Des rappels intelligents pour<br /><span>les aidants</span>',
         'hero.tagline': 'Mnesya connecte les aidants et leurs proches âgés grâce à un système de rappels simple et accessible qui ne laisse passer aucun moment important.',
+        'hero.cta1': 'Voir la démo',
         'hero.cta2': 'Découvrir les fonctionnalités',
-        'hero.platforms': '<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.341 5.95 22.232a1.398 1.398 0 0 1-1.41.03 1.37 1.37 0 0 1-.69-1.195V2.933c0-.5.265-.963.69-1.195a1.398 1.398 0 0 1 1.41.03l11.573 6.89-2.197 1.308-9.476-5.633v13.334l9.476-5.633 2.197 1.307zm1.303-2.67-2.196-1.307 2.293-1.363 2.537 1.51a1.37 1.37 0 0 1 0 2.32l-2.537 1.51-2.293-1.363 2.196-1.307z"/></svg> Bientôt sur iOS &amp; Android',
         'stack.label': 'Construit avec',
         'features.label': 'Fonctionnalités',
         'features.title': 'Tout ce dont un aidant a besoin',
         'features.subtitle': 'Trois piliers conçus autour de la simplicité et de la fiabilité.',
         'f1.title': 'Notifications d\'escalade intelligentes',
-        'f1.desc': 'Quand un rappel se déclenche, Mnesya envoie trois relances automatiques (T+0, T+5, T+10 min). Sans réponse, l\'aidant reçoit immédiatement une alerte — aucun médicament ni rendez-vous ne passe à la trappe.',
+        'f1.desc': 'Quand un rappel se déclenche, Mnesya envoie trois relances automatiques (T+0, T+5, T+10 min). Sans réponse, l\'aidant reçoit immédiatement une alerte: aucun médicament ni rendez-vous ne passe à la trappe.',
         'f2.title': 'Tableau de bord en temps réel',
-        'f2.desc': 'Les aidants voient en direct chaque interaction — Fait, Reporté, Impossible ou Manqué — sur les 48 dernières heures. Un badge non lu vous tient informé d\'un coup d\'œil.',
+        'f2.desc': 'Les aidants voient en direct chaque interaction (Fait, Reporté, Impossible ou Manqué) sur les 48 dernières heures. Un badge non lu vous tient informé d\'un coup d\'œil.',
         'f3.title': 'Appairage en un code',
-        'f3.desc': 'Aucune création de compte requise pour la personne âgée. L\'aidant génère un code à 6 caractères valable 24 heures. L\'utilisateur le saisit une fois et est instantanément connecté.',
+        'f3.desc': 'Aucune création de compte requise pour la personne âgée. L\'aidant génère un code à 6 caractères valable 5 minutes. L\'utilisateur le saisit une fois et est instantanément connecté.',
         'about.label': 'À propos',
         'about.title': 'Pourquoi Mnesya existe',
         'about.subtitle': 'Une histoire personnelle derrière une application simple.',
@@ -783,13 +954,16 @@
         'about.p1': 'Tout a commencé par un coup de téléphone. Un membre de la famille, vif d\'esprit et farouchement indépendant, avait oublié de prendre son médicament pour la tension pour la troisième fois cette semaine-là. Non par négligence, mais parce que les rappels sur son vieux téléphone étaient minuscules, faciles à ignorer et disparaissaient en quelques secondes.',
         'about.p2': 'Nous avons essayé toutes les applications de rappels du marché. Elles étaient soit trop complexes (trop de menus, texte trop petit), soit trop passives (une bannière qui s\'effaçait avant même d\'être remarquée). Il nous fallait quelque chose qui <em>persiste</em> jusqu\'à une confirmation, et qui nous alerte discrètement en cas d\'absence de réponse.',
         'about.building': 'Construire Mnesya',
-        'about.p3': 'Mnesya (du grec <em>mnēsía</em>, mémoire) a été développé en deux mois dans le cadre de notre Projet Portfolio à <a href="https://www.holbertonschool.com/" target="_blank" rel="noopener">Holberton School</a>. Chaque décision de design a été guidée par une seule question : <em>« Mon proche de 80 ans comprendrait-il ça en moins de 3 secondes ? »</em> — grands boutons, couleurs contrastées, maximum 3 actions par écran, et un appairage sans aucune création de compte.',
+        'about.p3': 'Mnesya (du grec <em>mnēsía</em>, mémoire) a été développé en deux mois dans le cadre de notre Projet Portfolio à <a href="https://www.holbertonschool.com/" target="_blank" rel="noopener">Holberton School</a>. Chaque décision de design a été guidée par une seule question : <em>« Mon proche de 80 ans comprendrait-il ça en moins de 3 secondes ? »</em>, grands boutons, couleurs contrastées, maximum 3 actions par écran, et un appairage sans aucune création de compte.',
         'about.p4': 'Le résultat : l\'aidant configure tout, et la personne âgée n\'a qu\'à répondre à une seule question plein écran : <strong>Fait · Rappelle-moi · Je ne peux pas</strong>.',
         'about.github': 'Voir sur GitHub',
         'about.team': 'L\'équipe',
         'stats.tests': 'Tests réussis',
         'stats.screens': 'Écrans',
         'stats.languages': 'Langues',
+        'video.label': 'Démo',
+        'video.title': 'Mnesya en action',
+        'video.desc': 'Regardez une démonstration complète de l\'app: de la configuration par l\'aidant jusqu\'à la livraison des rappels et le suivi des activités en temps réel.',
         'footer.text': 'Projet Portfolio pour',
       }
     };
